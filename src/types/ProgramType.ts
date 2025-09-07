@@ -4,13 +4,13 @@ export type CDKey = {
   version: string;
   validFrom: string;
   validUntil: string;
-  notes: string;
 };
 
 export type Program = {
   title: string;
   slug: { current: string };
   description: string;
-  image: { asset: { url: string } };
+  image?: { asset: { url: string } };
+  downloadLink?: string;
   cdKeys: CDKey[];
 };

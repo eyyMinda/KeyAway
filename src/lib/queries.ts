@@ -3,7 +3,7 @@ export const storeDetailsQuery = `*[_type=="storeDetails"]{
   title,
   description,
   logo,
-  logoDark,
+  logoLight,
   header->{
     isLogo,
     headerLinks
@@ -47,6 +47,12 @@ export const allProgramsQuery = `
 `;
 export const programBySlugQuery = `
 *[_type == "program" && slug.current == $slug][0]{
-  title, description, image, cdKeys[]
+  title, description, image, downloadLink, cdKeys[]
 }
 `;
+
+/* ------------ Social ------------ */
+export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) {
+  platform,
+  url
+}`;

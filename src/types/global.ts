@@ -26,6 +26,15 @@ export type SanityLink = {
   url?: string;
 };
 
+export type SocialLink = {
+  platform: string;
+  url: string;
+};
+
+export type SocialData = {
+  socialLinks: SocialLink[];
+};
+
 export type LogoData = {
   src: string;
   alt: string;
