@@ -3,10 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { client } from "@/src/sanity/lib/client";
-import { storeDetailsQuery } from "@lib/queries";
+import { storeDetailsQuery, socialLinksQuery } from "@lib/queries";
 import Header from "@components/Header";
 import Footer from "@components/Footer";
-import { LogoData } from "@/src/types/global";
+import { LogoData, SocialData } from "@/src/types/global";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 
@@ -42,12 +42,19 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const storeData = await getStoreData();
+  const socialLinks = await client.fetch(socialLinksQuery);
+
+  const currentLogo = storeData?.logoLight;
   const logoData: LogoData = {
-    src: urlFor(storeData?.logo).url(),
+    src: urlFor(currentLogo).url(),
     alt: storeData?.title,
-    width: getImageDimensions(storeData?.logo).width,
-    height: getImageDimensions(storeData?.logo).height,
-    blurDataURL: urlFor(storeData?.logo).width(24).height(24).blur(10).url()
+    width: getImageDimensions(currentLogo).width,
+    height: getImageDimensions(currentLogo).height,
+    blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url()
+  };
+
+  const socialData: SocialData = {
+    socialLinks: socialLinks || []
   };
 
   return (
@@ -56,7 +63,7 @@ export default async function RootLayout({
         <div className="mainContent flex flex-col min-h-screen">
           <Header storeData={storeData} logoData={logoData} />
           {children}
-          <Footer storeData={storeData} logoData={logoData} />
+          <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
         </div>
       </body>
     </html>
