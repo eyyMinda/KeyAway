@@ -61,13 +61,6 @@ SANITY_STUDIO_PROJECT_ID=yourProjectId
 SANITY_STUDIO_DATASET=production
 ```
 
-For embedded Sanity Studio (./src/app/sanity), also create:
-
-```
-SANITY_STUDIO_API_VERSION=2025-09-07
-SANITY_STUDIO_PROJECT_ID=yourProjectId
-SANITY_STUDIO_DATASET=production
-```
 
 ## 4. Run the development server
 
