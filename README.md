@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎁 KeyAway
 
-## Getting Started
+A modern, SEO-optimized website built with Next.js 14 and Sanity v3, showcasing the latest giveaway CD keys for pc optimization programs like IOBIT Malware Fighter. This project allows easy CMS management, user comments, while keeping the frontend fast, compact, and fully responsive.
 
-First, run the development server:
+## 🌟 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Latest CD keys: Display multiple programs with CD keys, versions, and statuses.
+- Sanity CMS: Manage programs and CD keys easily through an embedded dashboard.
+- Server-side fetching: Optimized for SEO with server-rendered pages.
+- Dynamic program pages: Each program has its own slug-based route.
+- Comments: Giscus integration for GitHub-based user comments.
+- TypeScript & Tailwind CSS: Strong typing and modern styling.
+- Optimized images: Uses Next.js <Image> component with Sanity image URLs.
+
+# 📂 Project Structure
+
+```
+/src
+  /app          → Next.js App Router pages
+    /program    → Dynamic program pages
+    /sanity     → Embedded Sanity Studio
+  /components   → Reusable UI components
+  /lib          → Sanity client & queries
+  /styles       → Global styles
+  /types        → TypeScript types for Program, CDKey
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# ⚡ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- [Next.js 14](https://nextjs.org/)
+- [Sanity v3](https://www.sanity.io/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Giscus](https://giscus.app/) for comments
+- [Vercel](https://vercel.com/) compatible for deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🚀 Getting Started
 
-## Learn More
+## 1. Clone the repo
 
-To learn more about Next.js, take a look at the following resources:
+```
+git clone https://github.com/yourusername/your-repo.git
+cd your-repo
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 2. Install dependencies
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+npm install
+# or
+yarn
+```
 
-## Deploy on Vercel
+## 3. Configure environment variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Create .env.local at the project root:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+SANITY_STUDIO_API_VERSION=2025-09-07
+SANITY_STUDIO_PROJECT_ID=yourProjectId
+SANITY_STUDIO_DATASET=production
+```
+
+For embedded Sanity Studio (./src/app/sanity), also create:
+
+```
+SANITY_STUDIO_API_VERSION=2025-09-07
+SANITY_STUDIO_PROJECT_ID=yourProjectId
+SANITY_STUDIO_DATASET=production
+```
+
+## 4. Run the development server
+
+```
+npm run dev
+```
+
+- Next.js: http://localhost:3000
+- Embedded Studio: http://localhost:3000/studio
+
+# 📝 Adding Programs & CD Keys
+
+1. Open the Studio dashboard: http://localhost:3000/studio
+2. Add a Program document.
+3. For each program, add CD Keys:
+   - Key
+   - Status (new, active, expired, limit)
+   - Version
+   - Valid from / until dates
+   - Notes (optional)
+4. Save → changes automatically appear on the frontend.
+
+# 💬 Comments Integration
+
+- Uses [Giscus](https://giscus.app/) to allow visitors to leave comments.
+- Requires configuring your GitHub repo and category IDs in the ProgramComments client component.
+
+# 🖼 Image Handling
+
+- Images use Sanity ImageObject type.
+- Optimized with Next.js <Image> component for automatic resizing and blur placeholders.
+
+# 📌 Notes
+
+- Server Components: Pages and most components are server-side for SEO and performance.
+- Client Components: Only use "use client" for components requiring browser APIs (e.g., Giscus).
+- SEO Optimized: Program pages are rendered server-side, ready for search engines.
+
+# 💻 Deployment
+
+- Fully compatible with Vercel.
+- Ensure environment variables are set in Vercel Dashboard.
+
+Run build:
+
+```
+npm run build
+npm run start
+```
+
+# 📄 License
+
+MIT License © [eyyMinda](https://github.com/eyyMinda)
