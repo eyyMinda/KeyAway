@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/update-expired-keys",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
