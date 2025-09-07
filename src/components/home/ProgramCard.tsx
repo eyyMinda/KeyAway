@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Program } from "@/src/types/ProgramType";
-import { IdealImage } from "@components/IdealImage";
+import { IdealImage } from "@/src/components/general/IdealImage";
 
 export default function ProgramCard({ program }: { program: Program }) {
   return (

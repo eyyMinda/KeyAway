@@ -2,7 +2,7 @@
 
 import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types/global";
 import Link from "next/link";
-import { IdealImageClient } from "./IdealImageClient";
+import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";
 import { FaGithub, FaLinkedin, FaInstagram, FaTwitter, FaYoutube, FaGlobe } from "react-icons/fa";
 

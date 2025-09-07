@@ -1,6 +1,6 @@
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@lib/queries";
-import ProgramCard from "@components/ProgramCard";
+import ProgramCard from "@/src/components/home/ProgramCard";
 import { Program } from "@/src/types/ProgramType";
 
 export default async function HomePage() {

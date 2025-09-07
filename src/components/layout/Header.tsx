@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
-import MobileMenu from "./MobileMenu";
-import { IdealImageClient } from "./IdealImageClient";
+import MobileMenu from "@components/layout/MobileMenu";
+import { IdealImageClient } from "@/src/components/general/IdealImageClient";
 import { StoreDetails, SanityLink, LogoData } from "@/src/types/global";
 import { usePathname } from "next/navigation";
 

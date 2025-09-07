@@ -54,6 +54,7 @@ export default function CDKeyActions({ cdKey, isDisabled }: CDKeyActionsProps) {
           </svg>
           Copy Key
         </button>
+
         <button
           onClick={() => markAsExpired(cdKey.key)}
           className="inline-flex items-center px-3 py-1 bg-error-600 hover:bg-error-700 text-white text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group relative cursor-pointer"
@@ -63,11 +64,6 @@ export default function CDKeyActions({ cdKey, isDisabled }: CDKeyActionsProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
           Expired
-          {/* Info tooltip */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-neutral-800 text-white text-xs rounded-lg shadow-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-            Report if this key doesn&apos;t work. Status will update based on community feedback.
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-neutral-800"></div>
-          </div>
         </button>
       </div>
     </>

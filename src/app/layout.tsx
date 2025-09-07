@@ -4,8 +4,8 @@ import "./globals.css";
 
 import { client } from "@/src/sanity/lib/client";
 import { storeDetailsQuery, socialLinksQuery } from "@lib/queries";
-import Header from "@components/Header";
-import Footer from "@components/Footer";
+import Header from "@components/layout/Header";
+import Footer from "@components/layout/Footer";
 import { LogoData, SocialData } from "@/src/types/global";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
