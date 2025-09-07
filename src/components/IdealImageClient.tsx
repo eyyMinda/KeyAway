@@ -1,29 +1,33 @@
+"use client";
+
 import { ReactElement } from "react";
 import Image from "next/image";
-import { getImageDimensions } from "@sanity/asset-utils";
-import { urlFor } from "@/src/sanity/lib/image";
-import { SanityAsset } from "@sanity/image-url/lib/types/types";
 
 interface IdealImageProps {
-  image?: SanityAsset;
   alt?: string;
   className?: string;
+  src?: string;
+  width?: number;
+  height?: number;
+  blurDataURL?: string;
 }
 
-export const IdealImage = ({
-  image,
+export const IdealImageClient = ({
+  src = "",
+  width = 0,
+  height = 0,
+  blurDataURL = "",
   alt = "An image without an alt, whoops",
   className
 }: IdealImageProps): ReactElement | null => {
-  if (!image) return null;
   return (
     <Image
-      src={urlFor(image).url()}
+      src={src}
       alt={alt}
-      width={getImageDimensions(image).width}
-      height={getImageDimensions(image).height}
+      width={width}
+      height={height}
       placeholder="blur"
-      blurDataURL={urlFor(image).width(24).height(24).blur(10).url()}
+      blurDataURL={blurDataURL}
       sizes="
         (max-width: 768px) 100vw,
         (max-width: 1200px) 50vw,
