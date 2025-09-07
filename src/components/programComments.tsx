@@ -5,16 +5,17 @@ import Giscus from "@giscus/react";
 export default function ProgramComments() {
   return (
     <Giscus
-      repo="your-github/repo"
-      repoId="YOUR_REPO_ID"
+      repo="eyyMinda/keyaways"
+      repoId="R_kgDOPrUr6Q"
       category="General"
-      categoryId="YOUR_CATEGORY_ID"
+      categoryId="DIC_kwDOPrUr6c4CvFkK"
       mapping="pathname"
       reactionsEnabled="1"
       emitMetadata="0"
-      inputPosition="bottom"
-      theme="light"
+      inputPosition="top"
       lang="en"
+      theme="catppuccin_macchiato"
+      loading="lazy"
     />
   );
 }
