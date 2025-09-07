@@ -1,11 +1,11 @@
-import { client } from "@/src/sanity/lib/client";
-import { programBySlugQuery } from "@lib/queries";
 import { CDKey } from "@/src/types/ProgramType";
 import ProgramComments from "@components/programComments";
 import { notFound } from "next/navigation";
 import { IdealImage } from "@components/IdealImage";
 import Link from "next/link";
 import CDKeyActions from "@/src/components/CDKeyActions";
+import { getStatusColor, sortCdKeysByStatus, isKeyExpiringSoon } from "@/src/lib/cdKeyUtils";
+import { getProgramWithUpdatedKeys } from "@/src/lib/sanityActions";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -13,30 +13,17 @@ interface ProgramPageProps {
 
 export default async function ProgramPage({ params }: ProgramPageProps) {
   const { slug } = await params;
-  const program = await client.fetch(programBySlugQuery, { slug: slug });
+
+  // Get program with automatically updated expired keys
+  const program = await getProgramWithUpdatedKeys(slug);
 
   if (!program) return notFound();
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "new":
-        return "bg-primary-500 text-white";
-      case "active":
-        return "bg-success-500 text-white";
-      case "limit":
-        return "bg-warning-500 text-white";
-      case "expired":
-        return "bg-error-500 text-white";
-      default:
-        return "bg-primary-500 text-white";
-    }
-  };
+  // Sort CD keys by status (they're already updated in Sanity)
+  const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
 
-  const statusOrder: Record<string, number> = { new: 0, active: 1, limit: 2, expired: 3 };
-  const sortedCdKeys =
-    program.cdKeys?.sort(
-      (a: CDKey, b: CDKey) => (statusOrder[a.status?.toLowerCase()] ?? 4) - (statusOrder[b.status?.toLowerCase()] ?? 4)
-    ) || [];
+  // Check if any keys are expiring soon
+  const hasExpiringSoonKeys = (program.cdKeys || []).some((key: CDKey) => isKeyExpiringSoon(key));
 
   return (
     <main className="min-h-screen bg-neutral-900">
@@ -107,6 +94,23 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           <div className="px-6 py-4 border-b border-neutral-700">
             <h2 className="text-2xl font-bold text-white">CD Keys</h2>
             <p className="text-neutral-300 mt-1">Available license keys for this program</p>
+            {hasExpiringSoonKeys && (
+              <div className="mt-3 p-3 bg-primary-900/20 border border-primary-500/30 rounded-lg">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-primary-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="text-primary-300 text-sm">
+                    Some keys are expiring within the next 24 hours. Use them soon!
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {sortedCdKeys && sortedCdKeys.length > 0 ? (
@@ -114,7 +118,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
               <table className="w-full">
                 <thead className="bg-neutral-700">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-200">Key</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-200 text-nowrap">Key</th>
                     <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Status</th>
                     <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Version</th>
                     <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Valid From</th>
@@ -129,7 +133,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
                       <tr
                         key={i}
                         className={`hover:bg-neutral-700 transition-colors ${isDisabled ? "opacity-50" : ""}`}>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-nowrap">
                           <code
                             className={`px-3 py-1 rounded-lg text-sm font-mono ${
                               isDisabled ? "bg-neutral-600 text-neutral-400" : "bg-neutral-600 text-neutral-200"
