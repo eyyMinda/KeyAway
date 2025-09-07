@@ -15,7 +15,6 @@ interface FooterProps {
 export default function Footer({ storeData, logoData, socialData }: FooterProps) {
   const pathname = usePathname();
   const footer = storeData?.footer;
-  console.log(storeData);
   let isLogo = false;
   let footerLinks: SanityLink[] = [];
   if (footer && (footer.footerLinks || footer.isLogo)) {
@@ -86,7 +85,6 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
             <ul className="space-y-2">
               {footerLinks &&
                 footerLinks.map((link, i) => {
-                  console.log(link);
                   let isActive = false;
                   const slug =
                     link.slug?.current && !link.slug.current.startsWith("/")
