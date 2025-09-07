@@ -4,10 +4,10 @@ import { CDKey } from "@/src/types/ProgramType";
 import ProgramComments from "@components/programComments";
 
 interface ProgramPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 export default async function ProgramPage({ params }: ProgramPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const program = await client.fetch(programBySlugQuery, { slug: slug });
 
   return (
