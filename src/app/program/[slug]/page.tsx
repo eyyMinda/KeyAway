@@ -5,9 +5,16 @@ import CDKeyTable from "@/src/components/program/cdkeys/CDKeyTable";
 import CommentsSection from "@/src/components/program/comments/CommentsSection";
 import { sortCdKeysByStatus } from "@/src/lib/cdKeyUtils";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanityActions";
+import { generateProgramMetadata } from "@/src/lib/metadata";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
+}
+
+// Generate dynamic metadata for each program page
+export async function generateMetadata({ params }: ProgramPageProps) {
+  const { slug } = await params;
+  return generateProgramMetadata(slug);
 }
 
 export default async function ProgramPage({ params }: ProgramPageProps) {

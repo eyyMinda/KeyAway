@@ -21,10 +21,52 @@ const geistMono = Geist_Mono({
   subsets: ["latin"]
 });
 
-export const metadata: Metadata = {
-  title: "KeyAway - Free Giveaway CD Keys",
-  description: "Free Giveaway CD Keys"
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const storeData = await getStoreData();
+  const storeTitle = storeData?.title || "KeyAway";
+
+  return {
+    title: {
+      default: `${storeTitle} - Free Giveaway CD Keys`,
+      template: `%s | ${storeTitle}`
+    },
+    description:
+      "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection.",
+    keywords: ["free cd keys", "giveaway", "software keys", "license keys", "free software", "iobit pro", "pro cd key"],
+    authors: [{ name: storeTitle }],
+    creator: storeTitle,
+    publisher: storeTitle,
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1
+      }
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: "https://keyaway.com",
+      siteName: storeTitle,
+      title: `${storeTitle} - Free Giveaway CD Keys`,
+      description:
+        "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection."
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${storeTitle} - Free Giveaway CD Keys`,
+      description:
+        "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection."
+    },
+    verification: {
+      google: "your-google-verification-code" // Replace with actual verification code
+    }
+  };
+}
 
 async function getStoreData() {
   return (
