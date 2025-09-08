@@ -13,4 +13,5 @@ export type Program = {
   image?: { asset: { url: string } };
   downloadLink?: string;
   cdKeys: CDKey[];
+  _updatedAt?: string;
 };
