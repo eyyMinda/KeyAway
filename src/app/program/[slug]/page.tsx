@@ -38,7 +38,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       <main className="min-h-screen bg-neutral-900">
         <ProgramInformation program={program} totalKeys={totalKeys} workingKeys={workingKeys} />
 
-        <CDKeyTable cdKeys={sortedCdKeys} />
+        <CDKeyTable cdKeys={sortedCdKeys} slug={slug} />
 
         <CommentsSection />
       </main>

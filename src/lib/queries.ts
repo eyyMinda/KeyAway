@@ -56,3 +56,8 @@ export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) 
   platform,
   url
 }`;
+
+/* ------------ Analytics ------------ */
+export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
+      _id, event, programSlug, social, createdAt
+    } | order(createdAt desc)`;

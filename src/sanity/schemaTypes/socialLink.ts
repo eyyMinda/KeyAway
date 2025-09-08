@@ -1,6 +1,6 @@
 import { defineType } from "sanity";
 
-export default defineType({
+export const socialLink = defineType({
   name: "socialLink",
   title: "Social Link",
   type: "document",

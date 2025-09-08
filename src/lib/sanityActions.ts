@@ -84,7 +84,6 @@ export async function getProgramWithUpdatedKeys(slug: string) {
         hasUpdates = true;
         return { ...key, status: "expired" };
       }
-
       return key;
     });
 
@@ -94,6 +93,7 @@ export async function getProgramWithUpdatedKeys(slug: string) {
 
       console.log(`Updated expired keys for program: ${program.title}`);
     }
+    program.slug = { current: slug };
 
     // Return the updated program
     return {
