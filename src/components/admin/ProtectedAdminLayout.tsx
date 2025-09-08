@@ -15,7 +15,7 @@ interface ProtectedAdminLayoutProps {
 export default function ProtectedAdminLayout({ title, subtitle, children }: ProtectedAdminLayoutProps) {
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | undefined>(undefined);
   const router = useRouter();
 
   useEffect(() => {
