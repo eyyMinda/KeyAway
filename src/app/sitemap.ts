@@ -4,7 +4,7 @@ import { allProgramsQuery } from "@/src/lib/queries";
 import { Program } from "@/src/types/ProgramType";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://keyaway.com";
+  const baseUrl = "https://keyaway.vercel.app";
 
   // Get all programs for dynamic routes
   const programs = await client.fetch(allProgramsQuery);

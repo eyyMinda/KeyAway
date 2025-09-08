@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/studio/", "/api/"]
     },
-    sitemap: "https://keyaway.com/sitemap.xml"
+    sitemap: "https://keyaway.vercel.app/sitemap.xml"
   };
 }
