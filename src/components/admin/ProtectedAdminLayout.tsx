@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminLayout from "./AdminLayout";
 import { isAuthenticatedInBrowser } from "@/src/lib/adminAuth";
-import { User } from "@/src/types/global";
 
 interface ProtectedAdminLayoutProps {
   title: string;
@@ -15,34 +14,27 @@ interface ProtectedAdminLayoutProps {
 export default function ProtectedAdminLayout({ title, subtitle, children }: ProtectedAdminLayoutProps) {
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | undefined>(undefined);
   const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // First check browser authentication state
         const browserAuth = isAuthenticatedInBrowser();
 
         if (!browserAuth) {
-          console.log("No browser authentication found, redirecting to homepage");
           router.push("/");
           return;
         }
 
-        // Then check server-side authentication
         const response = await fetch("/api/admin/check-access");
         const data = await response.json();
 
         if (data.isAdmin) {
           setIsAuthenticated(true);
-          setUser(data.user);
         } else {
-          console.log("Server authentication failed, redirecting to homepage");
           router.push("/");
         }
-      } catch (error) {
-        console.error("Auth check failed:", error);
+      } catch {
         router.push("/");
       } finally {
         setIsChecking(false);
@@ -51,13 +43,11 @@ export default function ProtectedAdminLayout({ title, subtitle, children }: Prot
 
     checkAuth();
 
-    // Set up periodic authentication check
     const interval = setInterval(() => {
       if (!isAuthenticatedInBrowser()) {
-        console.log("Authentication lost, redirecting to homepage");
         router.push("/");
       }
-    }, 10000); // Check every 10 seconds for better responsiveness
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [router]);
@@ -85,7 +75,7 @@ export default function ProtectedAdminLayout({ title, subtitle, children }: Prot
   }
 
   return (
-    <AdminLayout title={title} subtitle={subtitle} user={user}>
+    <AdminLayout title={title} subtitle={subtitle}>
       {children}
     </AdminLayout>
   );

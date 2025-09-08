@@ -1,16 +1,13 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { User } from "@/src/types/global";
 
 interface AdminLayoutProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
-  user?: User;
 }
 
-export default function AdminLayout({ children, title, subtitle, user }: AdminLayoutProps) {
+export default function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -47,29 +44,6 @@ export default function AdminLayout({ children, title, subtitle, user }: AdminLa
                   Events
                 </Link>
               </nav>
-
-              {/* User Info */}
-              {user && (
-                <div className="flex items-center space-x-3">
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
-                  </div>
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    {user.image ? (
-                      <Image
-                        src={user.image}
-                        alt={user.name}
-                        width={32}
-                        height={32}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-blue-600 font-medium text-sm">{user.name?.charAt(0)?.toUpperCase()}</span>
-                    )}
-                  </div>
-                </div>
-              )}
 
               {/* Studio Link */}
               <Link
