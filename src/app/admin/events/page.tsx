@@ -1,6 +1,6 @@
 "use client";
 
-import AdminLayout from "@/src/components/admin/AdminLayout";
+import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import { useState, useEffect } from "react";
 import { client } from "@/src/sanity/lib/client";
 import { trackingEventsQuery } from "@/src/lib/queries";
@@ -44,19 +44,19 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Events" subtitle="Track and analyze user interactions">
+      <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading events...</p>
           </div>
         </div>
-      </AdminLayout>
+      </ProtectedAdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="Events" subtitle="Track and analyze user interactions">
+    <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
       {/* Event Filter */}
       <div className="mb-6">
         <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
@@ -160,6 +160,6 @@ export default function EventsPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </ProtectedAdminLayout>
   );
 }

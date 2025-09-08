@@ -1,13 +1,20 @@
 import { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 interface AdminLayoutProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+  };
 }
 
-export default function AdminLayout({ children, title, subtitle }: AdminLayoutProps) {
+export default function AdminLayout({ children, title, subtitle, user }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -26,23 +33,55 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
               </Link>
             </div>
 
-            <nav className="flex space-x-8">
+            <div className="flex items-center space-x-6">
+              <nav className="flex space-x-8">
+                <Link
+                  href="/admin"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Analytics
+                </Link>
+                <Link
+                  href="/admin/programs"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Programs
+                </Link>
+                <Link
+                  href="/admin/events"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Events
+                </Link>
+              </nav>
+
+              {/* User Info */}
+              {user && (
+                <div className="flex items-center space-x-3">
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                    <p className="text-xs text-gray-500">{user.email}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    {user.image ? (
+                      <Image
+                        src={user.image}
+                        alt={user.name}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-blue-600 font-medium text-sm">{user.name?.charAt(0)?.toUpperCase()}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Studio Link */}
               <Link
-                href="/admin"
+                href="/studio"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Analytics
+                Studio
               </Link>
-              <Link
-                href="/admin/programs"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Programs
-              </Link>
-              <Link
-                href="/admin/events"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Events
-              </Link>
-            </nav>
+            </div>
           </div>
         </div>
       </header>

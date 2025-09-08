@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { trackingEventsQuery } from "@/src/lib/queries";
 import { client } from "@/src/sanity/lib/client";
-import AdminLayout from "@/src/components/admin/AdminLayout";
+import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
 import EventChart from "@/src/components/admin/EventChart";
@@ -93,14 +93,14 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">
+      <ProtectedAdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading analytics data...</p>
           </div>
         </div>
-      </AdminLayout>
+      </ProtectedAdminLayout>
     );
   }
 
@@ -136,7 +136,7 @@ export default function AnalyticsPage() {
   }));
 
   return (
-    <AdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">
+    <ProtectedAdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">
       {/* Time Filter */}
       <div className="mb-8">
         <TimeFilter
@@ -220,7 +220,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </ProtectedAdminLayout>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import AdminLayout from "@/src/components/admin/AdminLayout";
+import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import { useState, useEffect } from "react";
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/queries";
@@ -37,19 +37,19 @@ export default function ProgramsPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Programs" subtitle="Manage CD key programs and content">
+      <ProtectedAdminLayout title="Programs" subtitle="Manage CD key programs and content">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading programs...</p>
           </div>
         </div>
-      </AdminLayout>
+      </ProtectedAdminLayout>
     );
   }
 
   return (
-    <AdminLayout title="Programs" subtitle="Manage CD key programs and content">
+    <ProtectedAdminLayout title="Programs" subtitle="Manage CD key programs and content">
       {/* Search and Actions */}
       <div className="mb-6">
         <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
@@ -192,6 +192,6 @@ export default function ProgramsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </ProtectedAdminLayout>
   );
 }

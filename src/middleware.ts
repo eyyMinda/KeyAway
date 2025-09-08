@@ -6,7 +6,8 @@ const lastUpdateTime = new Map<string, number>();
 const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 export function middleware(request: NextRequest) {
-  // Only check for program pages
+  // Only handle program pages for key updates
+  // Admin authentication is handled client-side in ProtectedAdminLayout
   if (request.nextUrl.pathname.startsWith("/program/")) {
     const slug = request.nextUrl.pathname.split("/program/")[1];
 

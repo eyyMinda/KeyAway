@@ -1,9 +1,9 @@
 import Link from "next/link";
-import AdminLayout from "@/src/components/admin/AdminLayout";
+import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 
 export default function AdminHomePage() {
   return (
-    <AdminLayout title="Admin Dashboard" subtitle="Manage your KeyAway platform">
+    <ProtectedAdminLayout title="Admin Dashboard" subtitle="Manage your KeyAway platform">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Analytics Card */}
         <Link href="/admin/analytics" className="group">
@@ -131,6 +131,6 @@ export default function AdminHomePage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </ProtectedAdminLayout>
   );
 }
