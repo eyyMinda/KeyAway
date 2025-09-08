@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { clearAdminVerification } from "@/src/lib/adminAuth";
 
 export default function StudioVerification() {
   useEffect(() => {
@@ -38,10 +39,10 @@ export default function StudioVerification() {
 
         if (hasNotAuthorized) {
           console.log("❌ Admin access denied - not authorized for this project");
-          localStorage.removeItem("keyaway_admin_verified");
+          clearAdminVerification();
         } else if (hasLoginPrompt) {
           console.log("⏳ Admin verification pending - still logging in");
-          localStorage.removeItem("keyaway_admin_verified");
+          clearAdminVerification();
         } else if (hasManageLink || manageProjectLinks.length > 0) {
           console.log("✅ Admin access granted - project access verified");
           const verifiedSession = {
@@ -49,16 +50,18 @@ export default function StudioVerification() {
             projectId: projectId
           };
           localStorage.setItem("keyaway_admin_verified", JSON.stringify(verifiedSession));
+          // Dispatch custom event to notify components
+          window.dispatchEvent(new CustomEvent("keyaway_admin_verified_changed"));
         } else if (!userMenuButton) {
           console.log("❌ Admin access denied - not authenticated");
-          localStorage.removeItem("keyaway_admin_verified");
+          clearAdminVerification();
         } else {
           console.log("⚠️ Admin access denied - verification unclear");
-          localStorage.removeItem("keyaway_admin_verified");
+          clearAdminVerification();
         }
       } catch {
         console.log("❌ Studio verification failed");
-        localStorage.removeItem("keyaway_admin_verified");
+        clearAdminVerification();
       }
     };
 

@@ -1,5 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
-import { userIdQuery, userQuery } from "./queries";
+import { storeDetailsQuery } from "./queries";
 
 export interface AdminUser {
   id: string;
@@ -13,15 +13,11 @@ export interface AdminUser {
  */
 export async function checkAdminAccess(): Promise<{ isAdmin: boolean; user?: AdminUser }> {
   try {
-    const result = await client.fetch(userQuery);
-
-    if (result) {
-      return { isAdmin: true, user: result };
-    }
-
-    await client.fetch(userIdQuery);
+    // Try to access Sanity - if this succeeds, user is admin
+    await client.fetch(storeDetailsQuery);
     return { isAdmin: true };
   } catch {
+    // If we can't access Sanity, user is not admin
     return { isAdmin: false };
   }
 }
@@ -55,8 +51,12 @@ export async function checkAdminAccessClient(): Promise<boolean> {
 /**
  * Clear admin verification session
  */
-export function clearAdminVerification(): void {
-  localStorage.removeItem("keyaway_admin_verified");
+export function clearAdminVerification(refresh = false): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("keyaway_admin_verified");
+    // Force a page refresh to clear all admin state
+    if (refresh) window.location.reload();
+  }
 }
 
 /**
