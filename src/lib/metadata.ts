@@ -21,7 +21,7 @@ const defaultData = {
   store: "KeyAway",
   title: (storeTitle: string) => `${storeTitle} - Free Giveaway CD Keys`,
   description:
-    "Get free CD keys for popular software and games. Download programs with working license keys from our giveaway collection.",
+    "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection.",
   url: "https://keyaway.vercel.app",
   canonical: "https://keyaway.vercel.app",
   programTitle: (programTitle: string, storeTitle: string) => `${programTitle} - Free CD Keys | ${storeTitle}`,
