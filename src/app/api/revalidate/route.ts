@@ -1,24 +1,22 @@
+// app/api/revalidate/route.ts
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
+    const body = await req.json();
+
     const secret = req.headers.get("sanity-webhook-secret");
-    if (secret !== process.env.SANITY_WEBHOOK_SECRET) {
+    if (secret !== process.env.SANITY_WEBHOOK_SECRET || body.secret !== process.env.SANITY_WEBHOOK_SECRET) {
       return NextResponse.json({ message: "Invalid secret" }, { status: 401 });
     }
 
-    const body = await req.json();
+    // Always revalidate homepage
+    revalidateTag("homepage");
 
-    // Revalidate the homepage always
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/`, {
-      method: "PURGE" // Vercel's cache purge method
-    });
-
-    // If it's a Program, also revalidate its page
+    // Revalidate program pages
     if (body._type === "program" && body.slug?.current) {
-      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/program/${body.slug.current}`, {
-        method: "PURGE"
-      });
+      revalidateTag(`program-${body.slug.current}`);
     }
 
     return NextResponse.json({ revalidated: true });

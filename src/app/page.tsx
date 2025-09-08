@@ -4,7 +4,7 @@ import ProgramCard from "@/src/components/home/ProgramCard";
 import { Program } from "@/src/types/ProgramType";
 
 export default async function HomePage() {
-  const programs = await client.fetch(allProgramsQuery);
+  const programs = await client.fetch(allProgramsQuery, {}, { next: { tags: ["homepage"] } });
 
   return (
     <main className="max-w-6xl mx-auto px-6 py-16">

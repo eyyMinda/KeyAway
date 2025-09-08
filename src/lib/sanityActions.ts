@@ -2,6 +2,7 @@
 
 import { client } from "@/src/sanity/lib/client";
 import { CDKey } from "@/src/types/ProgramType";
+import { programBySlugQuery } from "./queries";
 
 /**
  * Updates expired CD keys in Sanity for a specific program
@@ -69,20 +70,7 @@ export async function updateAllExpiredKeys(): Promise<void> {
 export async function getProgramWithUpdatedKeys(slug: string) {
   try {
     // First, get the program
-    const program = await client.fetch(
-      `
-      *[_type == "program" && slug.current == $slug][0] {
-        _id,
-        title,
-        slug,
-        description,
-        image,
-        downloadLink,
-        cdKeys
-      }
-    `,
-      { slug }
-    );
+    const program = await client.fetch(programBySlugQuery, { slug }, { next: { tags: [`program-${slug}`] } });
 
     if (!program) return null;
 
