@@ -102,7 +102,7 @@ export function isAuthenticatedInBrowser(): boolean {
         localStorage.removeItem("keyaway_admin_verified");
       }
     } catch (error) {
-      console.log("❌ Admin verification corrupted");
+      console.log("❌ Admin verification corrupted", error);
       localStorage.removeItem("keyaway_admin_verified");
     }
   }
@@ -146,7 +146,7 @@ export function isAuthenticatedInBrowser(): boolean {
         console.log("❌ Admin authentication token invalid");
       }
     } catch (error) {
-      console.log("❌ Admin authentication token corrupted");
+      console.log("❌ Admin authentication token corrupted", error);
     }
   } else {
     console.log("❌ Admin not authenticated - no Sanity Studio session");

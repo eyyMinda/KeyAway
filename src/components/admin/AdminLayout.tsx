@@ -1,17 +1,13 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { User } from "@/src/types/global";
 
 interface AdminLayoutProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-    image?: string;
-  };
+  user?: User;
 }
 
 export default function AdminLayout({ children, title, subtitle, user }: AdminLayoutProps) {

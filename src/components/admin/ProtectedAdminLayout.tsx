@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminLayout from "./AdminLayout";
 import { isAuthenticatedInBrowser } from "@/src/lib/adminAuth";
+import { User } from "@/src/types/global";
 
 interface ProtectedAdminLayoutProps {
   title: string;
@@ -14,7 +15,7 @@ interface ProtectedAdminLayoutProps {
 export default function ProtectedAdminLayout({ title, subtitle, children }: ProtectedAdminLayoutProps) {
   const [isChecking, setIsChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {

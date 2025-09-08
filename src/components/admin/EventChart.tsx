@@ -49,7 +49,7 @@ export default function EventChart({ data, title, type = "doughnut", className =
                   .reduce((sum, prevItem) => sum + (prevItem.value / total) * 100, 0);
 
                 const startAngle = (cumulativePercentage / 100) * 360;
-                const endAngle = ((cumulativePercentage + percentage) / 100) * 360;
+                // const endAngle = ((cumulativePercentage + percentage) / 100) * 360;
 
                 const color = item.color || defaultColors[index % defaultColors.length];
 

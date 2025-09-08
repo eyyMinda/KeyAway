@@ -10,6 +10,7 @@ export async function trackEvent(
       keepalive: true // better delivery when user navigates away
     });
   } catch (e) {
+    void e;
     // keep silent; analytics should never break UX
   }
 }
