@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { SanityLink } from "@/src/types/global";
+import AdminNavIcons from "@components/layout/AdminNavIcons";
+import { usePathname } from "next/navigation";
 
 interface MobileMenuProps {
   headerLinks?: SanityLink[];
   isOpen: boolean;
   onClose: () => void;
 }
-
-import { usePathname } from "next/navigation";
 
 export default function MobileMenu({ headerLinks, isOpen, onClose }: MobileMenuProps) {
   const pathname = usePathname();
@@ -37,6 +37,11 @@ export default function MobileMenu({ headerLinks, isOpen, onClose }: MobileMenuP
             </Link>
           );
         })}
+
+      {/* Admin Navigation for Mobile */}
+      <div className="pt-2 border-t border-gray-700">
+        <AdminNavIcons />
+      </div>
     </div>
   );
 }
