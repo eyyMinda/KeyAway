@@ -61,6 +61,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <meta name="google-site-verification" content="jCM2s4y7bLvOzH32pe8QtRIdwbgEOmntka957Z-tXKI" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PageViewTracker />
         <div className="mainContent flex flex-col min-h-screen">
