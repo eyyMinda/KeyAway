@@ -21,6 +21,7 @@ const imageProviders: RemotePattern[] = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: "export",
   images: {
     remotePatterns: imageProviders
   }
