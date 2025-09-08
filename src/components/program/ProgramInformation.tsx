@@ -31,7 +31,10 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
 
           {/* Content */}
           <div className="order-1 lg:order-2">
-            <h1 className="text-4xl font-bold text-white mb-4">{program.title}</h1>
+            <h1 className="text-4xl font-bold text-white mb-4">{program.title} Free CD Keys</h1>
+            <h2 className="text-xl text-primary-300 mb-4">
+              Download premium software for free and activate one of the working license keys
+            </h2>
             {program.description && (
               <p className="text-lg text-neutral-300 mb-6 leading-relaxed">{program.description}</p>
             )}
@@ -64,11 +67,11 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-neutral-700 rounded-xl p-4 text-center">
                 <div className="text-2xl font-bold text-primary-400">{totalKeys}</div>
-                <div className="text-sm text-neutral-300">Available Keys</div>
+                <div className="text-sm text-neutral-300">Available CD Keys</div>
               </div>
               <div className="bg-neutral-700 rounded-xl p-4 text-center">
                 <div className="text-2xl font-bold text-success-400">{workingKeys}</div>
-                <div className="text-sm text-neutral-300">Working Keys</div>
+                <div className="text-sm text-neutral-300">Working License Keys</div>
               </div>
             </div>
           </div>

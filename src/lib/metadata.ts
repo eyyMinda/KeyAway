@@ -19,14 +19,15 @@ async function getStoreData() {
 
 const defaultData = {
   store: "KeyAway",
-  title: (storeTitle: string) => `${storeTitle} - Free Giveaway CD Keys`,
+  title: (storeTitle: string) => `${storeTitle} - Free CD Keys for Premium Software`,
   description:
-    "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection.",
+    "Get free CD keys for popular software like IOBIT, Malware Fighter, and more. Download premium programs with working license keys from our giveaway collection.",
   url: "https://keyaway.vercel.app",
   canonical: "https://keyaway.vercel.app",
-  programTitle: (programTitle: string, storeTitle: string) => `${programTitle} - Free CD Keys | ${storeTitle}`,
+  programTitle: (programTitle: string, storeTitle: string) =>
+    `${programTitle} Premium Software Free CD Keys | ${storeTitle}`,
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
-    `${programTitle} Get ${workingKeys} working CD keys out of ${totalKeys} total. Download ${programTitle} for free with our giveaway keys.`,
+    `Download ${programTitle} for free! Get ${workingKeys} working CD keys out of ${totalKeys} total. Premium software license keys from our giveaway collection.`,
   programUrl: (slug: string) => `https://keyaway.vercel.app/program/${slug}`,
   programCanonical: (slug: string) => `https://keyaway.vercel.app/program/${slug}`,
   privacyTitle: (storeTitle: string) => `Privacy Policy | ${storeTitle}`,

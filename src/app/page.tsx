@@ -15,7 +15,10 @@ export default async function HomePage() {
 
   return (
     <main className="max-w-7xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold mb-6">Most Popular</h1>
+      <h1 className="text-3xl font-bold mb-6">Free CD Keys & Software Licenses</h1>
+      <h2 className="text-xl text-gray-600 mb-8">
+        Download premium software for free and activate one of the working license keys
+      </h2>
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {programs.map((program: Program) => (
           <ProgramCard key={program.slug.current} program={program} />
