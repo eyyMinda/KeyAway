@@ -11,27 +11,33 @@ interface ProgramPageProps {
 }
 
 export default async function ProgramPage({ params }: ProgramPageProps) {
-  const { slug } = await params;
+  try {
+    const { slug } = await params;
 
-  // Get program with automatically updated expired keys
-  const program = await getProgramWithUpdatedKeys(slug);
+    // Get program with automatically updated expired keys
+    // Temporarily disable Sanity updates for debugging
+    const program = await getProgramWithUpdatedKeys(slug);
 
-  if (!program) return notFound();
+    if (!program) return notFound();
 
-  // Sort CD keys by status (they're already updated in Sanity)
-  const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
+    // Sort CD keys by status (they're already updated in Sanity)
+    const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
 
-  // Calculate stats for the program information
-  const totalKeys = sortedCdKeys.length;
-  const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
+    // Calculate stats for the program information
+    const totalKeys = sortedCdKeys.length;
+    const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
 
-  return (
-    <main className="min-h-screen bg-neutral-900">
-      <ProgramInformation program={program} totalKeys={totalKeys} workingKeys={workingKeys} />
+    return (
+      <main className="min-h-screen bg-neutral-900">
+        <ProgramInformation program={program} totalKeys={totalKeys} workingKeys={workingKeys} />
 
-      <CDKeyTable cdKeys={sortedCdKeys} />
+        <CDKeyTable cdKeys={sortedCdKeys} />
 
-      <CommentsSection />
-    </main>
-  );
+        <CommentsSection />
+      </main>
+    );
+  } catch (error) {
+    console.error("Error in ProgramPage:", error);
+    return notFound();
+  }
 }
