@@ -68,11 +68,44 @@ export async function checkAdminAccessClient(): Promise<boolean> {
 }
 
 /**
+ * Clear admin verification session
+ * This can be called when user signs out or loses access
+ */
+export function clearAdminVerification(): void {
+  localStorage.removeItem("keyaway_admin_verified");
+  console.log("🧹 Admin verification cleared");
+}
+
+/**
  * Check if user is authenticated by checking browser storage
  * This is a fallback method for client-side checks
  */
 export function isAuthenticatedInBrowser(): boolean {
   if (typeof window === "undefined") return false;
+
+  // Check for verified admin session first
+  const verifiedSession = localStorage.getItem("keyaway_admin_verified");
+  if (verifiedSession) {
+    try {
+      const sessionData = JSON.parse(verifiedSession);
+      const now = new Date();
+      const sessionTime = new Date(sessionData.verifiedAt);
+      const timeDiff = now.getTime() - sessionTime.getTime();
+      const isSessionValid = timeDiff < 2 * 60 * 60 * 1000; // 2 hours
+
+      if (isSessionValid) {
+        const hoursLeft = (2 * 60 * 60 * 1000 - timeDiff) / (1000 * 60 * 60);
+        console.log(`✅ Admin verified - ${hoursLeft.toFixed(1)} hours remaining`);
+        return true;
+      } else {
+        console.log("❌ Admin verification expired");
+        localStorage.removeItem("keyaway_admin_verified");
+      }
+    } catch (error) {
+      console.log("❌ Admin verification corrupted");
+      localStorage.removeItem("keyaway_admin_verified");
+    }
+  }
 
   // Check for Sanity Studio authentication token in localStorage
   // The key format is __studio_auth_token_{projectId}
@@ -101,15 +134,14 @@ export function isAuthenticatedInBrowser(): boolean {
         const now = new Date();
         const timeDiff = now.getTime() - tokenTime.getTime();
         const isNotExpired = timeDiff < 24 * 60 * 60 * 1000;
-        const hoursLeft = (24 * 60 * 60 * 1000 - timeDiff) / (1000 * 60 * 60);
 
         if (isNotExpired) {
-          console.log(`✅ Admin authenticated - ${hoursLeft.toFixed(1)} hours remaining`);
+          console.log("⚠️ Sanity token found but not verified for this project");
         } else {
           console.log("❌ Admin authentication expired");
         }
 
-        return isNotExpired;
+        return false; // Don't allow access without verification
       } else {
         console.log("❌ Admin authentication token invalid");
       }
