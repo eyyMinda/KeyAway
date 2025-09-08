@@ -5,11 +5,12 @@ import Giscus from "@giscus/react";
 export default function ProgramComments() {
   return (
     <Giscus
-      repo="eyyMinda/keyaways"
+      repo="eyyMinda/keyaway"
       repoId="R_kgDOPrUr6Q"
-      category="General"
-      categoryId="DIC_kwDOPrUr6c4CvFkK"
+      category="Announcements"
+      categoryId="DIC_kwDOPrUr6c4CvFkJ"
       mapping="pathname"
+      strict="1"
       reactionsEnabled="1"
       emitMetadata="0"
       inputPosition="top"
