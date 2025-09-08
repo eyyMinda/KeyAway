@@ -149,7 +149,8 @@ export default function AnalyticsPage() {
       path === "/"
         ? "Home"
         : path
-            .replace(/\//g, "")
+            .replace(/^\//, "")
+            .replace(/\//g, " | ")
             .replace(/-/g, " ")
             .replace(/\b\w/g, l => l.toUpperCase())
   }));

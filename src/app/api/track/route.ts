@@ -29,29 +29,100 @@ function hashIp(ip: string | undefined) {
   }
 }
 
+// Simple in-memory cache for IP locations (expires after 1 hour)
+const locationCache = new Map<string, { data: { country?: string; city?: string }; expires: number }>();
+
+// Clean up expired cache entries every 10 minutes
+setInterval(
+  () => {
+    const now = Date.now();
+    for (const [ip, entry] of locationCache.entries()) {
+      if (entry.expires <= now) {
+        locationCache.delete(ip);
+      }
+    }
+  },
+  10 * 60 * 1000
+); // 10 minutes
+
 async function getLocationFromIP(ip: string | undefined): Promise<{ country?: string; city?: string } | undefined> {
   if (!ip) return undefined;
 
-  try {
-    // Use ipapi.co for free IP geolocation (1000 requests/day free)
-    // Fetch both country and city in a single request
-    const response = await fetch(`https://ipapi.co/${ip}/json/`, {
-      headers: {
-        "User-Agent": "KeyAway Analytics"
-      }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        country: data.country_name || undefined,
-        city: data.city || undefined
-      };
-    }
-  } catch (error) {
-    console.error("Error fetching location:", error);
+  // Check cache first
+  const cached = locationCache.get(ip);
+  if (cached && cached.expires > Date.now()) {
+    console.log(`📦 Using cached location for IP: ${ip}`);
+    return cached.data;
   }
 
+  // Multiple geolocation services with different parsers
+  const services = [
+    {
+      name: "ipapi.co",
+      url: `https://ipapi.co/${ip}/json/`,
+      parser: (data: Record<string, unknown>) => ({
+        country: data.country_name as string,
+        city: data.city as string
+      })
+    },
+    {
+      name: "ip-api.com",
+      url: `https://ip-api.com/json/${ip}`,
+      parser: (data: Record<string, unknown>) => ({
+        country: data.country as string,
+        city: data.city as string
+      })
+    },
+    {
+      name: "ipinfo.io",
+      url: `https://ipinfo.io/${ip}/json`,
+      parser: (data: Record<string, unknown>) => ({
+        country: data.country as string,
+        city: data.city as string
+      })
+    }
+  ];
+
+  // Try each service with timeout
+  for (const service of services) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+
+      const response = await fetch(service.url, {
+        headers: {
+          "User-Agent": "KeyAway Analytics"
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        const result = service.parser(data);
+
+        // Validate that we got meaningful data
+        if (result.country || result.city) {
+          console.log(`✅ Location data from ${service.name}:`, result);
+
+          // Cache the result for 1 hour
+          locationCache.set(ip, {
+            data: result,
+            expires: Date.now() + 60 * 60 * 1000 // 1 hour
+          });
+
+          return result;
+        }
+      }
+    } catch (error) {
+      // Log warning but continue to next service
+      console.warn(`⚠️ ${service.name} failed:`, error instanceof Error ? error.message : "Unknown error");
+      continue;
+    }
+  }
+
+  console.warn("❌ All geolocation services failed for IP:", ip);
   return undefined;
 }
 
