@@ -8,7 +8,10 @@ export async function POST(req: Request) {
 
     const secret = req.headers.get("sanity-webhook-secret");
     if (secret !== process.env.SANITY_WEBHOOK_SECRET || body.secret !== process.env.SANITY_WEBHOOK_SECRET) {
-      return NextResponse.json({ message: "Invalid secret" }, { status: 401 });
+      return NextResponse.json(
+        { message: "Invalid secret", data: { secret, bodySecret: body.secret } },
+        { status: 401 }
+      );
     }
 
     // Always revalidate homepage
