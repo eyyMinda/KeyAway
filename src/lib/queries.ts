@@ -42,7 +42,7 @@ export const footerLinksQuery = `*[_type=="footerLink"] | order(_createdAt asc) 
 /* ------------ Programs ------------ */
 export const allProgramsQuery = `
 *[_type == "program"]{
-  title, slug, description, image
+  title, slug, description, image, cdKeys[]
 }
 `;
 export const programBySlugQuery = `
@@ -59,5 +59,5 @@ export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) 
 
 /* ------------ Analytics ------------ */
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
-      _id, event, programSlug, social, createdAt
+      _id, event, programSlug, social, path, createdAt
     } | order(createdAt desc)`;
