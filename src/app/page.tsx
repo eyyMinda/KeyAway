@@ -3,6 +3,8 @@ import { allProgramsQuery } from "@lib/queries";
 import ProgramCard from "@/src/components/home/ProgramCard";
 import { Program } from "@/src/types/ProgramType";
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const programs = await client.fetch(allProgramsQuery, {}, { next: { tags: ["homepage"] } });
 
