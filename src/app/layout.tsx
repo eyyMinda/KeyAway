@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { Analytics } from "@vercel/analytics/next";
 import { client } from "@/src/sanity/lib/client";
 import { storeDetailsQuery, socialLinksQuery } from "@lib/queries";
 import Header from "@components/layout/Header";
@@ -65,6 +66,7 @@ export default async function RootLayout({
           {children}
           <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
         </div>
+        <Analytics />
       </body>
     </html>
   );
