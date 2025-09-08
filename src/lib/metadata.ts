@@ -53,7 +53,8 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
     twitter: {
       card: "summary_large_image",
       title: defaultData.title(storeTitle),
-      description: defaultData.description
+      description: defaultData.description,
+      images: ["https://keyaway.vercel.app/images/KeyAway_Logo.png"]
     },
     alternates: {
       canonical: defaultData.canonical
