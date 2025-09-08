@@ -17,7 +17,7 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
           <div className="order-2 lg:order-1">
             {program.image ? (
               <div className="relative rounded-2xl overflow-hidden shadow-medium">
-                <IdealImage image={program.image} alt={program.title} className="w-full max-h-96 object-cover" />
+                <IdealImage image={program.image} alt={program.title} className="w-full max-h-96 object-contain" />
               </div>
             ) : (
               <div className="w-full h-80 bg-gradient-to-br from-primary-900 to-accent-900 rounded-2xl flex items-center justify-center shadow-medium">
