@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { CDKey } from "@/src/types/ProgramType";
+import { trackEvent } from "@/src/lib/trackEvent";
 
 interface CDKeyActionsProps {
   cdKey: CDKey;
   isDisabled: boolean;
+  slug: string;
 }
 
-export default function CDKeyActions({ cdKey, isDisabled }: CDKeyActionsProps) {
+export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsProps) {
   const [notification, setNotification] = useState<string | null>(null);
 
   const copyToClipboard = async (key: string) => {
@@ -40,7 +42,10 @@ export default function CDKeyActions({ cdKey, isDisabled }: CDKeyActionsProps) {
       {/* Action Buttons */}
       <div className="flex justify-center space-x-2">
         <button
-          onClick={() => copyToClipboard(cdKey.key)}
+          onClick={() => {
+            copyToClipboard(cdKey.key);
+            trackEvent("copy_cdkey", { programSlug: slug, key: cdKey, path: window.location.pathname });
+          }}
           className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none cursor-pointer"
           disabled={isDisabled}
           title="Copy key to clipboard">

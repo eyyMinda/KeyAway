@@ -5,9 +5,10 @@ import { isKeyExpiringSoon } from "@/src/lib/cdKeyUtils";
 
 interface CDKeyTableProps {
   cdKeys: CDKey[];
+  slug: string;
 }
 
-export default function CDKeyTable({ cdKeys }: CDKeyTableProps) {
+export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   const hasExpiringSoonKeys = cdKeys.some((key: CDKey) => isKeyExpiringSoon(key));
 
   return (
@@ -55,7 +56,7 @@ export default function CDKeyTable({ cdKeys }: CDKeyTableProps) {
               </thead>
               <tbody className="divide-y divide-neutral-700">
                 {cdKeys.map((cdKey: CDKey, i: number) => (
-                  <CDKeyItem key={i} cdKey={cdKey} index={i} />
+                  <CDKeyItem key={i} cdKey={cdKey} index={i} slug={slug} />
                 ))}
               </tbody>
             </table>

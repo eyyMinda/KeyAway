@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { Program } from "@/src/types/ProgramType";
+import { trackEvent } from "@/src/lib/trackEvent";
 
 interface ProgramInformationProps {
   program: Program;
@@ -40,6 +43,9 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
                   href={program.downloadLink}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() =>
+                    trackEvent("download_click", { programSlug: program.slug.current, path: window.location.pathname })
+                  }
                   className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800">
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

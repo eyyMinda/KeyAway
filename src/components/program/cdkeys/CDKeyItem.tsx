@@ -5,9 +5,10 @@ import { getStatusColor } from "@/src/lib/cdKeyUtils";
 interface CDKeyItemProps {
   cdKey: CDKey;
   index: number;
+  slug: string;
 }
 
-export default function CDKeyItem({ cdKey, index }: CDKeyItemProps) {
+export default function CDKeyItem({ cdKey, index, slug }: CDKeyItemProps) {
   const isDisabled = cdKey.status === "limit" || cdKey.status === "expired";
 
   return (
@@ -36,7 +37,7 @@ export default function CDKeyItem({ cdKey, index }: CDKeyItemProps) {
       </td>
       {!isDisabled && (
         <td className="px-6 py-4 text-center">
-          <CDKeyActions key={cdKey.key} cdKey={cdKey} isDisabled={isDisabled} />
+          <CDKeyActions key={cdKey.key} cdKey={cdKey} isDisabled={isDisabled} slug={slug} />
         </td>
       )}
     </tr>

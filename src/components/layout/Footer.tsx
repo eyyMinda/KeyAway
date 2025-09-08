@@ -5,6 +5,7 @@ import Link from "next/link";
 import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";
 import { FaGithub, FaLinkedin, FaInstagram, FaTwitter, FaYoutube, FaGlobe } from "react-icons/fa";
+import { trackEvent } from "@/src/lib/trackEvent";
 
 interface FooterProps {
   storeData: StoreDetails;
@@ -69,6 +70,18 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                     href={social.url}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() => {
+                      console.log(
+                        "social_click",
+                        window.location.pathname.split("/").filter(Boolean).pop(),
+                        social.platform,
+                        window.location.pathname
+                      );
+                      trackEvent("social_click", {
+                        social: social.platform,
+                        path: window.location.pathname
+                      });
+                    }}
                     className="text-gray-300 hover:text-primary-500 transition-colors"
                     title={social.platform}>
                     <span className="sr-only">{social.platform}</span>
