@@ -7,9 +7,11 @@ import { client } from "@/src/sanity/lib/client";
 import { storeDetailsQuery, socialLinksQuery } from "@lib/queries";
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
+import PageViewTracker from "@components/PageViewTracker";
 import { LogoData, SocialData } from "@/src/types/global";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
+import { generateHomePageMetadata } from "@/src/lib/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,50 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const storeData = await getStoreData();
-  const storeTitle = storeData?.title || "KeyAway";
-
-  return {
-    title: {
-      default: `${storeTitle} - Free Giveaway CD Keys`,
-      template: `%s | ${storeTitle}`
-    },
-    description:
-      "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection.",
-    keywords: ["free cd keys", "giveaway", "software keys", "license keys", "free software", "iobit pro", "pro cd key"],
-    authors: [{ name: storeTitle }],
-    creator: storeTitle,
-    publisher: storeTitle,
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1
-      }
-    },
-    openGraph: {
-      type: "website",
-      locale: "en_US",
-      url: "https://keyaway.com",
-      siteName: storeTitle,
-      title: `${storeTitle} - Free Giveaway CD Keys`,
-      description:
-        "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection."
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${storeTitle} - Free Giveaway CD Keys`,
-      description:
-        "Get free CD keys for popular software. Download programs with working license keys from our giveaway collection."
-    },
-    verification: {
-      google: "your-google-verification-code" // Replace with actual verification code
-    }
-  };
+  return generateHomePageMetadata();
 }
 
 async function getStoreData() {
@@ -103,6 +62,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <PageViewTracker />
         <div className="mainContent flex flex-col min-h-screen">
           <Header storeData={storeData} logoData={logoData} />
           {children}

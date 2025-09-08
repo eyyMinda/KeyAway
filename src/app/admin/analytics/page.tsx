@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { trackingEventsQuery } from "@/src/lib/queries";
+import { trackingEventsQuery, allProgramsQuery } from "@/src/lib/queries";
 import { client } from "@/src/sanity/lib/client";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
 import EventChart from "@/src/components/admin/EventChart";
 import TimeFilter from "@/src/components/admin/TimeFilter";
+import { Program } from "@/src/types/ProgramType";
 
 type EventDoc = {
   _id: string;
@@ -15,11 +16,15 @@ type EventDoc = {
   programSlug?: string;
   social?: string;
   path?: string;
+  referrer?: string;
+  country?: string;
+  city?: string;
   createdAt: string;
 };
 
 export default function AnalyticsPage() {
   const [events, setEvents] = useState<EventDoc[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState("30d");
   const [customDateRange, setCustomDateRange] = useState({
@@ -53,8 +58,12 @@ export default function AnalyticsPage() {
       };
 
       const since = getDateFromPeriod(selectedPeriod);
-      const eventsData: EventDoc[] = await client.fetch(trackingEventsQuery, { since });
+      const [eventsData, programsData] = await Promise.all([
+        client.fetch(trackingEventsQuery, { since }),
+        client.fetch(allProgramsQuery)
+      ]);
       setEvents(eventsData);
+      setPrograms(programsData);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
@@ -79,17 +88,27 @@ export default function AnalyticsPage() {
   const byProgram = new Map<string, number>();
   const bySocial = new Map<string, number>();
   const byPath = new Map<string, number>();
+  const byCountry = new Map<string, number>();
+  const byReferrer = new Map<string, number>();
 
   for (const e of events) {
     totals.set(e.event, (totals.get(e.event) || 0) + 1);
     if (e.programSlug) byProgram.set(e.programSlug, (byProgram.get(e.programSlug) || 0) + 1);
     if (e.social) bySocial.set(e.social, (bySocial.get(e.social) || 0) + 1);
     if (e.path) byPath.set(e.path, (byPath.get(e.path) || 0) + 1);
+    if (e.country) byCountry.set(e.country, (byCountry.get(e.country) || 0) + 1);
+    if (e.referrer) {
+      try {
+        const hostname = new URL(e.referrer).hostname;
+        byReferrer.set(hostname, (byReferrer.get(hostname) || 0) + 1);
+      } catch {
+        // Invalid URL, skip
+      }
+    }
   }
 
   const totalEvents = events.length;
   const uniquePrograms = byProgram.size;
-  const uniquePaths = byPath.size;
 
   if (loading) {
     return (
@@ -135,6 +154,18 @@ export default function AnalyticsPage() {
             .replace(/\b\w/g, l => l.toUpperCase())
   }));
 
+  const countryData = Array.from(byCountry).map(([country, count]) => ({
+    key: country,
+    value: count,
+    label: country
+  }));
+
+  const referrerData = Array.from(byReferrer).map(([hostname, count]) => ({
+    key: hostname,
+    value: count,
+    label: hostname
+  }));
+
   return (
     <ProtectedAdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">
       {/* Time Filter */}
@@ -148,14 +179,21 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-6 mb-8">
         <AnalyticsCard title="Total Events" value={totalEvents} subtitle="Last 30 days" icon="📊" color="blue" />
+        <AnalyticsCard
+          title="Total Programs"
+          value={programs.length}
+          subtitle="All programs in system"
+          icon="🎮"
+          color="green"
+        />
         <AnalyticsCard
           title="Active Programs"
           value={uniquePrograms}
           subtitle="With tracked events"
-          icon="🎮"
-          color="green"
+          icon="📈"
+          color="purple"
         />
         <AnalyticsCard
           title="Social Clicks"
@@ -165,11 +203,18 @@ export default function AnalyticsPage() {
           color="purple"
         />
         <AnalyticsCard
-          title="Unique Pages"
-          value={uniquePaths}
-          subtitle="Pages with activity"
-          icon="📄"
+          title="Page Views"
+          value={totals.get("page_viewed") || 0}
+          subtitle="Total page views"
+          icon="👁️"
           color="orange"
+        />
+        <AnalyticsCard
+          title="Unique Countries"
+          value={byCountry.size}
+          subtitle="Geographic reach"
+          icon="🌍"
+          color="blue"
         />
       </div>
 
@@ -183,6 +228,12 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <DataTable title="Top Programs" data={programData} maxItems={10} showPercentage={true} />
         <DataTable title="Social Media Engagement" data={socialData} maxItems={8} showPercentage={true} />
+      </div>
+
+      {/* Location & Referrer Data */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <DataTable title="Top Countries" data={countryData} maxItems={10} showPercentage={true} />
+        <DataTable title="Top Referrers" data={referrerData} maxItems={8} showPercentage={true} />
       </div>
 
       {/* Page Activity */}
@@ -201,20 +252,40 @@ export default function AnalyticsPage() {
             {events.slice(0, 10).map(event => (
               <div
                 key={event._id}
-                className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                <div className="flex items-center space-x-3">
+                className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                <div className="flex items-center space-x-3 flex-1 min-w-0">
                   <div className={`w-2 h-2 rounded-full ${getEventDotColor(event.event)}`} />
-                  <span className="text-sm font-medium text-gray-900">
-                    {event.event.replace(/_/g, " ").toUpperCase()}
-                  </span>
-                  {event.programSlug && (
-                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{event.programSlug}</span>
-                  )}
-                  {event.social && (
-                    <span className="text-xs text-gray-500 bg-blue-100 px-2 py-1 rounded">{event.social}</span>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm font-medium text-gray-900">
+                        {event.event.replace(/_/g, " ").toUpperCase()}
+                      </span>
+                      {event.programSlug && (
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{event.programSlug}</span>
+                      )}
+                      {event.social && (
+                        <span className="text-xs text-gray-500 bg-blue-100 px-2 py-1 rounded">{event.social}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {event.country && (
+                        <span className="text-xs text-gray-500 bg-green-100 px-2 py-1 rounded">
+                          {event.country}
+                          {event.city && `, ${event.city}`}
+                        </span>
+                      )}
+                      {event.path && <span className="text-xs text-gray-500 font-mono">{event.path}</span>}
+                      {event.referrer && (
+                        <span className="text-xs text-gray-500 truncate max-w-32" title={event.referrer}>
+                          from {new URL(event.referrer).hostname}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs text-gray-500">{new Date(event.createdAt).toLocaleString()}</div>
+                <div className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                  {new Date(event.createdAt).toLocaleString()}
+                </div>
               </div>
             ))}
           </div>

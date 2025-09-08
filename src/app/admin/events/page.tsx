@@ -14,6 +14,8 @@ type EventDoc = {
   createdAt: string;
   userAgent?: string;
   referrer?: string;
+  country?: string;
+  city?: string;
 };
 
 export default function EventsPage() {
@@ -107,6 +109,12 @@ export default function EventsPage() {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Path</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Location
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Referrer
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Timestamp
                 </th>
               </tr>
@@ -142,6 +150,30 @@ export default function EventsPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <span className="font-mono text-xs">{event.path || "/"}</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {event.country || event.city ? (
+                      <div className="flex flex-col">
+                        {event.country && <span className="font-medium">{event.country}</span>}
+                        {event.city && <span className="text-xs text-gray-500">{event.city}</span>}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {event.referrer ? (
+                      <a
+                        href={event.referrer}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-xs truncate max-w-32 block"
+                        title={event.referrer}>
+                        {new URL(event.referrer).hostname}
+                      </a>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(event.createdAt).toLocaleString()}

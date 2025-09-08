@@ -59,14 +59,5 @@ export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) 
 
 /* ------------ Analytics ------------ */
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
-      _id, event, programSlug, social, path, createdAt
+      _id, event, programSlug, social, path, referrer, country, city, createdAt
     } | order(createdAt desc)`;
-
-/* ------------ Admin ------------ */
-export const userIdQuery = `*[_type == "sanity.user"]{_id}[0]`;
-export const userQuery = `*[_type == "sanity.user"][0]{
-      id,
-      name,
-      email,
-      image
-    }`;

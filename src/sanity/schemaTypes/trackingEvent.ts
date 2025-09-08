@@ -13,7 +13,8 @@ export const trackingEvent = defineType({
         list: [
           { title: "Copy CD Key", value: "copy_cdkey" },
           { title: "Download Click", value: "download_click" },
-          { title: "Social Click", value: "social_click" }
+          { title: "Social Click", value: "social_click" },
+          { title: "Page Viewed", value: "page_viewed" }
         ]
       },
       validation: Rule => Rule.required()
@@ -24,6 +25,18 @@ export const trackingEvent = defineType({
     { name: "path", title: "Path", type: "string" },
     { name: "referrer", title: "Referrer", type: "url" },
     { name: "userAgent", title: "User Agent", type: "string" },
+    {
+      name: "country",
+      title: "Country",
+      type: "string",
+      description: "User's country based on IP geolocation"
+    },
+    {
+      name: "city",
+      title: "City",
+      type: "string",
+      description: "User's city based on IP geolocation"
+    },
     {
       name: "ipHash",
       title: "Visitor Hash",

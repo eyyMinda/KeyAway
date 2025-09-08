@@ -1,5 +1,5 @@
 export async function trackEvent(
-  event: "copy_cdkey" | "download_click" | "social_click",
+  event: "copy_cdkey" | "download_click" | "social_click" | "page_viewed",
   meta?: Record<string, unknown>
 ) {
   try {
