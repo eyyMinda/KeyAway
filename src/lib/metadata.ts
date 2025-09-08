@@ -28,7 +28,13 @@ const defaultData = {
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
     `${programTitle} Get ${workingKeys} working CD keys out of ${totalKeys} total. Download ${programTitle} for free with our giveaway keys.`,
   programUrl: (slug: string) => `https://keyaway.vercel.app/program/${slug}`,
-  programCanonical: (slug: string) => `https://keyaway.vercel.app/program/${slug}`
+  programCanonical: (slug: string) => `https://keyaway.vercel.app/program/${slug}`,
+  privacyTitle: (storeTitle: string) => `Privacy Policy | ${storeTitle}`,
+  privacyDescription: (storeTitle: string) =>
+    `Learn how ${storeTitle} handles your personal data, comments, and contributions while keeping the site transparent.`,
+  termsTitle: (storeTitle: string) => `Terms of Service | ${storeTitle}`,
+  termsDescription: (storeTitle: string) =>
+    `Read the terms of service for using ${storeTitle}, a platform for sharing publicly available giveaway CD keys.`
 };
 
 export async function generateHomePageMetadata(): Promise<Metadata> {
@@ -111,4 +117,52 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
       description: defaultData.description
     };
   }
+}
+
+export async function generatePrivacyMetadata(): Promise<Metadata> {
+  const storeData = await getStoreData();
+  const storeTitle = storeData?.title || defaultData.store;
+
+  return {
+    title: defaultData.privacyTitle(storeTitle),
+    description: defaultData.privacyDescription(storeTitle),
+    openGraph: {
+      title: defaultData.privacyTitle(storeTitle),
+      description: defaultData.privacyDescription(storeTitle),
+      type: "website",
+      url: `${defaultData.url}/privacy`
+    },
+    twitter: {
+      card: "summary",
+      title: defaultData.privacyTitle(storeTitle),
+      description: defaultData.privacyDescription(storeTitle)
+    },
+    alternates: {
+      canonical: `${defaultData.canonical}/privacy`
+    }
+  };
+}
+
+export async function generateTermsMetadata(): Promise<Metadata> {
+  const storeData = await getStoreData();
+  const storeTitle = storeData?.title || defaultData.store;
+
+  return {
+    title: defaultData.termsTitle(storeTitle),
+    description: defaultData.termsDescription(storeTitle),
+    openGraph: {
+      title: defaultData.termsTitle(storeTitle),
+      description: defaultData.termsDescription(storeTitle),
+      type: "website",
+      url: `${defaultData.url}/terms`
+    },
+    twitter: {
+      card: "summary",
+      title: defaultData.termsTitle(storeTitle),
+      description: defaultData.termsDescription(storeTitle)
+    },
+    alternates: {
+      canonical: `${defaultData.canonical}/terms`
+    }
+  };
 }
