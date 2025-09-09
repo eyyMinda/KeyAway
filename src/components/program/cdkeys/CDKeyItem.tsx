@@ -1,6 +1,9 @@
+"use client";
+
 import { CDKey } from "@/src/types/ProgramType";
 import CDKeyActions from "@/src/components/program/cdkeys/CDKeyActions";
 import { getStatusColor } from "@/src/lib/cdKeyUtils";
+import { useCopyTracking } from "@/src/hooks/useCopyTracking";
 
 interface CDKeyItemProps {
   cdKey: CDKey;
@@ -11,11 +14,13 @@ interface CDKeyItemProps {
 export default function CDKeyItem({ cdKey, index, slug }: CDKeyItemProps) {
   const isDisabled = cdKey.status === "limit" || cdKey.status === "expired";
 
+  useCopyTracking({ cdKey, slug });
+
   return (
     <tr key={index} className={`hover:bg-neutral-700 transition-colors ${isDisabled ? "opacity-50" : ""}`}>
       <td className="px-6 py-4 text-nowrap">
         <code
-          className={`px-3 py-1 rounded-lg text-sm font-mono ${
+          className={`px-3 py-1 rounded-lg text-sm font-mono select-text ${
             isDisabled ? "bg-neutral-600 text-neutral-400" : "bg-neutral-600 text-neutral-200"
           }`}>
           {cdKey.key}

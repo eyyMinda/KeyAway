@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CDKey } from "@/src/types/ProgramType";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackCopyEvent } from "@/src/lib/copyTracking";
 
 interface CDKeyActionsProps {
   cdKey: CDKey;
@@ -44,7 +44,7 @@ export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsPr
         <button
           onClick={() => {
             copyToClipboard(cdKey.key);
-            trackEvent("copy_cdkey", { programSlug: slug, key: cdKey, path: window.location.pathname });
+            trackCopyEvent(cdKey, slug, "button_click");
           }}
           className="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none cursor-pointer"
           disabled={isDisabled}
