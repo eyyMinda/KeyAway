@@ -14,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/studio/", "/api/", "/admin/"]
       }
     ],
-    sitemap: "https://keyaway.vercel.app/sitemap.xml",
-    host: "https://keyaway.vercel.app"
+    sitemap: "https://keyaway.app/sitemap.xml",
+    host: "https://keyaway.app"
   };
 }

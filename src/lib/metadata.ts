@@ -22,14 +22,14 @@ const defaultData = {
   title: (storeTitle: string) => `${storeTitle} - Free CD Keys for Premium Software`,
   description:
     "Get free CD keys for popular software like IOBIT, Malware Fighter, and more. Download premium programs with working license keys from our giveaway collection.",
-  url: "https://keyaway.vercel.app",
-  canonical: "https://keyaway.vercel.app",
+  url: "https://keyaway.app",
+  canonical: "https://keyaway.app",
   programTitle: (programTitle: string, storeTitle: string) =>
     `${programTitle} Premium Software Free CD Keys | ${storeTitle}`,
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
     `Download ${programTitle} for free! Get ${workingKeys} working CD keys out of ${totalKeys} total. Premium software license keys from our giveaway collection.`,
-  programUrl: (slug: string) => `https://keyaway.vercel.app/program/${slug}`,
-  programCanonical: (slug: string) => `https://keyaway.vercel.app/program/${slug}`,
+  programUrl: (slug: string) => `https://keyaway.app/program/${slug}`,
+  programCanonical: (slug: string) => `https://keyaway.app/program/${slug}`,
   privacyTitle: (storeTitle: string) => `Privacy Policy | ${storeTitle}`,
   privacyDescription: (storeTitle: string) =>
     `Learn how ${storeTitle} handles your personal data, comments, and contributions while keeping the site transparent.`,
@@ -55,7 +55,7 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: defaultData.title(storeTitle),
       description: defaultData.description,
-      images: ["https://keyaway.vercel.app/images/KeyAway_Logo.png"]
+      images: ["https://keyaway.app/images/KeyAway_Logo.png"]
     },
     alternates: {
       canonical: defaultData.canonical
