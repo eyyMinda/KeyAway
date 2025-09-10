@@ -1,9 +1,9 @@
 {
-  "origins": [
-    "https://keyaway.app",
+  "origins": ["https://keyaway.app", "https://keyaway.vercel.app"],
+  "originsRegex": [
     "https://keyaway.app/*",
-    "https://keyaway.vercel.app",
-    "https://keyaway.vercel.app/*"
-  ],
-  "originsRegex": ["http://localhost:[0-9]+", "http://localhost:[0-9]+/*"]
+    "https://keyaway.vercel.app/*",
+    "http://localhost:[0-9]+",
+    "http://localhost:[0-9]+/*"
+  ]
 }
