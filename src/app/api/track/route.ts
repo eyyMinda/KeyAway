@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import crypto from "crypto";
-
-type TrackBody = {
-  event: "copy_cdkey" | "download_click" | "social_click" | "page_viewed" | "report_expired_cdkey";
-  meta?: Record<string, unknown>;
-};
+import { TrackRequestBody } from "@/src/types";
 
 const ALLOWED_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed", "report_expired_cdkey"]);
 
@@ -123,7 +119,7 @@ async function getLocationFromIP(ip: string | undefined): Promise<{ country?: st
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as TrackBody;
+    const body = (await req.json()) as TrackRequestBody;
 
     if (!body?.event || !ALLOWED_EVENTS.has(body.event)) {
       return NextResponse.json({ ok: false, error: "Invalid event" }, { status: 400 });

@@ -1,15 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CDKey } from "@/src/types/ProgramType";
+import { CDKeyActionsProps } from "@/src/types";
 import { trackCopyEvent } from "@/src/lib/copyTracking";
 import { trackEvent } from "@/src/lib/trackEvent";
-
-interface CDKeyActionsProps {
-  cdKey: CDKey;
-  isDisabled: boolean;
-  slug: string;
-}
 
 export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsProps) {
   const [notification, setNotification] = useState<string | null>(null);

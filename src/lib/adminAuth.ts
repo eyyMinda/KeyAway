@@ -1,12 +1,6 @@
 import { client } from "@/src/sanity/lib/client";
 import { storeDetailsQuery } from "./queries";
-
-export interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  image?: string;
-}
+import { AdminUser } from "@/src/types";
 
 /**
  * Check if the current user has admin access by verifying they can access Sanity Studio

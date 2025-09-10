@@ -1,15 +1,14 @@
-import { CDKey } from "@/src/types/ProgramType";
+"use client";
+
+import { CDKey, CDKeyTableProps } from "@/src/types";
 import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import KeyStatusTooltip from "@/src/components/program/KeyStatusTooltip";
 import { isKeyExpiringSoon } from "@/src/lib/cdKeyUtils";
-
-interface CDKeyTableProps {
-  cdKeys: CDKey[];
-  slug: string;
-}
+import { useExpiredKeyReports } from "@/src/hooks/useExpiredKeyReports";
 
 export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   const hasExpiringSoonKeys = cdKeys.some((key: CDKey) => isKeyExpiringSoon(key));
+  const { reports } = useExpiredKeyReports(slug);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -48,6 +47,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-200 text-nowrap">Key</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Status</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Reports</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Version</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Valid From</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Valid Until</th>
@@ -56,7 +56,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
               </thead>
               <tbody className="divide-y divide-neutral-700">
                 {cdKeys.map((cdKey: CDKey, i: number) => (
-                  <CDKeyItem key={i} cdKey={cdKey} index={i} slug={slug} />
+                  <CDKeyItem key={i} cdKey={cdKey} index={i} slug={slug} reportCount={reports.get(cdKey.key) || 0} />
                 ))}
               </tbody>
             </table>

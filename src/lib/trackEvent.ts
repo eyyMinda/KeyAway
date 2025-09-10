@@ -1,7 +1,6 @@
-export async function trackEvent(
-  event: "copy_cdkey" | "download_click" | "social_click" | "page_viewed" | "report_expired_cdkey",
-  meta?: Record<string, unknown>
-) {
+import { TrackingEvent, TrackEventMeta } from "@/src/types";
+
+export async function trackEvent(event: TrackingEvent, meta?: TrackEventMeta) {
   try {
     await fetch("/api/track", {
       method: "POST",

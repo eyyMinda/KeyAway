@@ -1,11 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-interface AdminAccessResult {
-  isAdmin: boolean;
-  loading: boolean;
-}
+import { AdminAccessResult } from "@/src/types";
 
 export function useAdminAccess(): AdminAccessResult {
   const [isAdmin, setIsAdmin] = useState(false);

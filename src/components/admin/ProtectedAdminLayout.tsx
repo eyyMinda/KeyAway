@@ -4,12 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminLayout from "./AdminLayout";
 import { isAuthenticatedInBrowser } from "@/src/lib/adminAuth";
-
-interface ProtectedAdminLayoutProps {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}
+import { ProtectedAdminLayoutProps } from "@/src/types";
 
 export default function ProtectedAdminLayout({ title, subtitle, children }: ProtectedAdminLayoutProps) {
   const [isChecking, setIsChecking] = useState(true);

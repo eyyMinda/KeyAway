@@ -1,11 +1,6 @@
 import { useEffect } from "react";
 import { trackCopyEvent } from "@/src/lib/copyTracking";
-import { CDKey } from "@/src/types/ProgramType";
-
-interface UseCopyTrackingProps {
-  cdKey: CDKey;
-  slug: string;
-}
+import { UseCopyTrackingProps } from "@/src/types";
 
 export function useCopyTracking({ cdKey, slug }: UseCopyTrackingProps) {
   useEffect(() => {
@@ -17,7 +12,7 @@ export function useCopyTracking({ cdKey, slug }: UseCopyTrackingProps) {
           if (copiedText === cdKey.key) {
             trackCopyEvent(cdKey, slug, "keyboard_or_context_menu");
           }
-        } catch (error) {
+        } catch {
           // Silently handle clipboard access errors
         }
       }, 10);

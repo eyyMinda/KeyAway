@@ -1,5 +1,5 @@
 import { trackEvent } from "./trackEvent";
-import { CDKey } from "@/src/types/ProgramType";
+import { CDKey } from "@/src/types";
 
 export function trackCopyEvent(cdKey: CDKey, slug: string, copyMethod: "button_click" | "keyboard_or_context_menu") {
   trackEvent("copy_cdkey", {
