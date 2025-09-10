@@ -138,11 +138,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Invalid event" }, { status: 400 });
     }
 
-    // // Skip tracking for localhost requests
-    // const host = req.headers.get("host") || "";
-    // if (host.startsWith("localhost") || host.includes("127.0.0.1")) {
-    //   return NextResponse.json({ ok: true, message: "Skipped localhost tracking" });
-    // }
+    // Skip tracking for localhost requests
+    const host = req.headers.get("host") || "";
+    if (host.startsWith("localhost") || host.includes("127.0.0.1")) {
+      return NextResponse.json({ ok: true, message: "Skipped localhost tracking" });
+    }
 
     // Extract request context
     const ua = req.headers.get("user-agent") || undefined;

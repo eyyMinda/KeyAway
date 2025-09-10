@@ -8,7 +8,18 @@ import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
 import EventChart from "@/src/components/admin/EventChart";
 import TimeFilter from "@/src/components/admin/TimeFilter";
+import RecentActivity from "@/src/components/admin/RecentActivity";
 import { Program, AnalyticsEventData } from "@/src/types";
+import {
+  getDateFromPeriod,
+  aggregateEvents,
+  transformEventData,
+  transformProgramData,
+  transformSocialData,
+  transformPathData,
+  transformCountryData,
+  transformReferrerData
+} from "@/src/lib/analyticsUtils";
 
 export default function AnalyticsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);
@@ -23,29 +34,7 @@ export default function AnalyticsPage() {
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const getDateFromPeriod = (period: string) => {
-        const now = new Date();
-        switch (period) {
-          case "1h":
-            return new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-          case "24h":
-            return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-          case "7d":
-            return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-          case "30d":
-            return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-          case "90d":
-            return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
-          case "custom":
-            return customDateRange.start
-              ? new Date(customDateRange.start).toISOString()
-              : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-          default:
-            return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-        }
-      };
-
-      const since = getDateFromPeriod(selectedPeriod);
+      const since = getDateFromPeriod(selectedPeriod, customDateRange);
       const [eventsData, programsData] = await Promise.all([
         client.fetch(trackingEventsQuery, { since }),
         client.fetch(allProgramsQuery)
@@ -57,7 +46,7 @@ export default function AnalyticsPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPeriod, customDateRange.start]);
+  }, [selectedPeriod, customDateRange]);
 
   useEffect(() => {
     fetchEvents();
@@ -72,29 +61,7 @@ export default function AnalyticsPage() {
   };
 
   // Aggregate data
-  const totals = new Map<string, number>();
-  const byProgram = new Map<string, number>();
-  const bySocial = new Map<string, number>();
-  const byPath = new Map<string, number>();
-  const byCountry = new Map<string, number>();
-  const byReferrer = new Map<string, number>();
-
-  for (const e of events) {
-    totals.set(e.event, (totals.get(e.event) || 0) + 1);
-    if (e.programSlug) byProgram.set(e.programSlug, (byProgram.get(e.programSlug) || 0) + 1);
-    if (e.social) bySocial.set(e.social, (bySocial.get(e.social) || 0) + 1);
-    if (e.path) byPath.set(e.path, (byPath.get(e.path) || 0) + 1);
-    if (e.country) byCountry.set(e.country, (byCountry.get(e.country) || 0) + 1);
-    if (e.referrer) {
-      try {
-        const hostname = new URL(e.referrer).hostname;
-        byReferrer.set(hostname, (byReferrer.get(hostname) || 0) + 1);
-      } catch {
-        // Invalid URL, skip
-      }
-    }
-  }
-
+  const { totals, byProgram, bySocial, byPath, byCountry, byReferrer } = aggregateEvents(events);
   const totalEvents = events.length;
   const uniquePrograms = byProgram.size;
 
@@ -112,48 +79,12 @@ export default function AnalyticsPage() {
   }
 
   // Convert maps to arrays for components
-  const eventData = Array.from(totals).map(([name, count]) => ({
-    name: name.replace(/_/g, " ").toUpperCase(),
-    value: count,
-    color: getEventColor(name)
-  }));
-
-  const programData = Array.from(byProgram).map(([slug, count]) => ({
-    key: slug,
-    value: count,
-    label: slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase())
-  }));
-
-  const socialData = Array.from(bySocial).map(([name, count]) => ({
-    key: name,
-    value: count,
-    label: name.charAt(0).toUpperCase() + name.slice(1)
-  }));
-
-  const pathData = Array.from(byPath).map(([path, count]) => ({
-    key: path,
-    value: count,
-    label:
-      path === "/"
-        ? "Home"
-        : path
-            .replace(/^\//, "")
-            .replace(/\//g, " | ")
-            .replace(/-/g, " ")
-            .replace(/\b\w/g, l => l.toUpperCase())
-  }));
-
-  const countryData = Array.from(byCountry).map(([country, count]) => ({
-    key: country,
-    value: count,
-    label: country
-  }));
-
-  const referrerData = Array.from(byReferrer).map(([hostname, count]) => ({
-    key: hostname,
-    value: count,
-    label: hostname
-  }));
+  const eventData = transformEventData(totals);
+  const programData = transformProgramData(byProgram);
+  const socialData = transformSocialData(bySocial);
+  const pathData = transformPathData(byPath);
+  const countryData = transformCountryData(byCountry);
+  const referrerData = transformReferrerData(byReferrer);
 
   return (
     <ProtectedAdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">
@@ -231,81 +162,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-          <p className="text-sm text-gray-500 mt-1">Latest tracking events</p>
-        </div>
-        <div className="p-6">
-          <div className="space-y-3">
-            {events.slice(0, 10).map(event => (
-              <div
-                key={event._id}
-                className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  <div className={`w-2 h-2 rounded-full ${getEventDotColor(event.event)}`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm font-medium text-gray-900">
-                        {event.event.replace(/_/g, " ").toUpperCase()}
-                      </span>
-                      {event.programSlug && (
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{event.programSlug}</span>
-                      )}
-                      {event.social && (
-                        <span className="text-xs text-gray-500 bg-blue-100 px-2 py-1 rounded">{event.social}</span>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2 mt-1">
-                      {event.country && (
-                        <span className="text-xs text-gray-500 bg-green-100 px-2 py-1 rounded">
-                          {event.country}
-                          {event.city && `, ${event.city}`}
-                        </span>
-                      )}
-                      {event.path && <span className="text-xs text-gray-500 font-mono">{event.path}</span>}
-                      {event.referrer && (
-                        <span className="text-xs text-gray-500 truncate max-w-32" title={event.referrer}>
-                          from {new URL(event.referrer).hostname}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                  {new Date(event.createdAt).toLocaleString()}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <RecentActivity events={events} maxItems={10} />
     </ProtectedAdminLayout>
   );
-}
-
-function getEventColor(event: string): string {
-  switch (event) {
-    case "copy_cdkey":
-      return "#10B981"; // green
-    case "download_click":
-      return "#3B82F6"; // blue
-    case "social_click":
-      return "#8B5CF6"; // purple
-    default:
-      return "#6B7280"; // gray
-  }
-}
-
-function getEventDotColor(event: string): string {
-  switch (event) {
-    case "copy_cdkey":
-      return "bg-green-500";
-    case "download_click":
-      return "bg-blue-500";
-    case "social_click":
-      return "bg-purple-500";
-    default:
-      return "bg-gray-500";
-  }
 }
