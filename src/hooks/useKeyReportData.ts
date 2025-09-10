@@ -23,8 +23,6 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
           return matchesProgram;
         });
 
-        logger.collapse(keyReportEvents, `Key Report Events for ${programSlug}`, "info");
-
         const keyReportData = new Map<string, ReportData>();
 
         // Initialize with current keys
@@ -59,7 +57,6 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
           }
         }
 
-        logger.table(Array.from(keyReportData.entries()), `Report Data for ${programSlug}`, "success");
         setReportData(keyReportData);
       } catch (error) {
         logger.collapse(error, "Error fetching key report data", "error");
