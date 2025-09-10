@@ -43,14 +43,12 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
                   Events
                 </Link>
+                <Link
+                  href="/admin/expired-keys"
+                  className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
+                  Expired Keys
+                </Link>
               </nav>
-
-              {/* Studio Link */}
-              <Link
-                href="/studio"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Studio
-              </Link>
             </div>
           </div>
         </div>

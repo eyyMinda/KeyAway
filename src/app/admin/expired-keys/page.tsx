@@ -165,16 +165,15 @@ export default function ExpiredKeysPage() {
               id="program-filter"
               value={selectedProgram}
               onChange={e => setSelectedProgram(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <option key="all" value="all">
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+              <option key="all" value="all" className="text-gray-900">
                 All Programs
               </option>
               {programs.map((program, index) => (
                 <option
                   key={`program-${program._id}-${index}`}
                   value={program.slug?.current || program._id}
-                  data-key={program._id}
-                  data-slug={program.slug?.current}>
+                  className="text-gray-900">
                   {program.title}
                 </option>
               ))}

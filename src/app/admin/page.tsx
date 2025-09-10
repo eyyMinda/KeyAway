@@ -120,8 +120,8 @@ export default function AdminHomePage() {
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-sm">Total Events Today</p>
-                <p className="text-3xl font-bold">Loading...</p>
+                <p className="text-blue-300 text-sm">Total Events Today</p>
+                <p className="text-gray-300 text-3xl font-bold">Loading...</p>
               </div>
               <span className="text-4xl opacity-50">📊</span>
             </div>
@@ -130,8 +130,8 @@ export default function AdminHomePage() {
           <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-100 text-sm">Active Programs</p>
-                <p className="text-3xl font-bold">Loading...</p>
+                <p className="text-green-300 text-sm">Active Programs</p>
+                <p className="text-gray-300 text-3xl font-bold">Loading...</p>
               </div>
               <span className="text-4xl opacity-50">🎮</span>
             </div>
@@ -140,8 +140,8 @@ export default function AdminHomePage() {
           <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-purple-100 text-sm">Social Clicks</p>
-                <p className="text-3xl font-bold">Loading...</p>
+                <p className="text-purple-300 text-sm">Social Clicks</p>
+                <p className="text-gray-300 text-3xl font-bold">Loading...</p>
               </div>
               <span className="text-4xl opacity-50">📱</span>
             </div>
