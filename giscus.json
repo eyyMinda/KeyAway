@@ -1,3 +1,10 @@
 {
-  "origins": ["https://keyaway.app", "https://keyaway.vercel.app"]
+  "origins": [
+    "https://keyaway.app",
+    "https://keyaway.app/*",
+    "https://keyaway.vercel.app",
+    "https://keyaway.vercel.app/*",
+    "http://localhost:[0-9]+",
+    "http://localhost:[0-9]+/*"
+  ]
 }

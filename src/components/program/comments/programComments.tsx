@@ -40,13 +40,14 @@ export default function ProgramComments() {
       category="Announcements"
       categoryId="DIC_kwDOPrUr6c4CvFkJ"
       mapping="pathname"
-      strict="0"
+      strict="1"
       reactionsEnabled="1"
-      emitMetadata="1"
+      emitMetadata="0"
       inputPosition="top"
       lang="en"
       theme="catppuccin_macchiato"
       loading="lazy"
+      term="Comments"
     />
   );
 }
