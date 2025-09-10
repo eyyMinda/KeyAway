@@ -57,7 +57,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
   const getStatusColor = (status: string) => {
     switch (status) {
       case "new":
-        return "bg-blue-100 text-primary800 border border-blue-200";
+        return "bg-blue-100 text-primary-800 border border-blue-200";
       case "active":
         return "bg-green-100 text-green-800 border border-green-200";
       case "limit":

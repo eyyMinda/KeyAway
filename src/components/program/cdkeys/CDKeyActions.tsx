@@ -7,7 +7,6 @@ import ReportPopup from "./ReportPopup";
 import Toast from "@/src/components/ui/Toast";
 
 const NOTIFICATION_DURATION = 3000;
-const KEY_PREVIEW_LENGTH = 8;
 
 /**
  * CDKeyActions component provides copy and expired reporting functionality for CD keys
