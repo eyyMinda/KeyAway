@@ -145,6 +145,10 @@ export async function POST(req: Request) {
     const keyMasked = maskKey(body.meta?.key);
     const social = body.meta?.social as string | undefined;
     const path = body.meta?.path as string | undefined;
+    const referrer = body.meta?.referrer as string | undefined;
+    const utmSource = body.meta?.utm_source as string | undefined;
+    const utmMedium = body.meta?.utm_medium as string | undefined;
+    const utmCampaign = body.meta?.utm_campaign as string | undefined;
 
     // Build tracking event data - only include fields that have values
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -162,6 +166,10 @@ export async function POST(req: Request) {
     if (keyMasked) trackingData.keyMasked = keyMasked;
     if (social) trackingData.social = social;
     if (path) trackingData.path = path;
+    if (referrer) trackingData.referrer = referrer;
+    if (utmSource) trackingData.utm_source = utmSource;
+    if (utmMedium) trackingData.utm_medium = utmMedium;
+    if (utmCampaign) trackingData.utm_campaign = utmCampaign;
     if (location?.country) trackingData.country = location.country;
     if (location?.city) trackingData.city = location.city;
 

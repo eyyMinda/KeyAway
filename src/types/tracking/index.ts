@@ -13,6 +13,9 @@ export interface TrackingEventData {
   keyMasked?: string;
   userAgent?: string;
   ipHash?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
   createdAt: string;
 }
 
@@ -22,6 +25,10 @@ export interface TrackEventMeta {
   path?: string;
   social?: string;
   copyMethod?: "button_click" | "keyboard_or_context_menu";
+  referrer?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
 }
 
 export interface TrackRequestBody {

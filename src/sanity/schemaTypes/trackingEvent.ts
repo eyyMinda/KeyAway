@@ -39,6 +39,24 @@ export const trackingEvent = defineType({
       description: "User's city based on IP geolocation"
     },
     {
+      name: "utm_source",
+      title: "UTM Source",
+      type: "string",
+      description: "UTM source parameter from URL"
+    },
+    {
+      name: "utm_medium",
+      title: "UTM Medium",
+      type: "string",
+      description: "UTM medium parameter from URL"
+    },
+    {
+      name: "utm_campaign",
+      title: "UTM Campaign",
+      type: "string",
+      description: "UTM campaign parameter from URL"
+    },
+    {
       name: "ipHash",
       title: "Visitor Hash",
       type: "string",

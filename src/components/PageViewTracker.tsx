@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { trackEvent } from "@/src/lib/trackEvent";
+import { getUTMParameters } from "@/src/lib/utmUtils";
 
 export default function PageViewTracker() {
   const pathname = usePathname();
@@ -27,11 +28,15 @@ export default function PageViewTracker() {
           ? pathname.split("/program/")[1]?.split("/")[0]
           : undefined;
 
+        // Get UTM parameters from URL
+        const utmParams = getUTMParameters();
+
         // Track the page view
         await trackEvent("page_viewed", {
           path: pathname,
           programSlug,
-          referrer: referrer || undefined
+          referrer: referrer || undefined,
+          ...utmParams
         });
 
         hasTracked.current = true;
