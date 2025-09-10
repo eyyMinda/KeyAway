@@ -5,6 +5,7 @@ export const cdKey = defineType({
   title: "CD Key",
   type: "object",
   fields: [
+    { name: "id", title: "Key ID", type: "string", description: "Unique identifier for this CD key" },
     { name: "key", title: "Key", type: "string" },
     {
       name: "status",

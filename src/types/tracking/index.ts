@@ -11,6 +11,7 @@ export interface TrackingEventData {
   country?: string;
   city?: string;
   keyMasked?: string;
+  keyId?: string;
   userAgent?: string;
   ipHash?: string;
   utm_source?: string;

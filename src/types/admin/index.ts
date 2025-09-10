@@ -60,6 +60,7 @@ export interface TimeFilterProps {
 export interface ExpiredKeyReport {
   key: string;
   keyMasked: string;
+  keyId: string;
   programSlug: string;
   programTitle: string;
   reportCount: number;

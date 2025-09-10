@@ -6,11 +6,27 @@ import { TrackRequestBody } from "@/src/types";
 const ALLOWED_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed", "report_expired_cdkey"]);
 
 function maskKey(key?: unknown) {
-  if (typeof key !== "string" || !key) return undefined;
+  if (typeof key === "string" && key) {
+    const trimmed = key.replace(/\s+/g, "");
+    if (trimmed.length <= 6) return "***";
+    return `${trimmed.slice(0, 3)}***${trimmed.slice(-3)}`; // e.g. ABC***XYZ
+  }
 
-  const trimmed = key.replace(/\s+/g, "");
-  if (trimmed.length <= 6) return "***";
-  return `${trimmed.slice(0, 3)}***${trimmed.slice(-3)}`; // e.g. ABC***XYZ
+  if (key && typeof key === "object" && "key" in key) {
+    const keyString = (key as { key: string }).key;
+    const trimmed = keyString.replace(/\s+/g, "");
+    if (trimmed.length <= 6) return "***";
+    return `${trimmed.slice(0, 3)}***${trimmed.slice(-3)}`;
+  }
+
+  return undefined;
+}
+
+function getKeyId(key?: unknown): string | undefined {
+  if (key && typeof key === "object" && "id" in key) {
+    return (key as { id: string }).id;
+  }
+  return undefined;
 }
 
 function hashIp(ip: string | undefined) {
@@ -143,6 +159,7 @@ export async function POST(req: Request) {
     // Normalize meta safely
     const programSlug = body.meta?.programSlug as string | undefined;
     const keyMasked = maskKey(body.meta?.key);
+    const keyId = getKeyId(body.meta?.key);
     const social = body.meta?.social as string | undefined;
     const path = body.meta?.path as string | undefined;
     const referrer = body.meta?.referrer as string | undefined;
@@ -164,6 +181,7 @@ export async function POST(req: Request) {
     // Add optional fields only if they have values
     if (programSlug) trackingData.programSlug = programSlug;
     if (keyMasked) trackingData.keyMasked = keyMasked;
+    if (keyId) trackingData.keyId = keyId;
     if (social) trackingData.social = social;
     if (path) trackingData.path = path;
     if (referrer) trackingData.referrer = referrer;
