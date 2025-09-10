@@ -22,13 +22,6 @@ function maskKey(key?: unknown) {
   return undefined;
 }
 
-function getKeyId(key?: unknown): string | undefined {
-  if (key && typeof key === "object" && "id" in key) {
-    return (key as { id: string }).id;
-  }
-  return undefined;
-}
-
 function hashIp(ip: string | undefined) {
   try {
     const salt = process.env.ANALYTICS_SALT || "";
@@ -159,7 +152,6 @@ export async function POST(req: Request) {
     // Normalize meta safely
     const programSlug = body.meta?.programSlug as string | undefined;
     const keyMasked = maskKey(body.meta?.key);
-    const keyId = getKeyId(body.meta?.key);
     const social = body.meta?.social as string | undefined;
     const path = body.meta?.path as string | undefined;
     const referrer = body.meta?.referrer as string | undefined;
@@ -181,7 +173,6 @@ export async function POST(req: Request) {
     // Add optional fields only if they have values
     if (programSlug) trackingData.programSlug = programSlug;
     if (keyMasked) trackingData.keyMasked = keyMasked;
-    if (keyId) trackingData.keyId = keyId;
     if (social) trackingData.social = social;
     if (path) trackingData.path = path;
     if (referrer) trackingData.referrer = referrer;

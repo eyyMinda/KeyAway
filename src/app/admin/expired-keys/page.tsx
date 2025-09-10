@@ -40,32 +40,46 @@ export default function ExpiredKeysPage() {
           (event: Record<string, unknown>) => event.event === "report_expired_cdkey"
         );
 
-        // Group by keyId and program
+        // Group by actual CD key within each program
         const keyReports = new Map<string, ExpiredKeyReport>();
 
         for (const report of expiredReports) {
-          const keyId = (report.keyId as string) || (report.keyMasked as string) || "unknown";
           const programSlug = (report.programSlug as string) || "unknown";
+          const keyMasked = (report.keyMasked as string) || "unknown";
           const program = programsData.find(p => p.slug?.current === programSlug);
 
-          if (!keyReports.has(keyId)) {
-            keyReports.set(keyId, {
-              key: (report.keyMasked as string) || "unknown",
-              keyMasked: (report.keyMasked as string) || "unknown",
-              keyId: keyId,
+          // Find the actual CD key from the program to get the real key
+          let actualKey = null;
+          if (program?.cdKeys) {
+            actualKey = program.cdKeys.find(k => {
+              // Trim whitespace to match the masking logic in track API
+              const trimmedKey = k.key.replace(/\s+/g, "");
+              const masked = `${trimmedKey.slice(0, 3)}***${trimmedKey.slice(-3)}`;
+              return masked === keyMasked;
+            });
+          }
+
+          // Use the actual key for grouping, or fallback to masked if not found
+          const keyForGrouping = actualKey?.key || keyMasked;
+          const groupKey = `${programSlug}:${keyForGrouping}`;
+
+          if (!keyReports.has(groupKey)) {
+            keyReports.set(groupKey, {
+              key: keyForGrouping,
+              keyMasked: keyMasked,
               programSlug,
               programTitle: program?.title || "Unknown Program",
               reportCount: 0,
               firstReported: report.createdAt as string,
               lastReported: report.createdAt as string,
-              status: "active" as const, // Default status, will be updated from program data
-              validFrom: undefined,
-              validTo: undefined,
+              status: actualKey?.status || "active",
+              validFrom: actualKey?.validFrom,
+              validTo: actualKey?.validUntil,
               reports: []
             });
           }
 
-          const keyReport = keyReports.get(keyId)!;
+          const keyReport = keyReports.get(groupKey)!;
           keyReport.reportCount++;
           keyReport.reports.push({
             createdAt: report.createdAt as string,
@@ -82,25 +96,8 @@ export default function ExpiredKeysPage() {
           }
         }
 
-        // Get actual key data from programs to set status and validity
-        for (const [, report] of keyReports) {
-          const program = programsData.find(p => p.slug?.current === report.programSlug);
-          if (program?.cdKeys) {
-            // Try to find by keyId first, then fallback to key matching
-            const actualKey =
-              program.cdKeys.find(k => k.id === report.keyId) || program.cdKeys.find(k => k.key === report.key);
-            if (actualKey) {
-              report.status = actualKey.status;
-              report.validFrom = actualKey.validFrom;
-              report.validTo = actualKey.validUntil;
-              // Update the key and keyMasked with actual data
-              report.key = actualKey.key;
-              report.keyMasked = `${actualKey.key.slice(0, 3)}***${actualKey.key.slice(-3)}`;
-            }
-          }
-        }
-
-        setReports(Array.from(keyReports.values()).sort((a, b) => b.reportCount - a.reportCount));
+        const finalReports = Array.from(keyReports.values()).sort((a, b) => b.reportCount - a.reportCount);
+        setReports(finalReports);
       } catch (error) {
         console.error("Error fetching expired key reports:", error);
       } finally {
@@ -120,26 +117,37 @@ export default function ExpiredKeysPage() {
           return program && report.programSlug === program.slug?.current;
         });
 
-  const updateKeyStatus = async (keyId: string, newStatus: CDKeyStatus) => {
+  const updateKeyStatus = async (report: ExpiredKeyReport, newStatus: CDKeyStatus) => {
     try {
       // Find the program that contains this key
-      const program = programs.find(p => p.cdKeys?.some(k => k.id === keyId));
+      const program = programs.find(p => p.slug?.current === report.programSlug);
 
       if (!program) {
-        console.error("Program not found for keyId:", keyId);
+        console.error("Program not found for report:", report);
+        return;
+      }
+
+      // Find the specific key by matching the actual key
+      const keyIndex = program.cdKeys?.findIndex(k => k.key === report.key);
+
+      if (keyIndex === undefined || keyIndex === -1) {
+        console.error("Key not found in program:", report.key);
         return;
       }
 
       // Update the key status in the program
-      const updatedKeys = program.cdKeys?.map(k => (k.id === keyId ? { ...k, status: newStatus } : k)) || [];
+      const updatedKeys = [...(program.cdKeys || [])];
+      updatedKeys[keyIndex] = { ...updatedKeys[keyIndex], status: newStatus };
 
       // Update the program in Sanity
       await client.patch(program._id).set({ cdKeys: updatedKeys }).commit();
 
       // Update local state
-      setReports(prev => prev.map(report => (report.keyId === keyId ? { ...report, status: newStatus } : report)));
+      setReports(prev =>
+        prev.map(r => (r.programSlug === report.programSlug && r.key === report.key ? { ...r, status: newStatus } : r))
+      );
 
-      console.log(`Updated key ${keyId} status to ${newStatus}`);
+      console.log(`Updated key ${report.key} status to ${newStatus}`);
     } catch (error) {
       console.error("Error updating key status:", error);
     }
@@ -231,7 +239,7 @@ export default function ExpiredKeysPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <select
                         value={report.status}
-                        onChange={e => updateKeyStatus(report.keyId, e.target.value as CDKeyStatus)}
+                        onChange={e => updateKeyStatus(report, e.target.value as CDKeyStatus)}
                         className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
                         {Object.entries(STATUS_OPTIONS).map(([value, label]) => (
                           <option key={value} value={value}>

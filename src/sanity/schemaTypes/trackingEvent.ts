@@ -22,7 +22,6 @@ export const trackingEvent = defineType({
     },
     { name: "programSlug", title: "Program Slug", type: "string" },
     { name: "keyMasked", title: "Key (Masked)", type: "string" },
-    { name: "keyId", title: "Key ID", type: "string", description: "Unique identifier for the CD key" },
     { name: "social", title: "Social Name", type: "string" },
     { name: "path", title: "Path", type: "string" },
     { name: "referrer", title: "Referrer", type: "url" },

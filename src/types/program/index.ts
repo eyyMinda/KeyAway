@@ -2,7 +2,6 @@
 export type CDKeyStatus = "new" | "active" | "expired" | "limit";
 
 export interface CDKey {
-  id: string; // Unique identifier for the CD key
   key: string;
   status: CDKeyStatus;
   version: string;
