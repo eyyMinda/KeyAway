@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CDKeyActionsProps } from "@/src/types";
 import { trackCopyEvent } from "@/src/lib/copyTracking";
-import { trackEvent } from "@/src/lib/trackEvent";
+import ReportPopup from "./ReportPopup";
 import Toast from "@/src/components/ui/Toast";
 
 const NOTIFICATION_DURATION = 3000;
@@ -17,6 +17,7 @@ const KEY_PREVIEW_LENGTH = 8;
  */
 export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsProps) {
   const [notification, setNotification] = useState<string | null>(null);
+  const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
 
   /**
    * Handles copying the CD key to clipboard and shows notification
@@ -33,24 +34,10 @@ export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsPr
   };
 
   /**
-   * Handles marking the CD key as expired and shows notification
+   * Handles opening the report popup
    */
-  const handleMarkAsExpired = async () => {
-    try {
-      // Track the expired key report
-      await trackEvent("report_expired_cdkey", {
-        programSlug: slug,
-        key: cdKey,
-        path: window.location.pathname
-      });
-
-      setNotification(
-        `Key ${cdKey.key.substring(0, KEY_PREVIEW_LENGTH)}... marked as expired. Thank you for your feedback!`
-      );
-    } catch (error) {
-      console.error("Failed to report expired key:", error);
-      setNotification("Failed to report expired key. Please try again.");
-    }
+  const handleReportClick = () => {
+    setIsReportPopupOpen(true);
   };
 
   /**
@@ -67,6 +54,9 @@ export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsPr
         <Toast message={notification} type="info" duration={NOTIFICATION_DURATION} onClose={handleNotificationClose} />
       )}
 
+      {/* Report Popup */}
+      <ReportPopup isOpen={isReportPopupOpen} onClose={() => setIsReportPopupOpen(false)} cdKey={cdKey} slug={slug} />
+
       {/* Action Buttons */}
       <div className="flex justify-center space-x-2">
         <button
@@ -82,18 +72,15 @@ export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsPr
               d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
             />
           </svg>
-          Copy Key
+          Copy
         </button>
 
         <button
-          onClick={handleMarkAsExpired}
-          className="inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group relative cursor-pointer"
+          onClick={handleReportClick}
+          className="inline-flex items-center px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group relative cursor-pointer"
           disabled={isDisabled}
-          title="Feel free to report this CD key as expired. If enough people report it, its status will change accordingly.">
-          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          Expired
+          title="Report the status of this CD key">
+          Report
         </button>
       </div>
     </>

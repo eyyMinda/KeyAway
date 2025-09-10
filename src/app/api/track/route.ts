@@ -4,7 +4,16 @@ import crypto from "crypto";
 import { TrackRequestBody } from "@/src/types";
 import { hashCDKey, getKeyIdentifier, normalizeKey } from "@/src/lib/keyHashing";
 
-const ALLOWED_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed", "report_expired_cdkey"]);
+const ALLOWED_EVENTS = new Set([
+  "copy_cdkey",
+  "download_click",
+  "social_click",
+  "page_viewed",
+  "report_expired_cdkey",
+  "report_key_working",
+  "report_key_expired",
+  "report_key_limit_reached"
+]);
 
 function getKeyData(key?: unknown): { hash: string; identifier: string; normalized: string } | undefined {
   let keyString: string | undefined;

@@ -1,5 +1,13 @@
 // Tracking and analytics related types
-export type TrackingEvent = "copy_cdkey" | "download_click" | "social_click" | "page_viewed" | "report_expired_cdkey";
+export type TrackingEvent =
+  | "copy_cdkey"
+  | "download_click"
+  | "social_click"
+  | "page_viewed"
+  | "report_expired_cdkey"
+  | "report_key_working"
+  | "report_key_expired"
+  | "report_key_limit_reached";
 
 export interface TrackingEventData {
   _id: string;

@@ -1,6 +1,7 @@
 import React from "react";
 import { ExpiredKeyReport } from "@/src/types/admin";
 import { CDKeyStatus } from "@/src/types/program";
+import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
 
 interface ExpiredKeysTableProps {
   reports: ExpiredKeyReport[];
@@ -45,7 +46,9 @@ export default function ExpiredKeysTable({
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reports</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Report Status
+            </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Last Report
             </th>
@@ -93,12 +96,16 @@ export default function ExpiredKeysTable({
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.reports.length}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <ReportProgressBar reportData={report.reportData} />
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {report.reports.length > 0 ? new Date(report.reports[0].createdAt).toLocaleDateString() : "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button onClick={() => onViewDetails(report)} className="text-blue-600 hover:text-blue-900">
+                  <button
+                    onClick={() => onViewDetails(report)}
+                    className="text-blue-600 hover:text-blue-900 cursor-pointer">
                     View Details
                   </button>
                 </td>

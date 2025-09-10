@@ -43,15 +43,20 @@ export default function ExpiredKeysPage() {
           logger.collapse(events[0], "Sample tracking event data", "info");
         }
 
-        // Filter for expired key reports
-        const expiredReports = events.filter(
-          (event: Record<string, unknown>) => event.event === "report_expired_cdkey"
+        // Filter for all key report events
+        const keyReportEvents = events.filter((event: Record<string, unknown>) =>
+          [
+            "report_key_working",
+            "report_key_expired",
+            "report_key_limit_reached",
+            "report_expired_cdkey" // Keep for backward compatibility
+          ].includes(event.event as string)
         );
 
         // Group by actual CD key within each program using hash matching
         const keyReports = new Map<string, ExpiredKeyReport>();
 
-        for (const report of expiredReports) {
+        for (const report of keyReportEvents) {
           const programSlug = (report.programSlug as string) || "unknown";
           const keyHash = (report.keyHash as string) || "unknown";
           const keyIdentifier = (report.keyIdentifier as string) || "unknown";
@@ -91,6 +96,11 @@ export default function ExpiredKeysPage() {
               status: actualKey?.status || "active",
               validFrom: actualKey?.validFrom,
               validTo: actualKey?.validUntil,
+              reportData: {
+                working: 0,
+                expired: 0,
+                limit_reached: 0
+              },
               reports: []
             };
 
@@ -98,14 +108,33 @@ export default function ExpiredKeysPage() {
           }
 
           const keyReport = keyReports.get(groupKey)!;
+          const eventType = report.event as string;
+
+          // Update report data based on event type
+          switch (eventType) {
+            case "report_key_working":
+              keyReport.reportData.working++;
+              break;
+            case "report_key_expired":
+            case "report_expired_cdkey": // Backward compatibility
+              keyReport.reportData.expired++;
+              break;
+            case "report_key_limit_reached":
+              keyReport.reportData.limit_reached++;
+              break;
+          }
+
           keyReport.reportCount++;
+          keyReport.lastReported = report.createdAt as string;
+
           // Debug: Log the report data to see what's available
           logger.collapse(
             {
               country: report.country,
               city: report.city,
               createdAt: report.createdAt,
-              programSlug: report.programSlug
+              programSlug: report.programSlug,
+              eventType
             },
             "Processing report data",
             "info"
@@ -114,7 +143,12 @@ export default function ExpiredKeysPage() {
           keyReport.reports.push({
             createdAt: report.createdAt as string,
             country: (report.country as string) || "Unknown",
-            city: (report.city as string) || "Unknown"
+            city: (report.city as string) || "Unknown",
+            eventType: eventType as
+              | "report_key_working"
+              | "report_key_expired"
+              | "report_key_limit_reached"
+              | "report_expired_cdkey"
           });
 
           // Update first and last reported dates

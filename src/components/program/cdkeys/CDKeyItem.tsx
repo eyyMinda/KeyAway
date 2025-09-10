@@ -2,10 +2,11 @@
 
 import { CDKeyItemProps } from "@/src/types";
 import CDKeyActions from "@/src/components/program/cdkeys/CDKeyActions";
+import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
 import { getStatusColor } from "@/src/lib/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
 
-export default function CDKeyItem({ cdKey, index, slug, reportCount }: CDKeyItemProps) {
+export default function CDKeyItem({ cdKey, index, slug, reportData }: CDKeyItemProps) {
   const isDisabled = cdKey.status === "limit" || cdKey.status === "expired";
 
   useCopyTracking({ cdKey, slug });
@@ -25,14 +26,8 @@ export default function CDKeyItem({ cdKey, index, slug, reportCount }: CDKeyItem
           {cdKey.status}
         </span>
       </td>
-      <td className="px-6 py-4 text-center">
-        {+reportCount > 0 ? (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            {reportCount} reports
-          </span>
-        ) : (
-          <span className="text-neutral-500 text-sm">-</span>
-        )}
+      <td className="px-6 py-4">
+        <ReportProgressBar reportData={reportData} />
       </td>
       <td className={`px-6 py-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
         {cdKey.version}

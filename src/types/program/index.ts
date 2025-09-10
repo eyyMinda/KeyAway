@@ -26,11 +26,17 @@ export interface CDKeyTableProps {
   slug: string;
 }
 
+export interface ReportData {
+  working: number;
+  expired: number;
+  limit_reached: number;
+}
+
 export interface CDKeyItemProps {
   cdKey: CDKey;
   index: number;
   slug: string;
-  reportCount: number;
+  reportData: ReportData;
 }
 
 export interface CDKeyActionsProps {
