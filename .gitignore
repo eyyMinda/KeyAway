@@ -41,4 +41,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# cleanup localhost utility (temporary)
+src/app/admin/cleanup/
+src/app/api/admin/cleanup-localhost/
+src/lib/cleanupLocalhost.ts
+docs/CLEANUP_LOCALHOST.md
+
 .vercel
