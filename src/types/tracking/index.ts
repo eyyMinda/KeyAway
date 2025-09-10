@@ -10,7 +10,9 @@ export interface TrackingEventData {
   referrer?: string;
   country?: string;
   city?: string;
-  keyMasked?: string;
+  keyHash?: string;
+  keyIdentifier?: string;
+  keyNormalized?: string;
   userAgent?: string;
   ipHash?: string;
   utm_source?: string;

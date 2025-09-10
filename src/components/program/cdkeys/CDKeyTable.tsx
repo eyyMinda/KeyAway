@@ -5,10 +5,26 @@ import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import KeyStatusTooltip from "@/src/components/program/KeyStatusTooltip";
 import { isKeyExpiringSoon } from "@/src/lib/cdKeyUtils";
 import { useExpiredKeyReports } from "@/src/hooks/useExpiredKeyReports";
+import { useState, useEffect, useCallback } from "react";
 
 export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   const hasExpiringSoonKeys = cdKeys.some((key: CDKey) => isKeyExpiringSoon(key));
-  const { reports } = useExpiredKeyReports(slug);
+  const { getReportCount } = useExpiredKeyReports(slug, cdKeys);
+  const [reportCounts, setReportCounts] = useState<Map<string, number>>(new Map());
+
+  // Load report counts for all keys
+  const loadReportCounts = useCallback(async () => {
+    const counts = new Map<string, number>();
+    for (const cdKey of cdKeys) {
+      const count = await getReportCount(cdKey.key);
+      counts.set(cdKey.key, count);
+    }
+    setReportCounts(counts);
+  }, [cdKeys, getReportCount]);
+
+  useEffect(() => {
+    loadReportCounts();
+  }, [loadReportCounts]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -56,7 +72,13 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
               </thead>
               <tbody className="divide-y divide-neutral-700">
                 {cdKeys.map((cdKey: CDKey, i: number) => (
-                  <CDKeyItem key={i} cdKey={cdKey} index={i} slug={slug} reportCount={reports.get(cdKey.key) || 0} />
+                  <CDKeyItem
+                    key={i}
+                    cdKey={cdKey}
+                    index={i}
+                    slug={slug}
+                    reportCount={reportCounts.get(cdKey.key) || 0}
+                  />
                 ))}
               </tbody>
             </table>

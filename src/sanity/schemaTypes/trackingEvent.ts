@@ -21,7 +21,9 @@ export const trackingEvent = defineType({
       validation: Rule => Rule.required()
     },
     { name: "programSlug", title: "Program Slug", type: "string" },
-    { name: "keyMasked", title: "Key (Masked)", type: "string" },
+    { name: "keyHash", title: "Key Hash", type: "string", description: "SHA-256 hash of the CD key for privacy" },
+    { name: "keyIdentifier", title: "Key Identifier", type: "string", description: "Short identifier like ABC***XYZ" },
+    { name: "keyNormalized", title: "Key Normalized", type: "string", description: "Normalized key for matching" },
     { name: "social", title: "Social Name", type: "string" },
     { name: "path", title: "Path", type: "string" },
     { name: "referrer", title: "Referrer", type: "url" },

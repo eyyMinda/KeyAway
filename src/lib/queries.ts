@@ -59,5 +59,5 @@ export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) 
 
 /* ------------ Analytics ------------ */
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
-      _id, event, programSlug, social, path, referrer, country, city, createdAt
+      _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;

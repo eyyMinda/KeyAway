@@ -14,9 +14,9 @@ export default function PageViewTracker() {
     if (hasTracked.current) return;
 
     // Skip tracking if running on localhost
-    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-      return;
-    }
+    // if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    //   return;
+    // }
 
     const trackPageView = async () => {
       try {

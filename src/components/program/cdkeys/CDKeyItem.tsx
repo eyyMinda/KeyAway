@@ -26,7 +26,7 @@ export default function CDKeyItem({ cdKey, index, slug, reportCount }: CDKeyItem
         </span>
       </td>
       <td className="px-6 py-4 text-center">
-        {reportCount > 0 ? (
+        {+reportCount > 0 ? (
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
             {reportCount} reports
           </span>

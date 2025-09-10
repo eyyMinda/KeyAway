@@ -128,7 +128,7 @@ export default function EventsPage() {
                         event.event === "copy_cdkey"
                           ? "bg-green-100 text-green-800"
                           : event.event === "download_click"
-                            ? "bg-blue-100 text-blue-800"
+                            ? "bg-blue-100 text-primary800"
                             : "bg-purple-100 text-purple-800"
                       }`}>
                       {event.event.replace(/_/g, " ").toUpperCase()}

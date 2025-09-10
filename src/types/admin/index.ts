@@ -58,8 +58,9 @@ export interface TimeFilterProps {
 
 // Expired key reporting types
 export interface ExpiredKeyReport {
-  key: string;
-  keyMasked: string;
+  key: string; // Actual CD key
+  keyHash: string; // Hash for privacy
+  keyIdentifier: string; // Short identifier like ABC***XYZ
   programSlug: string;
   programTitle: string;
   reportCount: number;

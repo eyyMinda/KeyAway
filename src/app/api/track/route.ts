@@ -2,24 +2,26 @@ import { NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import crypto from "crypto";
 import { TrackRequestBody } from "@/src/types";
+import { hashCDKey, getKeyIdentifier, normalizeKey } from "@/src/lib/keyHashing";
 
 const ALLOWED_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed", "report_expired_cdkey"]);
 
-function maskKey(key?: unknown) {
+function getKeyData(key?: unknown): { hash: string; identifier: string; normalized: string } | undefined {
+  let keyString: string | undefined;
+
   if (typeof key === "string" && key) {
-    const trimmed = key.replace(/\s+/g, "");
-    if (trimmed.length <= 6) return "***";
-    return `${trimmed.slice(0, 3)}***${trimmed.slice(-3)}`; // e.g. ABC***XYZ
+    keyString = key;
+  } else if (key && typeof key === "object" && "key" in key) {
+    keyString = (key as { key: string }).key;
   }
 
-  if (key && typeof key === "object" && "key" in key) {
-    const keyString = (key as { key: string }).key;
-    const trimmed = keyString.replace(/\s+/g, "");
-    if (trimmed.length <= 6) return "***";
-    return `${trimmed.slice(0, 3)}***${trimmed.slice(-3)}`;
-  }
+  if (!keyString) return undefined;
 
-  return undefined;
+  return {
+    hash: hashCDKey(keyString),
+    identifier: getKeyIdentifier(keyString),
+    normalized: normalizeKey(keyString)
+  };
 }
 
 function hashIp(ip: string | undefined) {
@@ -134,11 +136,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Invalid event" }, { status: 400 });
     }
 
-    // Skip tracking for localhost requests
-    const host = req.headers.get("host") || "";
-    if (host.startsWith("localhost") || host.includes("127.0.0.1")) {
-      return NextResponse.json({ ok: true, message: "Skipped localhost tracking" });
-    }
+    // // Skip tracking for localhost requests
+    // const host = req.headers.get("host") || "";
+    // if (host.startsWith("localhost") || host.includes("127.0.0.1")) {
+    //   return NextResponse.json({ ok: true, message: "Skipped localhost tracking" });
+    // }
 
     // Extract request context
     const ua = req.headers.get("user-agent") || undefined;
@@ -151,7 +153,7 @@ export async function POST(req: Request) {
 
     // Normalize meta safely
     const programSlug = body.meta?.programSlug as string | undefined;
-    const keyMasked = maskKey(body.meta?.key);
+    const keyData = getKeyData(body.meta?.key);
     const social = body.meta?.social as string | undefined;
     const path = body.meta?.path as string | undefined;
     const referrer = body.meta?.referrer as string | undefined;
@@ -172,7 +174,11 @@ export async function POST(req: Request) {
 
     // Add optional fields only if they have values
     if (programSlug) trackingData.programSlug = programSlug;
-    if (keyMasked) trackingData.keyMasked = keyMasked;
+    if (keyData) {
+      trackingData.keyHash = keyData.hash;
+      trackingData.keyIdentifier = keyData.identifier;
+      trackingData.keyNormalized = keyData.normalized;
+    }
     if (social) trackingData.social = social;
     if (path) trackingData.path = path;
     if (referrer) trackingData.referrer = referrer;
