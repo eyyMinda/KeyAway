@@ -4,22 +4,10 @@ import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import { useState, useEffect } from "react";
 import { client } from "@/src/sanity/lib/client";
 import { trackingEventsQuery } from "@/src/lib/queries";
-
-type EventDoc = {
-  _id: string;
-  event: string;
-  programSlug?: string;
-  social?: string;
-  path?: string;
-  createdAt: string;
-  userAgent?: string;
-  referrer?: string;
-  country?: string;
-  city?: string;
-};
+import { AnalyticsEventData } from "@/src/types";
 
 export default function EventsPage() {
-  const [events, setEvents] = useState<EventDoc[]>([]);
+  const [events, setEvents] = useState<AnalyticsEventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<string>("all");
 
@@ -28,7 +16,7 @@ export default function EventsPage() {
       setLoading(true);
       try {
         const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(); // Last 7 days
-        const eventsData: EventDoc[] = await client.fetch(trackingEventsQuery, { since });
+        const eventsData: AnalyticsEventData[] = await client.fetch(trackingEventsQuery, { since });
         setEvents(eventsData);
       } catch (error) {
         console.error("Error fetching events:", error);

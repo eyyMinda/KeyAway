@@ -2,7 +2,7 @@ import { defineType } from "sanity";
 
 export const trackingEvent = defineType({
   name: "trackingEvent",
-  title: "Tracking Event",
+  title: "Analytics Event",
   type: "document",
   fields: [
     {
@@ -14,8 +14,7 @@ export const trackingEvent = defineType({
           { title: "Copy CD Key", value: "copy_cdkey" },
           { title: "Download Click", value: "download_click" },
           { title: "Social Click", value: "social_click" },
-          { title: "Page Viewed", value: "page_viewed" },
-          { title: "Report Expired CD Key", value: "report_expired_cdkey" }
+          { title: "Page Viewed", value: "page_viewed" }
         ]
       },
       validation: Rule => Rule.required()

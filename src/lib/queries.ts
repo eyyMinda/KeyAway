@@ -61,3 +61,8 @@ export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) 
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
       _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
+
+/* ------------ Key Reports ------------ */
+export const keyReportsQuery = `*[_type=="keyReport" && createdAt >= $since]{
+      _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+    } | order(createdAt desc)`;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { client } from "@/src/sanity/lib/client";
-import { trackingEventsQuery, allProgramsQuery } from "@/src/lib/queries";
+import { keyReportsQuery, allProgramsQuery } from "@/src/lib/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
 import ExpiredKeysTable from "@/src/components/admin/ExpiredKeysTable";
@@ -36,22 +36,15 @@ export default function ExpiredKeysPage() {
 
         // Fetch expired key reports from last 30 days
         const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
-        const events = await client.fetch(trackingEventsQuery, { since });
+        const events = await client.fetch(keyReportsQuery, { since });
 
         // Debug: Log a sample event to see the data structure
         if (events.length > 0) {
           logger.collapse(events[0], "Sample tracking event data", "info");
         }
 
-        // Filter for all key report events
-        const keyReportEvents = events.filter((event: Record<string, unknown>) =>
-          [
-            "report_key_working",
-            "report_key_expired",
-            "report_key_limit_reached",
-            "report_expired_cdkey" // Keep for backward compatibility
-          ].includes(event.event as string)
-        );
+        // All events are key reports from keyReportsQuery
+        const keyReportEvents = events;
 
         // Group by actual CD key within each program using hash matching
         const keyReports = new Map<string, ExpiredKeyReport>();
@@ -108,7 +101,8 @@ export default function ExpiredKeysPage() {
           }
 
           const keyReport = keyReports.get(groupKey)!;
-          const eventType = report.event as string;
+
+          const eventType = report.eventType as string;
 
           // Update report data based on event type
           switch (eventType) {
@@ -116,7 +110,6 @@ export default function ExpiredKeysPage() {
               keyReport.reportData.working++;
               break;
             case "report_key_expired":
-            case "report_expired_cdkey": // Backward compatibility
               keyReport.reportData.expired++;
               break;
             case "report_key_limit_reached":
@@ -144,11 +137,7 @@ export default function ExpiredKeysPage() {
             createdAt: report.createdAt as string,
             country: (report.country as string) || "Unknown",
             city: (report.city as string) || "Unknown",
-            eventType: eventType as
-              | "report_key_working"
-              | "report_key_expired"
-              | "report_key_limit_reached"
-              | "report_expired_cdkey"
+            eventType: eventType as "report_key_working" | "report_key_expired" | "report_key_limit_reached"
           });
 
           // Update first and last reported dates

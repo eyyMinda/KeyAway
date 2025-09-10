@@ -1,6 +1,7 @@
 import { type SchemaTypeDefinition } from "sanity";
 
 import { trackingEvent } from "./trackingEvent";
+import { keyReport } from "./keyReport";
 
 import { storeDetails } from "./storeDetails";
 import { header } from "./header";
@@ -12,5 +13,5 @@ import { program } from "./program";
 import { cdKey } from "./cdKey";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [trackingEvent, link, storeDetails, header, footer, socialLink, program, cdKey]
+  types: [trackingEvent, keyReport, link, storeDetails, header, footer, socialLink, program, cdKey]
 };

@@ -1,17 +1,12 @@
-// Tracking and analytics related types
-export type TrackingEvent =
-  | "copy_cdkey"
-  | "download_click"
-  | "social_click"
-  | "page_viewed"
-  | "report_expired_cdkey"
-  | "report_key_working"
-  | "report_key_expired"
-  | "report_key_limit_reached";
+// Analytics tracking types
+export type AnalyticsEvent = "copy_cdkey" | "download_click" | "social_click" | "page_viewed";
 
-export interface TrackingEventData {
+// Key report types
+export type KeyReportEvent = "report_key_working" | "report_key_expired" | "report_key_limit_reached";
+
+export interface AnalyticsEventData {
   _id: string;
-  event: TrackingEvent;
+  event: AnalyticsEvent;
   programSlug?: string;
   social?: string;
   path?: string;
@@ -21,6 +16,25 @@ export interface TrackingEventData {
   keyHash?: string;
   keyIdentifier?: string;
   keyNormalized?: string;
+  userAgent?: string;
+  ipHash?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  createdAt: string;
+}
+
+export interface KeyReportData {
+  _id: string;
+  eventType: KeyReportEvent;
+  programSlug: string;
+  keyHash: string;
+  keyIdentifier: string;
+  keyNormalized: string;
+  path?: string;
+  referrer?: string;
+  country?: string;
+  city?: string;
   userAgent?: string;
   ipHash?: string;
   utm_source?: string;
@@ -42,7 +56,7 @@ export interface TrackEventMeta {
 }
 
 export interface TrackRequestBody {
-  event: TrackingEvent;
+  event: AnalyticsEvent | KeyReportEvent;
   meta?: TrackEventMeta;
 }
 

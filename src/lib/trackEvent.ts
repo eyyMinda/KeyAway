@@ -1,6 +1,6 @@
-import { TrackingEvent, TrackEventMeta } from "@/src/types";
+import { AnalyticsEvent, KeyReportEvent, TrackEventMeta } from "@/src/types";
 
-export async function trackEvent(event: TrackingEvent, meta?: TrackEventMeta) {
+export async function trackEvent(event: AnalyticsEvent | KeyReportEvent, meta?: TrackEventMeta) {
   try {
     await fetch("/api/track", {
       method: "POST",

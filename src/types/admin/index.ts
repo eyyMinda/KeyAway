@@ -78,6 +78,6 @@ export interface ExpiredKeyReport {
     createdAt: string;
     country?: string;
     city?: string;
-    eventType: "report_key_working" | "report_key_expired" | "report_key_limit_reached" | "report_expired_cdkey";
+    eventType: "report_key_working" | "report_key_expired" | "report_key_limit_reached";
   }>;
 }

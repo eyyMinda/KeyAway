@@ -8,22 +8,10 @@ import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
 import EventChart from "@/src/components/admin/EventChart";
 import TimeFilter from "@/src/components/admin/TimeFilter";
-import { Program } from "@/src/types";
-
-type EventDoc = {
-  _id: string;
-  event: string;
-  programSlug?: string;
-  social?: string;
-  path?: string;
-  referrer?: string;
-  country?: string;
-  city?: string;
-  createdAt: string;
-};
+import { Program, AnalyticsEventData } from "@/src/types";
 
 export default function AnalyticsPage() {
-  const [events, setEvents] = useState<EventDoc[]>([]);
+  const [events, setEvents] = useState<AnalyticsEventData[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState("30d");

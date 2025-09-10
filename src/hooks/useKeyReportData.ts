@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { client } from "@/src/sanity/lib/client";
-import { trackingEventsQuery } from "@/src/lib/queries";
+import { keyReportsQuery } from "@/src/lib/queries";
 import { hashCDKeyClient } from "@/src/lib/keyHashing";
 import { ReportData } from "@/src/types/program";
 import { logger } from "@/src/lib/logger";
@@ -15,18 +15,12 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
     const fetchReportData = async () => {
       try {
         const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
-        const events = await client.fetch(trackingEventsQuery, { since });
+        const events = await client.fetch(keyReportsQuery, { since });
 
-        // Filter for all key report events
+        // Filter for matching program
         const keyReportEvents = events.filter((event: Record<string, unknown>) => {
-          const isKeyReport = [
-            "report_key_working",
-            "report_key_expired",
-            "report_key_limit_reached",
-            "report_expired_cdkey" // Keep for backward compatibility
-          ].includes(event.event as string);
           const matchesProgram = event.programSlug === programSlug;
-          return isKeyReport && matchesProgram;
+          return matchesProgram;
         });
 
         logger.collapse(keyReportEvents, `Key Report Events for ${programSlug}`, "info");
@@ -44,7 +38,7 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
         // Process events
         for (const event of keyReportEvents) {
           const keyHash = (event.keyHash as string) || "unknown";
-          const eventType = event.event as string;
+          const eventType = event.eventType as string;
 
           if (!keyReportData.has(keyHash)) {
             keyReportData.set(keyHash, { working: 0, expired: 0, limit_reached: 0 });
@@ -57,7 +51,6 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
               keyReportData.set(keyHash, { ...currentData, working: currentData.working + 1 });
               break;
             case "report_key_expired":
-            case "report_expired_cdkey": // Backward compatibility
               keyReportData.set(keyHash, { ...currentData, expired: currentData.expired + 1 });
               break;
             case "report_key_limit_reached":

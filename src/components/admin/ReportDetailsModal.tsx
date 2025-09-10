@@ -226,13 +226,12 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                         icon: "✓"
                       };
                     case "report_key_expired":
-                    case "report_expired_cdkey":
                       return {
                         bg: "bg-gradient-to-r from-red-50 to-rose-50",
                         border: "border-red-100",
                         text: "text-red-700",
                         badge: "bg-red-100 text-red-800 border-red-200",
-                        icon: "✗"
+                        icon: "❌"
                       };
                     case "report_key_limit_reached":
                       return {
@@ -257,7 +256,6 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                 const eventTypeLabels = {
                   report_key_working: "Working",
                   report_key_expired: "Expired",
-                  report_expired_cdkey: "Expired",
                   report_key_limit_reached: "Limit Reached"
                 };
 

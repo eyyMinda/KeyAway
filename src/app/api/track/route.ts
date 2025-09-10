@@ -4,16 +4,9 @@ import crypto from "crypto";
 import { TrackRequestBody } from "@/src/types";
 import { hashCDKey, getKeyIdentifier, normalizeKey } from "@/src/lib/keyHashing";
 
-const ALLOWED_EVENTS = new Set([
-  "copy_cdkey",
-  "download_click",
-  "social_click",
-  "page_viewed",
-  "report_expired_cdkey",
-  "report_key_working",
-  "report_key_expired",
-  "report_key_limit_reached"
-]);
+const ANALYTICS_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed"]);
+
+const REPORT_EVENTS = new Set(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
 function getKeyData(key?: unknown): { hash: string; identifier: string; normalized: string } | undefined {
   let keyString: string | undefined;
@@ -141,7 +134,7 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as TrackRequestBody;
 
-    if (!body?.event || !ALLOWED_EVENTS.has(body.event)) {
+    if (!body?.event || (!ANALYTICS_EVENTS.has(body.event) && !REPORT_EVENTS.has(body.event))) {
       return NextResponse.json({ ok: false, error: "Invalid event" }, { status: 400 });
     }
 
@@ -170,35 +163,45 @@ export async function POST(req: Request) {
     const utmMedium = body.meta?.utm_medium as string | undefined;
     const utmCampaign = body.meta?.utm_campaign as string | undefined;
 
-    // Build tracking event data - only include fields that have values
+    // Determine document type based on event type
+    const isReportEvent = REPORT_EVENTS.has(body.event);
+    const documentType = isReportEvent ? "keyReport" : "trackingEvent";
+
+    // Build event data - only include fields that have values
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const trackingData: any = {
-      _type: "trackingEvent",
-      event: body.event,
+    const eventData: any = {
+      _type: documentType,
       referrer: ref,
       userAgent: ua,
       ipHash: hashIp(ip),
       createdAt: new Date().toISOString()
     };
 
-    // Add optional fields only if they have values
-    if (programSlug) trackingData.programSlug = programSlug;
-    if (keyData) {
-      trackingData.keyHash = keyData.hash;
-      trackingData.keyIdentifier = keyData.identifier;
-      trackingData.keyNormalized = keyData.normalized;
+    // Add event-specific field
+    if (isReportEvent) {
+      eventData.eventType = body.event;
+    } else {
+      eventData.event = body.event;
     }
-    if (social) trackingData.social = social;
-    if (path) trackingData.path = path;
-    if (referrer) trackingData.referrer = referrer;
-    if (utmSource) trackingData.utm_source = utmSource;
-    if (utmMedium) trackingData.utm_medium = utmMedium;
-    if (utmCampaign) trackingData.utm_campaign = utmCampaign;
-    if (location?.country) trackingData.country = location.country;
-    if (location?.city) trackingData.city = location.city;
+
+    // Add optional fields only if they have values
+    if (programSlug) eventData.programSlug = programSlug;
+    if (keyData) {
+      eventData.keyHash = keyData.hash;
+      eventData.keyIdentifier = keyData.identifier;
+      eventData.keyNormalized = keyData.normalized;
+    }
+    if (social) eventData.social = social;
+    if (path) eventData.path = path;
+    if (referrer) eventData.referrer = referrer;
+    if (utmSource) eventData.utm_source = utmSource;
+    if (utmMedium) eventData.utm_medium = utmMedium;
+    if (utmCampaign) eventData.utm_campaign = utmCampaign;
+    if (location?.country) eventData.country = location.country;
+    if (location?.city) eventData.city = location.city;
 
     // Write to Sanity
-    await client.create(trackingData);
+    await client.create(eventData);
 
     return NextResponse.json({ ok: true });
   } catch (err) {
