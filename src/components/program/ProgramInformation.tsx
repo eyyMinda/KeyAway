@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { IdealImage } from "@/src/components/general/IdealImage";
-import { Program } from "@/src/types/ProgramType";
+import { Program } from "@/src/types";
 import { trackEvent } from "@/src/lib/trackEvent";
 
 interface ProgramInformationProps {

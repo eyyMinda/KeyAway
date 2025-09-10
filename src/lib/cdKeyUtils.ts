@@ -1,4 +1,4 @@
-import { CDKey } from "@/src/types/ProgramType";
+import { CDKey } from "@/src/types";
 
 /**
  * Checks if a CD key should be automatically expired based on its validUntil date

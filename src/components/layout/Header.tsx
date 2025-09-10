@@ -6,7 +6,7 @@ import { HiMenu, HiX } from "react-icons/hi";
 import MobileMenu from "@components/layout/MobileMenu";
 import AdminNavIcons from "@components/layout/AdminNavIcons";
 import { IdealImageClient } from "@/src/components/general/IdealImageClient";
-import { StoreDetails, SanityLink, LogoData } from "@/src/types/global";
+import { StoreDetails, SanityLink, LogoData } from "@/src/types";
 import { usePathname } from "next/navigation";
 
 interface HeaderProps {

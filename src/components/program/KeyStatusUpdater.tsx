@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CDKey } from "@/src/types/ProgramType";
+import { CDKey } from "@/src/types";
 import { processCdKeys } from "@/src/lib/cdKeyUtils";
 
 interface KeyStatusUpdaterProps {

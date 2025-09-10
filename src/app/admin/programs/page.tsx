@@ -4,7 +4,7 @@ import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import { useState, useEffect } from "react";
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/queries";
-import { Program } from "@/src/types/ProgramType";
+import { Program } from "@/src/types";
 import Link from "next/link";
 import { IdealImage } from "@/src/components/general/IdealImage";
 

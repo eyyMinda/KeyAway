@@ -8,7 +8,7 @@ import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
 import EventChart from "@/src/components/admin/EventChart";
 import TimeFilter from "@/src/components/admin/TimeFilter";
-import { Program } from "@/src/types/ProgramType";
+import { Program } from "@/src/types";
 
 type EventDoc = {
   _id: string;

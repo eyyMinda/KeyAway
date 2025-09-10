@@ -1,7 +1,7 @@
 "use server";
 
 import { client } from "@/src/sanity/lib/client";
-import { CDKey } from "@/src/types/ProgramType";
+import { CDKey } from "@/src/types";
 import { programBySlugQuery } from "./queries";
 
 /**

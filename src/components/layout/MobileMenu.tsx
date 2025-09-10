@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SanityLink } from "@/src/types/global";
+import { SanityLink } from "@/src/types";
 import AdminNavIcons from "@components/layout/AdminNavIcons";
 import { usePathname } from "next/navigation";
 

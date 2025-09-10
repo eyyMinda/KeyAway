@@ -1,4 +1,6 @@
 // Admin-related types
+import { CDKeyStatus } from "../program";
+
 export interface AdminUser {
   id: string;
   name: string;
@@ -72,6 +74,3 @@ export interface ExpiredKeyReport {
     city?: string;
   }>;
 }
-
-// Re-export from other modules
-export type { CDKeyStatus } from "../program";

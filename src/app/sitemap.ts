@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/queries";
-import { Program, CDKey } from "@/src/types/ProgramType";
+import { Program, CDKey } from "@/src/types";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://keyaway.app";

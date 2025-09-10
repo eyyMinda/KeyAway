@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { CDKey } from "@/src/types/ProgramType";
+import { CDKey } from "@/src/types";
 import { urlFor } from "@/src/sanity/lib/image";
 import { sortCdKeysByStatus } from "./cdKeyUtils";
 import { getProgramWithUpdatedKeys } from "./sanityActions";

@@ -1,6 +1,6 @@
 "use client";
 
-import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types/global";
+import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types";
 import Link from "next/link";
 import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";

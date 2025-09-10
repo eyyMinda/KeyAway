@@ -1,7 +1,7 @@
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@lib/queries";
 import ProgramCard from "@/src/components/home/ProgramCard";
-import { Program } from "@/src/types/ProgramType";
+import { Program } from "@/src/types";
 import { generateHomePageMetadata } from "@/src/lib/metadata";
 
 export const revalidate = 60;

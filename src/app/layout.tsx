@@ -8,7 +8,7 @@ import { storeDetailsQuery, socialLinksQuery } from "@lib/queries";
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
-import { LogoData, SocialData } from "@/src/types/global";
+import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/metadata";

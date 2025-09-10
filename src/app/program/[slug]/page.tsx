@@ -1,4 +1,4 @@
-import { CDKey } from "@/src/types/ProgramType";
+import { CDKey } from "@/src/types";
 import { notFound } from "next/navigation";
 import ProgramInformation from "@/src/components/program/ProgramInformation";
 import CDKeyTable from "@/src/components/program/cdkeys/CDKeyTable";
