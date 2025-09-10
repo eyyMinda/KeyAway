@@ -6,14 +6,14 @@ import Giscus from "@giscus/react";
 export default function ProgramComments() {
   const [showFallback, setShowFallback] = useState(false);
 
-  useEffect(() => {
-    // Set a timeout to show fallback if Giscus doesn't load
-    const timer = setTimeout(() => {
-      setShowFallback(true);
-    }, 3000); // 3 second timeout
+  // useEffect(() => {
+  //   // Set a timeout to show fallback if Giscus doesn't load
+  //   const timer = setTimeout(() => {
+  //     setShowFallback(true);
+  //   }, 3000); // 3 second timeout
 
-    return () => clearTimeout(timer);
-  }, []);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   // Show fallback if Giscus fails to load
   if (showFallback) {
