@@ -51,7 +51,6 @@ async function getLocationFromIP(ip: string | undefined): Promise<{ country?: st
   // Check cache first
   const cached = locationCache.get(ip);
   if (cached && cached.expires > Date.now()) {
-    console.log(`📦 Using cached location for IP: ${ip}`);
     return cached.data;
   }
 
@@ -104,8 +103,6 @@ async function getLocationFromIP(ip: string | undefined): Promise<{ country?: st
 
         // Validate that we got meaningful data
         if (result.country || result.city) {
-          console.log(`✅ Location data from ${service.name}:`, result);
-
           // Cache the result for 1 hour
           locationCache.set(ip, {
             data: result,
@@ -115,14 +112,12 @@ async function getLocationFromIP(ip: string | undefined): Promise<{ country?: st
           return result;
         }
       }
-    } catch (error) {
-      // Log warning but continue to next service
-      console.warn(`⚠️ ${service.name} failed:`, error instanceof Error ? error.message : "Unknown error");
+    } catch {
+      // Silently continue to next service
       continue;
     }
   }
 
-  console.warn("❌ All geolocation services failed for IP:", ip);
   return undefined;
 }
 
@@ -146,8 +141,8 @@ export async function POST(req: Request) {
     const xff = req.headers.get("x-forwarded-for") || "";
     const ip = xff.split(",")[0]?.trim() || undefined;
 
-    // Get location from IP (only for page_viewed events to avoid excessive API calls)
-    const location = body.event === "page_viewed" ? await getLocationFromIP(ip) : undefined;
+    // Get location from IP for all events
+    const location = await getLocationFromIP(ip);
 
     // Normalize meta safely
     const programSlug = body.meta?.programSlug as string | undefined;

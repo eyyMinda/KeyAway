@@ -19,6 +19,13 @@ export default function ProtectedAdminLayout({ title, subtitle, children }: Prot
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // In development mode, always allow admin access
+        if (process.env.NODE_ENV === "development") {
+          setIsAuthenticated(true);
+          setIsChecking(false);
+          return;
+        }
+
         const browserAuth = isAuthenticatedInBrowser();
 
         if (!browserAuth) {
@@ -44,6 +51,11 @@ export default function ProtectedAdminLayout({ title, subtitle, children }: Prot
     checkAuth();
 
     const interval = setInterval(() => {
+      // Skip auth checks in development mode
+      if (process.env.NODE_ENV === "development") {
+        return;
+      }
+
       if (!isAuthenticatedInBrowser()) {
         router.push("/");
       }

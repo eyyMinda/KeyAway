@@ -14,6 +14,13 @@ export function useAdminAccess(): AdminAccessResult {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
+        // In development mode (localhost), always allow admin access
+        if (process.env.NODE_ENV === "development") {
+          setIsAdmin(true);
+          setLoading(false);
+          return;
+        }
+
         // First check if admin verification key exists in localStorage
         const storedValue = typeof window !== "undefined" ? localStorage.getItem("keyaway_admin_verified") : null;
         const hasLocalStorageKey = storedValue !== null;

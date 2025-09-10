@@ -12,6 +12,11 @@ export interface AdminUser {
  * Check if the current user has admin access by verifying they can access Sanity Studio
  */
 export async function checkAdminAccess(): Promise<{ isAdmin: boolean; user?: AdminUser }> {
+  // In development mode (localhost), always allow admin access
+  if (process.env.NODE_ENV === "development") {
+    return { isAdmin: true };
+  }
+
   try {
     // Try to access Sanity - if this succeeds, user is admin
     await client.fetch(storeDetailsQuery);
