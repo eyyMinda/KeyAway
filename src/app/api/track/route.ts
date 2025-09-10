@@ -3,11 +3,11 @@ import { client } from "@/src/sanity/lib/client";
 import crypto from "crypto";
 
 type TrackBody = {
-  event: "copy_cdkey" | "download_click" | "social_click" | "page_viewed";
+  event: "copy_cdkey" | "download_click" | "social_click" | "page_viewed" | "report_expired_cdkey";
   meta?: Record<string, unknown>;
 };
 
-const ALLOWED_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed"]);
+const ALLOWED_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed", "report_expired_cdkey"]);
 
 function maskKey(key?: unknown) {
   if (typeof key !== "string" || !key) return undefined;

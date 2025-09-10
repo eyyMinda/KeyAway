@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CDKey } from "@/src/types/ProgramType";
 import { trackCopyEvent } from "@/src/lib/copyTracking";
+import { trackEvent } from "@/src/lib/trackEvent";
 
 interface CDKeyActionsProps {
   cdKey: CDKey;
@@ -25,7 +26,14 @@ export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsPr
     }
   };
 
-  const markAsExpired = (key: string) => {
+  const markAsExpired = async (key: string) => {
+    // Track the expired key report
+    await trackEvent("report_expired_cdkey", {
+      programSlug: slug,
+      key: cdKey,
+      path: window.location.pathname
+    });
+
     setNotification(`Key ${key.substring(0, 8)}... marked as expired. Thank you for your feedback!`);
     setTimeout(() => setNotification(null), 3000);
   };
