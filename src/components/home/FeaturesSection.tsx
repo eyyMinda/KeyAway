@@ -22,13 +22,13 @@ export default function FeaturesSection() {
       icon: FaShieldAlt,
       title: "Verified Sources",
       description:
-        "All software and keys come from legitimate sources, ensuring safety and compliance with software licenses.",
+        "All software and keys come from legitimate sources, ensuring safety and compliance with software terms.",
       color: "purple"
     },
     {
       icon: FaClock,
       title: "Always Available",
-      description: "24/7 access to our database of free software licenses. No registration required, no hidden fees.",
+      description: "24/7 access to our database of free CD keys. No registration required, no hidden fees.",
       color: "orange"
     }
   ];
@@ -75,8 +75,8 @@ export default function FeaturesSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">How KeyAway Works</h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We provide a community-driven platform for sharing and maintaining free software licenses. Our system
-            ensures you always have access to working keys.
+            We provide a community-driven platform for sharing and maintaining free CD keys. Our system ensures you
+            always have access to working activation keys.
           </p>
         </div>
 

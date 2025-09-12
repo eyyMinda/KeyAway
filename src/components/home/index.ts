@@ -1,4 +1,5 @@
 export { default as HeroSection } from "./HeroSection";
+export { default as HeroVisual } from "./HeroVisual";
 export { default as FeaturesSection } from "./FeaturesSection";
 export { default as PopularProgramsSection } from "./PopularProgramsSection";
 export { default as AllProgramsSection } from "./AllProgramsSection";

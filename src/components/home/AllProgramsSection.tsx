@@ -15,7 +15,7 @@ export default function AllProgramsSection({ programs }: AllProgramsSectionProps
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">All Available Programs</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Browse our complete collection of free software with verified license keys
+            Browse our complete collection of free software with verified CD keys
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function AllProgramsSection({ programs }: AllProgramsSectionProps
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No Programs Available</h3>
-            <p className="text-gray-600">Check back soon for new software programs and license keys.</p>
+            <p className="text-gray-600">Check back soon for new software programs and CD keys.</p>
           </div>
         )}
       </div>

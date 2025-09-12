@@ -21,13 +21,13 @@ const defaultData = {
   store: "KeyAway",
   title: (storeTitle: string) => `${storeTitle} - Free CD Keys for Premium Software`,
   description:
-    "Get free CD keys for popular software like IOBIT, Malware Fighter, and more. Download premium programs with working license keys from our giveaway collection.",
+    "Get free CD keys for popular software like IOBIT, Malware Fighter, and more. Download premium programs with working activation keys from our giveaway collection.",
   url: "https://www.keyaway.app",
   canonical: "https://www.keyaway.app",
   programTitle: (programTitle: string, storeTitle: string) =>
     `${programTitle} Premium Software Free CD Keys | ${storeTitle}`,
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
-    `Download ${programTitle} for free! Get ${workingKeys} working CD keys out of ${totalKeys} total. Premium software license keys from our giveaway collection.`,
+    `Download ${programTitle} for free! Get ${workingKeys} working CD keys out of ${totalKeys} total. Premium software activation keys from our giveaway collection.`,
   programUrl: (slug: string) => `https://www.keyaway.app/program/${slug}`,
   programCanonical: (slug: string) => `https://www.keyaway.app/program/${slug}`,
   privacyTitle: (storeTitle: string) => `Privacy Policy | ${storeTitle}`,
@@ -174,7 +174,7 @@ export function generateProgramsPageMetadata() {
   const defaultData = {
     title: (title: string) => `All Programs - ${title}`,
     description: (title: string) =>
-      `Browse all software programs with free license keys on ${title}. Find premium software for free with verified, working CD keys.`,
+      `Browse all software programs with free CD keys on ${title}. Find premium software for free with verified, working activation keys.`,
     canonical: "https://www.keyaway.app"
   };
 

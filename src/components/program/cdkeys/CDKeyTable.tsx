@@ -34,8 +34,8 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
         <div className="px-6 py-4 border-b border-neutral-700">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-white">Free CD Keys & License Codes</h2>
-              <p className="text-neutral-300 mt-1">Activate working license keys for premium software</p>
+              <h2 className="text-2xl font-bold text-white">Free CD Keys & Activation Codes</h2>
+              <p className="text-neutral-300 mt-1">Activate working CD keys for premium software</p>
             </div>
             <KeyStatusTooltip />
           </div>

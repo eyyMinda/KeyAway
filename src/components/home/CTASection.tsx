@@ -3,6 +3,46 @@
 import Link from "next/link";
 import { FaGithub, FaHeart, FaCarrot } from "react-icons/fa";
 
+const supportOptions = [
+  {
+    icon: FaCarrot,
+    title: "Buy Carrot Juice",
+    description: "Support us with a refreshing donation",
+    buttonText: "Buy Carrot Juice",
+    buttonIcon: "🥕",
+    href: "https://www.buymeacoffee.com/eyyMinda",
+    bgColor: "bg-orange-500/20",
+    iconColor: "text-orange-400",
+    buttonColor: "bg-orange-500 hover:bg-orange-600"
+  },
+  {
+    icon: FaGithub,
+    title: "Star on GitHub",
+    description: "Show your support by starring our repository",
+    buttonText: "Star on GitHub",
+    buttonIcon: "⭐",
+    href: "https://github.com/eyyMinda/keyaway",
+    bgColor: "bg-gray-700",
+    iconColor: "text-gray-300",
+    buttonColor: "bg-gray-600 hover:bg-gray-500"
+  }
+];
+
+const helpWays = [
+  {
+    text: "Report key status",
+    color: "bg-green-400"
+  },
+  {
+    text: "Share with friends",
+    color: "bg-blue-400"
+  },
+  {
+    text: "Suggest new programs",
+    color: "bg-purple-400"
+  }
+];
+
 export default function CTASection() {
   return (
     <section className="py-20 bg-gray-900 text-white">
@@ -50,57 +90,38 @@ export default function CTASection() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {/* Buy Carrot Juice */}
-              <div className="text-center">
-                <div className="bg-orange-500/20 rounded-2xl p-6 mb-4">
-                  <FaCarrot className="w-12 h-12 text-orange-400 mx-auto mb-4" />
-                  <h4 className="text-xl font-semibold mb-2">Buy Carrot Juice</h4>
-                  <p className="text-gray-300 text-sm mb-4">Support us with a refreshing donation</p>
-                  <Link
-                    href="https://www.buymeacoffee.com/eyyMinda"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-                    <span className="mr-2">🥕</span>
-                    Buy Carrot Juice
-                  </Link>
-                </div>
-              </div>
-
-              {/* GitHub Star */}
-              <div className="text-center">
-                <div className="bg-gray-700 rounded-2xl p-6 mb-4">
-                  <FaGithub className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h4 className="text-xl font-semibold mb-2">Star on GitHub</h4>
-                  <p className="text-gray-300 text-sm mb-4">Show your support by starring our repository</p>
-                  <Link
-                    href="https://github.com/eyyMinda/keyaway"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center bg-gray-600 hover:bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
-                    <FaGithub className="mr-2 w-4 h-4" />
-                    Star Project
-                  </Link>
-                </div>
-              </div>
+              {supportOptions.map((option, index) => {
+                const IconComponent = option.icon;
+                return (
+                  <div key={index} className="text-center">
+                    <div className={`${option.bgColor} rounded-2xl p-6 mb-4`}>
+                      <IconComponent className={`w-12 h-12 ${option.iconColor} mx-auto mb-4`} />
+                      <h4 className="text-xl font-semibold mb-2">{option.title}</h4>
+                      <p className="text-gray-300 text-sm mb-4">{option.description}</p>
+                      <Link
+                        href={option.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center ${option.buttonColor} text-white px-6 py-3 rounded-lg font-semibold transition-colors`}>
+                        <span className="mr-2">{option.buttonIcon}</span>
+                        {option.buttonText}
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Additional Ways to Help */}
             <div className="mt-8 pt-8 border-t border-gray-700">
               <h4 className="text-lg font-semibold mb-4">Other Ways to Help</h4>
               <div className="grid sm:grid-cols-3 gap-4 text-sm text-gray-300">
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span>Report key status</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span>Share with friends</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span>Suggest new programs</span>
-                </div>
+                {helpWays.map((way, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <div className={`w-2 h-2 ${way.color} rounded-full`}></div>
+                    <span>{way.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

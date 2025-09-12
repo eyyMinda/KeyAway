@@ -33,7 +33,7 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
           <div className="order-1 lg:order-2">
             <h1 className="text-4xl font-bold text-white mb-4">{program.title} Free CD Keys</h1>
             <h2 className="text-xl text-primary-300 mb-4">
-              Download premium software for free and activate one of the working license keys
+              Download premium software for free and activate one of the working CD keys
             </h2>
             {program.description && (
               <p className="text-lg text-neutral-300 mb-6 leading-relaxed">{program.description}</p>

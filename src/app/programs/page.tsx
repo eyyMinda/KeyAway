@@ -24,8 +24,8 @@ export default async function ProgramsPage() {
           <div className="text-center">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">All Software Programs</h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Browse our complete collection of {totalCount} software programs with verified license keys. Find exactly
-              what you need with our advanced filtering options.
+              Browse our complete collection of {totalCount} software programs with verified CD keys. Find exactly what
+              you need with our advanced filtering options.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400">
               <div className="flex items-center space-x-2">

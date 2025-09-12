@@ -25,8 +25,7 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
           </div>
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Most Popular Programs</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover the most popular software programs based on page views, downloads, and verified, working license
-            keys
+            Discover the most popular software programs based on page views, downloads, and verified, working CD keys
           </p>
         </div>
 
