@@ -13,17 +13,18 @@ interface ProgramInformationProps {
 
 export default function ProgramInformation({ program, totalKeys, workingKeys }: ProgramInformationProps) {
   return (
-    <div className="bg-neutral-800 shadow-soft">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+    <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 py-16">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Image */}
           <div className="order-2 lg:order-1">
             {program.image ? (
-              <div className="relative rounded-2xl overflow-hidden shadow-medium">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl group">
                 <IdealImage image={program.image} alt={program.title} className="w-full max-h-96 object-contain" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
             ) : (
-              <div className="w-full h-80 bg-gradient-to-br from-primary-900 to-accent-900 rounded-2xl flex items-center justify-center shadow-medium">
+              <div className="w-full h-80 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-3xl flex items-center justify-center shadow-2xl border border-white/10">
                 <div className="text-neutral-500 text-6xl">🎮</div>
               </div>
             )}
@@ -31,52 +32,60 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
 
           {/* Content */}
           <div className="order-1 lg:order-2">
-            <h1 className="text-4xl font-bold text-white mb-4">{program.title} Free CD Keys</h1>
-            <h2 className="text-xl text-primary-300 mb-4">
-              Download premium software for free and activate one of the working CD keys
-            </h2>
-            {program.description && (
-              <p className="text-lg text-neutral-300 mb-6 leading-relaxed">{program.description}</p>
-            )}
-
-            {/* Download Link */}
-            {program.downloadLink && (
-              <div className="mb-6">
-                <Link
-                  href={program.downloadLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() =>
-                    trackEvent("download_click", { programSlug: program.slug.current, path: window.location.pathname })
-                  }
-                  className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Download Program
-                </Link>
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                  {program.title} <span className="text-gradient-pro">Free CD Keys</span>
+                </h1>
+                <p className="text-xl text-gray-300 leading-relaxed">
+                  Download premium software for free and activate one of the working CD keys
+                </p>
               </div>
-            )}
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-neutral-700 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-primary-400">{totalKeys}</div>
-                <div className="text-sm text-neutral-300">Available CD Keys</div>
-              </div>
-              <div className="bg-neutral-700 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-success-400">{workingKeys}</div>
-                <div className="text-sm text-neutral-300">Working License Keys</div>
+              {program.description && <p className="text-lg text-gray-400 leading-relaxed">{program.description}</p>}
+
+              {/* Download Link */}
+              {program.downloadLink && (
+                <div>
+                  <Link
+                    href={program.downloadLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() =>
+                      trackEvent("download_click", {
+                        programSlug: program.slug.current,
+                        path: window.location.pathname
+                      })
+                    }
+                    className="inline-flex items-center bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800 shadow-lg">
+                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    Download Program
+                  </Link>
+                </div>
+              )}
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:border-primary-400/50 transition-all duration-300">
+                  <div className="text-3xl font-bold text-primary-400 mb-2">{totalKeys}</div>
+                  <div className="text-sm text-gray-300 font-medium">Available CD Keys</div>
+                </div>
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:border-green-400/50 transition-all duration-300">
+                  <div className="text-3xl font-bold text-green-400 mb-2">{workingKeys}</div>
+                  <div className="text-sm text-gray-300 font-medium">Working Keys</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

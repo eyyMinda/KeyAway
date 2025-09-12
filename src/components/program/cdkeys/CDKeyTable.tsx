@@ -29,70 +29,74 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   }, [cdKeys, getReportData, loading]);
 
   return (
-    <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="bg-neutral-800 rounded-2xl shadow-soft">
-        <div className="px-6 py-4 border-b border-neutral-700">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-white">Free CD Keys & Activation Codes</h2>
-              <p className="text-neutral-300 mt-1">Activate working CD keys for premium software</p>
-            </div>
-            <KeyStatusTooltip />
-          </div>
-          {hasExpiringSoonKeys && (
-            <div className="mt-3 p-3 bg-primary-900/20 border border-primary-500/30 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 text-primary-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span className="text-primary-300 text-sm">
-                  Some keys are expiring within the next 24 hours. Use them soon!
-                </span>
+    <section className="py-16 bg-gradient-to-br from-neutral-900 to-neutral-800">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-white/5 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/10">
+          <div className="px-8 py-6 border-b border-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-3xl font-bold text-white mb-2">
+                  Free CD Keys & <span className="text-gradient-pro">Activation Codes</span>
+                </h2>
+                <p className="text-gray-300 text-lg">Activate working CD keys for premium software</p>
               </div>
+              <KeyStatusTooltip />
+            </div>
+            {hasExpiringSoonKeys && (
+              <div className="mt-4 p-4 bg-primary-500/10 border border-primary-400/30 rounded-xl">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span className="text-primary-300 font-medium">
+                    Some keys are expiring within the next 24 hours. Use them soon!
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {cdKeys && cdKeys.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5">
+                  <tr>
+                    <th className="px-8 py-6 text-left text-sm font-semibold text-gray-200 text-nowrap">Key</th>
+                    <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Status</th>
+                    <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Reports</th>
+                    <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Version</th>
+                    <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Valid From</th>
+                    <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Valid Until</th>
+                    <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {cdKeys.map((cdKey: CDKey, i: number) => (
+                    <CDKeyItem
+                      key={i}
+                      cdKey={cdKey}
+                      index={i}
+                      slug={slug}
+                      reportData={reportDataMap.get(cdKey.key) || { working: 0, expired: 0, limit_reached: 0 }}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="px-8 py-16 text-center">
+              <div className="text-gray-500 text-6xl mb-6">🔑</div>
+              <h3 className="text-xl font-semibold text-gray-300 mb-3">No Keys Available</h3>
+              <p className="text-gray-400 text-lg">There are currently no CD keys available for this program.</p>
             </div>
           )}
         </div>
-
-        {cdKeys && cdKeys.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-neutral-700">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-neutral-200 text-nowrap">Key</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Status</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Reports</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Version</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Valid From</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Valid Until</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-neutral-200">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-700">
-                {cdKeys.map((cdKey: CDKey, i: number) => (
-                  <CDKeyItem
-                    key={i}
-                    cdKey={cdKey}
-                    index={i}
-                    slug={slug}
-                    reportData={reportDataMap.get(cdKey.key) || { working: 0, expired: 0, limit_reached: 0 }}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="px-6 py-12 text-center">
-            <div className="text-neutral-500 text-4xl mb-4">🔑</div>
-            <h3 className="text-lg font-semibold text-neutral-300 mb-2">No Keys Available</h3>
-            <p className="text-neutral-400">There are currently no CD keys available for this program.</p>
-          </div>
-        )}
       </div>
-    </div>
+    </section>
   );
 }
