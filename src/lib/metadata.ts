@@ -175,7 +175,7 @@ export function generateProgramsPageMetadata() {
     title: (title: string) => `All Programs - ${title}`,
     description: (title: string) =>
       `Browse all software programs with free license keys on ${title}. Find premium software for free with verified, working CD keys.`,
-    canonical: "https://keyaway.app"
+    canonical: "https://www.keyaway.app"
   };
 
   return {
