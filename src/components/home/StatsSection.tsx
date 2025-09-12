@@ -55,7 +55,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
 
   return (
     <section className="py-20 bg-gradient-to-br from-primary-600 to-blue-700 text-white">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-[90rem] mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4">Community Impact</h2>

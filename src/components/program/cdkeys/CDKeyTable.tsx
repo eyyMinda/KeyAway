@@ -29,7 +29,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   }, [cdKeys, getReportData, loading]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="bg-neutral-800 rounded-2xl shadow-soft">
         <div className="px-6 py-4 border-b border-neutral-700">
           <div className="flex items-center justify-between">

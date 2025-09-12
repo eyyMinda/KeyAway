@@ -6,7 +6,7 @@ import { FaGithub, FaHeart, FaCoffee } from "react-icons/fa";
 export default function CTASection() {
   return (
     <section className="py-20 bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-[90rem] mx-auto px-6">
         <div className="text-center">
           {/* Main CTA */}
           <div className="max-w-4xl mx-auto mb-16">

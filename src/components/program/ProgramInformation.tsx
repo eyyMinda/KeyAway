@@ -14,7 +14,7 @@ interface ProgramInformationProps {
 export default function ProgramInformation({ program, totalKeys, workingKeys }: ProgramInformationProps) {
   return (
     <div className="bg-neutral-800 shadow-soft">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Image */}
           <div className="order-2 lg:order-1">

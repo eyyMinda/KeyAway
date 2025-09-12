@@ -70,7 +70,7 @@ export default function FeaturesSection() {
 
   return (
     <section id="how-it-works" className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-[90rem] mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">How KeyAway Works</h2>

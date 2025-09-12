@@ -95,7 +95,7 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="max-w-[90rem] mx-auto px-6 py-12">
       {/* Filters and Search */}
       <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
         <div className="flex flex-col lg:flex-row gap-6">

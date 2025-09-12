@@ -7,7 +7,7 @@ export default function HeroSection() {
   return (
     <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-20 lg:py-32">
       <div className="absolute inset-0 bg-black/20"></div>
-      <div className="relative max-w-7xl mx-auto px-6">
+      <div className="relative max-w-[90rem] mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="space-y-8">

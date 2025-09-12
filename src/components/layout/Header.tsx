@@ -28,7 +28,7 @@ export default function Header({ storeData, logoData }: HeaderProps) {
 
   return (
     <header className="bg-gray-900 shadow-lg sticky top-0 z-[101]">
-      <div className="max-w-7xl mx-auto p-4 sm:px-6 lg:px-8 flex items-center justify-between max-h-20">
+      <div className="max-w-[90rem] mx-auto p-4 sm:px-6 lg:px-8 flex items-center justify-between max-h-20">
         <Link
           href="/"
           title={storeData.title}
@@ -47,7 +47,7 @@ export default function Header({ storeData, logoData }: HeaderProps) {
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-6">
-          <nav className="flex space-x-6">
+          <nav className="flex flex-wrap justify-end gap-6 gap-y-2">
             {headerLinks &&
               headerLinks.map((link, i) => {
                 let isActive = false;

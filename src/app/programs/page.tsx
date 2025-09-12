@@ -20,7 +20,7 @@ export default async function ProgramsPage() {
     <main className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-[90rem] mx-auto px-6">
           <div className="text-center">
             <h1 className="text-4xl lg:text-5xl font-bold mb-6">All Software Programs</h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
