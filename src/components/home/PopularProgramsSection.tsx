@@ -15,7 +15,7 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
 
   return (
-    <section className="py-20 bg-white">
+    <section id="popular-programs" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
