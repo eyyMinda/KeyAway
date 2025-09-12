@@ -1164,4 +1164,24 @@ body {
   .hover\:text-accent-950:hover {
     color: var(--accent-950);
   }
+
+  /* Custom gradient text utility */
+  .text-gradient-pro {
+    background: linear-gradient(135deg, #38bdf8 0%, #e879f9 50%, #38bdf8 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 3s ease-in-out infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }

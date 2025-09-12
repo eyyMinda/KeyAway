@@ -2,6 +2,31 @@
 
 import { FaDownload, FaKey, FaShieldAlt } from "react-icons/fa";
 import Link from "next/link";
+import HeroVisual from "./HeroVisual";
+
+const heroFeatures = [
+  {
+    icon: FaKey,
+    title: "Verified Keys",
+    description: "Community tested",
+    bgColor: "bg-primary-500/20",
+    iconColor: "text-primary-400"
+  },
+  {
+    icon: FaShieldAlt,
+    title: "Safe & Secure",
+    description: "100% legitimate",
+    bgColor: "bg-green-500/20",
+    iconColor: "text-green-400"
+  },
+  {
+    icon: FaDownload,
+    title: "Instant Access",
+    description: "No waiting",
+    bgColor: "bg-blue-500/20",
+    iconColor: "text-blue-400"
+  }
+];
 
 export default function HeroSection() {
   return (
@@ -12,43 +37,31 @@ export default function HeroSection() {
           {/* Content */}
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl lg:text-6xl font-bold leading-tight">Free CD Keys & Software Licenses</h1>
+              <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
+                Free CD Keys for <span className="text-gradient-pro">Pro Software</span>
+              </h1>
               <p className="text-xl lg:text-2xl text-gray-300 leading-relaxed">
-                Download premium software for free and activate one of our verified, working license keys
+                Unlock premium features and pro versions of your favorite software with our verified, working CD keys
               </p>
             </div>
 
             {/* Features */}
             <div className="grid sm:grid-cols-3 gap-6">
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0 w-12 h-12 bg-primary-500/20 rounded-lg flex items-center justify-center">
-                  <FaKey className="w-6 h-6 text-primary-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white">Verified Keys</h3>
-                  <p className="text-sm text-gray-400">Community tested</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <FaShieldAlt className="w-6 h-6 text-green-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white">Safe & Secure</h3>
-                  <p className="text-sm text-gray-400">100% legitimate</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <div className="flex-shrink-0 w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <FaDownload className="w-6 h-6 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white">Instant Access</h3>
-                  <p className="text-sm text-gray-400">No waiting</p>
-                </div>
-              </div>
+              {heroFeatures.map((feature, index) => {
+                const IconComponent = feature.icon;
+                return (
+                  <div key={index} className="flex items-center space-x-3">
+                    <div
+                      className={`flex-shrink-0 w-12 h-12 ${feature.bgColor} rounded-lg flex items-center justify-center`}>
+                      <IconComponent className={`w-6 h-6 ${feature.iconColor}`} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">{feature.title}</h3>
+                      <p className="text-sm text-gray-400">{feature.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* CTA Buttons */}
@@ -67,26 +80,7 @@ export default function HeroSection() {
           </div>
 
           {/* Visual Element */}
-          <div className="relative">
-            <div className="bg-gradient-to-br from-primary-500/20 to-blue-500/20 rounded-2xl p-8 backdrop-blur-sm border border-white/10">
-              <div className="space-y-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                </div>
-                <div className="space-y-4">
-                  <div className="h-4 bg-white/20 rounded w-3/4"></div>
-                  <div className="h-4 bg-white/20 rounded w-1/2"></div>
-                  <div className="h-4 bg-white/20 rounded w-2/3"></div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="h-16 bg-white/10 rounded-lg"></div>
-                  <div className="h-16 bg-white/10 rounded-lg"></div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <HeroVisual />
         </div>
       </div>
     </section>
