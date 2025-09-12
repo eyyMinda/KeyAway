@@ -76,8 +76,11 @@ export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt de
 export const popularProgramsByViewsQuery = `*[_type == "program"]{
   title, slug, description, image, cdKeys[],
   "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
-  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])
-} | order(viewCount desc) [0...6]`;
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
+  "hasKeys": count(cdKeys[]) > 0,
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 2,
+  _createdAt
+} | order(popularityScore desc) [0...6]`;
 
 /* ------------ Statistics ------------ */
 export const siteStatsQuery = `{

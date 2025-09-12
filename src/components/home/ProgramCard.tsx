@@ -1,20 +1,7 @@
 import Link from "next/link";
-import { Program } from "@/src/types";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { FaEye, FaDownload, FaKey } from "react-icons/fa";
-
-interface ProgramCardProps {
-  program: Program;
-  stats?: {
-    viewCount?: number;
-    downloadCount?: number;
-  };
-  badges?: {
-    mostViewed?: boolean;
-    mostDownloaded?: boolean;
-  };
-  showStats?: boolean;
-}
+import { ProgramCardProps } from "@/src/types/home";
 
 export default function ProgramCard({ program, stats, badges, showStats = true }: ProgramCardProps) {
   return (

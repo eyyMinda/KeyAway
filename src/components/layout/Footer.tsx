@@ -125,17 +125,35 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
 
           {/* Support Section */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Support</h4>
-            <div className="space-y-4">
+            <h4 className="text-lg font-semibold mb-4">Support & Follow</h4>
+            <div className="flex flex-wrap gap-3">
+              {/* Carrot Juice Support */}
               <Link
                 href="https://www.buymeacoffee.com/eyyMinda"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg font-semibold transition-colors">
-                <span className="mr-2">🥕</span>
-                Buy Me Carrot Juice
+                className="group bg-orange-500 hover:bg-orange-600 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-orange-400">
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-lg flex-shrink-0">🥕</span>
+                  <div className="text-center min-w-0">
+                    <div className="text-sm font-bold whitespace-nowrap">Buy Carrot Juice</div>
+                  </div>
+                </div>
               </Link>
-              <p className="text-sm text-gray-300">Help keep this project running</p>
+
+              {/* GitHub Star */}
+              <Link
+                href="https://github.com/eyyMinda/keyaway"
+                target="_blank"
+                rel="noreferrer"
+                className="group bg-gray-600 hover:bg-gray-700 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-gray-500">
+                <div className="flex items-center justify-center space-x-2">
+                  <span className="text-lg flex-shrink-0">⭐</span>
+                  <div className="text-center min-w-0">
+                    <div className="text-sm font-bold whitespace-nowrap">Star on GitHub</div>
+                  </div>
+                </div>
+              </Link>
             </div>
           </div>
         </div>

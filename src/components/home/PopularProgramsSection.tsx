@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Program } from "@/src/types";
 import { FaFire } from "react-icons/fa";
-import ProgramCard from "@/src/components/home/ProgramCard";
-
-interface PopularProgramsSectionProps {
-  programs: (Program & { viewCount: number; downloadCount: number })[];
-}
+import { ProgramCard } from "@/src/components/home";
+import { PopularProgramsSectionProps } from "@/src/types/home";
+import { sortByPopularity } from "@/src/lib/programUtils";
 
 export default function PopularProgramsSection({ programs }: PopularProgramsSectionProps) {
+  // Sort programs by popularity score (highest first)
+  const sortedPrograms = sortByPopularity(programs);
+
   // Find programs with highest stats for badges
   const maxViews = Math.max(...programs.map(p => p.viewCount), 0);
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
@@ -32,7 +32,7 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
 
         {/* Programs Grid */}
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {programs.map(program => (
+          {sortedPrograms.map(program => (
             <ProgramCard
               key={program.slug.current}
               program={program}

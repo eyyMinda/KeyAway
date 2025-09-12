@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FaGithub, FaHeart, FaCoffee } from "react-icons/fa";
+import { FaGithub, FaHeart, FaCarrot } from "react-icons/fa";
 
 export default function CTASection() {
   return (
@@ -42,27 +42,27 @@ export default function CTASection() {
               <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/20 rounded-full mb-4">
                 <FaHeart className="w-8 h-8 text-red-400" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Love KeyAway? Support Our Mission</h3>
+              <h3 className="text-2xl font-bold mb-4">Love KeyAway? Fuel Our Mission with Carrot Juice! 🥕</h3>
               <p className="text-gray-300 text-lg">
                 Help us keep this project running and growing. Your support enables us to add more programs, improve the
-                platform, and maintain our servers.
+                platform, and maintain our servers. Plus, it keeps us energized with fresh carrot juice!
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {/* Buy Me a Coffee */}
+              {/* Buy Carrot Juice */}
               <div className="text-center">
-                <div className="bg-yellow-500/20 rounded-2xl p-6 mb-4">
-                  <FaCoffee className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
-                  <h4 className="text-xl font-semibold mb-2">Buy Me a Coffee</h4>
-                  <p className="text-gray-300 text-sm mb-4">Support us with a one-time donation</p>
+                <div className="bg-orange-500/20 rounded-2xl p-6 mb-4">
+                  <FaCarrot className="w-12 h-12 text-orange-400 mx-auto mb-4" />
+                  <h4 className="text-xl font-semibold mb-2">Buy Carrot Juice</h4>
+                  <p className="text-gray-300 text-sm mb-4">Support us with a refreshing donation</p>
                   <Link
                     href="https://www.buymeacoffee.com/eyyMinda"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-3 rounded-lg font-semibold transition-colors">
-                    <span className="mr-2">☕</span>
-                    Buy Coffee
+                    className="inline-flex items-center bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                    <span className="mr-2">🥕</span>
+                    Buy Carrot Juice
                   </Link>
                 </div>
               </div>
