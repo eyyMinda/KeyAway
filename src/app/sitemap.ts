@@ -4,7 +4,7 @@ import { allProgramsQuery } from "@/src/lib/queries";
 import { Program, CDKey } from "@/src/types";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://keyaway.app";
+  const baseUrl = "https://www.keyaway.app";
   const currentDate = new Date();
 
   // Get all programs for dynamic routes

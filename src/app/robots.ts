@@ -14,7 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/studio/", "/api/", "/admin/"]
       }
     ],
-    sitemap: "https://keyaway.app/sitemap.xml",
-    host: "https://keyaway.app"
+    sitemap: "https://www.keyaway.app/sitemap.xml",
+    host: "https://www.keyaway.app"
   };
 }
