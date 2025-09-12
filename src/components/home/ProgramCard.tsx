@@ -1,8 +1,22 @@
 import Link from "next/link";
 import { Program } from "@/src/types";
 import { IdealImage } from "@/src/components/general/IdealImage";
+import { FaEye, FaDownload, FaKey } from "react-icons/fa";
 
-export default function ProgramCard({ program }: { program: Program }) {
+interface ProgramCardProps {
+  program: Program;
+  stats?: {
+    viewCount?: number;
+    downloadCount?: number;
+  };
+  badges?: {
+    mostViewed?: boolean;
+    mostDownloaded?: boolean;
+  };
+  showStats?: boolean;
+}
+
+export default function ProgramCard({ program, stats, badges, showStats = true }: ProgramCardProps) {
   return (
     <div className="group bg-white rounded-2xl shadow-soft hover:shadow-medium transition-all duration-300 overflow-hidden border border-neutral-100 hover:border-primary-200 animate-fade-in flex flex-col">
       {/* Image Container */}
@@ -20,6 +34,32 @@ export default function ProgramCard({ program }: { program: Program }) {
         )}
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Badges */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
+          {badges?.mostViewed && (
+            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+              <FaEye className="w-3 h-3" />
+              <span>Most Viewed</span>
+            </div>
+          )}
+          {badges?.mostDownloaded && (
+            <div className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+              <FaDownload className="w-3 h-3" />
+              <span>Most Downloaded</span>
+            </div>
+          )}
+        </div>
+
+        {/* Key Count Badge */}
+        {program.cdKeys?.length && (
+          <div className="absolute top-4 right-4">
+            <div className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
+              <FaKey className="w-3 h-3" />
+              <span>{program.cdKeys.length}</span>
+            </div>
+          </div>
+        )}
       </Link>
 
       {/* Content */}
@@ -29,6 +69,24 @@ export default function ProgramCard({ program }: { program: Program }) {
         </h2>
 
         <p className="text-neutral-600 text-sm mb-4 line-clamp-4 leading-relaxed">{program.description}</p>
+
+        {/* Stats above CTA */}
+        {showStats && (stats?.viewCount !== undefined || stats?.downloadCount !== undefined) && (
+          <div className="flex items-center justify-center gap-4 text-xs text-neutral-500 mb-4">
+            {stats?.viewCount !== undefined && (
+              <div className="flex items-center space-x-1">
+                <FaEye className="w-3 h-3" />
+                <span>{stats.viewCount} views</span>
+              </div>
+            )}
+            {stats?.downloadCount !== undefined && (
+              <div className="flex items-center space-x-1">
+                <FaDownload className="w-3 h-3" />
+                <span>{stats.downloadCount} downloads</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Action Button */}
         <Link

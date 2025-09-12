@@ -18,7 +18,7 @@ export default function CTASection() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="#all-programs"
+                href="/programs"
                 className="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
                 Browse All Programs
                 <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -89,3 +89,15 @@ export const siteStatsQuery = `{
 
 /* ------------ Recent Reports Query ------------ */
 export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekAgo] | order(createdAt desc)`;
+
+/* ------------ Programs with Filtering ------------ */
+export const programsWithStatsQuery = `*[_type == "program"]{
+  title, slug, description, image, cdKeys[], _createdAt,
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
+  "hasKeys": count(cdKeys[]) > 0,
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 2
+}`;
+
+/* ------------ Programs Count Query ------------ */
+export const programsCountQuery = `count(*[_type == "program"])`;

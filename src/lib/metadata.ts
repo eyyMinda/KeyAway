@@ -168,3 +168,50 @@ export async function generateTermsMetadata(): Promise<Metadata> {
     }
   };
 }
+
+export function generateProgramsPageMetadata() {
+  const storeTitle = "KeyAway";
+  const defaultData = {
+    title: (title: string) => `All Programs - ${title}`,
+    description: (title: string) =>
+      `Browse all software programs with free license keys on ${title}. Find premium software for free with verified, working CD keys.`,
+    canonical: "https://keyaway.app"
+  };
+
+  return {
+    title: defaultData.title(storeTitle),
+    description: defaultData.description(storeTitle),
+    keywords: [
+      "free software",
+      "license keys",
+      "CD keys",
+      "software programs",
+      "premium software free",
+      "all programs",
+      "software collection"
+    ],
+    openGraph: {
+      title: defaultData.title(storeTitle),
+      description: defaultData.description(storeTitle),
+      url: `${defaultData.canonical}/programs`,
+      siteName: storeTitle,
+      type: "website",
+      images: [
+        {
+          url: `${defaultData.canonical}/images/KeyAway_Logo.png`,
+          width: 1200,
+          height: 630,
+          alt: `${storeTitle} - All Programs`
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: defaultData.title(storeTitle),
+      description: defaultData.description(storeTitle)
+    },
+    alternates: {
+      canonical: `${defaultData.canonical}/programs`
+    }
+  };
+}

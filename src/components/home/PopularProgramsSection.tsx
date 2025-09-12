@@ -2,14 +2,18 @@
 
 import Link from "next/link";
 import { Program } from "@/src/types";
-import { FaFire, FaEye, FaDownload, FaKey } from "react-icons/fa";
-import { IdealImage } from "@/src/components/general/IdealImage";
+import { FaFire } from "react-icons/fa";
+import ProgramCard from "@/src/components/home/ProgramCard";
 
 interface PopularProgramsSectionProps {
   programs: (Program & { viewCount: number; downloadCount: number })[];
 }
 
 export default function PopularProgramsSection({ programs }: PopularProgramsSectionProps) {
+  // Find programs with highest stats for badges
+  const maxViews = Math.max(...programs.map(p => p.viewCount), 0);
+  const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
+
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-6">
@@ -27,73 +31,28 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
         </div>
 
         {/* Programs Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {programs.map((program, index) => (
-            <div key={program.slug.current} className="group">
-              <Link href={`/program/${program.slug.current}`}>
-                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 group-hover:border-primary-200">
-                  {/* Image */}
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-                    {program.image ? (
-                      <IdealImage
-                        image={program.image}
-                        alt={program.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
-                          <FaDownload className="w-8 h-8 text-primary-600" />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Popular Badge */}
-                    <div className="absolute top-4 left-4">
-                      <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
-                        <FaFire className="w-3 h-3" />
-                        <span>#{index + 1}</span>
-                      </div>
-                    </div>
-
-                    {/* Download Count Badge */}
-                    <div className="absolute top-4 right-4">
-                      <div className="bg-white/90 backdrop-blur-sm text-gray-700 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
-                        <FaDownload className="w-3 h-3" />
-                        <span>{program.downloadCount || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
-                      {program.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-2">{program.description}</p>
-
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <FaEye className="w-4 h-4" />
-                        <span>{program.viewCount || 0} views</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <FaKey className="w-4 h-4" />
-                        <span>{program.cdKeys?.length || 0} keys</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </div>
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {programs.map(program => (
+            <ProgramCard
+              key={program.slug.current}
+              program={program}
+              stats={{
+                viewCount: program.viewCount,
+                downloadCount: program.downloadCount
+              }}
+              badges={{
+                mostViewed: program.viewCount === maxViews && maxViews > 0,
+                mostDownloaded: program.downloadCount === maxDownloads && maxDownloads > 0
+              }}
+              showStats={true}
+            />
           ))}
         </div>
 
         {/* View All Button */}
         <div className="text-center mt-12">
           <Link
-            href="#all-programs"
+            href="/programs"
             className="inline-flex items-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
             View All Programs
             <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
