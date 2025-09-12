@@ -6,12 +6,12 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/studio/", "/api/", "/admin/", "/_next/", "/static/", "/sitemap.xml"]
+        disallow: ["/studio/", "/api/", "/admin/", "/_next/", "/static/"]
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/studio/", "/api/", "/admin/", "/sitemap.xml"]
+        disallow: ["/studio/", "/api/", "/admin/"]
       }
     ],
     sitemap: "https://www.keyaway.app/sitemap.xml",
