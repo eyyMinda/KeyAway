@@ -1,8 +1,14 @@
 import { client } from "@/src/sanity/lib/client";
-import { allProgramsQuery } from "@lib/queries";
-import ProgramCard from "@/src/components/home/ProgramCard";
-import { Program } from "@/src/types";
+import { allProgramsQuery, popularProgramsByViewsQuery, siteStatsQuery } from "@lib/queries";
 import { generateHomePageMetadata } from "@/src/lib/metadata";
+
+// Import homepage sections
+import HeroSection from "@/src/components/home/HeroSection";
+import FeaturesSection from "@/src/components/home/FeaturesSection";
+import PopularProgramsSection from "@/src/components/home/PopularProgramsSection";
+import AllProgramsSection from "@/src/components/home/AllProgramsSection";
+import StatsSection from "@/src/components/home/StatsSection";
+import CTASection from "@/src/components/home/CTASection";
 
 export const revalidate = 60;
 
@@ -11,19 +17,37 @@ export async function generateMetadata() {
 }
 
 export default async function HomePage() {
-  const programs = await client.fetch(allProgramsQuery, {}, { next: { tags: ["homepage"] } });
+  // Calculate date one week ago
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const weekAgoISO = weekAgo.toISOString();
+
+  // Fetch all data in parallel for better performance
+  const [programs, popularPrograms, stats] = await Promise.all([
+    client.fetch(allProgramsQuery, {}, { next: { tags: ["homepage"] } }),
+    client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
+    client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } })
+  ]);
 
   return (
-    <main className="max-w-7xl mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold mb-6">Free CD Keys & Software Licenses</h1>
-      <h2 className="text-xl text-gray-600 mb-8">
-        Download premium software for free and activate one of the working license keys
-      </h2>
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {programs.map((program: Program) => (
-          <ProgramCard key={program.slug.current} program={program} />
-        ))}
-      </div>
+    <main>
+      {/* Hero Section */}
+      <HeroSection />
+
+      {/* Features Section */}
+      <FeaturesSection />
+
+      {/* Popular Programs Section */}
+      <PopularProgramsSection programs={popularPrograms} />
+
+      {/* Statistics Section */}
+      <StatsSection stats={stats} />
+
+      {/* All Programs Section */}
+      <AllProgramsSection programs={programs} />
+
+      {/* Call-to-Action Section */}
+      <CTASection />
     </main>
   );
 }

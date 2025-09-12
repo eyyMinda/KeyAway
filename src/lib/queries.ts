@@ -66,3 +66,26 @@ export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $si
 export const keyReportsQuery = `*[_type=="keyReport" && createdAt >= $since]{
       _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
+
+/* ------------ Popular Programs ------------ */
+export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt desc) [0...6]{
+  title, slug, description, image, cdKeys[]
+}`;
+
+/* ------------ Popular Programs by Page Views ------------ */
+export const popularProgramsByViewsQuery = `*[_type == "program"]{
+  title, slug, description, image, cdKeys[],
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])
+} | order(viewCount desc) [0...6]`;
+
+/* ------------ Statistics ------------ */
+export const siteStatsQuery = `{
+  "totalPrograms": count(*[_type == "program"]),
+  "totalKeys": count(*[_type == "program"].cdKeys[]._key),
+  "totalReports": count(*[_type == "keyReport"]),
+  "recentReports": count(*[_type == "keyReport" && createdAt >= $weekAgo])
+}`;
+
+/* ------------ Recent Reports Query ------------ */
+export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekAgo] | order(createdAt desc)`;
