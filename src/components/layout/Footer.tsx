@@ -132,6 +132,12 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                 href="https://www.buymeacoffee.com/eyyMinda"
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => {
+                  trackEvent("social_click", {
+                    social: "buymeacoffee",
+                    path: window.location.pathname
+                  });
+                }}
                 className="group bg-orange-500 hover:bg-orange-600 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-orange-400">
                 <div className="flex items-center justify-center space-x-2">
                   <span className="text-lg flex-shrink-0">🥕</span>
@@ -146,6 +152,12 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                 href="https://github.com/eyyMinda/keyaway"
                 target="_blank"
                 rel="noreferrer"
+                onClick={() => {
+                  trackEvent("social_click", {
+                    social: "github keyaway",
+                    path: window.location.pathname
+                  });
+                }}
                 className="group bg-gray-600 hover:bg-gray-700 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-gray-500">
                 <div className="flex items-center justify-center space-x-2">
                   <span className="text-lg flex-shrink-0">⭐</span>

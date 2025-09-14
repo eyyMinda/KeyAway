@@ -1,22 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Giscus from "@giscus/react";
+import { trackEvent } from "@/src/lib/trackEvent";
 
 export default function ProgramComments() {
-  const [showFallback, setShowFallback] = useState(false);
-
-  // useEffect(() => {
-  //   // Set a timeout to show fallback if Giscus doesn't load
-  //   const timer = setTimeout(() => {
-  //     setShowFallback(true);
-  //   }, 3000); // 3 second timeout
-
-  //   return () => clearTimeout(timer);
-  // }, []);
-
-  // Show fallback if Giscus fails to load
-  if (showFallback) {
+  // Show fallback if Giscus fails to load (currently disabled)
+  if (false) {
     return (
       <div className="text-center py-8">
         <div className="text-gray-400 text-4xl mb-4">💬</div>
@@ -26,6 +15,12 @@ export default function ProgramComments() {
           href="https://github.com/eyyMinda/keyaway/discussions"
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => {
+            trackEvent("social_click", {
+              social: "github keyaway",
+              path: window.location.pathname
+            });
+          }}
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
           View Discussions on GitHub
         </a>

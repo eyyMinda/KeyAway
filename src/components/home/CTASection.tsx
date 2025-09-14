@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FaGithub, FaHeart, FaCarrot } from "react-icons/fa";
+import { trackEvent } from "@/src/lib/trackEvent";
 
 const supportOptions = [
   {
@@ -13,7 +14,8 @@ const supportOptions = [
     href: "https://www.buymeacoffee.com/eyyMinda",
     bgColor: "bg-orange-500/20",
     iconColor: "text-orange-400",
-    buttonColor: "bg-orange-500 hover:bg-orange-600"
+    buttonColor: "bg-orange-500 hover:bg-orange-600",
+    trackEvent: "buymeacoffee"
   },
   {
     icon: FaGithub,
@@ -24,7 +26,8 @@ const supportOptions = [
     href: "https://github.com/eyyMinda/keyaway",
     bgColor: "bg-gray-700",
     iconColor: "text-gray-300",
-    buttonColor: "bg-gray-600 hover:bg-gray-500"
+    buttonColor: "bg-gray-600 hover:bg-gray-500",
+    trackEvent: "github keyaway"
   }
 ];
 
@@ -69,6 +72,12 @@ export default function CTASection() {
                 href="https://github.com/eyyMinda/keyaway"
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => {
+                  trackEvent("social_click", {
+                    social: "github keyaway",
+                    path: window.location.pathname
+                  });
+                }}
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors">
                 <FaGithub className="mr-2 w-5 h-5" />
                 View on GitHub
@@ -102,6 +111,12 @@ export default function CTASection() {
                         href={option.href}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={() => {
+                          trackEvent("social_click", {
+                            social: option.trackEvent,
+                            path: window.location.pathname
+                          });
+                        }}
                         className={`inline-flex items-center ${option.buttonColor} text-white px-6 py-3 rounded-lg font-semibold transition-colors`}>
                         <span className="mr-2">{option.buttonIcon}</span>
                         {option.buttonText}
