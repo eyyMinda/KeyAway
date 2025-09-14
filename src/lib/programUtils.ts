@@ -10,11 +10,11 @@ export interface ProgramWithStats extends Program {
 
 /**
  * Calculate popularity score for a program
- * Formula: viewCount + (downloadCount * 2)
- * Downloads are weighted 2x more than views
+ * Formula: viewCount + (downloadCount * 3)
+ * Downloads are weighted 3x more than views (equal to 3 views)
  */
 export function calculatePopularityScore(viewCount: number, downloadCount: number): number {
-  return viewCount + downloadCount * 2;
+  return viewCount + downloadCount * 3;
 }
 
 /**
