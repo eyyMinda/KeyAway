@@ -91,6 +91,29 @@ export function getStatusColor(status: string): string {
   }
 }
 
+// Process CD keys to update their status based on current time
+export function processCdKeys(cdKeys: CDKey[]): CDKey[] {
+  const now = new Date();
+
+  return cdKeys.map(key => {
+    // If key is already expired or limit reached, don't change it
+    if (key.status === "expired" || key.status === "limit") {
+      return key;
+    }
+
+    // Check if key should be expired based on validUntil date
+    if (key.validUntil) {
+      const validUntil = new Date(key.validUntil);
+      if (now > validUntil) {
+        return { ...key, status: "expired" };
+      }
+    }
+
+    // Return key unchanged if no status update needed
+    return key;
+  });
+}
+
 // Sort CD keys by status priority (working keys first, then expired, then limit reached)
 export function sortCdKeysByStatus(cdKeys: CDKey[]): CDKey[] {
   const statusPriority: Record<string, number> = {
