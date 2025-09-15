@@ -9,7 +9,7 @@ import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 
 export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   const hasExpiringSoonKeys = cdKeys.some((key: CDKey) => isKeyExpiringSoon(key));
-  const { getReportData, loading } = useKeyReportData(slug, cdKeys);
+  const { getReportData, loading, refreshReportData } = useKeyReportData(slug, cdKeys);
   const [reportDataMap, setReportDataMap] = useState<Map<string, ReportData>>(new Map());
 
   // Load report data for all keys
@@ -27,6 +27,11 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
       loadReportData();
     }
   }, [cdKeys, getReportData, loading]);
+
+  // Handle report submission refresh
+  const handleReportSubmitted = () => {
+    refreshReportData();
+  };
 
   return (
     <section className="py-16 bg-gradient-to-br from-neutral-900 to-neutral-800">
@@ -83,6 +88,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
                       index={i}
                       slug={slug}
                       reportData={reportDataMap.get(cdKey.key) || { working: 0, expired: 0, limit_reached: 0 }}
+                      onReportSubmitted={handleReportSubmitted}
                     />
                   ))}
                 </tbody>

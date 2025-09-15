@@ -5,8 +5,7 @@ import { CDKeyActionsProps } from "@/src/types";
 import { trackCopyEvent } from "@/src/lib/copyTracking";
 import ReportPopup from "./ReportPopup";
 import Toast from "@/src/components/ui/Toast";
-
-const NOTIFICATION_DURATION = 3000;
+import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src/lib/notificationUtils";
 
 /**
  * CDKeyActions component provides copy and expired reporting functionality for CD keys
@@ -14,7 +13,7 @@ const NOTIFICATION_DURATION = 3000;
  * @param isDisabled - Whether the actions should be disabled
  * @param slug - The program slug for tracking purposes
  */
-export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsProps) {
+export default function CDKeyActions({ cdKey, isDisabled, slug, onReportSubmitted }: CDKeyActionsProps) {
   const [notification, setNotification] = useState<string | null>(null);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
 
@@ -24,11 +23,11 @@ export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsPr
   const handleCopyKey = async () => {
     try {
       await navigator.clipboard.writeText(cdKey.key);
-      setNotification("Key copied to clipboard!");
+      setNotification(getSuccessMessage("KEY_COPIED"));
       trackCopyEvent(cdKey, slug, "button_click");
     } catch (err) {
       console.error("Failed to copy: ", err);
-      setNotification("Failed to copy key");
+      setNotification(getErrorMessage("COPY_FAILED"));
     }
   };
 
@@ -50,11 +49,22 @@ export default function CDKeyActions({ cdKey, isDisabled, slug }: CDKeyActionsPr
     <>
       {/* Toast Notification */}
       {notification && (
-        <Toast message={notification} type="info" duration={NOTIFICATION_DURATION} onClose={handleNotificationClose} />
+        <Toast
+          message={notification}
+          type="info"
+          duration={NOTIFICATION_DURATION.SHORT}
+          onClose={handleNotificationClose}
+        />
       )}
 
       {/* Report Popup */}
-      <ReportPopup isOpen={isReportPopupOpen} onClose={() => setIsReportPopupOpen(false)} cdKey={cdKey} slug={slug} />
+      <ReportPopup
+        isOpen={isReportPopupOpen}
+        onClose={() => setIsReportPopupOpen(false)}
+        cdKey={cdKey}
+        slug={slug}
+        onReportSubmitted={onReportSubmitted}
+      />
 
       {/* Action Buttons */}
       <div className="flex justify-center space-x-2">

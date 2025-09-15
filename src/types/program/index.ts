@@ -37,12 +37,14 @@ export interface CDKeyItemProps {
   index: number;
   slug: string;
   reportData: ReportData;
+  onReportSubmitted?: () => void;
 }
 
 export interface CDKeyActionsProps {
   cdKey: CDKey;
   isDisabled: boolean;
   slug: string;
+  onReportSubmitted?: () => void;
 }
 
 export interface ProgramInformationProps {

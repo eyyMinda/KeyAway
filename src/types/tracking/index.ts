@@ -60,6 +60,45 @@ export interface TrackRequestBody {
   meta?: TrackEventMeta;
 }
 
+export interface DuplicateCheckRequest {
+  programSlug: string;
+  key: string;
+}
+
+export interface DuplicateCheckResponse {
+  ok: boolean;
+  isDuplicate: boolean;
+  existingReport?: {
+    _id: string;
+    eventType: KeyReportEvent;
+    programSlug: string;
+    keyHash: string;
+    keyIdentifier: string;
+    createdAt: string;
+  };
+  error?: string;
+}
+
+export interface RenewReportRequest {
+  reportId: string;
+  newEventType: KeyReportEvent;
+  programSlug: string;
+  key: string;
+}
+
+export interface RenewReportResponse {
+  ok: boolean;
+  updatedReport?: {
+    _id: string;
+    eventType: KeyReportEvent;
+    programSlug: string;
+    keyHash: string;
+    keyIdentifier: string;
+    createdAt: string;
+  };
+  error?: string;
+}
+
 // Geolocation types
 export interface LocationData {
   country?: string;

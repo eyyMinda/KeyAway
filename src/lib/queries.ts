@@ -67,6 +67,11 @@ export const keyReportsQuery = `*[_type=="keyReport" && createdAt >= $since]{
       _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
 
+/* ------------ Duplicate Key Report Check ------------ */
+export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHash && programSlug == $programSlug && keyHash == $keyHash]{
+      _id, eventType, programSlug, keyHash, keyIdentifier, createdAt
+    } | order(createdAt desc) [0]`;
+
 /* ------------ Popular Programs ------------ */
 export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt desc) [0...6]{
   title, slug, description, image, cdKeys[]

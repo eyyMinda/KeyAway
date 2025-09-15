@@ -10,10 +10,12 @@ import { logger } from "@/src/lib/logger";
 export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ key: string }>) {
   const [reportData, setReportData] = useState<Map<string, ReportData>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const fetchReportData = async () => {
       try {
+        setLoading(true);
         const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
         const events = await client.fetch(keyReportsQuery, { since });
 
@@ -66,7 +68,7 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
     };
 
     fetchReportData();
-  }, [programSlug, currentCdKeys]);
+  }, [programSlug, currentCdKeys, refreshTrigger]);
 
   const getReportData = useCallback(
     async (key: string): Promise<ReportData> => {
@@ -76,5 +78,9 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
     [reportData]
   );
 
-  return { getReportData, loading };
+  const refreshReportData = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
+
+  return { getReportData, loading, refreshReportData };
 }
