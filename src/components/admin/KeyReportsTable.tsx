@@ -3,7 +3,7 @@ import { ExpiredKeyReport } from "@/src/types/admin";
 import { CDKeyStatus } from "@/src/types/program";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
 
-interface ExpiredKeysTableProps {
+interface KeyReportsTableProps {
   reports: ExpiredKeyReport[];
   pendingChanges: Map<string, { originalStatus: CDKeyStatus; newStatus: CDKeyStatus }>;
   saving: Set<string>;
@@ -20,7 +20,7 @@ const STATUS_OPTIONS: Record<CDKeyStatus, string> = {
   limit: "Limit Reached"
 };
 
-export default function ExpiredKeysTable({
+export default function KeyReportsTable({
   reports,
   pendingChanges,
   saving,
@@ -28,12 +28,12 @@ export default function ExpiredKeysTable({
   onSaveStatusChange,
   onCancelStatusChange,
   onViewDetails
-}: ExpiredKeysTableProps) {
+}: KeyReportsTableProps) {
   if (reports.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 text-lg">No expired key reports found</div>
-        <div className="text-gray-400 text-sm mt-2">Reports will appear here when users report expired keys</div>
+        <div className="text-gray-500 text-lg">No key reports found</div>
+        <div className="text-gray-400 text-sm mt-2">Reports will appear here when users report key status changes</div>
       </div>
     );
   }

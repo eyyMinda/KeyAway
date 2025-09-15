@@ -56,18 +56,18 @@ export default function AdminHomePage() {
           </div>
         </Link>
 
-        {/* Expired Keys Card */}
-        <Link href="/admin/expired-keys" className="group">
-          <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 group-hover:border-red-300">
+        {/* Key Reports Card */}
+        <Link href="/admin/key-reports" className="group">
+          <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 group-hover:border-orange-300">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                <span className="text-2xl">⚠️</span>
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                <span className="text-2xl">🔄</span>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
-                  Expired Keys
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
+                  Key Reports
                 </h3>
-                <p className="text-sm text-gray-500">Manage reported expired CD keys</p>
+                <p className="text-sm text-gray-500">Manage all CD key reports (working, expired, limit reached)</p>
               </div>
             </div>
           </div>

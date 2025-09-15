@@ -50,9 +50,9 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                 Events
               </Link>
               <Link
-                href="/admin/expired-keys"
+                href="/admin/key-reports"
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors">
-                Expired Keys
+                Key Reports
               </Link>
             </nav>
 
@@ -94,10 +94,10 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                   Events
                 </Link>
                 <Link
-                  href="/admin/expired-keys"
+                  href="/admin/key-reports"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}>
-                  Expired Keys
+                  Key Reports
                 </Link>
               </nav>
             </div>

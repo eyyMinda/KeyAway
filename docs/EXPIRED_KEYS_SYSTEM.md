@@ -30,7 +30,7 @@ src/
 │   └── program/[slug]/
 │       └── page.tsx             # Updated program page
 ├── components/
-│   └── ExpiredKeysUpdater.tsx   # Manual update component
+│   └── KeyStatusUpdater.tsx   # Manual update component
 └── middleware.ts                 # Rate limiting middleware
 ```
 
@@ -108,10 +108,10 @@ Runs every 6 hours to update all expired keys.
 ### Manual Update Component
 
 ```tsx
-import ExpiredKeysUpdater from "@/src/components/ExpiredKeysUpdater";
+import KeyStatusUpdater from "@/src/components/program/KeyStatusUpdater";
 
 // Add to admin pages or program pages
-<ExpiredKeysUpdater />;
+<KeyStatusUpdater />;
 ```
 
 ### Server Action Usage

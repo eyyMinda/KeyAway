@@ -5,13 +5,13 @@ import { client } from "@/src/sanity/lib/client";
 import { keyReportsQuery, allProgramsQuery } from "@/src/lib/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
-import ExpiredKeysTable from "@/src/components/admin/ExpiredKeysTable";
+import KeyReportsTable from "@/src/components/admin/KeyReportsTable";
 import { Program, ExpiredKeyReport } from "@/src/types";
 import { hashCDKey } from "@/src/lib/keyHashing";
 import { logger } from "@/src/lib/logger";
 import { useStatusChange } from "@/src/hooks/useStatusChange";
 
-export default function ExpiredKeysPage() {
+export default function KeyReportsPage() {
   const [reports, setReports] = useState<ExpiredKeyReport[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ export default function ExpiredKeysPage() {
         const programsData: Program[] = await client.fetch(allProgramsQuery);
         setPrograms(programsData);
 
-        // Fetch expired key reports from last 30 days
+        // Fetch key reports from last 30 days
         const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
         const events = await client.fetch(keyReportsQuery, { since });
 
@@ -151,9 +151,9 @@ export default function ExpiredKeysPage() {
 
         const finalReports = Array.from(keyReports.values()).sort((a, b) => b.reportCount - a.reportCount);
         setReports(finalReports);
-        logger.collapse(`Loaded ${finalReports.length} expired key reports`, "Reports Loaded", "success");
+        logger.collapse(`Loaded ${finalReports.length} key reports`, "Reports Loaded", "success");
       } catch (error) {
-        logger.collapse(error, "Error fetching expired key reports", "error");
+        logger.collapse(error, "Error fetching key reports", "error");
       } finally {
         setLoading(false);
       }
@@ -173,11 +173,11 @@ export default function ExpiredKeysPage() {
 
   if (loading) {
     return (
-      <ProtectedAdminLayout title="Expired Key Reports" subtitle="Manage reported expired CD keys">
+      <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading expired key reports...</p>
+            <p className="text-gray-600">Loading key reports...</p>
           </div>
         </div>
       </ProtectedAdminLayout>
@@ -185,7 +185,7 @@ export default function ExpiredKeysPage() {
   }
 
   return (
-    <ProtectedAdminLayout title="Expired Key Reports" subtitle="Manage reported expired CD keys">
+    <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
       <div className="space-y-6">
         {/* Filter */}
         <div className="bg-white rounded-lg shadow p-4">
@@ -212,7 +212,7 @@ export default function ExpiredKeysPage() {
 
         {/* Reports Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <ExpiredKeysTable
+          <KeyReportsTable
             reports={filteredReports}
             pendingChanges={pendingChanges}
             saving={saving}
