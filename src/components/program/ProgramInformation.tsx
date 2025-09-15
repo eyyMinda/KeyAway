@@ -13,9 +13,9 @@ interface ProgramInformationProps {
 
 export default function ProgramInformation({ program, totalKeys, workingKeys }: ProgramInformationProps) {
   return (
-    <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 py-16">
+    <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 py-8 sm:py-12 lg:py-16">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Image */}
           <div className="order-2 lg:order-1">
             {program.image ? (
