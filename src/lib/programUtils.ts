@@ -103,3 +103,13 @@ export function searchPrograms(programs: ProgramWithStats[], searchTerm: string)
     program => program.title.toLowerCase().includes(term) || program.description.toLowerCase().includes(term)
   );
 }
+
+/**
+ * Convert kebab-case slug to proper title case
+ */
+export function formatSlugToTitle(slug: string): string {
+  return slug
+    .split("-")
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}

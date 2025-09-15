@@ -2,6 +2,7 @@ import React from "react";
 import { ExpiredKeyReport } from "@/src/types/admin";
 import { CDKeyStatus } from "@/src/types/program";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
+import { formatSlugToTitle } from "@/src/lib/programUtils";
 
 interface KeyReportsTableProps {
   reports: ExpiredKeyReport[];
@@ -64,7 +65,9 @@ export default function KeyReportsTable({
 
             return (
               <tr key={`${report.programSlug}-${report.key}-${index}`} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{report.programSlug}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {formatSlugToTitle(report.programSlug)}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">{report.key}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="space-y-2">
