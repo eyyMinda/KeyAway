@@ -8,8 +8,10 @@ import CommentsSection from "@/src/components/program/comments/CommentsSection";
 import { sortCdKeysByStatus } from "@/src/lib/cdKeyUtils";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanityActions";
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsQuery } from "@/src/lib/queries";
+import { popularProgramsQuery, storeDetailsQuery } from "@/src/lib/queries";
 import { generateProgramMetadata } from "@/src/lib/metadata";
+import { generateProgramPageJsonLd } from "@/src/lib/jsonLd";
+import JsonLd from "@/src/components/JsonLd";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -37,29 +39,39 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     const totalKeys = sortedCdKeys.length;
     const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
 
-    // Get related programs (excluding current program)
-    const allPrograms = await client.fetch(popularProgramsQuery);
+    // Get related programs and store data (excluding current program)
+    const [allPrograms, storeData] = await Promise.all([
+      client.fetch(popularProgramsQuery),
+      client.fetch(storeDetailsQuery)
+    ]);
     const relatedPrograms = allPrograms
       .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
       .slice(0, 5);
 
+    // Generate JSON-LD for program page
+    const storeInfo = storeData?.[0] || { title: "KeyAway" };
+    const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
+
     return (
-      <main className="min-h-screen bg-neutral-900">
-        {/* 1. Program Information - Most Important */}
-        <ProgramInformation program={program} totalKeys={totalKeys} workingKeys={workingKeys} />
+      <>
+        <JsonLd data={jsonLd} />
+        <main className="min-h-screen bg-neutral-900">
+          {/* 1. Program Information - Most Important */}
+          <ProgramInformation program={program} totalKeys={totalKeys} workingKeys={workingKeys} />
 
-        {/* 2. CD Key Table - Second Most Important */}
-        <CDKeyTable cdKeys={sortedCdKeys} slug={slug} />
+          {/* 2. CD Key Table - Second Most Important */}
+          <CDKeyTable cdKeys={sortedCdKeys} slug={slug} />
 
-        {/* 3. Activation Instructions */}
-        <ActivationInstructions />
+          {/* 3. Activation Instructions */}
+          <ActivationInstructions />
 
-        {/* 4. Related Programs */}
-        <RelatedPrograms programs={relatedPrograms} currentSlug={slug} />
+          {/* 4. Related Programs */}
+          <RelatedPrograms programs={relatedPrograms} currentSlug={slug} />
 
-        {/* 5. Comments Section */}
-        <CommentsSection />
-      </main>
+          {/* 5. Comments Section */}
+          <CommentsSection />
+        </main>
+      </>
     );
   } catch (error) {
     console.error("Error in ProgramPage:", error);

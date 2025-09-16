@@ -1,6 +1,8 @@
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsByViewsQuery, siteStatsQuery } from "@lib/queries";
+import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery } from "@lib/queries";
 import { generateHomePageMetadata } from "@/src/lib/metadata";
+import { generateHomePageJsonLd } from "@/src/lib/jsonLd";
+import JsonLd from "@/src/components/JsonLd";
 
 // Import homepage sections
 import HeroSection from "@/src/components/home/HeroSection";
@@ -22,27 +24,35 @@ export default async function HomePage() {
   const weekAgoISO = weekAgo.toISOString();
 
   // Fetch all data in parallel for better performance
-  const [popularPrograms, stats] = await Promise.all([
+  const [popularPrograms, stats, storeData] = await Promise.all([
     client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
-    client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } })
+    client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } }),
+    client.fetch(storeDetailsQuery, {}, { next: { tags: ["homepage"] } })
   ]);
 
+  // Generate JSON-LD for homepage
+  const storeInfo = storeData?.[0] || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
+  const jsonLd = generateHomePageJsonLd(storeInfo);
+
   return (
-    <main>
-      {/* Hero Section */}
-      <HeroSection />
+    <>
+      <JsonLd data={jsonLd} />
+      <main>
+        {/* Hero Section */}
+        <HeroSection />
 
-      {/* Popular Programs Section */}
-      <PopularProgramsSection programs={popularPrograms} />
+        {/* Popular Programs Section */}
+        <PopularProgramsSection programs={popularPrograms} />
 
-      {/* Features Section */}
-      <FeaturesSection />
+        {/* Features Section */}
+        <FeaturesSection />
 
-      {/* Statistics Section */}
-      <StatsSection stats={stats} />
+        {/* Statistics Section */}
+        <StatsSection stats={stats} />
 
-      {/* Call-to-Action Section */}
-      <CTASection />
-    </main>
+        {/* Call-to-Action Section */}
+        <CTASection />
+      </main>
+    </>
   );
 }
