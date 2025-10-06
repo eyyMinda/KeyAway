@@ -83,7 +83,7 @@ export function aggregateEvents(events: AnalyticsEventData[]): AggregatedData {
     if (event.country) byCountry.set(event.country, (byCountry.get(event.country) || 0) + 1);
     if (event.referrer) {
       try {
-        const hostname = new URL(event.referrer).hostname;
+        const hostname = event.referrer.startsWith("http") ? new URL(event.referrer).hostname : "www.keyaway.app";
         byReferrer.set(hostname, (byReferrer.get(hostname) || 0) + 1);
       } catch {
         // Invalid URL, skip

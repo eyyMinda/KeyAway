@@ -95,12 +95,14 @@ export default function EventsTable({
                 <td className="max-w-3xs px-6 py-4 text-sm text-gray-900">
                   {event.referrer ? (
                     <a
-                      href={event.referrer}
+                      href={
+                        event.referrer.startsWith("http") ? event.referrer : `https://www.keyaway.app${event.referrer}`
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-800 text-xs truncate max-w-32 block"
                       title={event.referrer}>
-                      {new URL(event.referrer).hostname}
+                      {event.referrer.startsWith("http") ? new URL(event.referrer).hostname : "www.keyaway.app"}
                     </a>
                   ) : (
                     <span className="text-gray-400">-</span>

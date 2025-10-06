@@ -56,7 +56,8 @@ export default function RecentActivity({
                       {event.path && <span className="text-xs text-gray-500 font-mono">{event.path}</span>}
                       {event.referrer && (
                         <span className="text-xs text-gray-500 truncate max-w-32" title={event.referrer}>
-                          from {new URL(event.referrer).hostname}
+                          from{" "}
+                          {event.referrer.startsWith("http") ? new URL(event.referrer).hostname : "www.keyaway.app"}
                         </span>
                       )}
                     </div>

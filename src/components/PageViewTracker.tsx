@@ -7,7 +7,6 @@ import { getUTMParameters } from "@/src/lib/utmUtils";
 
 // Debug logger
 const log = (...args: unknown[]) => {
-  // eslint-disable-next-line no-console
   console.info("PageViewTracker:", ...args);
 };
 
@@ -38,7 +37,9 @@ export default function PageViewTracker() {
         // Prefer internal referrer (previous path) for SPA nav; fallback to document.referrer
         const externalReferrer = document.referrer || undefined;
         const internalReferrer =
-          prevPathRef.current && prevPathRef.current !== pathname ? prevPathRef.current : undefined;
+          prevPathRef.current && prevPathRef.current !== pathname
+            ? `https://www.keyaway.app${prevPathRef.current}`
+            : undefined;
 
         // Extract program slug from pathname if it's a program page
         const programSlug = pathname.startsWith("/program/")
