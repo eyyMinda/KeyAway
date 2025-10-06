@@ -1,6 +1,7 @@
 "use client";
 
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
+import SearchInput from "@/src/components/ui/SearchInput";
 import { useState, useEffect } from "react";
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/queries";
@@ -55,13 +56,7 @@ export default function ProgramsPage() {
         <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex-1 max-w-md">
-              <input
-                type="text"
-                placeholder="Search programs..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search programs..." />
             </div>
             <div className="flex gap-2">
               <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">

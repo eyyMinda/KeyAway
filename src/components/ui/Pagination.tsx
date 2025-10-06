@@ -24,6 +24,7 @@ export default function Pagination({
   alwaysVisible = false
 }: PaginationProps) {
   if (totalPages <= 1 && !alwaysVisible) return null;
+  if (totalItems === 0) return null;
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);

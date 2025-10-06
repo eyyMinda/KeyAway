@@ -1,4 +1,4 @@
-import { FaSearch } from "react-icons/fa";
+import SearchInput from "@/src/components/ui/SearchInput";
 import { ProgramsFilterProps, FilterType, SortType } from "@/src/types/programs";
 
 export default function ProgramsFilter({
@@ -14,16 +14,7 @@ export default function ProgramsFilter({
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Search */}
         <div className="flex-1">
-          <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search programs..."
-              value={searchTerm}
-              onChange={e => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-          </div>
+          <SearchInput value={searchTerm} onChange={onSearchChange} placeholder="Search programs..." />
         </div>
 
         {/* Filters */}

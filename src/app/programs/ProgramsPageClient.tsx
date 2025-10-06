@@ -61,27 +61,32 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
 
       {/* Results Count */}
       <div className="mb-6">
-        <p className="text-gray-600">
-          Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPrograms.length)} of{" "}
-          {filteredAndSortedPrograms.length} programs
-        </p>
+        {filteredAndSortedPrograms.length === 0 ? (
+          <p className="text-gray-600">No results</p>
+        ) : (
+          <p className="text-gray-600">
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPrograms.length)} of{" "}
+            {filteredAndSortedPrograms.length} programs
+          </p>
+        )}
       </div>
 
       {/* Programs Grid */}
       <ProgramsGrid programs={paginatedPrograms} maxViews={maxViews} maxDownloads={maxDownloads} />
 
       {/* Pagination */}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={filteredAndSortedPrograms.length}
-        itemsPerPage={12} // This should match programsPerPage in ProgramsPageClient
-        onPageChange={setCurrentPage}
-        variant="detailed"
-        showInfo={false}
-        alwaysVisible={true}
-        className="mt-12"
-      />
+      {filteredAndSortedPrograms.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredAndSortedPrograms.length}
+          itemsPerPage={12} // This should match programsPerPage in ProgramsPageClient
+          onPageChange={setCurrentPage}
+          variant="detailed"
+          showInfo={false}
+          className="mt-12"
+        />
+      )}
     </div>
   );
 }
