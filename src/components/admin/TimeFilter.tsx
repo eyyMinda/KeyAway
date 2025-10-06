@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { FaChevronDown } from "react-icons/fa";
 
 interface TimeFilterProps {
   selectedPeriod: string;
@@ -67,13 +68,9 @@ export default function TimeFilter({
             }`}>
             {period.label}
             {period.value === "custom" && (
-              <svg
-                className={`w-4 h-4 transition-transform duration-200 ${showCustomRange ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+              <FaChevronDown
+                className={`w-3 h-3 transition-transform duration-200 ${showCustomRange ? "rotate-180" : ""}`}
+              />
             )}
           </button>
         ))}
