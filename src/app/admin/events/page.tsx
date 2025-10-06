@@ -2,6 +2,7 @@
 
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import TimeFilter from "@/src/components/admin/TimeFilter";
+import Pagination from "@/src/components/ui/Pagination";
 import { useState, useEffect, useCallback } from "react";
 import { client } from "@/src/sanity/lib/client";
 import { trackingEventsQuery, trackingEventsWithRangeQuery } from "@/src/lib/queries";
@@ -13,12 +14,14 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<string>("all");
   const [selectedPeriod, setSelectedPeriod] = useState("30d");
+  const [currentPage, setCurrentPage] = useState(1);
   const [customDateRange, setCustomDateRange] = useState({
     start: "",
     end: ""
   });
 
   const tableColumns = ["Event Type", "Program", "Social Platform", "Path", "Location", "Referrer", "Timestamp"];
+  const eventsPerPage = 25;
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -55,17 +58,31 @@ export default function EventsPage() {
 
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
+    setCurrentPage(1); // Reset to first page when period changes
   };
 
   const handleCustomDateChange = (start: string, end: string) => {
     setCustomDateRange({ start, end });
+    setCurrentPage(1); // Reset to first page when date range changes
     // Only trigger fetch if both dates are selected and we're in custom mode
     if (start && end && selectedPeriod === "custom") {
       // The useEffect will trigger the fetch automatically
     }
   };
 
+  const handleEventFilterChange = (eventType: string) => {
+    setSelectedEvent(eventType);
+    setCurrentPage(1); // Reset to first page when event filter changes
+  };
+
   const filteredEvents = selectedEvent === "all" ? events : events.filter(event => event.event === selectedEvent);
+
+  // Pagination logic
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / eventsPerPage));
+  const clampedPage = Math.min(currentPage, totalPages);
+  const pageStartIndex = (clampedPage - 1) * eventsPerPage;
+  const pageEndIndex = Math.min(pageStartIndex + eventsPerPage, filteredEvents.length);
+  const paginatedEvents = filteredEvents.slice(pageStartIndex, pageEndIndex);
 
   const eventTypes = Array.from(new Set(events.map(e => e.event)));
 
@@ -102,7 +119,7 @@ export default function EventsPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Events</h3>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setSelectedEvent("all")}
+                onClick={() => handleEventFilterChange("all")}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   selectedEvent === "all" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}>
@@ -154,7 +171,7 @@ export default function EventsPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Events</h3>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setSelectedEvent("all")}
+              onClick={() => handleEventFilterChange("all")}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                 selectedEvent === "all" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}>
@@ -163,7 +180,7 @@ export default function EventsPage() {
             {eventTypes.map(eventType => (
               <button
                 key={eventType}
-                onClick={() => setSelectedEvent(eventType)}
+                onClick={() => handleEventFilterChange(eventType)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   selectedEvent === eventType ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}>
@@ -197,7 +214,7 @@ export default function EventsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredEvents.slice(0, 50).map(event => (
+              {paginatedEvents.map(event => (
                 <tr key={event._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
@@ -268,6 +285,21 @@ export default function EventsPage() {
             <div className="text-4xl mb-4">📊</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
             <p className="text-gray-500">No events match the current filter criteria.</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {filteredEvents.length > 0 && (
+          <div className="p-4 border-t border-gray-200">
+            <Pagination
+              currentPage={clampedPage}
+              totalPages={totalPages}
+              totalItems={filteredEvents.length}
+              itemsPerPage={eventsPerPage}
+              onPageChange={setCurrentPage}
+              variant="simple"
+              className=""
+            />
           </div>
         )}
       </div>
