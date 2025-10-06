@@ -21,9 +21,3 @@ export interface ProgramsGridProps {
   maxViews: number;
   maxDownloads: number;
 }
-
-export interface ProgramsPaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}

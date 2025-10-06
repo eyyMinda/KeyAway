@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ProgramsFilter, ProgramsGrid, ProgramsPagination } from "@/src/components/programs";
+import { ProgramsFilter, ProgramsGrid } from "@/src/components/programs";
+import Pagination from "@/src/components/ui/Pagination";
 import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
 import { sortPrograms, filterProgramsByKeys, searchPrograms } from "@/src/lib/programUtils";
 
@@ -70,7 +71,17 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
       <ProgramsGrid programs={paginatedPrograms} maxViews={maxViews} maxDownloads={maxDownloads} />
 
       {/* Pagination */}
-      <ProgramsPagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredAndSortedPrograms.length}
+        itemsPerPage={12} // This should match programsPerPage in ProgramsPageClient
+        onPageChange={setCurrentPage}
+        variant="detailed"
+        showInfo={false}
+        alwaysVisible={true}
+        className="mt-12"
+      />
     </div>
   );
 }

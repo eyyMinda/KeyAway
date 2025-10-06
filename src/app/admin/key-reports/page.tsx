@@ -5,7 +5,7 @@ import { client } from "@/src/sanity/lib/client";
 import { keyReportsQuery, allProgramsQuery } from "@/src/lib/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
-import KeyReportsTable from "@/src/components/admin/KeyReportsTable";
+import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";
 import { Program, ExpiredKeyReport } from "@/src/types";
 import { hashCDKey } from "@/src/lib/keyHashing";
 import { logger } from "@/src/lib/logger";
