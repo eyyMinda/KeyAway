@@ -62,6 +62,11 @@ export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $si
       _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
 
+/* ------------ Analytics with Custom Date Range ------------ */
+export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && createdAt >= $since && createdAt <= $until]{
+      _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+    } | order(createdAt desc)`;
+
 /* ------------ Key Reports ------------ */
 export const keyReportsQuery = `*[_type=="keyReport" && createdAt >= $since]{
       _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt

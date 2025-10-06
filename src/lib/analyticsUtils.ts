@@ -15,9 +15,12 @@ export function getDateFromPeriod(period: string, customDateRange?: { start: str
     case "90d":
       return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
     case "custom":
-      return customDateRange?.start
-        ? new Date(customDateRange.start).toISOString()
-        : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      if (customDateRange?.start && customDateRange?.end) {
+        // Return the start date for the query
+        return new Date(customDateRange.start).toISOString();
+      }
+      // Return a very old date if custom range is not properly set (will result in no events)
+      return new Date("1970-01-01").toISOString();
     default:
       return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TimeFilterProps {
   selectedPeriod: string;
@@ -29,17 +29,27 @@ export default function TimeFilter({
 }: TimeFilterProps) {
   const [showCustomRange, setShowCustomRange] = useState(false);
 
+  // Automatically show custom range when custom period is selected
+  useEffect(() => {
+    setShowCustomRange(selectedPeriod === "custom");
+  }, [selectedPeriod]);
+
   const handlePeriodChange = (period: string) => {
-    onPeriodChange(period);
-    setShowCustomRange(period === "custom");
+    if (period === "custom" && selectedPeriod === "custom") {
+      // Toggle custom range visibility if custom is already selected
+      setShowCustomRange(!showCustomRange);
+    } else {
+      // Change period and show/hide custom range accordingly
+      onPeriodChange(period);
+      setShowCustomRange(period === "custom");
+    }
   };
 
   const handleCustomDateChange = (field: "start" | "end", value: string) => {
     if (onCustomDateChange && customDateRange) {
-      onCustomDateChange(
-        field === "start" ? value : customDateRange.start,
-        field === "end" ? value : customDateRange.end
-      );
+      const newStart = field === "start" ? value : customDateRange.start;
+      const newEnd = field === "end" ? value : customDateRange.end;
+      onCustomDateChange(newStart, newEnd);
     }
   };
 
@@ -52,16 +62,29 @@ export default function TimeFilter({
           <button
             key={period.value}
             onClick={() => handlePeriodChange(period.value)}
-            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+            className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
               selectedPeriod === period.value ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}>
             {period.label}
+            {period.value === "custom" && (
+              <svg
+                className={`w-4 h-4 transition-transform duration-200 ${showCustomRange ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            )}
           </button>
         ))}
       </div>
 
       {showCustomRange && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 pt-4 border-t border-gray-200 animate-in slide-in-from-top-2 duration-200">
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Select Date Range</h4>
+            <p className="text-xs text-gray-500">Choose both start and end dates to apply the custom filter</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
@@ -69,7 +92,8 @@ export default function TimeFilter({
                 type="date"
                 value={customDateRange?.start || ""}
                 onChange={e => handleCustomDateChange("start", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                max={customDateRange?.end || new Date().toISOString().split("T")[0]}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
             <div>
@@ -78,10 +102,24 @@ export default function TimeFilter({
                 type="date"
                 value={customDateRange?.end || ""}
                 onChange={e => handleCustomDateChange("end", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                min={customDateRange?.start || ""}
+                max={new Date().toISOString().split("T")[0]}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
           </div>
+          {customDateRange?.start && customDateRange?.end && (
+            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center">
+                <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <p className="text-sm text-green-700">
+                  <span className="font-medium">Selected range:</span> {customDateRange.start} to {customDateRange.end}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

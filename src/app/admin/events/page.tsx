@@ -1,32 +1,69 @@
 "use client";
 
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
-import { useState, useEffect } from "react";
+import TimeFilter from "@/src/components/admin/TimeFilter";
+import { useState, useEffect, useCallback } from "react";
 import { client } from "@/src/sanity/lib/client";
-import { trackingEventsQuery } from "@/src/lib/queries";
+import { trackingEventsQuery, trackingEventsWithRangeQuery } from "@/src/lib/queries";
 import { AnalyticsEventData } from "@/src/types";
+import { getDateFromPeriod } from "@/src/lib/analyticsUtils";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<string>("all");
+  const [selectedPeriod, setSelectedPeriod] = useState("30d");
+  const [customDateRange, setCustomDateRange] = useState({
+    start: "",
+    end: ""
+  });
+
+  const tableColumns = ["Event Type", "Program", "Social Platform", "Path", "Location", "Referrer", "Timestamp"];
+
+  const fetchEvents = useCallback(async () => {
+    setLoading(true);
+    try {
+      const since = getDateFromPeriod(selectedPeriod, customDateRange);
+
+      let eventsData: AnalyticsEventData[];
+
+      if (selectedPeriod === "custom" && customDateRange.start && customDateRange.end) {
+        // Use custom range query only when both dates are selected
+        const until = new Date(customDateRange.end + "T23:59:59.999Z").toISOString();
+        eventsData = await client.fetch(trackingEventsWithRangeQuery, { since, until });
+      } else if (selectedPeriod === "custom") {
+        // Don't fetch if custom is selected but dates are incomplete
+        setEvents([]);
+        setLoading(false);
+        return;
+      } else {
+        // Use regular query for non-custom periods
+        eventsData = await client.fetch(trackingEventsQuery, { since });
+      }
+
+      setEvents(eventsData);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedPeriod, customDateRange]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      try {
-        const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(); // Last 7 days
-        const eventsData: AnalyticsEventData[] = await client.fetch(trackingEventsQuery, { since });
-        setEvents(eventsData);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
-  }, []);
+  }, [fetchEvents]);
+
+  const handlePeriodChange = (period: string) => {
+    setSelectedPeriod(period);
+  };
+
+  const handleCustomDateChange = (start: string, end: string) => {
+    setCustomDateRange({ start, end });
+    // Only trigger fetch if both dates are selected and we're in custom mode
+    if (start && end && selectedPeriod === "custom") {
+      // The useEffect will trigger the fetch automatically
+    }
+  };
 
   const filteredEvents = selectedEvent === "all" ? events : events.filter(event => event.event === selectedEvent);
 
@@ -45,8 +82,72 @@ export default function EventsPage() {
     );
   }
 
+  // Show message when custom range is selected but dates are incomplete
+  if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
+    return (
+      <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
+        {/* Time Filter */}
+        <div className="mb-6">
+          <TimeFilter
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={handlePeriodChange}
+            customDateRange={customDateRange}
+            onCustomDateChange={handleCustomDateChange}
+          />
+        </div>
+
+        {/* Event Filter */}
+        <div className="mb-6">
+          <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Events</h3>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedEvent("all")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                  selectedEvent === "all" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}>
+                All Events (0)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Custom Range Message */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">Select Date Range</h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>Please select both start and end dates to view events for the custom range.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ProtectedAdminLayout>
+    );
+  }
+
   return (
     <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
+      {/* Time Filter */}
+      <div className="mb-6">
+        <TimeFilter
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={handlePeriodChange}
+          customDateRange={customDateRange}
+          onCustomDateChange={handleCustomDateChange}
+        />
+      </div>
+
       {/* Event Filter */}
       <div className="mb-6">
         <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
@@ -54,7 +155,7 @@ export default function EventsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedEvent("all")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                 selectedEvent === "all" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}>
               All Events ({events.length})
@@ -63,7 +164,7 @@ export default function EventsPage() {
               <button
                 key={eventType}
                 onClick={() => setSelectedEvent(eventType)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   selectedEvent === eventType ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}>
                 {eventType.replace(/_/g, " ").toUpperCase()} ({events.filter(e => e.event === eventType).length})
@@ -86,25 +187,13 @@ export default function EventsPage() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Event Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Program
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Social Platform
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Path</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Location
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Referrer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Timestamp
-                </th>
+                {tableColumns.map(label => (
+                  <th
+                    key={label}
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
