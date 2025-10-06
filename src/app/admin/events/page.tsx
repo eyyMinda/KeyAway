@@ -233,6 +233,7 @@ export default function EventsPage() {
       {/* Events Table */}
       <EventsTable
         events={paginatedEvents}
+        totalItems={sortedEvents.length}
         columns={tableColumns}
         sortColumn={sortColumn}
         sortDirection={sortDirection}

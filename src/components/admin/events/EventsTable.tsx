@@ -5,6 +5,7 @@ import Pagination from "@/src/components/ui/Pagination";
 
 interface EventsTableProps {
   events: AnalyticsEventData[];
+  totalItems: number;
   columns: SortableColumn[];
   sortColumn?: string;
   sortDirection?: SortDirection;
@@ -17,6 +18,7 @@ interface EventsTableProps {
 
 export default function EventsTable({
   events,
+  totalItems,
   columns,
   sortColumn,
   sortDirection,
@@ -121,7 +123,7 @@ export default function EventsTable({
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={events.length}
+          totalItems={totalItems}
           itemsPerPage={itemsPerPage}
           onPageChange={onPageChange}
           variant="simple"
