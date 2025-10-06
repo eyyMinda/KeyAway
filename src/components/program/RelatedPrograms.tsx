@@ -8,10 +8,9 @@ import { Program } from "@/src/types";
 
 interface RelatedProgramsProps {
   programs: Program[];
-  currentSlug: string;
 }
 
-export default function RelatedPrograms({ programs, currentSlug }: RelatedProgramsProps) {
+export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsPerView = 3;
   const maxIndex = Math.max(0, programs.length - itemsPerView);

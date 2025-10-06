@@ -66,7 +66,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           <ActivationInstructions />
 
           {/* 4. Related Programs */}
-          <RelatedPrograms programs={relatedPrograms} currentSlug={slug} />
+          <RelatedPrograms programs={relatedPrograms} />
 
           {/* 5. Comments Section */}
           <CommentsSection />
