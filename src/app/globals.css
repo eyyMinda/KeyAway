@@ -1184,4 +1184,35 @@ body {
       background-position: 100% 50%;
     }
   }
+
+  /* Dropdown slide down animation */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Arrow pulse to white animation */
+  @keyframes pulseWhite {
+    0%,
+    100% {
+      color: rgb(75, 85, 99); /* gray-600 */
+    }
+    50% {
+      color: rgb(255, 255, 255); /* white */
+    }
+  }
+
+  .animate-pulse-white {
+    animation: pulseWhite 2s ease-in-out infinite;
+  }
+
+  .group:hover .animate-pulse-white {
+    animation: none;
+  }
 }

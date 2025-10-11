@@ -14,3 +14,6 @@ export * from "./layout";
 
 // General types
 export * from "./general";
+
+// Notification types
+export * from "./notifications";

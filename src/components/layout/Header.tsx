@@ -5,16 +5,19 @@ import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
 import MobileMenu from "@components/layout/MobileMenu";
 import AdminNavIcons from "@components/layout/AdminNavIcons";
+import AnnouncementNotifications from "@components/layout/AnnouncementNotifications";
 import { IdealImageClient } from "@/src/components/general/IdealImageClient";
 import { StoreDetails, SanityLink, LogoData } from "@/src/types";
+import { Notification } from "@/src/types/notifications";
 import { usePathname } from "next/navigation";
 
 interface HeaderProps {
   storeData: StoreDetails;
   logoData: LogoData;
+  notifications: Notification[];
 }
 
-export default function Header({ storeData, logoData }: HeaderProps) {
+export default function Header({ storeData, logoData, notifications }: HeaderProps) {
   const pathname = usePathname();
   const header = storeData?.header;
   let isLogo = false;
@@ -71,15 +74,22 @@ export default function Header({ storeData, logoData }: HeaderProps) {
               })}
           </nav>
 
+          {/* Announcement Notifications */}
+          <AnnouncementNotifications notifications={notifications} />
+
           {/* Admin Navigation Icons */}
           <AdminNavIcons />
         </div>
-        {/* Mobile Burger Button */}
-        <button
-          className="md:hidden focus:outline-none text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
-          onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <HiX size={24} /> : <HiMenu size={24} />}
-        </button>
+
+        {/* Mobile: Notification Bell + Burger Menu */}
+        <div className="md:hidden flex items-center gap-2">
+          <AnnouncementNotifications notifications={notifications} />
+          <button
+            className="focus:outline-none text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <HiX size={24} /> : <HiMenu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}

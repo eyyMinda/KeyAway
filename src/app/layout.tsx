@@ -12,6 +12,7 @@ import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/metadata";
+import { getRecentNotifications } from "@/src/lib/notificationUtils.server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,8 +44,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const storeData = await getStoreData();
-  const socialLinks = await client.fetch(socialLinksQuery);
+  const [storeData, socialLinks, notifications] = await Promise.all([
+    getStoreData(),
+    client.fetch(socialLinksQuery),
+    getRecentNotifications()
+  ]);
 
   const currentLogo = storeData?.logoLight;
   const logoData: LogoData = {
@@ -67,7 +71,7 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PageViewTracker />
         <div className="mainContent flex flex-col min-h-screen">
-          <Header storeData={storeData} logoData={logoData} />
+          <Header storeData={storeData} logoData={logoData} notifications={notifications} />
           {children}
           <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
         </div>
