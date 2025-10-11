@@ -12,7 +12,19 @@ interface AnnouncementNotificationsProps {
 
 export default function AnnouncementNotifications({ notifications }: AnnouncementNotificationsProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showMiniPopup, setShowMiniPopup] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Show mini popup after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (notifications.length > 0 && !isOpen) {
+        setShowMiniPopup(true);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [notifications.length, isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -31,13 +43,19 @@ export default function AnnouncementNotifications({ notifications }: Announcemen
 
   const unreadCount = notifications.length;
 
+  // Handle opening the dropdown
+  const handleOpenDropdown = () => {
+    setIsOpen(!isOpen);
+    setShowMiniPopup(false); // Hide mini popup when opening dropdown
+  };
+
   if (unreadCount === 0) return null;
 
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Notification Bell Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleOpenDropdown}
         className="relative p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer focus:outline-none"
         aria-label="View announcements">
         <FaBell size={20} />
@@ -47,6 +65,20 @@ export default function AnnouncementNotifications({ notifications }: Announcemen
           </span>
         )}
       </button>
+
+      {/* Mini Popup - Appears after 5 seconds */}
+      {showMiniPopup && !isOpen && (
+        <div
+          className="absolute top-full right-0 mt-2 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap z-50 animate-fadeIn"
+          style={{ animation: "fadeIn 0.5s ease-out" }}>
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+            <span>New updates available!</span>
+          </div>
+          {/* Small arrow pointer */}
+          <div className="absolute -top-1 right-4 w-2 h-2 bg-primary-600 transform rotate-45"></div>
+        </div>
+      )}
 
       {/* Dropdown */}
       {isOpen && (
