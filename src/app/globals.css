@@ -1197,22 +1197,19 @@ body {
     }
   }
 
-  /* Arrow pulse to white animation */
-  @keyframes pulseWhite {
-    0%,
-    100% {
-      color: rgb(75, 85, 99); /* gray-600 */
+  /* Fade in animation for mini popup */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
     }
-    50% {
-      color: rgb(255, 255, 255); /* white */
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
-  .animate-pulse-white {
-    animation: pulseWhite 2s ease-in-out infinite;
-  }
-
-  .group:hover .animate-pulse-white {
-    animation: none;
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out;
   }
 }
