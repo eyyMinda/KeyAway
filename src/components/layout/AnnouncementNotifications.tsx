@@ -14,17 +14,27 @@ export default function AnnouncementNotifications({ notifications }: Announcemen
   const [isOpen, setIsOpen] = useState(false);
   const [showMiniPopup, setShowMiniPopup] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const miniPopupTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Show mini popup after 5 seconds
+  // Function to schedule mini popup appearance
+  const scheduleMiniPopup = (delay: number) => {
+    // Clear any existing timer
+    if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
+
+    // Schedule new timer
+    miniPopupTimerRef.current = setTimeout(() => {
+      if (notifications.length > 0) setShowMiniPopup(true);
+    }, delay);
+  };
+
+  // Show mini popup after 5 seconds on initial load
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (notifications.length > 0 && !isOpen) {
-        setShowMiniPopup(true);
-      }
-    }, 5000);
+    scheduleMiniPopup(5000);
 
-    return () => clearTimeout(timer);
-  }, [notifications.length, isOpen]);
+    return () => {
+      if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
+    };
+  }, [notifications.length]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -47,6 +57,17 @@ export default function AnnouncementNotifications({ notifications }: Announcemen
   const handleOpenDropdown = () => {
     setIsOpen(!isOpen);
     setShowMiniPopup(false); // Hide mini popup when opening dropdown
+
+    // When closing the dropdown, schedule mini popup to appear after 2 minutes
+    if (isOpen) {
+      scheduleMiniPopup(120000); // 2 minutes
+    }
+  };
+
+  // Handle clicking on the mini popup (hide it and reschedule)
+  const handleMiniPopupClick = () => {
+    setShowMiniPopup(false);
+    scheduleMiniPopup(120000); // Reappear after 2 minutes
   };
 
   if (unreadCount === 0) return null;
@@ -69,14 +90,15 @@ export default function AnnouncementNotifications({ notifications }: Announcemen
       {/* Mini Popup - Appears after 5 seconds */}
       {showMiniPopup && !isOpen && (
         <div
-          className="absolute top-full right-0 mt-2 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap z-50 animate-fadeIn"
+          onClick={handleMiniPopupClick}
+          className="absolute top-full right-0 mt-2 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap z-50"
           style={{ animation: "fadeIn 0.5s ease-out" }}>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
             <span>New updates available!</span>
           </div>
           {/* Small arrow pointer */}
-          <div className="absolute -top-1 right-4 w-2 h-2 bg-primary-600 transform rotate-45"></div>
+          <div className="absolute -top-1 right-4 w-2 h-2 bg-primary-600 transform rotate-45 pointer-events-none"></div>
         </div>
       )}
 
