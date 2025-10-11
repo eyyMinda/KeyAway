@@ -176,3 +176,110 @@ export function sortCdKeysByStatus(cdKeys: CDKey[]): CDKey[] {
     return priorityA - priorityB;
   });
 }
+
+/**
+ * Calculate a quality score for a CD key based on version, status, and reports
+ * Higher score = better quality (shown first)
+ */
+export function calculateKeyScore(
+  cdKey: CDKey,
+  reportData: { working: number; expired: number; limit_reached: number }
+): number {
+  let score = 0;
+
+  // 1. Version priority (most important - weight: 10000)
+  const version = parseFloat(cdKey.version || "0");
+  score += version * 10000;
+
+  // 2. Status priority (weight: 1000)
+  const statusScores: Record<string, number> = {
+    new: 4,
+    active: 3,
+    limit: 2,
+    limit_reached: 2,
+    expired: 1
+  };
+  score += (statusScores[cdKey.status] || 0) * 1000;
+
+  // 3. Report ratio (weight: 1-100)
+  const totalReports = reportData.working + reportData.expired + reportData.limit_reached;
+  if (totalReports > 0) {
+    const positiveRatio = reportData.working / totalReports;
+    score += positiveRatio * 100;
+  } else {
+    // No reports = neutral score (50)
+    score += 50;
+  }
+
+  return score;
+}
+
+/**
+ * Sort CD keys by custom quality score (version > status > reports)
+ */
+export function sortCdKeysByScore(
+  cdKeys: CDKey[],
+  reportDataMap: Map<string, { working: number; expired: number; limit_reached: number }>
+): CDKey[] {
+  return [...cdKeys].sort((a, b) => {
+    const reportA = reportDataMap.get(a.key) || { working: 0, expired: 0, limit_reached: 0 };
+    const reportB = reportDataMap.get(b.key) || { working: 0, expired: 0, limit_reached: 0 };
+
+    const scoreA = calculateKeyScore(a, reportA);
+    const scoreB = calculateKeyScore(b, reportB);
+
+    return scoreB - scoreA; // Descending (highest score first)
+  });
+}
+
+/**
+ * Sort CD keys by a specific column
+ */
+export function sortCdKeysByColumn(
+  cdKeys: CDKey[],
+  sortColumn: string,
+  sortDirection: "asc" | "desc",
+  reportDataMap: Map<string, { working: number; expired: number; limit_reached: number }>
+): CDKey[] {
+  return [...cdKeys].sort((a, b) => {
+    let compareA: number;
+    let compareB: number;
+
+    switch (sortColumn) {
+      case "status":
+        const statusOrder: Record<string, number> = { new: 1, active: 2, limit: 3, expired: 4 };
+        compareA = statusOrder[a.status] || 999;
+        compareB = statusOrder[b.status] || 999;
+        break;
+      case "version":
+        compareA = parseFloat(a.version || "0");
+        compareB = parseFloat(b.version || "0");
+        break;
+      case "validFrom":
+        compareA = new Date(a.validFrom || 0).getTime();
+        compareB = new Date(b.validFrom || 0).getTime();
+        break;
+      case "validUntil":
+        compareA = new Date(a.validUntil || 0).getTime();
+        compareB = new Date(b.validUntil || 0).getTime();
+        break;
+      case "reports":
+        const reportA = reportDataMap.get(a.key) || { working: 0, expired: 0, limit_reached: 0 };
+        const reportB = reportDataMap.get(b.key) || { working: 0, expired: 0, limit_reached: 0 };
+        const totalA = reportA.working + reportA.expired + reportA.limit_reached;
+        const totalB = reportB.working + reportB.expired + reportB.limit_reached;
+        // Sort by positive ratio (working reports / total reports)
+        const ratioA = totalA > 0 ? reportA.working / totalA : 0.5;
+        const ratioB = totalB > 0 ? reportB.working / totalB : 0.5;
+        compareA = ratioA;
+        compareB = ratioB;
+        break;
+      default:
+        return 0;
+    }
+
+    if (compareA < compareB) return sortDirection === "asc" ? -1 : 1;
+    if (compareA > compareB) return sortDirection === "asc" ? 1 : -1;
+    return 0;
+  });
+}

@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { CDKey, CDKeyTableProps, ReportData } from "@/src/types";
 import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import CDKeyMobileCard from "@/src/components/program/cdkeys/CDKeyMobileCard";
 import KeyStatusTooltip from "@/src/components/program/KeyStatusTooltip";
-import { getExpiringKeysMessage } from "@/src/lib/cdKeyUtils";
+import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
+import { getExpiringKeysMessage, sortCdKeysByScore, sortCdKeysByColumn } from "@/src/lib/cdKeyUtils";
 import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 
 export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   const expiringKeysMessage = getExpiringKeysMessage(cdKeys);
   const { getReportData, loading, refreshReportData } = useKeyReportData(slug, cdKeys);
   const [reportDataMap, setReportDataMap] = useState<Map<string, ReportData>>(new Map());
+  const [sortColumn, setSortColumn] = useState<string>("");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   // Load report data for all keys
   useEffect(() => {
@@ -33,6 +36,36 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   const handleReportSubmitted = () => {
     refreshReportData();
   };
+
+  // Define table columns
+  const tableColumns: SortableColumn[] = [
+    { key: "key", label: "Key", sortable: false, className: "text-left" },
+    { key: "status", label: "Status", sortable: true, className: "text-center" },
+    { key: "reports", label: "Reports", sortable: true, className: "text-center" },
+    { key: "version", label: "Version", sortable: true, className: "text-center" },
+    { key: "validFrom", label: "Valid From", sortable: true, className: "text-center" },
+    { key: "validUntil", label: "Valid Until", sortable: true, className: "text-center" },
+    { key: "actions", label: "Actions", sortable: false, className: "text-center" }
+  ];
+
+  // Handle sort
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      // Status defaults to asc (new→active→limit→expired), others default to desc (latest first)
+      setSortDirection(column === "status" ? "asc" : "desc");
+    }
+  };
+
+  // Sort keys
+  const sortedKeys = useMemo(() => {
+    if (!sortColumn) {
+      return sortCdKeysByScore(cdKeys, reportDataMap);
+    }
+    return sortCdKeysByColumn(cdKeys, sortColumn, sortDirection, reportDataMap);
+  }, [cdKeys, sortColumn, sortDirection, reportDataMap]);
 
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-neutral-900 to-neutral-800">
@@ -84,7 +117,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
               {/* Mobile Card Layout */}
               <div className="block lg:hidden px-4 py-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {cdKeys.map((cdKey: CDKey, i: number) => (
+                  {sortedKeys.map((cdKey: CDKey, i: number) => (
                     <CDKeyMobileCard
                       key={i}
                       cdKey={cdKey}
@@ -99,19 +132,15 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
               {/* Desktop Table Layout */}
               <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-white/5">
-                    <tr>
-                      <th className="px-8 py-6 text-left text-sm font-semibold text-gray-200 text-nowrap">Key</th>
-                      <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Status</th>
-                      <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Reports</th>
-                      <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Version</th>
-                      <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Valid From</th>
-                      <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Valid Until</th>
-                      <th className="px-8 py-6 text-center text-sm font-semibold text-gray-200">Actions</th>
-                    </tr>
-                  </thead>
+                  <SortableTableHead
+                    columns={tableColumns}
+                    sortColumn={sortColumn}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
+                    className="bg-white/5 text-gray-200"
+                  />
                   <tbody className="divide-y divide-white/10">
-                    {cdKeys.map((cdKey: CDKey, i: number) => (
+                    {sortedKeys.map((cdKey: CDKey, i: number) => (
                       <CDKeyItem
                         key={i}
                         cdKey={cdKey}
