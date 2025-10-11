@@ -49,13 +49,21 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
       title: defaultData.title(storeTitle),
       description: defaultData.description,
       type: "website",
-      url: defaultData.url
+      url: defaultData.url,
+      images: [
+        {
+          url: "https://www.keyaway.app/images/KeyAway_Card.png",
+          width: 1200,
+          height: 630,
+          alt: storeTitle
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title: defaultData.title(storeTitle),
       description: defaultData.description,
-      images: ["https://www.keyaway.app/images/KeyAway_Logo.png"]
+      images: ["https://www.keyaway.app/images/KeyAway_Card.png"]
     },
     alternates: {
       canonical: defaultData.canonical
@@ -198,7 +206,7 @@ export function generateProgramsPageMetadata() {
       type: "website",
       images: [
         {
-          url: `${defaultData.canonical}/images/KeyAway_Logo.png`,
+          url: `${defaultData.canonical}/images/KeyAway_Card.png`,
           width: 1200,
           height: 630,
           alt: `${storeTitle} - All Programs`
@@ -208,7 +216,8 @@ export function generateProgramsPageMetadata() {
     twitter: {
       card: "summary_large_image",
       title: defaultData.title(storeTitle),
-      description: defaultData.description(storeTitle)
+      description: defaultData.description(storeTitle),
+      images: [`${defaultData.canonical}/images/KeyAway_Card.png`]
     },
     alternates: {
       canonical: `${defaultData.canonical}/programs`
