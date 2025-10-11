@@ -5,11 +5,11 @@ import { CDKey, CDKeyTableProps, ReportData } from "@/src/types";
 import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import CDKeyMobileCard from "@/src/components/program/cdkeys/CDKeyMobileCard";
 import KeyStatusTooltip from "@/src/components/program/KeyStatusTooltip";
-import { isKeyExpiringSoon } from "@/src/lib/cdKeyUtils";
+import { getExpiringKeysMessage } from "@/src/lib/cdKeyUtils";
 import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 
 export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
-  const hasExpiringSoonKeys = cdKeys.some((key: CDKey) => isKeyExpiringSoon(key));
+  const expiringKeysMessage = getExpiringKeysMessage(cdKeys);
   const { getReportData, loading, refreshReportData } = useKeyReportData(slug, cdKeys);
   const [reportDataMap, setReportDataMap] = useState<Map<string, ReportData>>(new Map());
 
@@ -52,20 +52,28 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
                 <KeyStatusTooltip />
               </div>
             </div>
-            {hasExpiringSoonKeys && (
-              <div className="mt-4 p-4 bg-primary-500/10 border border-primary-400/30 rounded-xl">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-primary-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {expiringKeysMessage && (
+              <div className="mt-4 p-4 bg-amber-500/10 border border-amber-400/30 rounded-xl">
+                <div className="flex items-start">
+                  <svg
+                    className="w-5 h-5 text-amber-400 mr-3 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                     />
                   </svg>
-                  <span className="text-primary-300 font-medium">
-                    Some keys are expiring within the next 24 hours. Use them soon!
-                  </span>
+                  <div className="flex-1">
+                    <p className="text-amber-300 font-medium">{expiringKeysMessage}</p>
+                    <p className="text-amber-400/70 text-sm mt-1">
+                      Note: Once expired, the key won&apos;t activate and your software&apos;s pro version will stop
+                      working.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

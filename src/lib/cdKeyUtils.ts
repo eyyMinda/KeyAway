@@ -65,6 +65,11 @@ export function getStatusTextFromCDKeyStatus(status: CDKeyStatus): string {
 }
 
 // Check if a key is expiring soon (existing function from cdKeyUtils.ts)
+/**
+ * Checks if a CD key is expiring within 30 days
+ * @param key - The CD key object with validUntil date
+ * @returns true if the key expires within 30 days (but not yet expired)
+ */
 export function isKeyExpiringSoon(key: { validUntil?: string }): boolean {
   if (!key.validUntil) return false;
 
@@ -72,7 +77,39 @@ export function isKeyExpiringSoon(key: { validUntil?: string }): boolean {
   const now = new Date();
   const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-  return daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+  return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+}
+
+/**
+ * Gets a human-readable message for expiring keys
+ * @param cdKeys - Array of CD keys to check
+ * @returns A message describing how soon keys are expiring, or null if no expiring keys
+ */
+export function getExpiringKeysMessage(cdKeys: Array<{ validUntil?: string }>): string | null {
+  const expiringKeys = cdKeys.filter(isKeyExpiringSoon);
+  if (expiringKeys.length === 0) return null;
+
+  // Find the soonest expiring key
+  const now = new Date();
+  let minDays = Infinity;
+
+  expiringKeys.forEach(key => {
+    if (key.validUntil) {
+      const validUntil = new Date(key.validUntil);
+      const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysUntilExpiry < minDays) minDays = daysUntilExpiry;
+    }
+  });
+
+  if (minDays === 1) {
+    return "Some keys expire in 24 hours. Activate them now before they expire!";
+  } else if (minDays <= 3) {
+    return `Some keys expire in ${minDays} days. Activate them soon before they expire!`;
+  } else if (minDays <= 7) {
+    return "Some keys expire within a week. Activate them before they expire!";
+  } else {
+    return `Some keys expire within a month (${minDays} days). Activate them before they expire!`;
+  }
 }
 
 // Get status color classes (existing function from cdKeyUtils.ts)
