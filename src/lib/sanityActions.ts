@@ -87,11 +87,15 @@ export async function getProgramWithUpdatedKeys(slug: string) {
       return key;
     });
 
-    // Update in Sanity if there were changes
-    if (hasUpdates) {
-      await client.patch(program._id).set({ cdKeys: updatedKeys }).commit();
-
-      console.log(`Updated expired keys for program: ${program.title}`);
+    // Update in Sanity if there were changes (non-blocking - don't fail if update fails)
+    if (hasUpdates && program._id) {
+      try {
+        await client.patch(program._id).set({ cdKeys: updatedKeys }).commit();
+        console.log(`Updated expired keys for program: ${program.title}`);
+      } catch (updateError) {
+        console.error("Failed to update expired keys in Sanity (non-critical):", updateError);
+        // Continue anyway - return the program with updated keys even if Sanity update failed
+      }
     }
     program.slug = { current: slug };
 
@@ -101,7 +105,8 @@ export async function getProgramWithUpdatedKeys(slug: string) {
       cdKeys: updatedKeys
     };
   } catch (error) {
-    console.error("Failed to get program with updated keys:", error);
-    throw new Error("Failed to fetch program");
+    console.error("Failed to fetch program:", error);
+    // Only throw if it's a fetch error - this means the program doesn't exist or network failed
+    return null;
   }
 }

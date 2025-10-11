@@ -47,7 +47,7 @@ export const allProgramsQuery = `
 `;
 export const programBySlugQuery = `
 *[_type == "program" && slug.current == $slug][0]{
-  title, description, image, downloadLink, cdKeys[]
+  _id, title, description, image, downloadLink, cdKeys[]
 }
 `;
 
