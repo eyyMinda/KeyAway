@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
+import { FaKey } from "react-icons/fa";
 import MobileMenu from "@components/layout/MobileMenu";
 import AdminNavIcons from "@components/layout/AdminNavIcons";
 import AnnouncementNotifications from "@components/layout/AnnouncementNotifications";
+import ContactModal from "@/src/components/contact/ContactModal";
 import { IdealImageClient } from "@/src/components/general/IdealImageClient";
 import { StoreDetails, SanityLink, LogoData } from "@/src/types";
 import { Notification } from "@/src/types/notifications";
@@ -27,6 +29,7 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
     headerLinks = header.headerLinks || [];
   }
   const [isOpen, setIsOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const toggleMenu = () => setIsOpen(!isOpen);
 
   return (
@@ -74,6 +77,15 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
               })}
           </nav>
 
+          {/* Suggest Key Button */}
+          <button
+            onClick={() => setIsContactModalOpen(true)}
+            className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            aria-label="Suggest a key">
+            <FaKey size={16} />
+            <span className="text-sm font-medium">Suggest a Key</span>
+          </button>
+
           {/* Announcement Notifications */}
           <AnnouncementNotifications notifications={notifications} />
 
@@ -81,8 +93,14 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
           <AdminNavIcons />
         </div>
 
-        {/* Mobile: Notification Bell + Burger Menu */}
+        {/* Mobile: Suggest Key + Notification Bell + Burger Menu */}
         <div className="md:hidden flex items-center gap-2">
+          <button
+            onClick={() => setIsContactModalOpen(true)}
+            className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            aria-label="Suggest a key">
+            <FaKey size={18} />
+          </button>
           <AnnouncementNotifications notifications={notifications} />
           <button
             className="focus:outline-none text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
@@ -94,6 +112,9 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
 
       {/* Mobile Menu */}
       <MobileMenu headerLinks={headerLinks} isOpen={isOpen} onClose={toggleMenu} />
+
+      {/* Contact Modal */}
+      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
     </header>
   );
 }

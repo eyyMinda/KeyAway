@@ -30,9 +30,10 @@ function renderHeaderCell(
   if (column.sortable && onSort) {
     const isActive = sortColumn === column.key;
     const aria = isActive ? (sortDirection === "asc" ? "ascending" : "descending") : "none";
-    const baseColor = isDarkTheme ? "text-gray-400" : "text-gray-400";
-    const activeColor = isDarkTheme ? "text-gray-100" : "text-gray-700";
-    const hoverColor = isDarkTheme ? "group-hover:text-gray-200" : "group-hover:text-gray-600";
+    // All columns same color, active is darker (full black/white)
+    const baseColor = isDarkTheme ? "text-gray-300" : "text-gray-600";
+    const activeColor = isDarkTheme ? "text-white" : "text-gray-900";
+    const hoverColor = isDarkTheme ? "group-hover:text-gray-200" : "group-hover:text-gray-800";
 
     return (
       <th
@@ -53,8 +54,13 @@ function renderHeaderCell(
       </th>
     );
   }
+  // Non-sortable columns use same color as inactive sortable columns
+  const nonSortableColor = isDarkTheme ? "text-gray-300" : "text-gray-600";
+
   return (
-    <th key={column.key} className={`px-8 py-6 text-sm font-semibold tracking-wider ${column.className || ""}`}>
+    <th
+      key={column.key}
+      className={`px-8 py-6 text-sm font-semibold tracking-wider ${nonSortableColor} ${column.className || ""}`}>
       {column.label}
     </th>
   );

@@ -17,8 +17,10 @@ export default function SearchInput({
   disabled = false
 }: SearchInputProps) {
   return (
-    <div className={`relative ${className}`}>
-      <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+    <div className={`relative h-fit ${className}`}>
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center pointer-events-none">
+        <FaSearch className="text-gray-400 w-4 h-4" />
+      </div>
       <input
         type="text"
         placeholder={placeholder}

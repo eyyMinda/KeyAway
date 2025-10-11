@@ -2,10 +2,12 @@
 
 import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types";
 import Link from "next/link";
+import { useState } from "react";
 import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";
-import { FaGithub, FaLinkedin, FaInstagram, FaTwitter, FaYoutube, FaGlobe } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram, FaTwitter, FaYoutube, FaGlobe, FaKey } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/trackEvent";
+import ContactModal from "@/src/components/contact/ContactModal";
 
 interface FooterProps {
   storeData: StoreDetails;
@@ -23,6 +25,7 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
     footerLinks = footer.footerLinks || [];
   }
 
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const currentYear = new Date().getFullYear();
 
   const getSocialIcon = (platform: string) => {
@@ -127,6 +130,18 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
           <div>
             <h4 className="text-lg font-semibold mb-4">Support & Follow</h4>
             <div className="flex flex-wrap gap-3">
+              {/* Suggest a Key */}
+              <button
+                onClick={() => setIsContactModalOpen(true)}
+                className="group bg-primary-600 hover:bg-primary-700 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-primary-500 cursor-pointer">
+                <div className="flex items-center justify-center space-x-2">
+                  <FaKey className="flex-shrink-0" />
+                  <div className="text-center min-w-0">
+                    <div className="text-sm font-bold whitespace-nowrap">Suggest a Key</div>
+                  </div>
+                </div>
+              </button>
+
               {/* Carrot Juice Support */}
               <Link
                 href="https://www.buymeacoffee.com/eyyMinda"
@@ -185,6 +200,9 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
           </div>
         </div>
       </div>
+
+      {/* Contact Modal */}
+      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
     </footer>
   );
 }

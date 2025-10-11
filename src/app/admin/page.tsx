@@ -73,6 +73,40 @@ export default function AdminHomePage() {
           </div>
         </Link>
 
+        {/* Key Suggestions Card */}
+        <Link href="/admin/key-suggestions" className="group">
+          <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 group-hover:border-yellow-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
+                <span className="text-2xl">🔑</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-yellow-600 transition-colors">
+                  Key Suggestions
+                </h3>
+                <p className="text-sm text-gray-500">Review user-submitted CD keys</p>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Messages Card */}
+        <Link href="/admin/messages" className="group">
+          <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 hover:shadow-lg transition-all duration-200 group-hover:border-pink-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center group-hover:bg-pink-200 transition-colors">
+                <span className="text-2xl">📬</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-pink-600 transition-colors">
+                  Messages
+                </h3>
+                <p className="text-sm text-gray-500">View and respond to contact messages</p>
+              </div>
+            </div>
+          </div>
+        </Link>
+
         {/* Settings Card */}
         <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 opacity-50">
           <div className="flex items-center space-x-4">

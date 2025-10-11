@@ -17,3 +17,6 @@ export * from "./general";
 
 // Notification types
 export * from "./notifications";
+
+// Contact types
+export * from "./contact";
