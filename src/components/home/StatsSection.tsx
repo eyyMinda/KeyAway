@@ -54,30 +54,34 @@ export default function StatsSection({ stats }: StatsSectionProps) {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-primary-600 to-blue-700 text-white">
-      <div className="max-w-[90rem] mx-auto px-6">
+    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-primary-600 to-blue-700 text-white">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4">Community Impact</h2>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Community Impact</h2>
+          <p className="text-base sm:text-lg lg:text-xl text-blue-100 max-w-2xl mx-auto px-2 leading-relaxed">
             Our community-driven platform has helped thousands of users access premium software for free
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {statItems.map((item, index) => {
             const IconComponent = item.icon;
             return (
               <div key={index} className="text-center group">
                 <div
-                  className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl border-2 ${getColorClasses(item.color)} mb-6 group-hover:scale-110 transition-transform`}>
-                  <IconComponent className="w-10 h-10" />
+                  className={`inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border-2 ${getColorClasses(item.color)} mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform`}>
+                  <IconComponent className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10" />
                 </div>
-                <div className="space-y-2">
-                  <div className="text-4xl lg:text-5xl font-bold text-white">{item.value.toLocaleString()}</div>
-                  <h3 className="text-lg font-semibold text-blue-100">{item.label}</h3>
-                  <p className="text-sm text-blue-200">{item.description}</p>
+                <div className="space-y-1 sm:space-y-2">
+                  <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">
+                    {item.value.toLocaleString()}
+                  </div>
+                  <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-blue-100 leading-snug">
+                    {item.label}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-blue-200 leading-tight">{item.description}</p>
                 </div>
               </div>
             );
@@ -85,14 +89,14 @@ export default function StatsSection({ stats }: StatsSectionProps) {
         </div>
 
         {/* Additional Info */}
-        <div className="mt-16 text-center">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold mb-4">Join Our Growing Community</h3>
-            <p className="text-blue-100 text-lg leading-relaxed mb-6">
+        <div className="mt-10 sm:mt-12 lg:mt-16 text-center">
+          <div className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 max-w-4xl mx-auto">
+            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Join Our Growing Community</h3>
+            <p className="text-blue-100 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6 px-2">
               Every day, our community helps maintain the quality of our key database by reporting working, expired, or
               limit-reached keys. Your participation makes this platform better for everyone.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <div className="flex items-center space-x-2 text-blue-100">
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                 <span className="text-sm">Real-time updates</span>

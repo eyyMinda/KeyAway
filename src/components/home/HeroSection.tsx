@@ -30,26 +30,26 @@ const heroFeatures = [
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-20 lg:py-32">
+    <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-24 xl:py-32">
       <div className="absolute inset-0 bg-black/20"></div>
-      <div className="relative max-w-[90rem] mx-auto px-6">
+      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-3 sm:space-y-4">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
                 Free CD Keys for <span className="text-gradient-pro">Pro Software</span>
               </h1>
-              <p className="text-xl lg:text-2xl text-gray-300 leading-relaxed">
+              <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-300 leading-relaxed">
                 Unlock premium features and pro versions of your favorite software with our verified, working CD keys.
-                <span className="block mt-2 text-lg text-gray-400">
+                <span className="block mt-2 text-sm sm:text-base lg:text-lg text-gray-400">
                   Community-driven platform where users report key status and share new keys
                 </span>
               </p>
             </div>
 
             {/* Features */}
-            <div className="grid sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-3 gap-4 sm:gap-6">
               {heroFeatures.map((feature, index) => {
                 const IconComponent = feature.icon;
                 return (
@@ -68,16 +68,16 @@ export default function HeroSection() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col xs:flex-row gap-3 sm:gap-4">
               <Link
                 href="#popular-programs"
-                className="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
+                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
                 Browse Programs
-                <FaArrowRight className="ml-2" />
+                <FaArrowRight className="ml-2 text-sm" />
               </Link>
               <Link
                 href="#how-it-works"
-                className="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors">
+                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
                 How It Works
               </Link>
             </div>

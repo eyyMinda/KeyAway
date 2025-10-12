@@ -70,19 +70,19 @@ export default function FeaturesSection() {
   };
 
   return (
-    <section id="how-it-works" className="py-20 bg-gray-50">
-      <div className="max-w-[90rem] mx-auto px-6">
+    <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">How KeyAway Works</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">How KeyAway Works</h2>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
             We provide a community-driven platform for sharing and maintaining free CD keys. Our system ensures you
             always have access to working activation keys.
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-10 sm:mb-14 lg:mb-20">
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
@@ -99,16 +99,18 @@ export default function FeaturesSection() {
         </div>
 
         {/* Key Reporting System */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 lg:p-12">
-          <div className="text-center mb-12">
-            <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">Community Key Reporting System</h3>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-5 sm:p-6 lg:p-8 xl:p-12">
+          <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+              Community Key Reporting System
+            </h3>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-2">
               Help maintain our database by reporting key status. Your feedback keeps our community informed and ensures
               everyone gets working keys.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
             {reportingSteps.map((step, index) => {
               const IconComponent = step.icon;
               return (
@@ -158,13 +160,13 @@ export default function FeaturesSection() {
           </div>
 
           {/* Contribution CTA */}
-          <div className="mt-12 pt-8 border-t border-gray-200 bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl p-8">
+          <div className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 border-t border-gray-200 bg-gradient-to-br from-primary-50 to-blue-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8">
             <div className="text-center max-w-2xl mx-auto">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-100 rounded-full mb-4">
-                <FaUsers className="w-7 h-7 text-primary-600" />
+              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-primary-100 rounded-full mb-3 sm:mb-4">
+                <FaUsers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600" />
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">Got Free CD Keys to Share?</h4>
-              <p className="text-gray-700 mb-6 leading-relaxed">
+              <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Got Free CD Keys to Share?</h4>
+              <p className="text-sm sm:text-base text-gray-700 mb-5 sm:mb-6 leading-relaxed px-2">
                 Help grow our community database! If you have working CD keys for any software (not just IObit), share
                 them with us. Together we can build the largest free software key repository.
               </p>
@@ -175,11 +177,11 @@ export default function FeaturesSection() {
                   const contactBtn = document.querySelector('[aria-label="Contact us"]') as HTMLButtonElement;
                   contactBtn?.click();
                 }}
-                className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl">
-                <FaCheckCircle className="mr-2" />
+                className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl text-sm sm:text-base">
+                <FaCheckCircle className="mr-2 text-sm sm:text-base" />
                 Suggest a CD Key
               </Link>
-              <p className="text-sm text-gray-600 mt-4">
+              <p className="text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4 px-2">
                 Every contribution helps users worldwide access premium software for free
               </p>
             </div>

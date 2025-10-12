@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FaFire } from "react-icons/fa";
+import { FaFire, FaArrowRight } from "react-icons/fa";
 import { ProgramCard } from "@/src/components/home";
 import { PopularProgramsSectionProps } from "@/src/types/home";
 import { sortByPopularity } from "@/src/lib/programUtils";
@@ -15,16 +15,18 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
 
   return (
-    <section id="popular-programs" className="py-20 bg-white">
-      <div className="max-w-[90rem] mx-auto px-6">
+    <section id="popular-programs" className="py-12 sm:py-16 lg:py-20 bg-white">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <div className="inline-flex items-center space-x-2 bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm font-semibold mb-4">
             <FaFire className="w-4 h-4" />
             <span>Most Popular</span>
           </div>
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Most Popular Programs</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+            Most Popular Programs
+          </h2>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-2">
             Discover the most popular software programs based on page views, downloads, and verified, working CD keys
           </p>
         </div>
@@ -49,14 +51,12 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
         </div>
 
         {/* View All Button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-8 sm:mt-10 lg:mt-12">
           <Link
             href="/programs"
-            className="inline-flex items-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
+            className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
             View All Programs
-            <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+            <FaArrowRight className="ml-2 text-sm" />
           </Link>
         </div>
       </div>

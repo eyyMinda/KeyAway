@@ -51,23 +51,23 @@ const helpWays = [
 
 export default function CTASection() {
   return (
-    <section className="py-20 bg-gray-900 text-white">
-      <div className="max-w-[90rem] mx-auto px-6">
+    <section className="py-12 sm:py-16 lg:py-20 bg-gray-900 text-white">
+      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
         <div className="text-center">
           {/* Main CTA */}
-          <div className="max-w-4xl mx-auto mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6">Ready to Get Started?</h2>
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+          <div className="max-w-4xl mx-auto mb-10 sm:mb-12 lg:mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6">Ready to Get Started?</h2>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-6 sm:mb-8 leading-relaxed px-2">
               Join thousands of users who have already discovered premium software for free. Browse our collection, find
               what you need, and start using it today.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center">
               <Link
                 href="/programs"
-                className="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
+                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
                 Browse All Programs
-                <FaArrowRight className="ml-2" />
+                <FaArrowRight className="ml-2 text-sm" />
               </Link>
               <Link
                 href="https://github.com/eyyMinda/keyaway"
@@ -79,15 +79,15 @@ export default function CTASection() {
                     path: window.location.pathname
                   });
                 }}
-                className="inline-flex items-center justify-center px-8 py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors">
-                <FaGithub className="mr-2 w-5 h-5" />
+                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
+                <FaGithub className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
                 View on GitHub
               </Link>
             </div>
           </div>
 
           {/* Support Section */}
-          <div className="bg-gray-800 rounded-2xl p-8 lg:p-12 max-w-4xl mx-auto">
+          <div className="bg-gray-800 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 xl:p-12 max-w-4xl mx-auto">
             <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/20 rounded-full mb-4">
                 <FaHeart className="w-8 h-8 text-red-400" />
@@ -104,7 +104,7 @@ export default function CTASection() {
                 const IconComponent = option.icon;
                 return (
                   <div key={index} className="text-center">
-                    <div className={`${option.bgColor} rounded-2xl p-6 mb-4`}>
+                    <div className={`${option.bgColor} rounded-2xl p-6`}>
                       <IconComponent className={`w-12 h-12 ${option.iconColor} mx-auto mb-4`} />
                       <h4 className="text-xl font-semibold mb-2">{option.title}</h4>
                       <p className="text-gray-300 text-sm mb-4">{option.description}</p>
