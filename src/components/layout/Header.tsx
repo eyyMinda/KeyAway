@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
-import { FaKey } from "react-icons/fa";
+import { FaEnvelope } from "react-icons/fa";
 import MobileMenu from "@components/layout/MobileMenu";
 import AdminNavIcons from "@components/layout/AdminNavIcons";
 import AnnouncementNotifications from "@components/layout/AnnouncementNotifications";
@@ -77,13 +77,13 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
               })}
           </nav>
 
-          {/* Suggest Key Button */}
+          {/* Contact Button */}
           <button
             onClick={() => setIsContactModalOpen(true)}
             className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
-            aria-label="Suggest a key">
-            <FaKey size={16} />
-            <span className="text-sm font-medium">Suggest a Key</span>
+            aria-label="Contact us">
+            <FaEnvelope className="w-4 h-4" />
+            <span className="text-sm font-medium">Contact</span>
           </button>
 
           {/* Announcement Notifications */}
@@ -93,13 +93,13 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
           <AdminNavIcons />
         </div>
 
-        {/* Mobile: Suggest Key + Notification Bell + Burger Menu */}
+        {/* Mobile: Contact + Notification Bell + Burger Menu */}
         <div className="md:hidden flex items-center gap-2">
           <button
             onClick={() => setIsContactModalOpen(true)}
             className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
-            aria-label="Suggest a key">
-            <FaKey size={18} />
+            aria-label="Contact us">
+            <FaEnvelope className="w-5 h-5" />
           </button>
           <AnnouncementNotifications notifications={notifications} />
           <button
@@ -113,8 +113,8 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
       {/* Mobile Menu */}
       <MobileMenu headerLinks={headerLinks} isOpen={isOpen} onClose={toggleMenu} />
 
-      {/* Contact Modal */}
-      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+      {/* Contact Modal - defaults to contact tab */}
+      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} defaultTab="contact" />
     </header>
   );
 }
