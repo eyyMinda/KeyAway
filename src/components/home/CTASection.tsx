@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FaGithub, FaHeart, FaCarrot, FaKey, FaArrowRight } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/trackEvent";
+import { ContactModalTrigger } from "@/src/components/contact";
 
 const supportOptions = [
   {
@@ -143,17 +144,12 @@ export default function CTASection() {
                 ))}
               </div>
               <div className="mt-8 text-center">
-                <Link
-                  href="#"
-                  onClick={e => {
-                    e.preventDefault();
-                    const contactBtn = document.querySelector('[aria-label="Contact us"]') as HTMLButtonElement;
-                    contactBtn?.click();
-                  }}
+                <ContactModalTrigger
+                  tab="suggest"
                   className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
                   <FaKey className="mr-2" />
                   Suggest a CD Key Now
-                </Link>
+                </ContactModalTrigger>
               </div>
             </div>
           </div>

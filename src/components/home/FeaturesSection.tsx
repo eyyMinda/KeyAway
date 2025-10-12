@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { FaUsers, FaChartLine, FaShieldAlt, FaClock, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function FeaturesSection() {
   const features = [
@@ -170,17 +170,12 @@ export default function FeaturesSection() {
                 Help grow our community database! If you have working CD keys for any software (not just IObit), share
                 them with us. Together we can build the largest free software key repository.
               </p>
-              <Link
-                href="#"
-                onClick={e => {
-                  e.preventDefault();
-                  const contactBtn = document.querySelector('[aria-label="Contact us"]') as HTMLButtonElement;
-                  contactBtn?.click();
-                }}
+              <ContactModalTrigger
+                tab="suggest"
                 className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl text-sm sm:text-base">
                 <FaCheckCircle className="mr-2 text-sm sm:text-base" />
                 Suggest a CD Key
-              </Link>
+              </ContactModalTrigger>
               <p className="text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4 px-2">
                 Every contribution helps users worldwide access premium software for free
               </p>
