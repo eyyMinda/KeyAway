@@ -2,6 +2,7 @@ import { CDKey } from "@/src/types";
 import { notFound } from "next/navigation";
 import ProgramInformation from "@/src/components/program/ProgramInformation";
 import CDKeyTable from "@/src/components/program/cdkeys/CDKeyTable";
+import ContributeBanner from "@/src/components/program/ContributeBanner";
 import ActivationInstructions from "@/src/components/program/ActivationInstructions";
 import RelatedPrograms from "@/src/components/program/RelatedPrograms";
 import CommentsSection from "@/src/components/program/comments/CommentsSection";
@@ -62,13 +63,16 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           {/* 2. CD Key Table - Second Most Important */}
           <CDKeyTable cdKeys={sortedCdKeys} slug={slug} />
 
-          {/* 3. Activation Instructions */}
+          {/* 3. Contribute Banner - Encourage User Participation */}
+          <ContributeBanner />
+
+          {/* 4. Activation Instructions */}
           <ActivationInstructions />
 
-          {/* 4. Related Programs */}
+          {/* 5. Related Programs */}
           <RelatedPrograms programs={relatedPrograms} />
 
-          {/* 5. Comments Section */}
+          {/* 6. Comments Section */}
           <CommentsSection />
         </main>
       </>

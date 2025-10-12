@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FaGithub, FaHeart, FaCarrot } from "react-icons/fa";
+import { FaGithub, FaHeart, FaCarrot, FaKey, FaArrowRight } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/trackEvent";
 
 const supportOptions = [
@@ -34,15 +34,18 @@ const supportOptions = [
 const helpWays = [
   {
     text: "Report key status",
-    color: "bg-green-400"
+    color: "bg-green-400",
+    description: "Let us know if keys work or expired"
   },
   {
     text: "Share with friends",
-    color: "bg-blue-400"
+    color: "bg-blue-400",
+    description: "Spread the word about free keys"
   },
   {
-    text: "Suggest new programs",
-    color: "bg-purple-400"
+    text: "Suggest CD keys",
+    color: "bg-purple-400",
+    description: "Share keys for any software you find"
   }
 ];
 
@@ -64,9 +67,7 @@ export default function CTASection() {
                 href="/programs"
                 className="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
                 Browse All Programs
-                <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+                <FaArrowRight className="ml-2" />
               </Link>
               <Link
                 href="https://github.com/eyyMinda/keyaway"
@@ -129,14 +130,30 @@ export default function CTASection() {
 
             {/* Additional Ways to Help */}
             <div className="mt-8 pt-8 border-t border-gray-700">
-              <h4 className="text-lg font-semibold mb-4">Other Ways to Help</h4>
-              <div className="grid sm:grid-cols-3 gap-4 text-sm text-gray-300">
+              <h4 className="text-lg font-semibold mb-6 text-center">Other Ways to Contribute</h4>
+              <div className="grid sm:grid-cols-3 gap-6">
                 {helpWays.map((way, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 ${way.color} rounded-full`}></div>
-                    <span>{way.text}</span>
+                  <div
+                    key={index}
+                    className="text-center p-4 bg-gray-700/50 rounded-xl hover:bg-gray-700 transition-colors">
+                    <div className={`w-3 h-3 ${way.color} rounded-full mx-auto mb-2`}></div>
+                    <p className="font-semibold text-white mb-1">{way.text}</p>
+                    <p className="text-xs text-gray-400">{way.description}</p>
                   </div>
                 ))}
+              </div>
+              <div className="mt-8 text-center">
+                <Link
+                  href="#"
+                  onClick={e => {
+                    e.preventDefault();
+                    const contactBtn = document.querySelector('[aria-label="Contact us"]') as HTMLButtonElement;
+                    contactBtn?.click();
+                  }}
+                  className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
+                  <FaKey className="mr-2" />
+                  Suggest a CD Key Now
+                </Link>
               </div>
             </div>
           </div>

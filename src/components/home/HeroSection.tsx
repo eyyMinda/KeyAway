@@ -1,6 +1,6 @@
 "use client";
 
-import { FaDownload, FaKey, FaShieldAlt } from "react-icons/fa";
+import { FaDownload, FaKey, FaShieldAlt, FaArrowRight } from "react-icons/fa";
 import Link from "next/link";
 import HeroVisual from "./HeroVisual";
 
@@ -41,7 +41,10 @@ export default function HeroSection() {
                 Free CD Keys for <span className="text-gradient-pro">Pro Software</span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-300 leading-relaxed">
-                Unlock premium features and pro versions of your favorite software with our verified, working CD keys
+                Unlock premium features and pro versions of your favorite software with our verified, working CD keys.
+                <span className="block mt-2 text-lg text-gray-400">
+                  Community-driven platform where users report key status and share new keys
+                </span>
               </p>
             </div>
 
@@ -70,6 +73,7 @@ export default function HeroSection() {
                 href="#popular-programs"
                 className="inline-flex items-center justify-center px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
                 Browse Programs
+                <FaArrowRight className="ml-2" />
               </Link>
               <Link
                 href="#how-it-works"

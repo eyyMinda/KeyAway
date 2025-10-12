@@ -88,7 +88,7 @@ export default function ContactModal({ isOpen, onClose, defaultTab = "suggest" }
                 ? "text-primary-600 border-b-2 border-primary-600"
                 : "text-gray-600 hover:text-gray-900"
             }`}>
-            Contact Me
+            Contact Us
           </button>
         </div>
 

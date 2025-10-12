@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FaUsers, FaChartLine, FaShieldAlt, FaClock, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 
 export default function FeaturesSection() {
@@ -153,6 +154,34 @@ export default function FeaturesSection() {
                   <p className="text-sm text-gray-600">Maximum activations exceeded</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Contribution CTA */}
+          <div className="mt-12 pt-8 border-t border-gray-200 bg-gradient-to-br from-primary-50 to-blue-50 rounded-2xl p-8">
+            <div className="text-center max-w-2xl mx-auto">
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-100 rounded-full mb-4">
+                <FaUsers className="w-7 h-7 text-primary-600" />
+              </div>
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">Got Free CD Keys to Share?</h4>
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                Help grow our community database! If you have working CD keys for any software (not just IObit), share
+                them with us. Together we can build the largest free software key repository.
+              </p>
+              <Link
+                href="#"
+                onClick={e => {
+                  e.preventDefault();
+                  const contactBtn = document.querySelector('[aria-label="Contact us"]') as HTMLButtonElement;
+                  contactBtn?.click();
+                }}
+                className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl">
+                <FaCheckCircle className="mr-2" />
+                Suggest a CD Key
+              </Link>
+              <p className="text-sm text-gray-600 mt-4">
+                Every contribution helps users worldwide access premium software for free
+              </p>
             </div>
           </div>
         </div>
