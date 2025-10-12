@@ -14,9 +14,9 @@ interface ProgramInformationProps {
 
 export default function ProgramInformation({ program, totalKeys, workingKeys }: ProgramInformationProps) {
   return (
-    <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 py-8 sm:py-12 lg:py-16">
+    <section className="bg-gradient-to-br from-neutral-800 to-neutral-900 py-6 sm:py-10 lg:py-16">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
           {/* Image */}
           <div className="order-2 lg:order-1">
             {program.image ? (
@@ -33,21 +33,23 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
 
           {/* Content */}
           <div className="order-1 lg:order-2">
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
               <div>
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-3 sm:mb-4 leading-tight lg:max-w-xl mx-auto lg:mx-0">
                   {program.title} <span className="text-gradient-pro">Free CD Keys</span>
                 </h1>
-                <p className="text-xl text-gray-300 leading-relaxed">
+                <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed">
                   Download premium software for free and activate one of the working CD keys
                 </p>
               </div>
 
-              {program.description && <p className="text-lg text-gray-400 leading-relaxed">{program.description}</p>}
+              {program.description && (
+                <p className="text-sm sm:text-base lg:text-lg text-gray-400 leading-relaxed">{program.description}</p>
+              )}
 
               {/* Download Link */}
               {program.downloadLink && (
-                <div>
+                <div className="flex justify-center lg:justify-start">
                   <Link
                     href={program.downloadLink}
                     target="_blank"
@@ -58,22 +60,22 @@ export default function ProgramInformation({ program, totalKeys, workingKeys }: 
                         path: window.location.pathname
                       })
                     }
-                    className="inline-flex items-center bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800 shadow-lg">
-                    <FaDownload size={20} className="mr-3" />
+                    className="inline-flex items-center bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-5 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800 shadow-lg text-sm sm:text-base">
+                    <FaDownload size={18} className="mr-2 sm:mr-3" />
                     Download Program
                   </Link>
                 </div>
               )}
 
               {/* Stats */}
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:border-primary-400/50 transition-all duration-300">
-                  <div className="text-3xl font-bold text-primary-400 mb-2">{totalKeys}</div>
-                  <div className="text-sm text-gray-300 font-medium">Available CD Keys</div>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
+                <div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border border-white/10 hover:border-primary-400/50 transition-all duration-300">
+                  <div className="text-2xl sm:text-3xl font-bold text-primary-400 mb-1 sm:mb-2">{totalKeys}</div>
+                  <div className="text-xs sm:text-sm text-gray-300 font-medium leading-tight">Available CD Keys</div>
                 </div>
-                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center border border-white/10 hover:border-green-400/50 transition-all duration-300">
-                  <div className="text-3xl font-bold text-green-400 mb-2">{workingKeys}</div>
-                  <div className="text-sm text-gray-300 font-medium">Working Keys</div>
+                <div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 text-center border border-white/10 hover:border-green-400/50 transition-all duration-300">
+                  <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-1 sm:mb-2">{workingKeys}</div>
+                  <div className="text-xs sm:text-sm text-gray-300 font-medium leading-tight">Working Keys</div>
                 </div>
               </div>
             </div>

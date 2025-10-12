@@ -68,28 +68,28 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   }, [cdKeys, sortColumn, sortDirection, reportDataMap]);
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-neutral-900 to-neutral-800">
+    <section className="py-6 sm:py-10 lg:py-16 bg-gradient-to-br from-neutral-900 to-neutral-800">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white/5 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/10">
-          <div className="px-4 sm:px-8 py-4 sm:py-6 border-b border-white/10">
-            <div className="flex items-start justify-between">
+        <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl border border-white/10">
+          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">
+            <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2">
+                <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white mb-1.5 sm:mb-2 leading-tight">
                   Free CD Keys & <span className="text-gradient-pro">Activation Codes</span>
                 </h2>
-                <p className="text-gray-300 text-sm sm:text-base lg:text-lg">
+                <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-tight sm:leading-normal">
                   Activate working CD keys for premium software
                 </p>
               </div>
-              <div className="ml-4 flex-shrink-0">
+              <div className="flex-shrink-0">
                 <KeyStatusTooltip />
               </div>
             </div>
             {expiringKeysMessage && (
-              <div className="mt-4 p-4 bg-amber-500/10 border border-amber-400/30 rounded-xl">
-                <div className="flex items-start">
+              <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-amber-500/10 border border-amber-400/30 rounded-lg sm:rounded-xl">
+                <div className="flex items-start gap-2 sm:gap-3">
                   <svg
-                    className="w-5 h-5 text-amber-400 mr-3 mt-0.5 flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 mt-0.5 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -100,9 +100,11 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
                       d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                     />
                   </svg>
-                  <div className="flex-1">
-                    <p className="text-amber-300 font-medium">{expiringKeysMessage}</p>
-                    <p className="text-amber-400/70 text-sm mt-1">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-amber-300 font-medium text-xs sm:text-sm leading-tight sm:leading-normal">
+                      {expiringKeysMessage}
+                    </p>
+                    <p className="text-amber-400/70 text-xs sm:text-sm mt-1 leading-tight">
                       Note: Once expired, the key won&apos;t activate and your software&apos;s pro version will stop
                       working.
                     </p>
@@ -115,8 +117,8 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
           {cdKeys && cdKeys.length > 0 ? (
             <>
               {/* Mobile Card Layout */}
-              <div className="block lg:hidden px-4 py-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="block lg:hidden px-3 sm:px-4 py-4 sm:py-6">
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
                   {sortedKeys.map((cdKey: CDKey, i: number) => (
                     <CDKeyMobileCard
                       key={i}

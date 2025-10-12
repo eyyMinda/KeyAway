@@ -43,41 +43,43 @@ export default function ActivationInstructions() {
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-br from-neutral-800 to-neutral-900">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-neutral-800 to-neutral-900">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-3 sm:mb-4">
             How to Activate Your <span className="text-gradient-pro">Pro Software</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-300 max-w-3xl mx-auto px-2">
             Follow these simple steps to unlock premium features with our verified CD keys
           </p>
         </div>
 
         {/* Steps */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
           {steps.map((step, index) => (
             <div key={index} className="text-center group">
               <div
-                className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${step.bgColor} mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                <step.icon className={`w-8 h-8 ${step.color}`} />
+                className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl ${step.bgColor} mb-4 sm:mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <step.icon className={`w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 ${step.color}`} />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-3">{step.title}</h3>
-              <p className="text-gray-300 leading-relaxed">{step.description}</p>
+              <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-2 sm:mb-3">{step.title}</h3>
+              <p className="text-sm sm:text-base text-gray-300 leading-relaxed px-2">{step.description}</p>
             </div>
           ))}
         </div>
 
         {/* Tips */}
-        <div className="bg-neutral-700/50 rounded-2xl p-8 border border-neutral-600">
-          <h3 className="text-xl font-semibold text-white mb-6 text-center">Important Tips</h3>
-          <div className="grid md:grid-cols-3 gap-6">
+        <div className="bg-neutral-700/50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border border-neutral-600">
+          <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-4 sm:mb-6 text-center">
+            Important Tips
+          </h3>
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
             {tips.map((tip, index) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className="flex-shrink-0 w-6 h-6 bg-yellow-500/20 rounded-full flex items-center justify-center mt-0.5">
-                  <tip.icon className="w-3 h-3 text-yellow-400" />
+              <div key={index} className="flex items-start space-x-2 sm:space-x-3">
+                <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-500/20 rounded-full flex items-center justify-center mt-0.5">
+                  <tip.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400" />
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">{tip.text}</p>
+                <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">{tip.text}</p>
               </div>
             ))}
           </div>
