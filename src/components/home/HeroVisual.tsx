@@ -3,14 +3,29 @@
 import { FaKey, FaDownload, FaShieldAlt, FaCheckCircle } from "react-icons/fa";
 
 export default function HeroVisual() {
+  const handleScrollToPrograms = () => {
+    document.querySelector("#popular-programs")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
-    <div className="relative order-2 lg:order-1">
+    <div
+      onClick={handleScrollToPrograms}
+      className="relative order-2 lg:order-1 cursor-pointer group"
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleScrollToPrograms();
+        }
+      }}
+      aria-label="Scroll to programs">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-accent-500/10 rounded-3xl transform rotate-3"></div>
-      <div className="absolute inset-0 bg-gradient-to-tl from-accent-500/10 to-primary-500/10 rounded-3xl transform -rotate-2"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-accent-500/10 rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
+      <div className="absolute inset-0 bg-gradient-to-tl from-accent-500/10 to-primary-500/10 rounded-3xl transform -rotate-2 group-hover:-rotate-4 transition-transform duration-300"></div>
 
       {/* Main Visual Container */}
-      <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10">
+      <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10 group-hover:border-white/20 transition-all duration-300">
         {/* Floating Elements */}
         <div className="absolute top-4 right-4 w-16 h-16 bg-primary-500/20 rounded-full flex items-center justify-center animate-pulse">
           <FaKey className="w-8 h-8 text-primary-400" />
@@ -51,9 +66,9 @@ export default function HeroVisual() {
           </div>
 
           {/* Call to Action */}
-          <div className="space-y-2">
+          <div className="space-y-2 group-hover:scale-105 transition-transform duration-300">
             <div className="text-lg font-semibold text-white">Get Started</div>
-            <div className="text-sm text-gray-300">Browse Programs</div>
+            <div className="text-sm text-gray-300">Click to Browse Programs</div>
           </div>
         </div>
 
