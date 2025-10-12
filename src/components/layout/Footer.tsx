@@ -5,7 +5,17 @@ import Link from "next/link";
 import { useState } from "react";
 import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";
-import { FaGithub, FaLinkedin, FaInstagram, FaTwitter, FaYoutube, FaGlobe, FaKey } from "react-icons/fa";
+import {
+  FaGithub,
+  FaLinkedin,
+  FaInstagram,
+  FaTwitter,
+  FaYoutube,
+  FaGlobe,
+  FaKey,
+  FaEnvelope,
+  FaChevronRight
+} from "react-icons/fa";
 import { trackEvent } from "@/src/lib/trackEvent";
 import ContactModal from "@/src/components/contact/ContactModal";
 
@@ -126,61 +136,71 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
             </ul>
           </div>
 
-          {/* Support Section */}
+          {/* Contribute Section */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Support & Follow</h4>
-            <div className="flex flex-wrap gap-3">
-              {/* Suggest a Key */}
+            <h4 className="text-lg font-semibold mb-4">Contribute</h4>
+            <div className="space-y-3">
+              {/* Suggest a Key Button */}
               <button
-                onClick={() => setIsContactModalOpen(true)}
-                className="group bg-primary-600 hover:bg-primary-700 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-primary-500 cursor-pointer">
-                <div className="flex items-center justify-center space-x-2">
-                  <FaKey className="flex-shrink-0" />
-                  <div className="text-center min-w-0">
-                    <div className="text-sm font-bold whitespace-nowrap">Suggest a Key</div>
+                onClick={() => {
+                  setIsContactModalOpen(true);
+                }}
+                className="group w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-4 py-4 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl border-2 border-primary-400/30 cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <FaKey className="w-5 h-5" />
                   </div>
+                  <div className="text-left flex-1">
+                    <div className="text-sm font-bold">Suggest a Key</div>
+                    <div className="text-xs text-primary-100 opacity-90">Share free CD keys</div>
+                  </div>
+                  <FaChevronRight className="w-4 h-4 opacity-75" />
                 </div>
               </button>
 
-              {/* Carrot Juice Support */}
-              <Link
-                href="https://www.buymeacoffee.com/eyyMinda"
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => {
-                  trackEvent("social_click", {
-                    social: "buymeacoffee",
-                    path: window.location.pathname
-                  });
-                }}
-                className="group bg-orange-500 hover:bg-orange-600 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-orange-400">
-                <div className="flex items-center justify-center space-x-2">
-                  <span className="text-lg flex-shrink-0">🥕</span>
-                  <div className="text-center min-w-0">
-                    <div className="text-sm font-bold whitespace-nowrap">Buy Carrot Juice</div>
+              {/* Contact Us Button */}
+              <button
+                onClick={() => setIsContactModalOpen(true)}
+                className="group w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg border border-gray-600/50 cursor-pointer">
+                <div className="flex items-center space-x-3">
+                  <FaEnvelope className="w-5 h-5 flex-shrink-0" />
+                  <div className="text-left flex-1">
+                    <div className="text-sm font-semibold">Contact Us</div>
                   </div>
                 </div>
-              </Link>
+              </button>
+            </div>
 
-              {/* GitHub Star */}
-              <Link
-                href="https://github.com/eyyMinda/keyaway"
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => {
-                  trackEvent("social_click", {
-                    social: "github keyaway",
-                    path: window.location.pathname
-                  });
-                }}
-                className="group bg-gray-600 hover:bg-gray-700 text-white px-3 py-3 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105 hover:shadow-lg border border-gray-500">
-                <div className="flex items-center justify-center space-x-2">
-                  <span className="text-lg flex-shrink-0">⭐</span>
-                  <div className="text-center min-w-0">
-                    <div className="text-sm font-bold whitespace-nowrap">Star on GitHub</div>
-                  </div>
-                </div>
-              </Link>
+            <div className="mt-6 pt-6 border-t border-gray-700">
+              <p className="text-xs text-gray-400 mb-3">Support the Project</p>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="https://www.buymeacoffee.com/eyyMinda"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => {
+                    trackEvent("social_click", {
+                      social: "buymeacoffee",
+                      path: window.location.pathname
+                    });
+                  }}
+                  className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                  🥕 Carrot Juice
+                </Link>
+                <Link
+                  href="https://github.com/eyyMinda/keyaway"
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => {
+                    trackEvent("social_click", {
+                      social: "github keyaway",
+                      path: window.location.pathname
+                    });
+                  }}
+                  className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                  ⭐ GitHub
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -201,8 +221,8 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
         </div>
       </div>
 
-      {/* Contact Modal */}
-      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
+      {/* Contact Modal - defaults to suggest tab */}
+      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} defaultTab="suggest" />
     </footer>
   );
 }
