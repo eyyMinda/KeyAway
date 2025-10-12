@@ -22,4 +22,6 @@ export interface ProgramsGridProps {
   programs: ProgramWithStats[];
   maxViews: number;
   maxDownloads: number;
+  showBrowseAllCTA?: boolean;
+  limit?: number;
 }

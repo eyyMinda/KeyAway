@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { FaFire, FaArrowRight } from "react-icons/fa";
-import { ProgramCard } from "@/src/components/home";
+import { FaFire } from "react-icons/fa";
+import { ProgramsGrid } from "@/src/components/programs";
 import { PopularProgramsSectionProps } from "@/src/types/home";
 import { sortByPopularity } from "@/src/lib/programUtils";
 
@@ -31,34 +30,14 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
           </p>
         </div>
 
-        {/* Programs Grid */}
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {sortedPrograms.map(program => (
-            <ProgramCard
-              key={program.slug.current}
-              program={program}
-              stats={{
-                viewCount: program.viewCount,
-                downloadCount: program.downloadCount
-              }}
-              badges={{
-                mostViewed: program.viewCount === maxViews && maxViews > 0,
-                mostDownloaded: program.downloadCount === maxDownloads && maxDownloads > 0
-              }}
-              showStats={true}
-            />
-          ))}
-        </div>
-
-        {/* View All Button */}
-        <div className="text-center mt-8 sm:mt-10 lg:mt-12">
-          <Link
-            href="/programs"
-            className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
-            View All Programs
-            <FaArrowRight className="ml-2 text-sm" />
-          </Link>
-        </div>
+        {/* Programs Grid with CTAs */}
+        <ProgramsGrid
+          programs={sortedPrograms}
+          maxViews={maxViews}
+          maxDownloads={maxDownloads}
+          showBrowseAllCTA={true}
+          limit={8}
+        />
       </div>
     </section>
   );
