@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { client } from "@/src/sanity/lib/client";
 import { storeDetailsQuery, socialLinksQuery } from "@lib/queries";
 import Header from "@components/layout/Header";
@@ -76,6 +77,7 @@ export default async function RootLayout({
           <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
         </div>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
