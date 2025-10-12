@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
 import { FaEnvelope } from "react-icons/fa";
 import MobileMenu from "@components/layout/MobileMenu";
@@ -30,7 +30,20 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
   }
   const [isOpen, setIsOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [contactModalTab, setContactModalTab] = useState<"contact" | "suggest">("contact");
   const toggleMenu = () => setIsOpen(!isOpen);
+
+  // Listen for custom events to open modal
+  useEffect(() => {
+    const handleOpenModal = (e: Event) => {
+      const customEvent = e as CustomEvent<{ tab: "contact" | "suggest" }>;
+      setContactModalTab(customEvent.detail.tab);
+      setIsContactModalOpen(true);
+    };
+
+    window.addEventListener("openContactModal", handleOpenModal);
+    return () => window.removeEventListener("openContactModal", handleOpenModal);
+  }, []);
 
   return (
     <header className="bg-gray-900 shadow-lg sticky top-0 z-[101]">
@@ -79,7 +92,10 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
 
           {/* Contact Button */}
           <button
-            onClick={() => setIsContactModalOpen(true)}
+            onClick={() => {
+              setContactModalTab("contact");
+              setIsContactModalOpen(true);
+            }}
             className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-4 h-4" />
@@ -96,7 +112,10 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
         {/* Mobile: Contact + Notification Bell + Burger Menu */}
         <div className="md:hidden flex items-center gap-2">
           <button
-            onClick={() => setIsContactModalOpen(true)}
+            onClick={() => {
+              setContactModalTab("contact");
+              setIsContactModalOpen(true);
+            }}
             className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-5 h-5" />
@@ -113,8 +132,12 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
       {/* Mobile Menu */}
       <MobileMenu headerLinks={headerLinks} isOpen={isOpen} onClose={toggleMenu} />
 
-      {/* Contact Modal - defaults to contact tab */}
-      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} defaultTab="contact" />
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        defaultTab={contactModalTab}
+      />
     </header>
   );
 }

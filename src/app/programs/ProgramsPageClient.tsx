@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ProgramsFilter, ProgramsGrid } from "@/src/components/programs";
+import { ProgramsFilter, ProgramsGrid, ContributeSection, WhyUseSection } from "@/src/components/programs";
 import Pagination from "@/src/components/ui/Pagination";
 import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
 import { sortPrograms, filterProgramsByKeys, searchPrograms } from "@/src/lib/programUtils";
@@ -48,45 +48,51 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
   };
 
   return (
-    <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
-      {/* Filters and Search */}
-      <ProgramsFilter
-        searchTerm={searchTerm}
-        filter={filter}
-        sortBy={sortBy}
-        onSearchChange={handleSearchChange}
-        onFilterChange={handleFilterChange}
-        onSortChange={handleSortChange}
-      />
+    <>
+      <div id="programs-grid" className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+        {/* Filters and Search */}
+        <ProgramsFilter
+          searchTerm={searchTerm}
+          filter={filter}
+          sortBy={sortBy}
+          onSearchChange={handleSearchChange}
+          onFilterChange={handleFilterChange}
+          onSortChange={handleSortChange}
+        />
 
-      {/* Results Count */}
-      <div className="mb-4 sm:mb-6">
-        {filteredAndSortedPrograms.length === 0 ? (
-          <p className="text-sm sm:text-base text-gray-600">No results</p>
-        ) : (
-          <p className="text-sm sm:text-base text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPrograms.length)} of{" "}
-            {filteredAndSortedPrograms.length} programs
-          </p>
+        {/* Results Count */}
+        <div className="mb-4 sm:mb-6">
+          {filteredAndSortedPrograms.length === 0 ? (
+            <p className="text-sm sm:text-base text-gray-600">No results</p>
+          ) : (
+            <p className="text-sm sm:text-base text-gray-600">
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPrograms.length)} of{" "}
+              {filteredAndSortedPrograms.length} programs
+            </p>
+          )}
+        </div>
+
+        {/* Programs Grid */}
+        <ProgramsGrid programs={paginatedPrograms} maxViews={maxViews} maxDownloads={maxDownloads} />
+
+        {/* Pagination */}
+        {filteredAndSortedPrograms.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredAndSortedPrograms.length}
+            itemsPerPage={12} // This should match programsPerPage in ProgramsPageClient
+            onPageChange={setCurrentPage}
+            variant="detailed"
+            showInfo={false}
+            className="mt-8 sm:mt-10 lg:mt-12"
+          />
         )}
       </div>
 
-      {/* Programs Grid */}
-      <ProgramsGrid programs={paginatedPrograms} maxViews={maxViews} maxDownloads={maxDownloads} />
-
-      {/* Pagination */}
-      {filteredAndSortedPrograms.length > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredAndSortedPrograms.length}
-          itemsPerPage={12} // This should match programsPerPage in ProgramsPageClient
-          onPageChange={setCurrentPage}
-          variant="detailed"
-          showInfo={false}
-          className="mt-8 sm:mt-10 lg:mt-12"
-        />
-      )}
-    </div>
+      {/* Additional Sections */}
+      <ContributeSection />
+      <WhyUseSection />
+    </>
   );
 }

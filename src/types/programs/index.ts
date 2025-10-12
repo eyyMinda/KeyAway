@@ -1,5 +1,7 @@
 import { ProgramWithStats } from "@/src/types/home";
 
+export type { ProgramWithStats };
+
 export interface ProgramsPageClientProps {
   programs: ProgramWithStats[];
 }
