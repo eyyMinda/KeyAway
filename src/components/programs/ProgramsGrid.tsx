@@ -4,16 +4,16 @@ import { ProgramsGridProps } from "@/src/types/programs";
 export default function ProgramsGrid({ programs, maxViews, maxDownloads }: ProgramsGridProps) {
   if (programs.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="text-gray-400 text-6xl mb-4">🔍</div>
-        <h3 className="text-xl font-semibold text-gray-600 mb-2">No programs found</h3>
-        <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+      <div className="text-center py-10 sm:py-12">
+        <div className="text-gray-400 text-5xl sm:text-6xl mb-3 sm:mb-4">🔍</div>
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">No programs found</h3>
+        <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria</p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
       {programs.map(program => (
         <ProgramCard
           key={program.slug.current}

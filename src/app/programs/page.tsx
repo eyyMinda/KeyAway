@@ -26,24 +26,26 @@ export default async function ProgramsPage() {
       <JsonLd data={jsonLd} />
       <main className="min-h-screen bg-gray-50">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-16 lg:py-24">
-          <div className="max-w-[90rem] mx-auto px-6">
+        <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-24">
+          <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              <h1 className="text-4xl lg:text-5xl font-bold mb-6">All Software Programs</h1>
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
+                All Software Programs
+              </h1>
+              <p className="text-base sm:text-lg lg:text-xl text-gray-300 max-w-3xl mx-auto mb-6 sm:mb-8 leading-relaxed">
                 Browse our complete collection of {totalCount} software programs with verified CD keys. Find exactly
                 what you need with our advanced filtering options.
               </p>
-              <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400">
-                <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                   <span>Community verified</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                   <span>Real-time updates</span>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                   <span>Always free</span>
                 </div>

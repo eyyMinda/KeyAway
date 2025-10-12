@@ -48,7 +48,7 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
   };
 
   return (
-    <div className="max-w-[90rem] mx-auto px-6 py-12">
+    <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
       {/* Filters and Search */}
       <ProgramsFilter
         searchTerm={searchTerm}
@@ -60,11 +60,11 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
       />
 
       {/* Results Count */}
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         {filteredAndSortedPrograms.length === 0 ? (
-          <p className="text-gray-600">No results</p>
+          <p className="text-sm sm:text-base text-gray-600">No results</p>
         ) : (
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPrograms.length)} of{" "}
             {filteredAndSortedPrograms.length} programs
           </p>
@@ -84,7 +84,7 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
           onPageChange={setCurrentPage}
           variant="detailed"
           showInfo={false}
-          className="mt-12"
+          className="mt-8 sm:mt-10 lg:mt-12"
         />
       )}
     </div>
