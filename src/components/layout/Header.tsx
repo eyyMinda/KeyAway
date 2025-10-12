@@ -7,7 +7,7 @@ import { FaEnvelope } from "react-icons/fa";
 import MobileMenu from "@components/layout/MobileMenu";
 import AdminNavIcons from "@components/layout/AdminNavIcons";
 import AnnouncementNotifications from "@components/layout/AnnouncementNotifications";
-import ContactModal from "@/src/components/contact/ContactModal";
+import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { IdealImageClient } from "@/src/components/general/IdealImageClient";
 import { StoreDetails, SanityLink, LogoData } from "@/src/types";
 import { Notification } from "@/src/types/notifications";
@@ -91,16 +91,13 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
           </nav>
 
           {/* Contact Button */}
-          <button
-            onClick={() => {
-              setContactModalTab("contact");
-              setIsContactModalOpen(true);
-            }}
+          <ContactModalTrigger
+            tab="contact"
             className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-4 h-4" />
             <span className="text-sm font-medium">Contact</span>
-          </button>
+          </ContactModalTrigger>
 
           {/* Announcement Notifications */}
           <AnnouncementNotifications notifications={notifications} />
@@ -111,15 +108,12 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
 
         {/* Mobile: Contact + Notification Bell + Burger Menu */}
         <div className="md:hidden flex items-center gap-2">
-          <button
-            onClick={() => {
-              setContactModalTab("contact");
-              setIsContactModalOpen(true);
-            }}
+          <ContactModalTrigger
+            tab="contact"
             className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-5 h-5" />
-          </button>
+          </ContactModalTrigger>
           <AnnouncementNotifications notifications={notifications} />
           <button
             className="focus:outline-none text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"

@@ -17,7 +17,7 @@ import {
   FaChevronRight
 } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/trackEvent";
-import ContactModal from "@/src/components/contact/ContactModal";
+import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 
 interface FooterProps {
   storeData: StoreDetails;
@@ -141,10 +141,8 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
             <h4 className="text-lg font-semibold mb-4">Contribute</h4>
             <div className="space-y-3">
               {/* Suggest a Key Button */}
-              <button
-                onClick={() => {
-                  setIsContactModalOpen(true);
-                }}
+              <ContactModalTrigger
+                tab="suggest"
                 className="group w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-4 py-4 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl border-2 border-primary-400/30 cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -156,11 +154,11 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                   </div>
                   <FaChevronRight className="w-4 h-4 opacity-75" />
                 </div>
-              </button>
+              </ContactModalTrigger>
 
               {/* Contact Us Button */}
-              <button
-                onClick={() => setIsContactModalOpen(true)}
+              <ContactModalTrigger
+                tab="contact"
                 className="group w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg border border-gray-600/50 cursor-pointer">
                 <div className="flex items-center space-x-3">
                   <FaEnvelope className="w-5 h-5 flex-shrink-0" />
@@ -168,7 +166,7 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                     <div className="text-sm font-semibold">Contact Us</div>
                   </div>
                 </div>
-              </button>
+              </ContactModalTrigger>
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-700">

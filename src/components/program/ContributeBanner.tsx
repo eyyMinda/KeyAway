@@ -1,13 +1,9 @@
 "use client";
 
 import { FaKey, FaExclamationCircle } from "react-icons/fa";
+import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function ContributeBanner() {
-  const handleSuggestKey = () => {
-    const contactBtn = document.querySelector('[aria-label="Contact us"]') as HTMLButtonElement;
-    contactBtn?.click();
-  };
-
   return (
     <section className="py-6 sm:py-10 lg:py-12 bg-gradient-to-br from-neutral-900 to-neutral-800">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,12 +21,12 @@ export default function ContributeBanner() {
                 Know of other free CD keys for this or any other software? Share them with the community and help others
                 unlock premium features!
               </p>
-              <button
-                onClick={handleSuggestKey}
+              <ContactModalTrigger
+                tab="suggest"
                 className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl cursor-pointer text-sm sm:text-base">
                 <FaKey className="mr-2 text-sm" />
                 Suggest a CD Key
-              </button>
+              </ContactModalTrigger>
             </div>
 
             {/* Report Keys Section */}

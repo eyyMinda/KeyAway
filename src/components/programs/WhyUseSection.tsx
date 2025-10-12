@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FaCheckCircle, FaClock, FaUsers, FaLightbulb } from "react-icons/fa";
+import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function WhyUseSection() {
   return (
@@ -66,14 +67,11 @@ export default function WhyUseSection() {
               className="inline-flex items-center justify-center bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg text-sm sm:text-base">
               Back to Home
             </Link>
-            <button
-              onClick={() => {
-                const event = new CustomEvent("openContactModal", { detail: { tab: "contact" } });
-                window.dispatchEvent(event);
-              }}
+            <ContactModalTrigger
+              tab="contact"
               className="inline-flex items-center justify-center bg-white hover:bg-gray-50 text-gray-900 font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl border-2 border-gray-200 hover:border-primary-300 transition-all duration-300 text-sm sm:text-base cursor-pointer">
               Contact Us
-            </button>
+            </ContactModalTrigger>
           </div>
         </div>
       </div>

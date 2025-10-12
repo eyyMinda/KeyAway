@@ -2,6 +2,7 @@
 
 import { FaDownload, FaKey, FaShieldAlt } from "react-icons/fa";
 import HeroVisual from "./HeroVisual";
+import { ContactModalTrigger } from "@/src/components/contact";
 
 const heroFeatures = [
   {
@@ -74,15 +75,12 @@ export default function HeroSection() {
 
             {/* Primary CTA */}
             <div className="flex gap-4 pt-2">
-              <button
-                onClick={() => {
-                  const event = new CustomEvent("openContactModal", { detail: { tab: "suggest" } });
-                  window.dispatchEvent(event);
-                }}
+              <ContactModalTrigger
+                tab="suggest"
                 className="inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] shadow-2xl text-base sm:text-lg cursor-pointer ring-2 ring-accent-400/50 hover:ring-accent-400/70">
                 <FaKey className="mr-3 text-lg" />
                 Suggest a CD Key
-              </button>
+              </ContactModalTrigger>
 
               <button
                 onClick={() => {

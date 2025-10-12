@@ -1,6 +1,7 @@
 "use client";
 
 import { FaCheckCircle, FaKey, FaHeart } from "react-icons/fa";
+import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function ContributeSection() {
   return (
@@ -52,15 +53,12 @@ export default function ContributeSection() {
         </div>
 
         <div className="text-center">
-          <button
-            onClick={() => {
-              const event = new CustomEvent("openContactModal", { detail: { tab: "suggest" } });
-              window.dispatchEvent(event);
-            }}
+          <ContactModalTrigger
+            tab="suggest"
             className="inline-flex items-center bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] shadow-[0_8px_30px_rgb(255,255,255,0.12)] hover:shadow-[0_12px_40px_rgb(255,255,255,0.2)] text-sm sm:text-base cursor-pointer">
             <FaKey className="mr-2 sm:mr-3" />
             Suggest a CD Key Now
-          </button>
+          </ContactModalTrigger>
         </div>
       </div>
     </section>

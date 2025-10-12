@@ -15,6 +15,13 @@ export default function ContactModal({ isOpen, onClose, defaultTab = "suggest" }
   const [activeTab, setActiveTab] = useState<"contact" | "suggest">(defaultTab);
   const modalRef = useRef<HTMLDivElement>(null);
 
+  // Update active tab when defaultTab changes and modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(defaultTab);
+    }
+  }, [isOpen, defaultTab]);
+
   // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
