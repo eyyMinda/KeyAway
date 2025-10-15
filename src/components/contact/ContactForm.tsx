@@ -44,7 +44,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-gray-600 text-sm">Have a question or feedback? Send me a message!</p>
+      <p className="text-gray-600 text-sm">Have a question or feedback? Send us a message!</p>
 
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{error}</div>}
 

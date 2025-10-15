@@ -56,7 +56,7 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <p className="text-gray-600 text-sm">
-        Found a free CD key? Help the community by suggesting it! I&apos;ll review and add it to the website.
+        Found a free CD key? Help the community by suggesting it! We&apos;ll review and add it to the website.
       </p>
 
       {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{error}</div>}
@@ -129,7 +129,7 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
       {/* Optional Contact Info */}
       <div className="pt-4 border-t border-gray-200">
         <p className="text-sm text-gray-600 mb-3">
-          <span className="font-medium">Optional:</span> Leave your contact info in case I need more details about this
+          <span className="font-medium">Optional:</span> Leave your contact info in case we need more details about this
           key.
         </p>
 
