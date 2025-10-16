@@ -37,7 +37,7 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
   if (programs.length === 0) return null;
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-2 sm:mb-3 lg:mb-4">
