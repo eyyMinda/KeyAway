@@ -18,7 +18,7 @@ import {
   transformSocialData,
   transformPathData,
   transformCountryData,
-  transformReferrerData
+  transformReferrerDataWithParams
 } from "@/src/lib/analyticsUtils";
 
 export default function AnalyticsPage() {
@@ -84,7 +84,7 @@ export default function AnalyticsPage() {
   const socialData = transformSocialData(bySocial);
   const pathData = transformPathData(byPath);
   const countryData = transformCountryData(byCountry);
-  const referrerData = transformReferrerData(byReferrer);
+  const referrerData = transformReferrerDataWithParams(events);
 
   return (
     <ProtectedAdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">

@@ -1,6 +1,6 @@
 interface DataTableProps {
   title: string;
-  data: Array<{ key: string; value: number; label?: string }>;
+  data: Array<{ key: string; value: number; label?: string; referrerParam?: string }>;
   maxItems?: number;
   showPercentage?: boolean;
   className?: string;
@@ -41,17 +41,24 @@ export default function DataTable({
                   <div className="flex items-center flex-1 min-w-0">
                     <span className="text-sm font-medium text-gray-500 w-6">#{index + 1}</span>
                     <div className="flex-1 min-w-0 ml-3">
-                      <p className="text-sm font-medium text-gray-900 truncate">{item.label || item.key}</p>
-                      {showPercentage && <p className="text-xs text-gray-500">{percentage.toFixed(1)}% of total</p>}
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium text-gray-900 truncate">{item.label || item.key}</p>
+                        {item.referrerParam && <p className="text-xs text-gray-500">({item.referrerParam})</p>}
+                      </div>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <div className="w-24 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(item.value / sortedData[0].value) * 100}%` }}
-                      />
+                    <div className="flex flex-col">
+                      {showPercentage && (
+                        <p className="text-xs text-gray-500 mb-1">{percentage.toFixed(1)}% of total</p>
+                      )}
+                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(item.value / sortedData[0].value) * 100}%` }}
+                        />
+                      </div>
                     </div>
                     <span className="text-sm font-semibold text-gray-900 w-12 text-right">
                       {item.value.toLocaleString()}

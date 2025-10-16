@@ -162,6 +162,58 @@ export function transformReferrerData(byReferrer: Map<string, number>): TableDat
   }));
 }
 
+export function transformReferrerDataWithParams(
+  events: AnalyticsEventData[]
+): Array<{ key: string; value: number; label: string; referrerParam?: string }> {
+  const referrerMap = new Map<string, { count: number; referrerParam?: string }>();
+
+  for (const event of events) {
+    if (event.referrer) {
+      const { hostname, referrerParam } = extractReferrerInfo(event.referrer);
+      const key = hostname;
+      const existing = referrerMap.get(key);
+      referrerMap.set(key, {
+        count: (existing?.count || 0) + 1,
+        referrerParam: referrerParam || existing?.referrerParam
+      });
+    }
+  }
+
+  return Array.from(referrerMap).map(([hostname, data]) => ({
+    key: hostname,
+    value: data.count,
+    label: hostname,
+    referrerParam: data.referrerParam
+  }));
+}
+
+// Referrer utilities
+export function extractReferrerInfo(referrer: string): { hostname: string; referrerParam?: string } {
+  try {
+    if (referrer.startsWith("http")) {
+      const url = new URL(referrer);
+      const referrerParam = url.searchParams.get("referrer");
+      return {
+        hostname: url.hostname,
+        referrerParam: referrerParam || undefined
+      };
+    } else {
+      // For relative URLs, assume it's from keyaway.app
+      const url = new URL(`https://www.keyaway.app${referrer}`);
+      const referrerParam = url.searchParams.get("referrer");
+      return {
+        hostname: "www.keyaway.app",
+        referrerParam: referrerParam || undefined
+      };
+    }
+  } catch {
+    return {
+      hostname: "www.keyaway.app",
+      referrerParam: undefined
+    };
+  }
+}
+
 // Format utilities
 export function formatEventName(event: string): string {
   return event.replace(/_/g, " ").toUpperCase();

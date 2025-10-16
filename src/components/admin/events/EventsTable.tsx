@@ -2,6 +2,7 @@ import React from "react";
 import { AnalyticsEventData } from "@/src/types";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import Pagination from "@/src/components/ui/Pagination";
+import { extractReferrerInfo } from "@/src/lib/analyticsUtils";
 
 interface EventsTableProps {
   events: AnalyticsEventData[];
@@ -94,16 +95,29 @@ export default function EventsTable({
                 </td>
                 <td className="max-w-3xs px-6 py-4 text-sm text-gray-900">
                   {event.referrer ? (
-                    <a
-                      href={
-                        event.referrer.startsWith("http") ? event.referrer : `https://www.keyaway.app${event.referrer}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-xs truncate max-w-32 block"
-                      title={event.referrer}>
-                      {event.referrer.startsWith("http") ? new URL(event.referrer).hostname : "www.keyaway.app"}
-                    </a>
+                    <div className="flex flex-col whitespace-nowrap">
+                      <a
+                        href={
+                          event.referrer.startsWith("http")
+                            ? event.referrer
+                            : `https://www.keyaway.app${event.referrer}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-xs truncate max-w-32 block"
+                        title={event.referrer}>
+                        {(() => {
+                          const { hostname } = extractReferrerInfo(event.referrer);
+                          return hostname;
+                        })()}
+                      </a>
+                      {(() => {
+                        const { referrerParam } = extractReferrerInfo(event.referrer);
+                        return referrerParam ? (
+                          <span className="text-xs text-gray-500 truncate">({referrerParam})</span>
+                        ) : null;
+                      })()}
+                    </div>
                   ) : (
                     <span className="text-gray-400">-</span>
                   )}

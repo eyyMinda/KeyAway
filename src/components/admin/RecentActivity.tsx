@@ -1,5 +1,5 @@
 import { AnalyticsEventData } from "@/src/types";
-import { getEventDotColor, formatEventName } from "@/src/lib/analyticsUtils";
+import { getEventDotColor, formatEventName, extractReferrerInfo } from "@/src/lib/analyticsUtils";
 
 interface RecentActivityProps {
   events: AnalyticsEventData[];
@@ -54,12 +54,18 @@ export default function RecentActivity({
                         </span>
                       )}
                       {event.path && <span className="text-xs text-gray-500 font-mono">{event.path}</span>}
-                      {event.referrer && (
-                        <span className="text-xs text-gray-500 truncate max-w-32" title={event.referrer}>
-                          from{" "}
-                          {event.referrer.startsWith("http") ? new URL(event.referrer).hostname : "www.keyaway.app"}
-                        </span>
-                      )}
+                      {event.referrer &&
+                        (() => {
+                          const { hostname, referrerParam } = extractReferrerInfo(event.referrer);
+                          return (
+                            <span
+                              className="text-xs text-gray-500 truncate max-w-32 whitespace-nowrap"
+                              title={event.referrer}>
+                              from {hostname}
+                              {referrerParam && ` (${referrerParam})`}
+                            </span>
+                          );
+                        })()}
                     </div>
                   </div>
                 </div>
