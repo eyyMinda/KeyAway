@@ -43,7 +43,7 @@ export default function ActivationInstructions() {
   ];
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-neutral-800 to-neutral-900">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-3 sm:mb-4">
@@ -69,7 +69,7 @@ export default function ActivationInstructions() {
         </div>
 
         {/* Tips */}
-        <div className="bg-neutral-700/50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border border-neutral-600">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8">
           <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-4 sm:mb-6 text-center">
             Important Tips
           </h3>

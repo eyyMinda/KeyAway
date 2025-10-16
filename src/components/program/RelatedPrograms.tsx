@@ -37,7 +37,7 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
   if (programs.length === 0) return null;
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-neutral-900 to-neutral-800">
+    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-2 sm:mb-3 lg:mb-4">
@@ -68,14 +68,14 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
           )}
 
           {/* Programs Grid */}
-          <div className="overflow-hidden px-2 sm:px-0">
+          <div className="px-2 sm:px-0">
             <div
               className="flex transition-transform duration-300 ease-in-out"
               style={{ transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)` }}>
               {programs.map(program => (
                 <div key={program.slug.current} className="flex-shrink-0 w-full md:w-1/3 px-2 sm:px-4">
                   <Link href={`/program/${program.slug.current}`} className="block group">
-                    <div className="bg-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-neutral-700 hover:border-primary-400">
+                    <div className="bg-gradient-to-b from-gray-800 via-gray-900 via-80% to-gray-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-600 hover:border-blue-400">
                       {/* Image */}
                       <div className="relative h-36 sm:h-40 lg:h-48 overflow-hidden">
                         {program.image ? (

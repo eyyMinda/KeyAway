@@ -56,7 +56,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     return (
       <>
         <JsonLd data={jsonLd} />
-        <main className="min-h-screen bg-neutral-900">
+        <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
           {/* 1. Program Information - Most Important */}
           <ProgramInformation program={program} totalKeys={totalKeys} workingKeys={workingKeys} />
 

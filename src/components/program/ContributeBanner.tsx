@@ -5,7 +5,7 @@ import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function ContributeBanner() {
   return (
-    <section className="py-6 sm:py-10 lg:py-12 bg-gradient-to-br from-neutral-900 to-neutral-800">
+    <section className="py-6 sm:py-10 lg:py-12 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-gradient-to-r from-primary-600/20 to-blue-600/20 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-primary-500/30 p-5 sm:p-6 lg:p-8 xl:p-12">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 items-center">
