@@ -23,13 +23,12 @@ const defaultData = {
   description:
     "Get free CD keys for popular software like IOBIT, Malware Fighter, and more. Download premium programs with working activation keys from our giveaway collection.",
   url: "https://www.keyaway.app",
-  canonical: "https://www.keyaway.app",
+  image: "https://www.keyaway.app/images/KeyAway_Card.png",
   programTitle: (programTitle: string, storeTitle: string) =>
     `${programTitle} Premium Software Free CD Keys | ${storeTitle}`,
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
     `Download ${programTitle} for free! Get ${workingKeys} working CD keys out of ${totalKeys} total. Premium software activation keys from our giveaway collection.`,
-  programUrl: (slug: string) => `https://www.keyaway.app/program/${slug}`,
-  programCanonical: (slug: string) => `https://www.keyaway.app/program/${slug}`,
+  programUrl: (slug: string) => `${defaultData.url}/program/${slug}`,
   privacyTitle: (storeTitle: string) => `Privacy Policy | ${storeTitle}`,
   privacyDescription: (storeTitle: string) =>
     `Learn how ${storeTitle} handles your personal data, comments, and contributions while keeping the site transparent.`,
@@ -42,17 +41,21 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
   const storeTitle = storeData?.title || defaultData.store;
 
+  const title = defaultData.title(storeTitle);
+  const description = storeData?.description || defaultData.description;
+  const url = defaultData.url;
+
   return {
-    title: defaultData.title(storeTitle),
-    description: defaultData.description,
+    title,
+    description,
     openGraph: {
-      title: defaultData.title(storeTitle),
-      description: defaultData.description,
+      title,
+      description,
       type: "website",
-      url: defaultData.url,
+      url,
       images: [
         {
-          url: "https://www.keyaway.app/images/KeyAway_Card.png",
+          url: defaultData.image,
           width: 1200,
           height: 630,
           alt: storeTitle
@@ -61,12 +64,12 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: defaultData.title(storeTitle),
-      description: defaultData.description,
-      images: ["https://www.keyaway.app/images/KeyAway_Card.png"]
+      title,
+      description,
+      images: [defaultData.image]
     },
     alternates: {
-      canonical: defaultData.canonical
+      canonical: url
     }
   };
 }
@@ -74,7 +77,6 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
 export async function generateProgramMetadata(slug: string): Promise<Metadata> {
   try {
     const [program, storeData] = await Promise.all([getProgramWithUpdatedKeys(slug), getStoreData()]);
-
     const storeTitle = storeData?.title || defaultData.store;
 
     if (!program) {
@@ -90,6 +92,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
 
     const title = defaultData.programTitle(program.title, storeTitle);
     const description = defaultData.programDescription(program.title, workingKeys, totalKeys);
+    const url = defaultData.programUrl(slug);
 
     return {
       title,
@@ -98,7 +101,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
         title,
         description,
         type: "website",
-        url: defaultData.programUrl(slug),
+        url,
         images: program.image
           ? [
               {
@@ -117,7 +120,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
         images: program.image ? [urlFor(program.image).width(1200).height(630).url()] : []
       },
       alternates: {
-        canonical: defaultData.programCanonical(slug)
+        canonical: url
       }
     };
   } catch (error) {
@@ -133,22 +136,26 @@ export async function generatePrivacyMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
   const storeTitle = storeData?.title || defaultData.store;
 
+  const title = defaultData.privacyTitle(storeTitle);
+  const description = defaultData.privacyDescription(storeTitle);
+  const url = `${defaultData.url}/privacy`;
+
   return {
-    title: defaultData.privacyTitle(storeTitle),
-    description: defaultData.privacyDescription(storeTitle),
+    title,
+    description,
     openGraph: {
-      title: defaultData.privacyTitle(storeTitle),
-      description: defaultData.privacyDescription(storeTitle),
+      title,
+      description,
       type: "website",
-      url: `${defaultData.url}/privacy`
+      url
     },
     twitter: {
       card: "summary",
-      title: defaultData.privacyTitle(storeTitle),
-      description: defaultData.privacyDescription(storeTitle)
+      title,
+      description
     },
     alternates: {
-      canonical: `${defaultData.canonical}/privacy`
+      canonical: url
     }
   };
 }
@@ -157,38 +164,47 @@ export async function generateTermsMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
   const storeTitle = storeData?.title || defaultData.store;
 
+  const title = defaultData.termsTitle(storeTitle);
+  const description = defaultData.termsDescription(storeTitle);
+  const url = `${defaultData.url}/terms`;
+
   return {
-    title: defaultData.termsTitle(storeTitle),
-    description: defaultData.termsDescription(storeTitle),
+    title,
+    description,
     openGraph: {
-      title: defaultData.termsTitle(storeTitle),
-      description: defaultData.termsDescription(storeTitle),
+      title,
+      description,
       type: "website",
-      url: `${defaultData.url}/terms`
+      url
     },
     twitter: {
       card: "summary",
-      title: defaultData.termsTitle(storeTitle),
-      description: defaultData.termsDescription(storeTitle)
+      title,
+      description
     },
     alternates: {
-      canonical: `${defaultData.canonical}/terms`
+      canonical: url
     }
   };
 }
 
 export function generateProgramsPageMetadata() {
   const storeTitle = "KeyAway";
-  const defaultData = {
+
+  const defaultProgramsData = {
     title: (title: string) => `All Programs - ${title}`,
     description: (title: string) =>
       `Browse all software programs with free CD keys on ${title}. Find premium software for free with verified, working activation keys.`,
-    canonical: "https://www.keyaway.app"
+    url: `${defaultData.url}/programs`
   };
 
+  const title = defaultProgramsData.title(storeTitle);
+  const description = defaultProgramsData.description(storeTitle);
+  const url = defaultProgramsData.url;
+
   return {
-    title: defaultData.title(storeTitle),
-    description: defaultData.description(storeTitle),
+    title,
+    description,
     keywords: [
       "free software",
       "license keys",
@@ -199,14 +215,14 @@ export function generateProgramsPageMetadata() {
       "software collection"
     ],
     openGraph: {
-      title: defaultData.title(storeTitle),
-      description: defaultData.description(storeTitle),
-      url: `${defaultData.canonical}/programs`,
+      title,
+      description,
+      url,
       siteName: storeTitle,
       type: "website",
       images: [
         {
-          url: `${defaultData.canonical}/images/KeyAway_Card.png`,
+          url: defaultData.image,
           width: 1200,
           height: 630,
           alt: `${storeTitle} - All Programs`
@@ -215,12 +231,12 @@ export function generateProgramsPageMetadata() {
     },
     twitter: {
       card: "summary_large_image",
-      title: defaultData.title(storeTitle),
-      description: defaultData.description(storeTitle),
-      images: [`${defaultData.canonical}/images/KeyAway_Card.png`]
+      title,
+      description,
+      images: [defaultData.image]
     },
     alternates: {
-      canonical: `${defaultData.canonical}/programs`
+      canonical: defaultProgramsData.url
     }
   };
 }
