@@ -16,6 +16,7 @@ export const socialLink = defineType({
           { title: "Instagram", value: "instagram" },
           { title: "Twitter", value: "twitter" },
           { title: "YouTube", value: "youtube" },
+          { title: "Facebook", value: "facebook" },
           { title: "Website/Portfolio", value: "website" }
         ],
         layout: "dropdown"

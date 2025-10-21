@@ -11,6 +11,7 @@ import {
   FaInstagram,
   FaTwitter,
   FaYoutube,
+  FaFacebook,
   FaGlobe,
   FaKey,
   FaEnvelope,
@@ -50,6 +51,8 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
         return FaTwitter;
       case "youtube":
         return FaYoutube;
+      case "facebook":
+        return FaFacebook;
       case "website":
       case "portfolio":
         return FaGlobe;
