@@ -1,5 +1,5 @@
 // Analytics tracking types
-export type AnalyticsEvent = "copy_cdkey" | "download_click" | "social_click" | "page_viewed";
+export type AnalyticsEvent = "copy_cdkey" | "download_click" | "social_click" | "page_viewed" | "facebook_group_click";
 
 // Key report types
 export type KeyReportEvent = "report_key_working" | "report_key_expired" | "report_key_limit_reached";

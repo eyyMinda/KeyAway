@@ -1,31 +1,39 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { FaBell } from "react-icons/fa";
 import { Notification } from "@/src/types/notifications";
 import NotificationItem from "./NotificationItem";
+import { FacebookGroupButton } from "@/src/components/social";
+import { usePathname } from "next/navigation";
+import { SocialData } from "@/src/types";
 
 interface AnnouncementNotificationsProps {
   notifications: Notification[];
+  socialData?: SocialData;
 }
 
-export default function AnnouncementNotifications({ notifications }: AnnouncementNotificationsProps) {
+export default function AnnouncementNotifications({ notifications, socialData }: AnnouncementNotificationsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showMiniPopup, setShowMiniPopup] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const miniPopupTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pathname = usePathname();
 
   // Function to schedule mini popup appearance
-  const scheduleMiniPopup = (delay: number) => {
-    // Clear any existing timer
-    if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
+  const scheduleMiniPopup = useCallback(
+    (delay: number) => {
+      // Clear any existing timer
+      if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
 
-    // Schedule new timer
-    miniPopupTimerRef.current = setTimeout(() => {
-      if (notifications.length > 0) setShowMiniPopup(true);
-    }, delay);
-  };
+      // Schedule new timer
+      miniPopupTimerRef.current = setTimeout(() => {
+        if (notifications.length > 0) setShowMiniPopup(true);
+      }, delay);
+    },
+    [notifications.length]
+  );
 
   // Show mini popup after 5 seconds on initial load
   useEffect(() => {
@@ -34,7 +42,7 @@ export default function AnnouncementNotifications({ notifications }: Announcemen
     return () => {
       if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
     };
-  }, [notifications.length]);
+  }, [notifications.length, scheduleMiniPopup]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -119,6 +127,11 @@ export default function AnnouncementNotifications({ notifications }: Announcemen
             {notifications.map(notification => (
               <NotificationItem key={notification.id} notification={notification} onClose={() => setIsOpen(false)} />
             ))}
+
+            {/* Facebook Group Button */}
+            <div className="p-3 border-t border-gray-700">
+              <FacebookGroupButton socialData={socialData} path={pathname} variant="outline" className="text-xs" />
+            </div>
           </div>
 
           {/* Footer */}

@@ -87,7 +87,7 @@ export default async function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PageViewTracker />
         <div className="mainContent flex flex-col min-h-screen">
-          <Header storeData={storeData} logoData={logoData} notifications={notifications} />
+          <Header storeData={storeData} logoData={logoData} notifications={notifications} socialData={socialData} />
           {children}
           <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
         </div>

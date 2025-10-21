@@ -7,7 +7,7 @@ import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";
 import { FaKey, FaEnvelope, FaChevronRight } from "react-icons/fa";
 import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
-import { Socials } from "@/src/components/social";
+import { Socials, FacebookGroupButton } from "@/src/components/social";
 import { trackEvent } from "@/src/lib/trackEvent";
 
 interface FooterProps {
@@ -34,18 +34,23 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2">
-            <Link href="/" className="inline-block mb-4">
+          <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
+            <Link href="/" className="inline-block">
               {isLogo ? (
                 <IdealImageClient {...logoData} className="h-12 w-auto" />
               ) : (
                 <h3 className="text-2xl font-bold text-white">{storeData.title}</h3>
               )}
             </Link>
-            <p className="text-gray-300 mb-6 max-w-md">
+            <p className="text-gray-300 max-w-md mb-2">
               {storeData.description || "Free Giveaway CD Keys for your favorite games and software."}
             </p>
             <Socials socialLinks={socialData?.socialLinks || []} path={pathname} />
+
+            {/* Facebook Group Button */}
+            <div className="mt-auto w-fit">
+              <FacebookGroupButton socialData={socialData} path={pathname} variant="outline" className="text-sm" />
+            </div>
           </div>
 
           {/* Navigation Links */}

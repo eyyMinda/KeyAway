@@ -68,7 +68,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
   }, [cdKeys, sortColumn, sortDirection, reportDataMap]);
 
   return (
-    <section className="py-6 sm:py-10 lg:py-16 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+    <section className="py-6 sm:py-10 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-600">
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">

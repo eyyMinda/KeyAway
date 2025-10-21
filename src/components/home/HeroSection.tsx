@@ -3,6 +3,12 @@
 import { FaDownload, FaKey, FaShieldAlt } from "react-icons/fa";
 import HeroVisual from "./HeroVisual";
 import { ContactModalTrigger } from "@/src/components/contact";
+import { FacebookGroupHeroPromo } from "@/src/components/social";
+import { SocialData } from "@/src/types";
+
+interface HeroSectionProps {
+  socialData?: SocialData;
+}
 
 const heroFeatures = [
   {
@@ -28,7 +34,7 @@ const heroFeatures = [
   }
 ];
 
-export default function HeroSection() {
+export default function HeroSection({ socialData }: HeroSectionProps) {
   return (
     <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-28">
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
@@ -73,27 +79,37 @@ export default function HeroSection() {
               </p>
             </div>
 
-            {/* Primary CTA */}
-            <div className="flex gap-4 pt-2">
+            {/* Primary CTA - Better mobile layout */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
               <ContactModalTrigger
                 tab="suggest"
-                className="inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] shadow-2xl text-base sm:text-lg cursor-pointer ring-2 ring-accent-400/50 hover:ring-accent-400/70">
-                <FaKey className="mr-3 text-lg" />
-                Suggest a CD Key
+                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 lg:px-10 lg:py-5 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] shadow-2xl text-sm sm:text-base lg:text-lg cursor-pointer ring-2 ring-accent-400/50 hover:ring-accent-400/70">
+                <FaKey className="mr-2 sm:mr-3 text-base sm:text-lg" />
+                <span className="whitespace-nowrap">Suggest a CD Key</span>
               </ContactModalTrigger>
 
               <button
                 onClick={() => {
                   document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base cursor-pointer">
-                How It Works
+                className="inline-flex items-center justify-center px-4 py-3 sm:px-6 sm:py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base cursor-pointer">
+                <span className="whitespace-nowrap">How It Works</span>
               </button>
             </div>
           </div>
 
-          {/* Visual Element */}
-          <HeroVisual />
+          {/* Right Side - Visual and Facebook Promo */}
+          <div className="flex flex-col gap-6">
+            {/* Visual Element */}
+            <div className="order-2 lg:order-1">
+              <HeroVisual />
+            </div>
+
+            {/* Facebook Group Promotion - Moved to right side */}
+            <div className="order-1 lg:order-2">
+              <FacebookGroupHeroPromo socialData={socialData} />
+            </div>
+          </div>
         </div>
       </div>
     </section>

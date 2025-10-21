@@ -1,4 +1,4 @@
-import { CDKey } from "@/src/types";
+import { CDKey, SocialData } from "@/src/types";
 import { notFound } from "next/navigation";
 import ProgramInformation from "@/src/components/program/ProgramInformation";
 import CDKeyTable from "@/src/components/program/cdkeys/CDKeyTable";
@@ -9,7 +9,7 @@ import CommentsSection from "@/src/components/program/comments/CommentsSection";
 import { sortCdKeysByStatus } from "@/src/lib/cdKeyUtils";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanityActions";
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsQuery, storeDetailsQuery } from "@/src/lib/queries";
+import { popularProgramsQuery, storeDetailsQuery, socialLinksQuery } from "@/src/lib/queries";
 import { generateProgramMetadata } from "@/src/lib/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
@@ -40,11 +40,16 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     const totalKeys = sortedCdKeys.length;
     const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
 
-    // Get related programs and store data (excluding current program)
-    const [allPrograms, storeData] = await Promise.all([
+    // Get related programs, store data, and social data (excluding current program)
+    const [allPrograms, storeData, socialLinks] = await Promise.all([
       client.fetch(popularProgramsQuery),
-      client.fetch(storeDetailsQuery)
+      client.fetch(storeDetailsQuery),
+      client.fetch(socialLinksQuery)
     ]);
+
+    const socialData: SocialData = {
+      socialLinks: socialLinks || []
+    };
     const relatedPrograms = allPrograms
       .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
       .slice(0, 5);
@@ -58,7 +63,12 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
         <JsonLd data={jsonLd} />
         <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
           {/* 1. Program Information - Most Important */}
-          <ProgramInformation program={program} totalKeys={totalKeys} workingKeys={workingKeys} />
+          <ProgramInformation
+            program={program}
+            totalKeys={totalKeys}
+            workingKeys={workingKeys}
+            socialData={socialData}
+          />
 
           {/* 2. CD Key Table - Second Most Important */}
           <CDKeyTable cdKeys={sortedCdKeys} slug={slug} />

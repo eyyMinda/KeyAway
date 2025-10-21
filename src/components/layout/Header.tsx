@@ -9,7 +9,7 @@ import AdminNavIcons from "@components/layout/AdminNavIcons";
 import AnnouncementNotifications from "@components/layout/AnnouncementNotifications";
 import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { IdealImageClient } from "@/src/components/general/IdealImageClient";
-import { StoreDetails, SanityLink, LogoData } from "@/src/types";
+import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types";
 import { Notification } from "@/src/types/notifications";
 import { usePathname } from "next/navigation";
 
@@ -17,9 +17,10 @@ interface HeaderProps {
   storeData: StoreDetails;
   logoData: LogoData;
   notifications: Notification[];
+  socialData?: SocialData;
 }
 
-export default function Header({ storeData, logoData, notifications }: HeaderProps) {
+export default function Header({ storeData, logoData, notifications, socialData }: HeaderProps) {
   const pathname = usePathname();
   const header = storeData?.header;
   let isLogo = false;
@@ -100,7 +101,7 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
           </ContactModalTrigger>
 
           {/* Announcement Notifications */}
-          <AnnouncementNotifications notifications={notifications} />
+          <AnnouncementNotifications notifications={notifications} socialData={socialData} />
 
           {/* Admin Navigation Icons */}
           <AdminNavIcons />
@@ -124,7 +125,7 @@ export default function Header({ storeData, logoData, notifications }: HeaderPro
       </div>
 
       {/* Mobile Menu */}
-      <MobileMenu headerLinks={headerLinks} isOpen={isOpen} onClose={toggleMenu} />
+      <MobileMenu headerLinks={headerLinks} isOpen={isOpen} onClose={toggleMenu} socialData={socialData} />
 
       {/* Contact Modal */}
       <ContactModal

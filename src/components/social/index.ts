@@ -7,3 +7,6 @@ export {
   type SocialPlatform,
   type SocialLink
 } from "./SocialComponents";
+
+export { FacebookGroupHeroPromo } from "./FacebookGroupHeroPromo";
+export { FacebookGroupButton } from "./FacebookGroupButton";

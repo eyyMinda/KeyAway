@@ -1,5 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery } from "@lib/queries";
+import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/queries";
 import { generateHomePageMetadata } from "@/src/lib/metadata";
 import { generateHomePageJsonLd } from "@/src/lib/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
@@ -10,6 +10,7 @@ import FeaturesSection from "@/src/components/home/FeaturesSection";
 import PopularProgramsSection from "@/src/components/home/PopularProgramsSection";
 import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
+import { SocialData } from "@/src/types";
 
 export const revalidate = 60;
 
@@ -24,11 +25,16 @@ export default async function HomePage() {
   const weekAgoISO = weekAgo.toISOString();
 
   // Fetch all data in parallel for better performance
-  const [popularPrograms, stats, storeData] = await Promise.all([
+  const [popularPrograms, stats, storeData, socialLinks] = await Promise.all([
     client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
     client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } }),
-    client.fetch(storeDetailsQuery, {}, { next: { tags: ["homepage"] } })
+    client.fetch(storeDetailsQuery, {}, { next: { tags: ["homepage"] } }),
+    client.fetch(socialLinksQuery)
   ]);
+
+  const socialData: SocialData = {
+    socialLinks: socialLinks || []
+  };
 
   // Generate JSON-LD for homepage
   const storeInfo = storeData?.[0] || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
@@ -39,7 +45,7 @@ export default async function HomePage() {
       <JsonLd data={jsonLd} />
       <main>
         {/* Hero Section */}
-        <HeroSection />
+        <HeroSection socialData={socialData} />
 
         {/* Popular Programs Section */}
         <PopularProgramsSection programs={popularPrograms} />
