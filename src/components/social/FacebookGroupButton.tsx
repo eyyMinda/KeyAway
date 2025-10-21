@@ -24,7 +24,8 @@ export function FacebookGroupButton({
   const facebookUrl = getFacebookSocialLink(socialData);
 
   const handleClick = () => {
-    trackEvent("facebook_group_click", {
+    trackEvent("social_click", {
+      social: "facebook",
       path: path || window.location.pathname
     });
   };
