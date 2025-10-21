@@ -5,20 +5,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";
-import {
-  FaGithub,
-  FaLinkedin,
-  FaInstagram,
-  FaTwitter,
-  FaYoutube,
-  FaFacebook,
-  FaGlobe,
-  FaKey,
-  FaEnvelope,
-  FaChevronRight
-} from "react-icons/fa";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { FaKey, FaEnvelope, FaChevronRight } from "react-icons/fa";
 import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
+import { Socials } from "@/src/components/social";
+import { trackEvent } from "@/src/lib/trackEvent";
 
 interface FooterProps {
   storeData: StoreDetails;
@@ -39,28 +29,6 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const currentYear = new Date().getFullYear();
 
-  const getSocialIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case "github":
-        return FaGithub;
-      case "linkedin":
-        return FaLinkedin;
-      case "instagram":
-        return FaInstagram;
-      case "twitter":
-        return FaTwitter;
-      case "youtube":
-        return FaYoutube;
-      case "facebook":
-        return FaFacebook;
-      case "website":
-      case "portfolio":
-        return FaGlobe;
-      default:
-        return FaGlobe;
-    }
-  };
-
   return (
     <footer className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white mt-auto">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -77,35 +45,7 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
             <p className="text-gray-300 mb-6 max-w-md">
               {storeData.description || "Free Giveaway CD Keys for your favorite games and software."}
             </p>
-            <div className="flex space-x-4">
-              {socialData?.socialLinks?.map((social, index) => {
-                const IconComponent = getSocialIcon(social.platform);
-                return (
-                  <Link
-                    key={index}
-                    href={social.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={() => {
-                      console.log(
-                        "social_click",
-                        window.location.pathname.split("/").filter(Boolean).pop(),
-                        social.platform,
-                        window.location.pathname
-                      );
-                      trackEvent("social_click", {
-                        social: social.platform,
-                        path: window.location.pathname
-                      });
-                    }}
-                    className="text-gray-300 hover:text-primary-500 transition-colors"
-                    title={social.platform}>
-                    <span className="sr-only">{social.platform}</span>
-                    <IconComponent className="h-6 w-6" />
-                  </Link>
-                );
-              })}
-            </div>
+            <Socials socialLinks={socialData?.socialLinks || []} path={pathname} />
           </div>
 
           {/* Navigation Links */}
