@@ -68,6 +68,21 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="jCM2s4y7bLvOzH32pe8QtRIdwbgEOmntka957Z-tXKI" />
+
+        {/* Technology Stack Metadata */}
+        <meta name="generator" content="Next.js" />
+        <meta name="powered-by" content="Next.js" />
+        <meta name="cms" content="Sanity.io" />
+        <meta name="hosting" content="Vercel" />
+        <meta name="framework" content="Next.js" />
+        <meta name="platform" content="Vercel" />
+
+        {/* Additional Technology Information */}
+        <meta name="build-tool" content="Next.js" />
+        <meta name="deployment-platform" content="Vercel" />
+        <meta name="content-management" content="Sanity.io" />
+        <meta name="database" content="Sanity.io" />
+        <meta name="cdn" content="Vercel Edge Network" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <PageViewTracker />
