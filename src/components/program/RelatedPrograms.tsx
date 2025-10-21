@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
@@ -19,12 +19,20 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
   const maxIndex = Math.max(0, programs.length - itemsPerView);
 
   // Detect mobile on mount and resize
-  useState(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+  useEffect(() => {
+    const checkMobile = () => {
+      if (typeof window !== "undefined") {
+        setIsMobile(window.innerWidth < 768);
+      }
+    };
+
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  });
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
+    }
+  }, []);
 
   const nextSlide = () => {
     setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
