@@ -1,6 +1,7 @@
 "use client";
 
-import { FaGithub, FaLinkedin, FaInstagram, FaTwitter, FaYoutube, FaFacebook, FaGlobe } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram, FaYoutube, FaFacebook, FaGlobe } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { trackEvent } from "@/src/lib/trackEvent";
 import Link from "next/link";
 
@@ -9,7 +10,8 @@ export const SOCIAL_PLATFORMS = {
   github: { icon: FaGithub, name: "GitHub" },
   linkedin: { icon: FaLinkedin, name: "LinkedIn" },
   instagram: { icon: FaInstagram, name: "Instagram" },
-  twitter: { icon: FaTwitter, name: "Twitter" },
+  twitter: { icon: FaXTwitter, name: "X (Twitter)" },
+  x: { icon: FaXTwitter, name: "X" },
   youtube: { icon: FaYoutube, name: "YouTube" },
   facebook: { icon: FaFacebook, name: "Facebook" },
   website: { icon: FaGlobe, name: "Website" },
