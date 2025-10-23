@@ -59,7 +59,9 @@ export default function EventsTable({
                         ? "bg-green-100 text-green-800"
                         : event.event === "download_click"
                           ? "bg-blue-100 text-primary-800"
-                          : "bg-purple-100 text-purple-800"
+                          : event.event === "social_click"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-purple-100 text-purple-800"
                     }`}>
                     {event.event.replace(/_/g, " ").toUpperCase()}
                   </span>
