@@ -7,5 +7,7 @@ export interface Notification {
   programTitle: string;
   message: string;
   createdAt: string;
+  updatedAt?: string;
   keysCount?: number;
+  keyStatus?: "new" | "active";
 }

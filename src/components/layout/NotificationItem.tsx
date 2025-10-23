@@ -15,8 +15,8 @@ export default function NotificationItem({ notification, onClose }: Notification
   const daysOld = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
 
   // Determine prominence level
-  const isFresh = daysOld <= 7; // Last week
-  const isRecent = daysOld > 7 && daysOld <= 14; // 1-2 weeks
+  const isFresh = daysOld <= 30; // 1 month and 14 days
+  const isRecent = daysOld > 30 && daysOld <= 90; // Under 3 months
 
   // Dynamic styling based on age
   const baseOpacity = isFresh ? "opacity-100" : isRecent ? "opacity-75" : "opacity-60";
@@ -66,9 +66,10 @@ export default function NotificationItem({ notification, onClose }: Notification
                 day: "numeric"
               })}
             </span>
-            {isFresh && (
-              <span className="inline-flex items-center px-1.5 py-0.5 bg-primary-500/20 text-primary-300 rounded text-[10px] font-bold">
-                HOT
+            {!isNewProgram && notification.keyStatus == "new" && (
+              <span
+                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase "bg-blue-500/20 text-blue-300 border border-blue-500/30"`}>
+                {notification.keyStatus}
               </span>
             )}
           </div>

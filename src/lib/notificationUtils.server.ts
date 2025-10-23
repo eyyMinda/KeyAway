@@ -2,15 +2,15 @@ import { client } from "@/src/sanity/lib/client";
 import { Notification } from "@/src/types/notifications";
 
 /**
- * Get recent notifications (new programs and updated CD keys within last 30 days)
+ * Get recent notifications (new programs and newly added CD keys within last 30 days)
  */
 export async function getRecentNotifications(): Promise<Notification[]> {
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  const since = oneMonthAgo.toISOString();
+  const filterAgo = new Date();
+  filterAgo.setMonth(filterAgo.getMonth() - 1);
+  filterAgo.setDate(filterAgo.getDate() - 14);
 
   try {
-    // Fetch all programs to check for recent updates
+    // Fetch all programs once
     const programs = await client.fetch<
       Array<{
         _id: string;
@@ -18,26 +18,24 @@ export async function getRecentNotifications(): Promise<Notification[]> {
         _updatedAt: string;
         title: string;
         slug: { current: string };
-        cdKeys: Array<{ _key: string; key: string; status: string }>;
+        cdKeys: Array<{ _key: string; key: string; status: string; createdAt?: string; validFrom: string }>;
       }>
     >(
-      `*[_type == "program" && (_createdAt >= $since || _updatedAt >= $since)] | order(_updatedAt desc) {
+      `*[_type == "program"] | order(_createdAt desc) {
         _id,
         _createdAt,
         _updatedAt,
         title,
         slug,
         cdKeys[]
-      }`,
-      { since }
+      }`
     );
 
     const notifications: Notification[] = [];
 
     for (const program of programs) {
-      const programCreatedAt = new Date(program._createdAt);
-      const programUpdatedAt = new Date(program._updatedAt);
-      const isNewProgram = programCreatedAt > oneMonthAgo;
+      const programActivityAt = new Date(program._createdAt) || new Date(program._updatedAt);
+      const isNewProgram = programActivityAt > filterAgo;
 
       // Check if program itself is new
       if (isNewProgram) {
@@ -49,23 +47,40 @@ export async function getRecentNotifications(): Promise<Notification[]> {
           message: "New program added",
           createdAt: program._createdAt
         });
+        // Don't continue - still check for new keys even if program is new
       }
-      // Check if program was updated recently (keys were likely added)
-      else if (programUpdatedAt > oneMonthAgo && program.cdKeys && program.cdKeys.length > 0) {
-        // Count only active keys (exclude expired and limit reached)
-        const activeKeys = program.cdKeys.filter(
-          key => key.status !== "expired" && key.status !== "limit" && key.status !== "limit_reached"
-        );
 
-        if (activeKeys.length > 0) {
+      // Check for newly added keys (both new and existing programs)
+      if (program.cdKeys && program.cdKeys.length > 0) {
+        // Find keys that were created in the last 30 days
+        const newlyAddedKeys = program.cdKeys.filter(key => {
+          const keyDate = key.createdAt || key.validFrom;
+          if (!keyDate) return false;
+
+          const keyCreatedAt = new Date(keyDate);
+          return keyCreatedAt >= filterAgo && (key.status === "new" || key.status === "active");
+        });
+
+        if (newlyAddedKeys.length > 0) {
+          // Get the most recent key creation date and status
+          const mostRecentKey = newlyAddedKeys.reduce((latest, key) => {
+            const keyDate = new Date(key.createdAt || key.validFrom);
+            const latestDate = new Date(latest.createdAt || latest.validFrom);
+            return keyDate > latestDate ? key : latest;
+          });
+
+          const mostRecentKeyDate = mostRecentKey.createdAt || mostRecentKey.validFrom;
+          const keyStatus = mostRecentKey.status as "new" | "active";
+
           notifications.push({
             id: `keys-${program._id}`,
             type: "new_keys",
             programSlug: program.slug.current,
             programTitle: program.title,
-            message: `Updated with ${activeKeys.length} ${activeKeys.length === 1 ? "key" : "keys"}`,
-            createdAt: program._updatedAt,
-            keysCount: activeKeys.length
+            message: `${newlyAddedKeys.length} new ${newlyAddedKeys.length === 1 ? "key" : "keys"} added`,
+            createdAt: mostRecentKeyDate,
+            keysCount: newlyAddedKeys.length,
+            keyStatus: keyStatus
           });
         }
       }

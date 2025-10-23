@@ -78,8 +78,6 @@ export default function AnnouncementNotifications({ notifications, socialData }:
     scheduleMiniPopup(120000); // Reappear after 2 minutes
   };
 
-  if (unreadCount === 0) return null;
-
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Notification Bell Button */}
@@ -124,9 +122,16 @@ export default function AnnouncementNotifications({ notifications, socialData }:
 
           {/* Notifications List - Shows ~2.8 notifications at once */}
           <div className="max-h-[240px] overflow-y-auto">
-            {notifications.map(notification => (
-              <NotificationItem key={notification.id} notification={notification} onClose={() => setIsOpen(false)} />
-            ))}
+            {notifications.length > 0 ? (
+              notifications.map(notification => (
+                <NotificationItem key={notification.id} notification={notification} onClose={() => setIsOpen(false)} />
+              ))
+            ) : (
+              <div className="px-4 py-8 text-center">
+                <div className="text-gray-400 text-sm mb-2">No recent announcements</div>
+                <div className="text-gray-500 text-xs">Check back later for updates!</div>
+              </div>
+            )}
 
             {/* Facebook Group Button */}
             <div className="p-3 border-t border-gray-700">
