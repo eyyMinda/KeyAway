@@ -32,6 +32,14 @@ export const cdKey = defineType({
           }
           return true;
         })
+    },
+    {
+      name: "createdAt",
+      title: "Created At",
+      type: "datetime",
+      description: "When this key was first added (auto-filled on creation)",
+      initialValue: () => new Date().toISOString(),
+      readOnly: ({ parent }) => !!parent?.createdAt
     }
   ]
 });

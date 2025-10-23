@@ -36,29 +36,46 @@ export async function updateAllExpiredKeys(): Promise<void> {
       if (!program.cdKeys || program.cdKeys.length === 0) continue;
 
       const now = new Date();
+      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       let hasUpdates = false;
       const updatedKeys = program.cdKeys.map((key: CDKey) => {
-        const validUntil = new Date(key.validUntil);
+        let updatedKey = { ...key };
 
-        // If the key is not already expired and the validUntil date has passed
-        if (key.status.toLowerCase() !== "expired" && now > validUntil) {
-          hasUpdates = true;
-          return { ...key, status: "expired" };
+        // Check if key should be expired based on validUntil date
+        if (key.status.toLowerCase() !== "expired" && key.validUntil) {
+          const validUntil = new Date(key.validUntil);
+          if (now > validUntil) {
+            hasUpdates = true;
+            updatedKey = { ...updatedKey, status: "expired" };
+          }
         }
 
-        return key;
+        // Check if "new" key is older than 1 month and convert to "active"
+        if (key.status.toLowerCase() === "new") {
+          // Check createdAt first, then fall back to validFrom
+          const keyDate = key.createdAt || key.validFrom;
+          if (keyDate) {
+            const checkDate = new Date(keyDate);
+            if (checkDate < oneMonthAgo) {
+              hasUpdates = true;
+              updatedKey = { ...updatedKey, status: "active" };
+            }
+          }
+        }
+
+        return updatedKey;
       });
 
       // Only update if there were changes
       if (hasUpdates) {
         await client.patch(program._id).set({ cdKeys: updatedKeys }).commit();
 
-        console.log(`Updated expired keys for program: ${program._id}`);
+        console.log(`Updated keys for program: ${program._id}`);
       }
     }
   } catch (error) {
-    console.error("Failed to update all expired keys:", error);
-    throw new Error("Failed to update expired keys");
+    console.error("Failed to update all keys:", error);
+    throw new Error("Failed to update keys");
   }
 }
 
@@ -74,26 +91,45 @@ export async function getProgramWithUpdatedKeys(slug: string) {
 
     if (!program) return null;
 
-    // Process and update expired keys
+    // Process and update keys (expired and new->active)
     const now = new Date();
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     let hasUpdates = false;
     const updatedKeys = (program.cdKeys || []).map((key: CDKey) => {
-      const validUntil = new Date(key.validUntil);
+      let updatedKey = { ...key };
 
-      if (key.status.toLowerCase() !== "expired" && now > validUntil) {
-        hasUpdates = true;
-        return { ...key, status: "expired" };
+      // Check if key should be expired based on validUntil date
+      if (key.status.toLowerCase() !== "expired" && key.validUntil) {
+        const validUntil = new Date(key.validUntil);
+        if (now > validUntil) {
+          hasUpdates = true;
+          updatedKey = { ...updatedKey, status: "expired" };
+        }
       }
-      return key;
+
+      // Check if "new" key is older than 1 month and convert to "active"
+      if (key.status.toLowerCase() === "new") {
+        // Check createdAt first, then fall back to validFrom
+        const keyDate = key.createdAt || key.validFrom;
+        if (keyDate) {
+          const checkDate = new Date(keyDate);
+          if (checkDate < oneMonthAgo) {
+            hasUpdates = true;
+            updatedKey = { ...updatedKey, status: "active" };
+          }
+        }
+      }
+
+      return updatedKey;
     });
 
     // Update in Sanity if there were changes (non-blocking - don't fail if update fails)
     if (hasUpdates && program._id) {
       try {
         await client.patch(program._id).set({ cdKeys: updatedKeys }).commit();
-        console.log(`Updated expired keys for program: ${program.title}`);
+        console.log(`Updated keys for program: ${program.title}`);
       } catch (updateError) {
-        console.error("Failed to update expired keys in Sanity (non-critical):", updateError);
+        console.error("Failed to update keys in Sanity (non-critical):", updateError);
         // Continue anyway - return the program with updated keys even if Sanity update failed
       }
     }

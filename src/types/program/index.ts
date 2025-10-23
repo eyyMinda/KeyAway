@@ -9,6 +9,7 @@ export interface CDKey {
   version: string;
   validFrom: string;
   validUntil: string;
+  createdAt?: string;
 }
 
 export interface Program {
