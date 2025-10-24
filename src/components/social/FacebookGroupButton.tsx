@@ -1,6 +1,6 @@
 "use client";
 
-import { FaFacebook, FaUsers } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/trackEvent";
 import Link from "next/link";
 import { SocialData } from "@/src/types";

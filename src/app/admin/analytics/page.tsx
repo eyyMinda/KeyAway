@@ -61,7 +61,7 @@ export default function AnalyticsPage() {
   };
 
   // Aggregate data
-  const { totals, byProgram, bySocial, byPath, byCountry, byReferrer } = aggregateEvents(events);
+  const { totals, byProgram, bySocial, byPath, byCountry } = aggregateEvents(events);
   const totalEvents = events.length;
   const uniquePrograms = byProgram.size;
 

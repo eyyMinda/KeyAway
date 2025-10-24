@@ -1,5 +1,4 @@
 // Program and CD Key related types
-import { SocialData } from "../layout";
 
 export type CDKeyStatus = "new" | "active" | "expired" | "limit";
 
