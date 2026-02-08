@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { client } from "@/src/sanity/lib/client";
 import { keyReportsQuery, allProgramsQuery } from "@/src/lib/queries";
@@ -12,7 +12,7 @@ import { hashCDKey } from "@/src/lib/keyHashing";
 import { logger } from "@/src/lib/logger";
 import { useStatusChange } from "@/src/hooks/useStatusChange";
 
-export default function KeyReportsPage() {
+function KeyReportsPageContent() {
   const searchParams = useSearchParams();
   const [reports, setReports] = useState<ExpiredKeyReport[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -254,5 +254,24 @@ export default function KeyReportsPage() {
         report={selectedReport}
       />
     </ProtectedAdminLayout>
+  );
+}
+
+const KeyReportsFallback = () => (
+  <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading key reports...</p>
+      </div>
+    </div>
+  </ProtectedAdminLayout>
+);
+
+export default function KeyReportsPage() {
+  return (
+    <Suspense fallback={<KeyReportsFallback />}>
+      <KeyReportsPageContent />
+    </Suspense>
   );
 }
