@@ -35,7 +35,9 @@ export default function KeyReportsPage() {
         setPrograms(programsData);
 
         // Fetch key reports from last 30 days
-        const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
+        // const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
+        // Fetch all historical key reports
+        const since = "1970-01-01T00:00:00.000Z";
         const events = await client.fetch(keyReportsQuery, { since });
 
         // Debug: Log a sample event to see the data structure
