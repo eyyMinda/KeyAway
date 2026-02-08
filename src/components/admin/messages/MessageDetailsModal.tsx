@@ -59,14 +59,14 @@ export default function MessageDetailsModal({ message, onClose, onStatusChange }
           {/* Title */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">Subject</label>
-            <p className="text-lg font-semibold text-gray-900">{message.title}</p>
+            <p className="text-lg font-semibold text-gray-900">{message.title ?? "-"}</p>
           </div>
 
           {/* Message */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">Message</label>
             <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg border border-gray-200">
-              {message.message}
+              {message.message ?? "-"}
             </p>
           </div>
 
@@ -74,16 +74,16 @@ export default function MessageDetailsModal({ message, onClose, onStatusChange }
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">Name</label>
-              <p className="text-gray-900">{message.name || <span className="text-gray-400">Not provided</span>}</p>
+              <p className="text-gray-900">{message.name?.trim() ? message.name : "-"}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-              {message.email ? (
+              {message.email?.trim() ? (
                 <a href={`mailto:${message.email}`} className="text-primary-600 hover:text-primary-700">
                   {message.email}
                 </a>
               ) : (
-                <span className="text-gray-400">Not provided</span>
+                <span className="text-gray-500">-</span>
               )}
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function MessageDetailsModal({ message, onClose, onStatusChange }
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">Received</label>
-              <p className="text-gray-900">{new Date(message.createdAt).toLocaleString()}</p>
+              <p className="text-gray-900">{message.createdAt ? new Date(message.createdAt).toLocaleString() : "-"}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>

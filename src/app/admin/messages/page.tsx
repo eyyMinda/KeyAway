@@ -13,8 +13,8 @@ export default function MessagesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortColumn, setSortColumn] = useState<string>("createdAt");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortColumn, setSortColumn] = useState<string>("status");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
   useEffect(() => {
     fetchMessages();
@@ -64,18 +64,19 @@ export default function MessagesPage() {
       return matchesSearch && matchesStatus;
     });
 
-    // Sort
+    // Sort (status order: new, read, replied, archived)
+    const statusOrder: Record<string, number> = { new: 0, read: 1, replied: 2, archived: 3 };
     return [...filtered].sort((a, b) => {
       let cmp = 0;
       switch (sortColumn) {
         case "title":
-          cmp = a.title.localeCompare(b.title);
+          cmp = (a.title ?? "").localeCompare(b.title ?? "");
           break;
         case "status":
-          cmp = a.status.localeCompare(b.status);
+          cmp = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
           break;
         case "createdAt":
-          cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          cmp = new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
           break;
         default:
           return 0;
