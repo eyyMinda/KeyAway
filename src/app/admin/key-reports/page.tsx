@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { client } from "@/src/sanity/lib/client";
 import { keyReportsQuery, allProgramsQuery } from "@/src/lib/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
@@ -12,12 +13,14 @@ import { logger } from "@/src/lib/logger";
 import { useStatusChange } from "@/src/hooks/useStatusChange";
 
 export default function KeyReportsPage() {
+  const searchParams = useSearchParams();
   const [reports, setReports] = useState<ExpiredKeyReport[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState<string>("all");
   const [selectedReport, setSelectedReport] = useState<ExpiredKeyReport | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const hasAppliedProgramParam = useRef(false);
 
   // Use custom hook for status change management
   const { pendingChanges, saving, handleStatusChange, saveStatusChange, cancelStatusChange } = useStatusChange({
@@ -163,6 +166,18 @@ export default function KeyReportsPage() {
 
     fetchData();
   }, []);
+
+  // Apply ?program= from URL once when programs are loaded
+  useEffect(() => {
+    if (hasAppliedProgramParam.current || programs.length === 0) return;
+    const programSlug = searchParams.get("program");
+    if (!programSlug) return;
+    const valid = programs.some(p => p.slug?.current === programSlug);
+    if (valid) {
+      setSelectedProgram(programSlug);
+      hasAppliedProgramParam.current = true;
+    }
+  }, [programs, searchParams]);
 
   const filteredReports =
     selectedProgram === "all"
