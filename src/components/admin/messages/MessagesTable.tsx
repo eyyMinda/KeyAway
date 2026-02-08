@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { ContactMessage } from "@/src/types/contact";
-import { client } from "@/src/sanity/lib/client";
 import MessageDetailsModal from "./MessageDetailsModal";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 
@@ -29,7 +28,15 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
   const handleStatusChange = async (messageId: string, newStatus: ContactMessage["status"]) => {
     setUpdating(messageId);
     try {
-      await client.patch(messageId).set({ status: newStatus }).commit();
+      const res = await fetch("/api/admin/update-message-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, newStatus })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Update failed");
+      }
       onUpdate();
     } catch (error) {
       console.error("Error updating message status:", error);
