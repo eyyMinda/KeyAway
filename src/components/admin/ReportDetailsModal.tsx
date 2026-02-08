@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ExpiredKeyReport } from "@/src/types";
 import ModalSection from "./ModalSection";
-import { FiAlertTriangle } from "react-icons/fi";
+import { FiAlertTriangle, FiCheck, FiX } from "react-icons/fi";
 
 interface ReportDetailsModalProps {
   isOpen: boolean;
@@ -213,74 +213,47 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
 
           {/* Individual Reports */}
           <ModalSection title={`Individual Reports (${report.reports.length})`} color="purple">
-            <div className="space-y-3">
+            <div className="space-y-1.5">
               {report.reports.map((reportItem, index) => {
-                const getEventTypeColor = (eventType: string) => {
-                  switch (eventType) {
-                    case "report_key_working":
-                      return {
-                        bg: "bg-gradient-to-r from-green-50 to-emerald-50",
-                        border: "border-green-100",
-                        text: "text-green-700",
-                        badge: "bg-green-100 text-green-800 border-green-200",
-                        icon: "✓"
-                      };
-                    case "report_key_expired":
-                      return {
-                        bg: "bg-gradient-to-r from-red-50 to-rose-50",
-                        border: "border-red-100",
-                        text: "text-red-700",
-                        badge: "bg-red-100 text-red-800 border-red-200",
-                        icon: "❌"
-                      };
-                    case "report_key_limit_reached":
-                      return {
-                        bg: "bg-gradient-to-r from-orange-50 to-amber-50",
-                        border: "border-orange-100",
-                        text: "text-orange-700",
-                        badge: "bg-orange-100 text-orange-800 border-orange-200",
-                        icon: "⚠"
-                      };
-                    default:
-                      return {
-                        bg: "bg-gradient-to-r from-gray-50 to-slate-50",
-                        border: "border-gray-100",
-                        text: "text-gray-700",
-                        badge: "bg-gray-100 text-gray-800 border-gray-200",
-                        icon: "?"
-                      };
+                const eventTypeConfig = {
+                  report_key_working: {
+                    Icon: FiCheck,
+                    label: "Working",
+                    iconClass: "text-green-600",
+                    rowClass: "bg-green-50/80 border-green-200"
+                  },
+                  report_key_expired: {
+                    Icon: FiX,
+                    label: "Expired",
+                    iconClass: "text-red-600",
+                    rowClass: "bg-red-50/80 border-red-200"
+                  },
+                  report_key_limit_reached: {
+                    Icon: FiAlertTriangle,
+                    label: "Limit Reached",
+                    iconClass: "text-amber-600",
+                    rowClass: "bg-amber-50/80 border-amber-200"
                   }
                 };
-
-                const colors = getEventTypeColor(reportItem.eventType);
-                const eventTypeLabels = {
-                  report_key_working: "Working",
-                  report_key_expired: "Expired",
-                  report_key_limit_reached: "Limit Reached"
+                const config = eventTypeConfig[reportItem.eventType as keyof typeof eventTypeConfig] ?? {
+                  Icon: FiAlertTriangle,
+                  label: reportItem.eventType,
+                  iconClass: "text-gray-500",
+                  rowClass: "bg-gray-50 border-gray-200"
                 };
 
                 return (
                   <div
                     key={index}
-                    className={`${colors.bg} rounded-lg p-4 border ${colors.border} hover:shadow-md transition-shadow`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-lg">{colors.icon}</span>
-                        <div className={`text-sm font-semibold ${colors.text}`}>
-                          {eventTypeLabels[reportItem.eventType as keyof typeof eventTypeLabels] ||
-                            reportItem.eventType}
-                        </div>
-                      </div>
-                      <div className={`text-xs font-medium px-2 py-1 rounded border ${colors.badge}`}>
-                        {formatDate(reportItem.createdAt)}
-                      </div>
+                    className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-xs ${config.rowClass}`}>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <config.Icon className={`w-4 h-4 ${config.iconClass}`} />
+                      <span className="font-medium text-gray-900">{config.label}</span>
                     </div>
-                    <div className="text-sm">
-                      <span className={`${colors.text} font-medium`}>Location:</span>
-                      <span className="ml-2 text-gray-900 font-medium">
-                        {reportItem.city}, {reportItem.country}
-                      </span>
-                    </div>
+                    <span className="text-gray-500 shrink-0">{formatDate(reportItem.createdAt)}</span>
+                    <span className="text-gray-600 truncate min-w-0">
+                      {reportItem.city}, {reportItem.country}
+                    </span>
                   </div>
                 );
               })}
