@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ContactMessage } from "@/src/types/contact";
 import MessageDetailsModal from "./MessageDetailsModal";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
+
+export type MessageUpdatePayload = Partial<Pick<ContactMessage, "status" | "email" | "name">>;
 
 interface MessagesTableProps {
   messages: ContactMessage[];
@@ -17,6 +19,14 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
 
+  // Keep selected message in sync when list refetches (e.g. after update)
+  const selectedId = selectedMessage?._id;
+  useEffect(() => {
+    if (!selectedId || !messages.length) return;
+    const updated = messages.find(m => m._id === selectedId);
+    if (updated) setSelectedMessage(updated);
+  }, [messages, selectedId]);
+
   const tableColumns: SortableColumn[] = [
     { key: "title", label: "Title", sortable: true, className: "text-left" },
     { key: "contact", label: "Contact", sortable: false, className: "text-left" },
@@ -25,21 +35,20 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
     { key: "actions", label: "Actions", sortable: false, className: "text-center" }
   ];
 
-  const handleStatusChange = async (messageId: string, newStatus: ContactMessage["status"]) => {
+  const handleUpdateMessage = async (messageId: string, updates: MessageUpdatePayload) => {
+    if (Object.keys(updates).length === 0) return;
     setUpdating(messageId);
     try {
-      const res = await fetch("/api/admin/update-message-status", {
-        method: "POST",
+      const res = await fetch("/api/admin/update-message", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId, newStatus })
+        body: JSON.stringify({ messageId, ...updates })
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Update failed");
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Update failed");
       onUpdate();
     } catch (error) {
-      console.error("Error updating message status:", error);
+      console.error("Error updating message:", error);
     } finally {
       setUpdating(null);
     }
@@ -128,7 +137,9 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
                       <div className="flex justify-center">
                         <select
                           value={message.status ?? "new"}
-                          onChange={e => handleStatusChange(message._id, e.target.value as ContactMessage["status"])}
+                          onChange={e =>
+                            handleUpdateMessage(message._id, { status: e.target.value as ContactMessage["status"] })
+                          }
                           disabled={updating === message._id}
                           className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${getStatusColor(message.status ?? "new")} disabled:opacity-50`}>
                           <option value="new">New</option>
@@ -161,10 +172,8 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
         <MessageDetailsModal
           message={selectedMessage}
           onClose={() => setSelectedMessage(null)}
-          onStatusChange={(newStatus: ContactMessage["status"]) => {
-            handleStatusChange(selectedMessage._id, newStatus);
-            setSelectedMessage(null);
-          }}
+          onUpdateMessage={updates => handleUpdateMessage(selectedMessage._id, updates)}
+          updating={updating === selectedMessage._id}
         />
       )}
     </>

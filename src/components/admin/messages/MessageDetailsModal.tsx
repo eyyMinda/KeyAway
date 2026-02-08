@@ -1,17 +1,34 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { FaTimes } from "react-icons/fa";
 import { ContactMessage } from "@/src/types/contact";
+import type { MessageUpdatePayload } from "./MessagesTable";
 
 interface MessageDetailsModalProps {
   message: ContactMessage;
   onClose: () => void;
-  onStatusChange: (newStatus: ContactMessage["status"]) => void;
+  onUpdateMessage: (updates: MessageUpdatePayload) => void;
+  updating?: boolean;
 }
 
-export default function MessageDetailsModal({ message, onClose, onStatusChange }: MessageDetailsModalProps) {
+export default function MessageDetailsModal({ message, onClose, onUpdateMessage, updating }: MessageDetailsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [emailInput, setEmailInput] = useState(message.email ?? "");
+  const [emailSaved, setEmailSaved] = useState(false);
+
+  // Sync email input when message changes (e.g. after refetch)
+  useEffect(() => {
+    setEmailInput(message.email ?? "");
+  }, [message._id, message.email]);
+
+  const handleSaveEmail = useCallback(() => {
+    const trimmed = emailInput.trim();
+    if (trimmed === (message.email ?? "").trim()) return;
+    onUpdateMessage({ email: trimmed || undefined });
+    setEmailSaved(true);
+    setTimeout(() => setEmailSaved(false), 2000);
+  }, [emailInput, message.email, onUpdateMessage]);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -78,12 +95,30 @@ export default function MessageDetailsModal({ message, onClose, onStatusChange }
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-              {message.email?.trim() ? (
-                <a href={`mailto:${message.email}`} className="text-primary-600 hover:text-primary-700">
-                  {message.email}
+              <div className="flex gap-2 items-center">
+                <input
+                  type="email"
+                  value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && handleSaveEmail()}
+                  placeholder="Add or edit email..."
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 text-sm"
+                  disabled={updating}
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveEmail}
+                  disabled={updating || emailInput.trim() === (message.email ?? "").trim()}
+                  className="shrink-0 px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  {emailSaved ? "Saved" : "Save"}
+                </button>
+              </div>
+              {message.email?.trim() && (
+                <a
+                  href={`mailto:${message.email}`}
+                  className="mt-1 inline-block text-sm text-primary-600 hover:text-primary-700">
+                  Send mail
                 </a>
-              ) : (
-                <span className="text-gray-500">-</span>
               )}
             </div>
           </div>
@@ -97,9 +132,10 @@ export default function MessageDetailsModal({ message, onClose, onStatusChange }
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
               <select
-                value={message.status}
-                onChange={e => onStatusChange(e.target.value as ContactMessage["status"])}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer text-gray-900">
+                value={message.status ?? "new"}
+                onChange={e => onUpdateMessage({ status: e.target.value as ContactMessage["status"] })}
+                disabled={updating}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer text-gray-900 disabled:opacity-50">
                 <option value="new">New</option>
                 <option value="read">Read</option>
                 <option value="replied">Replied</option>
