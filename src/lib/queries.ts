@@ -45,6 +45,11 @@ export const allProgramsQuery = `
   title, slug, description, image, cdKeys[]
 }
 `;
+export const adminProgramsQuery = `
+*[_type == "program"]{
+  _id, title, slug, description, image, downloadLink, cdKeys[]
+}
+`;
 export const programBySlugQuery = `
 *[_type == "program" && slug.current == $slug][0]{
   _id, title, description, image, downloadLink, cdKeys[]
