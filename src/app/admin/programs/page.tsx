@@ -2,33 +2,36 @@
 
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import SearchInput from "@/src/components/ui/SearchInput";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { client } from "@/src/sanity/lib/client";
-import { allProgramsQuery } from "@/src/lib/queries";
+import { adminProgramsQuery } from "@/src/lib/queries";
 import { Program } from "@/src/types";
 import Link from "next/link";
 import { IdealImage } from "@/src/components/general/IdealImage";
+import ProgramEditModal from "@/src/components/admin/programs/ProgramEditModal";
 
 export default function ProgramsPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const fetchPrograms = useCallback(async () => {
+    setLoading(true);
+    try {
+      const programsData: Program[] = await client.fetch(adminProgramsQuery);
+      setPrograms(programsData);
+    } catch (error) {
+      console.error("Error fetching programs:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchPrograms = async () => {
-      setLoading(true);
-      try {
-        const programsData: Program[] = await client.fetch(allProgramsQuery);
-        setPrograms(programsData);
-      } catch (error) {
-        console.error("Error fetching programs:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPrograms();
-  }, []);
+  }, [fetchPrograms]);
 
   const filteredPrograms = programs.filter(
     program =>
@@ -74,7 +77,7 @@ export default function ProgramsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPrograms.map(program => (
           <div
-            key={program.slug.current}
+            key={program._id ?? program.slug.current}
             className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
             {/* Program Image */}
             <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -110,11 +113,13 @@ export default function ProgramsPage() {
                   className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors text-center">
                   View
                 </Link>
-                <button className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                <button
+                  onClick={() => {
+                    setSelectedProgram(program);
+                    setEditModalOpen(true);
+                  }}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
                   Edit
-                </button>
-                <button className="px-3 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors">
-                  Delete
                 </button>
               </div>
             </div>
@@ -139,6 +144,25 @@ export default function ProgramsPage() {
           )}
         </div>
       )}
+
+      <ProgramEditModal
+        program={selectedProgram}
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setSelectedProgram(null);
+        }}
+        onSaved={() => {
+          fetchPrograms();
+          setEditModalOpen(false);
+          setSelectedProgram(null);
+        }}
+        onDeleted={() => {
+          fetchPrograms();
+          setEditModalOpen(false);
+          setSelectedProgram(null);
+        }}
+      />
 
       {/* Summary Stats */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
