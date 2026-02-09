@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { client } from "@/src/sanity/lib/client";
 import { keyReportsQuery, allProgramsQuery } from "@/src/lib/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
@@ -11,13 +12,15 @@ import { hashCDKey } from "@/src/lib/keyHashing";
 import { logger } from "@/src/lib/logger";
 import { useStatusChange } from "@/src/hooks/useStatusChange";
 
-export default function KeyReportsPage() {
+function KeyReportsPageContent() {
+  const searchParams = useSearchParams();
   const [reports, setReports] = useState<ExpiredKeyReport[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState<string>("all");
   const [selectedReport, setSelectedReport] = useState<ExpiredKeyReport | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const hasAppliedProgramParam = useRef(false);
 
   // Use custom hook for status change management
   const { pendingChanges, saving, handleStatusChange, saveStatusChange, cancelStatusChange } = useStatusChange({
@@ -35,7 +38,9 @@ export default function KeyReportsPage() {
         setPrograms(programsData);
 
         // Fetch key reports from last 30 days
-        const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
+        // const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
+        // Fetch all historical key reports
+        const since = "1970-01-01T00:00:00.000Z";
         const events = await client.fetch(keyReportsQuery, { since });
 
         // Debug: Log a sample event to see the data structure
@@ -162,6 +167,18 @@ export default function KeyReportsPage() {
     fetchData();
   }, []);
 
+  // Apply ?program= from URL once when programs are loaded
+  useEffect(() => {
+    if (hasAppliedProgramParam.current || programs.length === 0) return;
+    const programSlug = searchParams.get("program");
+    if (!programSlug) return;
+    const valid = programs.some(p => p.slug?.current === programSlug);
+    if (valid) {
+      setSelectedProgram(programSlug);
+      hasAppliedProgramParam.current = true;
+    }
+  }, [programs, searchParams]);
+
   const filteredReports =
     selectedProgram === "all"
       ? reports
@@ -237,5 +254,24 @@ export default function KeyReportsPage() {
         report={selectedReport}
       />
     </ProtectedAdminLayout>
+  );
+}
+
+const KeyReportsFallback = () => (
+  <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading key reports...</p>
+      </div>
+    </div>
+  </ProtectedAdminLayout>
+);
+
+export default function KeyReportsPage() {
+  return (
+    <Suspense fallback={<KeyReportsFallback />}>
+      <KeyReportsPageContent />
+    </Suspense>
   );
 }

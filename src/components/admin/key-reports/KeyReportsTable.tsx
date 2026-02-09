@@ -35,7 +35,7 @@ export default function KeyReportsTable({
   const [sortColumn, setSortColumn] = useState<SortColumn>("lastReport");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 10;
+  const pageSize = 20;
 
   const getLatestReportTs = (r: ExpiredKeyReport): number => {
     if (!r.reports || r.reports.length === 0) return 0;

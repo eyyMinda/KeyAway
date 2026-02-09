@@ -16,7 +16,8 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
     const fetchReportData = async () => {
       try {
         setLoading(true);
-        const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
+        // const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
+        const since = "1970-01-01T00:00:00.000Z"; // all historical reports
         const events = await client.fetch(keyReportsQuery, { since });
 
         // Filter for matching program

@@ -81,3 +81,17 @@ export interface ExpiredKeyReport {
     eventType: "report_key_working" | "report_key_expired" | "report_key_limit_reached";
   }>;
 }
+
+/** Admin header key-report notification item (from GET /api/admin/key-report-notifications). */
+export interface KeyReportNotificationItem {
+  programSlug: string;
+  programTitle: string;
+  keyIdentifier: string;
+  negativeCount: number;
+  positiveCount: number;
+  working: number;
+  expired: number;
+  limit_reached: number;
+  ratioLabel: string;
+  link: string;
+}

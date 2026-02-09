@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { KeySuggestion } from "@/src/types/contact";
-import { client } from "@/src/sanity/lib/client";
 import SuggestionDetailsModal from "./SuggestionDetailsModal";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
+
+export type SuggestionUpdatePayload = Partial<Pick<KeySuggestion, "status" | "email" | "name">>;
 
 interface KeySuggestionsTableProps {
   suggestions: KeySuggestion[];
@@ -24,6 +25,32 @@ export default function KeySuggestionsTable({
   const [selectedSuggestion, setSelectedSuggestion] = useState<KeySuggestion | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
 
+  const selectedId = selectedSuggestion?._id;
+  useEffect(() => {
+    if (!selectedId || !suggestions.length) return;
+    const updated = suggestions.find(s => s._id === selectedId);
+    if (updated) setSelectedSuggestion(updated);
+  }, [suggestions, selectedId]);
+
+  const handleUpdateSuggestion = async (suggestionId: string, updates: SuggestionUpdatePayload) => {
+    if (Object.keys(updates).length === 0) return;
+    setUpdating(suggestionId);
+    try {
+      const res = await fetch("/api/admin/update-key-suggestion", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ suggestionId, ...updates })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Update failed");
+      onUpdate();
+    } catch (error) {
+      console.error("Error updating suggestion:", error);
+    } finally {
+      setUpdating(null);
+    }
+  };
+
   const tableColumns: SortableColumn[] = [
     { key: "programName", label: "Program", sortable: true, className: "text-left" },
     { key: "cdKey", label: "CD Key", sortable: false, className: "text-left" },
@@ -32,18 +59,6 @@ export default function KeySuggestionsTable({
     { key: "createdAt", label: "Date", sortable: true, className: "text-center" },
     { key: "actions", label: "Actions", sortable: false, className: "text-center" }
   ];
-
-  const handleStatusChange = async (suggestionId: string, newStatus: KeySuggestion["status"]) => {
-    setUpdating(suggestionId);
-    try {
-      await client.patch(suggestionId).set({ status: newStatus }).commit();
-      onUpdate();
-    } catch (error) {
-      console.error("Error updating suggestion status:", error);
-    } finally {
-      setUpdating(null);
-    }
-  };
 
   const getStatusColor = (status: KeySuggestion["status"]) => {
     switch (status) {
@@ -87,52 +102,64 @@ export default function KeySuggestionsTable({
               onSort={onSort}
             />
             <tbody className="divide-y divide-gray-200">
-              {suggestions.map(suggestion => (
-                <tr key={suggestion._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{suggestion.programName}</div>
-                    <a
-                      href={suggestion.programLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary-600 hover:text-primary-700 truncate max-w-xs block">
-                      {suggestion.programLink}
-                    </a>
-                  </td>
-                  <td className="px-6 py-4">
-                    <code className="px-2 py-1 bg-gray-100 whitespace-nowrap text-gray-900 rounded text-sm font-mono">
-                      {suggestion.cdKey}
-                    </code>
-                  </td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-900">v{suggestion.programVersion}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-center">
-                      <select
-                        value={suggestion.status}
-                        onChange={e => handleStatusChange(suggestion._id, e.target.value as KeySuggestion["status"])}
-                        disabled={updating === suggestion._id}
-                        className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${getStatusColor(suggestion.status)} disabled:opacity-50`}>
-                        <option value="new">New</option>
-                        <option value="reviewing">Reviewing</option>
-                        <option value="added">Added</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-500">
-                    {new Date(suggestion.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => setSelectedSuggestion(suggestion)}
-                        className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors cursor-pointer">
-                        View Details
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {suggestions.map(suggestion => {
+                const isRejected = suggestion.status === "rejected";
+                return (
+                  <tr key={suggestion._id} className={`hover:bg-gray-50 ${isRejected ? "bg-gray-50 opacity-75" : ""}`}>
+                    <td className="px-6 py-4">
+                      <div className={`font-medium truncate ${isRejected ? "text-gray-500" : "text-gray-900"}`}>
+                        {suggestion.programName}
+                      </div>
+                      <a
+                        href={suggestion.programLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`text-xs truncate max-w-xs block ${isRejected ? "text-gray-400" : "text-primary-600 hover:text-primary-700"}`}>
+                        {suggestion.programLink}
+                      </a>
+                    </td>
+                    <td className="px-6 py-4">
+                      <code
+                        className={`px-2 py-1 bg-gray-100 whitespace-nowrap rounded text-sm font-mono ${isRejected ? "text-gray-500" : "text-gray-900"}`}>
+                        {suggestion.cdKey}
+                      </code>
+                    </td>
+                    <td className={`px-6 py-4 text-center text-sm ${isRejected ? "text-gray-500" : "text-gray-900"}`}>
+                      v{suggestion.programVersion}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <select
+                          value={suggestion.status}
+                          onChange={e =>
+                            handleUpdateSuggestion(suggestion._id, {
+                              status: e.target.value as KeySuggestion["status"]
+                            })
+                          }
+                          disabled={updating === suggestion._id}
+                          className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${getStatusColor(suggestion.status)} disabled:opacity-50`}>
+                          <option value="new">New</option>
+                          <option value="reviewing">Reviewing</option>
+                          <option value="added">Added</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </td>
+                    <td className={`px-6 py-4 text-center text-sm ${isRejected ? "text-gray-400" : "text-gray-500"}`}>
+                      {new Date(suggestion.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => setSelectedSuggestion(suggestion)}
+                          className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors cursor-pointer">
+                          View Details
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -143,10 +170,8 @@ export default function KeySuggestionsTable({
         <SuggestionDetailsModal
           suggestion={selectedSuggestion}
           onClose={() => setSelectedSuggestion(null)}
-          onStatusChange={newStatus => {
-            handleStatusChange(selectedSuggestion._id, newStatus);
-            setSelectedSuggestion(null);
-          }}
+          onUpdateSuggestion={updates => handleUpdateSuggestion(selectedSuggestion._id, updates)}
+          updating={updating === selectedSuggestion._id}
         />
       )}
     </>

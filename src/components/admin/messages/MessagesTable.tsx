@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ContactMessage } from "@/src/types/contact";
-import { client } from "@/src/sanity/lib/client";
 import MessageDetailsModal from "./MessageDetailsModal";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
+
+export type MessageUpdatePayload = Partial<Pick<ContactMessage, "status" | "email" | "name">>;
 
 interface MessagesTableProps {
   messages: ContactMessage[];
@@ -18,6 +19,14 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
 
+  // Keep selected message in sync when list refetches (e.g. after update)
+  const selectedId = selectedMessage?._id;
+  useEffect(() => {
+    if (!selectedId || !messages.length) return;
+    const updated = messages.find(m => m._id === selectedId);
+    if (updated) setSelectedMessage(updated);
+  }, [messages, selectedId]);
+
   const tableColumns: SortableColumn[] = [
     { key: "title", label: "Title", sortable: true, className: "text-left" },
     { key: "contact", label: "Contact", sortable: false, className: "text-left" },
@@ -26,13 +35,20 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
     { key: "actions", label: "Actions", sortable: false, className: "text-center" }
   ];
 
-  const handleStatusChange = async (messageId: string, newStatus: ContactMessage["status"]) => {
+  const handleUpdateMessage = async (messageId: string, updates: MessageUpdatePayload) => {
+    if (Object.keys(updates).length === 0) return;
     setUpdating(messageId);
     try {
-      await client.patch(messageId).set({ status: newStatus }).commit();
+      const res = await fetch("/api/admin/update-message", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId, ...updates })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Update failed");
       onUpdate();
     } catch (error) {
-      console.error("Error updating message status:", error);
+      console.error("Error updating message:", error);
     } finally {
       setUpdating(null);
     }
@@ -72,7 +88,14 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full table-fixed">
+            <colgroup>
+              <col className="w-[28%]" />
+              <col className="w-[22%]" />
+              <col className="w-[14%]" />
+              <col className="w-[14%]" />
+              <col className="w-[22%]" />
+            </colgroup>
             <SortableTableHead
               columns={tableColumns}
               sortColumn={sortColumn}
@@ -80,50 +103,65 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
               onSort={onSort}
             />
             <tbody className="divide-y divide-gray-200">
-              {messages.map(message => (
-                <tr key={message._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{message.title}</div>
-                    <div className="text-sm text-gray-500 truncate max-w-md">{message.message.slice(0, 60)}...</div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {message.name || message.email ? (
-                      <div className="text-sm">
-                        {message.name && <div className="font-medium text-gray-900">{message.name}</div>}
-                        {message.email && <div className="text-gray-500">{message.email}</div>}
+              {messages.map(message => {
+                const isArchived = message.status === "archived";
+                const title = message.title ?? "-";
+                const messagePreview = message.message
+                  ? `${message.message.slice(0, 60)}${message.message.length > 60 ? "..." : ""}`
+                  : "-";
+                const contactName = message.name ?? "-";
+                const contactEmail = message.email ?? "-";
+                const hasContact = (message.name ?? "").trim() || (message.email ?? "").trim();
+                const dateStr = message.createdAt ? new Date(message.createdAt).toLocaleDateString() : "-";
+                return (
+                  <tr key={message._id} className={`hover:bg-gray-50 ${isArchived ? "bg-gray-50 opacity-75" : ""}`}>
+                    <td className="px-6 py-4 align-top text-left">
+                      <div className={`font-medium truncate ${isArchived ? "text-gray-500" : "text-gray-900"}`}>
+                        {title}
                       </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">Anonymous</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-center">
-                      <select
-                        value={message.status}
-                        onChange={e => handleStatusChange(message._id, e.target.value as ContactMessage["status"])}
-                        disabled={updating === message._id}
-                        className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${getStatusColor(message.status)} disabled:opacity-50`}>
-                        <option value="new">New</option>
-                        <option value="read">Read</option>
-                        <option value="replied">Replied</option>
-                        <option value="archived">Archived</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-center text-sm text-gray-500">
-                    {new Date(message.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-center">
-                      <button
-                        onClick={() => setSelectedMessage(message)}
-                        className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors cursor-pointer">
-                        View Details
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      <div className={`text-sm truncate ${isArchived ? "text-gray-400" : "text-gray-500"}`}>
+                        {messagePreview}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 align-top text-left">
+                      {hasContact ? (
+                        <div className="text-sm">
+                          <div className={isArchived ? "text-gray-500" : "text-gray-900"}>{contactName}</div>
+                          <div className={isArchived ? "text-gray-400" : "text-gray-500"}>{contactEmail}</div>
+                        </div>
+                      ) : (
+                        <span className={isArchived ? "text-gray-400" : "text-gray-500"}>-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 align-top text-center">
+                      <div className="flex justify-center">
+                        <select
+                          value={message.status ?? "new"}
+                          onChange={e =>
+                            handleUpdateMessage(message._id, { status: e.target.value as ContactMessage["status"] })
+                          }
+                          disabled={updating === message._id}
+                          className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${getStatusColor(message.status ?? "new")} disabled:opacity-50`}>
+                          <option value="new">New</option>
+                          <option value="read">Read</option>
+                          <option value="replied">Replied</option>
+                          <option value="archived">Archived</option>
+                        </select>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 align-top text-center text-sm text-gray-500">{dateStr}</td>
+                    <td className="px-6 py-4 align-top text-center">
+                      <div className="flex justify-center">
+                        <button
+                          onClick={() => setSelectedMessage(message)}
+                          className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors cursor-pointer">
+                          View Details
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -134,10 +172,8 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
         <MessageDetailsModal
           message={selectedMessage}
           onClose={() => setSelectedMessage(null)}
-          onStatusChange={(newStatus: ContactMessage["status"]) => {
-            handleStatusChange(selectedMessage._id, newStatus);
-            setSelectedMessage(null);
-          }}
+          onUpdateMessage={updates => handleUpdateMessage(selectedMessage._id, updates)}
+          updating={updating === selectedMessage._id}
         />
       )}
     </>

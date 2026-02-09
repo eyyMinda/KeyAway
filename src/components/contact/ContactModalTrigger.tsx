@@ -15,17 +15,18 @@ export default function ContactModalTrigger({ tab, children, className, asChild 
     window.dispatchEvent(event);
   };
 
+  const triggerClassName = [className, "cursor-pointer"].filter(Boolean).join(" ");
+
   if (asChild) {
-    // Clone the child element and add the onClick handler
     return (
-      <div onClick={handleClick} className={className}>
+      <div onClick={handleClick} className={triggerClassName}>
         {children}
       </div>
     );
   }
 
   return (
-    <button onClick={handleClick} className={className} type="button">
+    <button onClick={handleClick} className={triggerClassName} type="button">
       {children}
     </button>
   );

@@ -63,7 +63,8 @@ export default function AnalyticsPage() {
   // Aggregate data
   const { totals, byProgram, bySocial, byPath, byCountry } = aggregateEvents(events);
   const totalEvents = events.length;
-  const uniquePrograms = byProgram.size;
+  const totalPrograms = programs.filter(p => p.slug?.current).length;
+  const uniqueVisitors = new Set(events.map(e => e.ipHash).filter(Boolean)).size;
 
   if (loading) {
     return (
@@ -99,21 +100,14 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 mb-8">
         <AnalyticsCard title="Total Events" value={totalEvents} subtitle="Last 30 days" icon="📊" color="blue" />
         <AnalyticsCard
           title="Total Programs"
-          value={programs.length}
-          subtitle="All programs in system"
-          icon="🎮"
+          value={totalPrograms}
+          subtitle="Programs on website"
+          icon="💻"
           color="green"
-        />
-        <AnalyticsCard
-          title="Active Programs"
-          value={uniquePrograms}
-          subtitle="With tracked events"
-          icon="📈"
-          color="purple"
         />
         <AnalyticsCard
           title="Social Clicks"
@@ -128,6 +122,13 @@ export default function AnalyticsPage() {
           subtitle="Total page views"
           icon="👁️"
           color="orange"
+        />
+        <AnalyticsCard
+          title="Unique Visitors"
+          value={uniqueVisitors}
+          subtitle="Distinct visitors"
+          icon="👨‍👩‍👧"
+          color="purple"
         />
         <AnalyticsCard
           title="Unique Countries"
