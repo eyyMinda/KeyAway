@@ -49,6 +49,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [slugChangeConfirmOpen, setSlugChangeConfirmOpen] = useState(false);
 
   const syncFromProgram = useCallback(() => {
     if (program) {
@@ -70,6 +71,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setDeleteConfirm("");
       setDeleteError(null);
     }
+    setSlugChangeConfirmOpen(false);
     setLibraryOpen(false);
     setSaveError(null);
   }, [program]);
@@ -82,7 +84,9 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
     if (!isOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (libraryOpen) {
+        if (slugChangeConfirmOpen) {
+          setSlugChangeConfirmOpen(false);
+        } else if (libraryOpen) {
           setLibraryOpen(false);
         } else if (deleteExpanded) {
           setDeleteExpanded(false);
@@ -104,13 +108,13 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";
     };
-  }, [isOpen, onClose, deleteExpanded, libraryOpen]);
+  }, [isOpen, onClose, deleteExpanded, libraryOpen, slugChangeConfirmOpen]);
 
   const slugValidation = validateSlug(slug);
   const canSave =
     title.trim() && slugValidation.normalized && !slugValidation.error && description.trim() && !saveLoading;
 
-  const handleSave = async () => {
+  const performSave = async () => {
     if (!canSave) return;
     setSaveError(null);
     setSaveLoading(true);
@@ -139,6 +143,17 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
     } finally {
       setSaveLoading(false);
     }
+  };
+
+  const handleSave = () => {
+    if (!canSave) return;
+    const originalSlug = program?.slug?.current ?? "";
+    const newSlug = slugValidation.normalized ?? "";
+    if (program && originalSlug && newSlug !== originalSlug) {
+      setSlugChangeConfirmOpen(true);
+      return;
+    }
+    performSave();
   };
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -336,18 +351,52 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
 
           {program && (
             <div className="border-t border-gray-200 pt-6 mt-6">
-              <p className="text-sm text-gray-600 mb-2">
-                Deleting this program will remove it and all its CD keys. This cannot be undone.
+              <p className="text-sm text-gray-600">
+                <button
+                  type="button"
+                  onClick={() => setDeleteExpanded(true)}
+                  className="text-gray-500 underline hover:text-gray-600 cursor-pointer align-baseline">
+                  Deleting this program
+                </button>{" "}
+                will remove it and all its CD keys. This cannot be undone.
               </p>
-              <button
-                type="button"
-                onClick={() => setDeleteExpanded(true)}
-                className="text-gray-500 underline hover:text-gray-600 cursor-pointer">
-                Delete program
-              </button>
             </div>
           )}
         </div>
+
+        {slugChangeConfirmOpen && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm rounded-2xl"
+            onClick={() => setSlugChangeConfirmOpen(false)}>
+            <div
+              className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4"
+              onClick={e => e.stopPropagation()}>
+              <p className="text-sm text-gray-700">
+                Changing the slug will change this program&apos;s URL. Links shared elsewhere may stop working. Are you
+                sure you want to continue?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSlugChangeConfirmOpen(false);
+                    performSave();
+                  }}
+                  disabled={saveLoading}
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 cursor-pointer">
+                  {saveLoading ? "Saving…" : "Yes, change slug"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSlugChangeConfirmOpen(false)}
+                  disabled={saveLoading}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {libraryOpen && (
           <div
