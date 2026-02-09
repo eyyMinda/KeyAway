@@ -3,27 +3,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { FaTimes } from "react-icons/fa";
 import type { Program } from "@/src/types/program";
-import { urlFor } from "@/src/sanity/lib/image";
+import { titleToSlug, validateSlug } from "./programSlugUtils";
 import DeleteProgramModal from "./DeleteProgramModal";
-
-const SLUG_REGEX = /^[a-z0-9-]+$/;
-
-function titleToSlug(title: string): string {
-  return title
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-    .replace(/^-+|-+$/g, "");
-}
-
-function validateSlug(raw: string): { normalized: string; error: string | null } {
-  const normalized = titleToSlug(raw);
-  if (!raw.trim()) return { normalized: "", error: "Slug is required" };
-  if (!normalized) return { normalized: "", error: "Use at least one letter or number" };
-  if (!SLUG_REGEX.test(normalized)) return { normalized: "", error: "Only lowercase letters, numbers, and hyphens" };
-  return { normalized, error: null };
-}
+import SlugChangeConfirmModal from "./SlugChangeConfirmModal";
+import ImageLibraryModal from "./ImageLibraryModal";
+import ProgramImageField from "./ProgramImageField";
 
 interface ProgramEditModalProps {
   program: Program | null;
@@ -42,7 +26,6 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
-  const [libraryAssets, setLibraryAssets] = useState<{ _id: string }[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteExpanded, setDeleteExpanded] = useState(false);
@@ -176,16 +159,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
     }
   }, []);
 
-  const openLibrary = useCallback(async () => {
-    setLibraryOpen(true);
-    try {
-      const res = await fetch("/api/admin/programs/image-assets");
-      const data = await res.json().catch(() => ({}));
-      setLibraryAssets(Array.isArray(data.assets) ? data.assets : []);
-    } catch {
-      setLibraryAssets([]);
-    }
-  }, []);
+  const openLibrary = useCallback(() => setLibraryOpen(true), []);
 
   const handleDelete = async () => {
     if (!program?._id || deleteConfirm.trim() !== program.title.trim()) return;
@@ -282,51 +256,14 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
-            {imageAssetId && (
-              <div className="mb-2 relative inline-block">
-                <div className="relative flex items-center justify-center max-w-32 max-h-32 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={urlFor({ _type: "image", asset: { _ref: imageAssetId } })
-                      .fit("max")
-                      .url()}
-                    alt=""
-                    className="max-w-full max-h-32 w-auto h-auto object-contain"
-                  />
-                </div>
-              </div>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <label className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 cursor-pointer">
-                {uploadLoading ? "Uploading…" : "Upload image"}
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  className="sr-only"
-                  disabled={saveLoading || uploadLoading}
-                  onChange={handleUpload}
-                />
-              </label>
-              <button
-                type="button"
-                onClick={openLibrary}
-                disabled={saveLoading}
-                className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 cursor-pointer">
-                Choose from library
-              </button>
-              {imageAssetId && (
-                <button
-                  type="button"
-                  onClick={() => setImageAssetId(null)}
-                  disabled={saveLoading}
-                  className="px-3 py-2 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 cursor-pointer">
-                  Clear image
-                </button>
-              )}
-            </div>
-          </div>
+          <ProgramImageField
+            imageAssetId={imageAssetId}
+            onAssetIdChange={setImageAssetId}
+            uploadLoading={uploadLoading}
+            onUpload={handleUpload}
+            onOpenLibrary={openLibrary}
+            disabled={saveLoading}
+          />
 
           {saveError && (
             <p className="text-sm text-red-600" role="alert">
@@ -364,86 +301,14 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           )}
         </div>
 
-        {slugChangeConfirmOpen && (
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm rounded-2xl"
-            onClick={() => setSlugChangeConfirmOpen(false)}>
-            <div
-              className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4"
-              onClick={e => e.stopPropagation()}>
-              <p className="text-sm text-gray-700">
-                Changing the slug will change this program&apos;s URL. Links shared elsewhere may stop working. Are you
-                sure you want to continue?
-              </p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSlugChangeConfirmOpen(false);
-                    performSave();
-                  }}
-                  disabled={saveLoading}
-                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 cursor-pointer">
-                  {saveLoading ? "Saving…" : "Yes, change slug"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSlugChangeConfirmOpen(false)}
-                  disabled={saveLoading}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <SlugChangeConfirmModal
+          isOpen={slugChangeConfirmOpen}
+          onClose={() => setSlugChangeConfirmOpen(false)}
+          onConfirm={performSave}
+          saving={saveLoading}
+        />
 
-        {libraryOpen && (
-          <div
-            className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm rounded-2xl"
-            onClick={() => setLibraryOpen(false)}>
-            <div
-              className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col"
-              onClick={e => e.stopPropagation()}>
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                <h3 className="font-semibold text-gray-900">Choose image</h3>
-                <button
-                  type="button"
-                  onClick={() => setLibraryOpen(false)}
-                  className="p-2 text-gray-500 hover:bg-gray-200 rounded-lg cursor-pointer">
-                  <FaTimes size={18} />
-                </button>
-              </div>
-              <div className="p-4 overflow-y-auto flex-1">
-                {libraryAssets.length === 0 ? (
-                  <p className="text-sm text-gray-500">No images in library. Upload an image first.</p>
-                ) : (
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-1">
-                    {libraryAssets.map(asset => (
-                      <button
-                        type="button"
-                        key={asset._id}
-                        onClick={() => {
-                          setImageAssetId(asset._id);
-                          setLibraryOpen(false);
-                        }}
-                        className="relative flex items-center justify-center max-w-28 max-h-28 rounded-lg overflow-hidden border-2 border-transparent hover:border-blue-500 focus:border-blue-500 cursor-pointer bg-gray-100">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={urlFor({ _type: "image", asset: { _ref: asset._id } })
-                            .fit("max")
-                            .url()}
-                          alt=""
-                          className="max-w-full max-h-24 w-auto h-auto object-contain"
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <ImageLibraryModal isOpen={libraryOpen} onClose={() => setLibraryOpen(false)} onSelect={setImageAssetId} />
 
         {deleteExpanded && program && (
           <DeleteProgramModal
