@@ -7,13 +7,21 @@ import { client } from "@/src/sanity/lib/client";
 import { adminProgramsQuery } from "@/src/lib/queries";
 import { Program } from "@/src/types";
 import Link from "next/link";
+import { FaWrench } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import ProgramEditModal from "@/src/components/admin/programs/ProgramEditModal";
+
+type ProgramFilter = "all" | "no-working-keys" | "has-working-keys";
+
+function workingKeysCount(program: Program): number {
+  return program.cdKeys?.filter(key => key.status === "active" || key.status === "new").length ?? 0;
+}
 
 export default function ProgramsPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<ProgramFilter>("all");
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
@@ -33,11 +41,18 @@ export default function ProgramsPage() {
     fetchPrograms();
   }, [fetchPrograms]);
 
-  const filteredPrograms = programs.filter(
-    program =>
-      program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      program.slug.current.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPrograms = programs
+    .filter(
+      program =>
+        program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        program.slug.current.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter(program => {
+      if (filter === "all") return true;
+      const working = workingKeysCount(program);
+      if (filter === "no-working-keys") return working === 0;
+      return working > 0;
+    });
 
   if (loading) {
     return (
@@ -61,12 +76,19 @@ export default function ProgramsPage() {
             <div className="flex-1 max-w-md">
               <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search programs..." />
             </div>
-            <div className="flex gap-2">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <div className="flex flex-wrap gap-2 items-center">
+              <select
+                value={filter}
+                onChange={e => setFilter(e.target.value as ProgramFilter)}
+                className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm cursor-pointer">
+                <option value="all">All programs</option>
+                <option value="no-working-keys">No working keys</option>
+                <option value="has-working-keys">Has working keys</option>
+              </select>
+              <button
+                type="button"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
                 Add Program
-              </button>
-              <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                Export
               </button>
             </div>
           </div>
@@ -99,10 +121,7 @@ export default function ProgramsPage() {
                   <span className="font-medium">{program.cdKeys?.length || 0}</span> CD Keys
                 </div>
                 <div className="text-sm text-gray-500">
-                  <span className="font-medium">
-                    {program.cdKeys?.filter(key => key.status === "active" || key.status === "new").length || 0}
-                  </span>{" "}
-                  Working
+                  <span className="font-medium">{workingKeysCount(program)}</span> Working
                 </div>
               </div>
 
@@ -110,15 +129,17 @@ export default function ProgramsPage() {
               <div className="flex gap-2">
                 <Link
                   href={`/program/${program.slug.current}`}
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors text-center">
+                  className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors text-center cursor-pointer">
                   View
                 </Link>
                 <button
+                  type="button"
                   onClick={() => {
                     setSelectedProgram(program);
                     setEditModalOpen(true);
                   }}
-                  className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
+                  <FaWrench className="shrink-0" size={14} />
                   Edit
                 </button>
               </div>
@@ -132,13 +153,17 @@ export default function ProgramsPage() {
         <div className="text-center py-12">
           <div className="text-4xl mb-4">🎮</div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {searchTerm ? "No programs found" : "No programs available"}
+            {searchTerm || filter !== "all" ? "No programs found" : "No programs available"}
           </h3>
           <p className="text-gray-500 mb-4">
-            {searchTerm ? "Try adjusting your search terms." : "Get started by adding your first program."}
+            {searchTerm || filter !== "all"
+              ? "Try adjusting your search or filter."
+              : "Get started by adding your first program."}
           </p>
           {!searchTerm && (
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button
+              type="button"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
               Add Program
             </button>
           )}
