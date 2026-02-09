@@ -76,7 +76,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
       }`}
       onClick={handleBackdropClick}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-gray-900/60 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none" />
 
       {/* Modal */}
       <div
