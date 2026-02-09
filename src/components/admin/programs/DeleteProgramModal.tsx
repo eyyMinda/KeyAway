@@ -24,6 +24,10 @@ export default function DeleteProgramModal({
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm rounded-2xl">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+        <p className="text-sm text-gray-600">
+          This will permanently remove the program and all its CD keys. Links and reports referencing it may break. This
+          cannot be undone.
+        </p>
         <p className="text-sm text-gray-700">
           Type the program name to confirm: <strong>{programTitle}</strong>
         </p>
