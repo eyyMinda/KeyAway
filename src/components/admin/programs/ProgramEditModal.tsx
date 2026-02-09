@@ -27,19 +27,28 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const syncFromProgram = useCallback(() => {
-    if (!program) return;
-    setTitle(program.title);
-    setSlug(program.slug?.current ?? "");
-    setDescription(program.description ?? "");
-    setDownloadLink(program.downloadLink ?? "");
-    setDeleteExpanded(false);
-    setDeleteConfirm("");
-    setDeleteError(null);
+    if (program) {
+      setTitle(program.title);
+      setSlug(program.slug?.current ?? "");
+      setDescription(program.description ?? "");
+      setDownloadLink(program.downloadLink ?? "");
+      setDeleteExpanded(false);
+      setDeleteConfirm("");
+      setDeleteError(null);
+    } else {
+      setTitle("");
+      setSlug("");
+      setDescription("");
+      setDownloadLink("");
+      setDeleteExpanded(false);
+      setDeleteConfirm("");
+      setDeleteError(null);
+    }
     setSaveError(null);
   }, [program]);
 
   useEffect(() => {
-    if (program && isOpen) syncFromProgram();
+    if (isOpen) syncFromProgram();
   }, [program, isOpen, syncFromProgram]);
 
   useEffect(() => {
@@ -69,19 +78,22 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   }, [isOpen, onClose, deleteExpanded]);
 
   const handleSave = async () => {
-    if (!program?._id) return;
+    if (!title.trim() || !slug.trim() || !description.trim()) return;
     setSaveError(null);
     setSaveLoading(true);
     try {
-      const res = await fetch(`/api/admin/programs/${program._id}`, {
-        method: "PATCH",
+      const payload = {
+        title: title.trim(),
+        slug: slug.trim(),
+        description: description.trim(),
+        downloadLink: downloadLink.trim() || undefined
+      };
+      const url = program?._id ? `/api/admin/programs/${program._id}` : "/api/admin/programs";
+      const method = program?._id ? "PATCH" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title.trim() || undefined,
-          slug: slug.trim() || undefined,
-          description: description.trim() || undefined,
-          downloadLink: downloadLink.trim() || undefined
-        })
+        body: JSON.stringify(payload)
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -122,7 +134,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
         ref={modalRef}
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-2xl font-bold text-gray-900">Edit program</h2>
+          <h2 className="text-2xl font-bold text-gray-900">{program ? "Edit program" : "Add program"}</h2>
           <button
             onClick={onClose}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
@@ -196,17 +208,19 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
             </button>
           </div>
 
-          <div className="border-t border-gray-200 pt-6 mt-6">
-            <p className="text-sm text-gray-600 mb-2">
-              Deleting this program will remove it and all its CD keys. This cannot be undone.
-            </p>
-            <button
-              type="button"
-              onClick={() => setDeleteExpanded(true)}
-              className="text-red-600 underline hover:text-red-700 cursor-pointer">
-              Delete program
-            </button>
-          </div>
+          {program && (
+            <div className="border-t border-gray-200 pt-6 mt-6">
+              <p className="text-sm text-gray-600 mb-2">
+                Deleting this program will remove it and all its CD keys. This cannot be undone.
+              </p>
+              <button
+                type="button"
+                onClick={() => setDeleteExpanded(true)}
+                className="text-red-600 underline hover:text-red-700 cursor-pointer">
+                Delete program
+              </button>
+            </div>
+          )}
         </div>
 
         {deleteExpanded && program && (

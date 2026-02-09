@@ -87,6 +87,10 @@ export default function ProgramsPage() {
               </select>
               <button
                 type="button"
+                onClick={() => {
+                  setSelectedProgram(null);
+                  setEditModalOpen(true);
+                }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
                 Add Program
               </button>
@@ -163,6 +167,10 @@ export default function ProgramsPage() {
           {!searchTerm && (
             <button
               type="button"
+              onClick={() => {
+                setSelectedProgram(null);
+                setEditModalOpen(true);
+              }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
               Add Program
             </button>
