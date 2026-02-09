@@ -22,13 +22,12 @@ export default function ProgramInformation({ program, totalKeys, workingKeys, so
           {/* Image */}
           <div className="order-2 lg:order-1">
             {program.image ? (
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl group">
-                <IdealImage image={program.image} alt={program.title} className="w-full max-h-96 object-contain" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative overflow-hidden shadow-2xl">
+                <IdealImage image={program.image} alt={program.title} className="w-full h-auto rounded-2xl" />
               </div>
             ) : (
               <div className="w-full h-80 bg-gradient-to-br from-primary-500/20 to-accent-500/20 rounded-3xl flex items-center justify-center shadow-2xl border border-white/10">
-                <div className="text-neutral-500 text-6xl">🎮</div>
+                <div className="text-neutral-500 text-6xl">💻</div>
               </div>
             )}
           </div>
