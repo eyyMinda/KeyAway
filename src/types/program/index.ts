@@ -16,7 +16,7 @@ export interface Program {
   title: string;
   slug: { current: string };
   description: string;
-  image?: { asset: { url: string } };
+  image?: { asset: { url?: string; _ref?: string } };
   downloadLink?: string;
   cdKeys: CDKey[];
   _updatedAt?: string;

@@ -9,7 +9,8 @@ function normalizeSlug(s: string): string {
     .trim()
     .toLowerCase()
     .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/^-+|-+$/g, "");
 }
 
 export async function POST(request: NextRequest) {
@@ -42,10 +43,16 @@ export async function POST(request: NextRequest) {
     }
     const downloadLink = downloadLinkRaw || undefined;
 
-    const duplicate = await client.fetch<string | null>(
-      `*[_type == "program" && slug.current == $slug][0]._id`,
-      { slug }
-    );
+    const imageAssetId =
+      b.imageAssetId === null || b.imageAssetId === ""
+        ? undefined
+        : typeof b.imageAssetId === "string"
+          ? b.imageAssetId.trim() || undefined
+          : undefined;
+
+    const duplicate = await client.fetch<string | null>(`*[_type == "program" && slug.current == $slug][0]._id`, {
+      slug
+    });
     if (duplicate) {
       return NextResponse.json({ error: "A program with this slug already exists" }, { status: 400 });
     }
@@ -56,6 +63,9 @@ export async function POST(request: NextRequest) {
       slug: { _type: "slug", current: slug },
       description,
       ...(downloadLink && { downloadLink }),
+      ...(imageAssetId && {
+        image: { _type: "image", asset: { _type: "reference", _ref: imageAssetId } }
+      }),
       cdKeys: []
     });
 
