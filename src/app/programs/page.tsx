@@ -6,6 +6,7 @@ import JsonLd from "@/src/components/JsonLd";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
 import ProgramsHero from "@/src/components/programs/ProgramsHero";
 import { FacebookGroupButton } from "@/src/components/social";
+import { getFeaturedProgram } from "@/src/lib/sanityActions";
 import type { Program, SocialData } from "@/src/types";
 
 export const revalidate = 60;
@@ -16,10 +17,11 @@ export async function generateMetadata() {
 
 export default async function ProgramsPage() {
   // Fetch all programs with stats for client-side filtering
-  const [programs, totalCount, socialLinks] = await Promise.all([
+  const [programs, totalCount, socialLinks, featuredProgram] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: ["programs"] } }),
     client.fetch(programsCountQuery, {}, { next: { tags: ["programs"] } }),
-    client.fetch(socialLinksQuery)
+    client.fetch(socialLinksQuery),
+    getFeaturedProgram()
   ]);
 
   const socialData: SocialData = {
@@ -47,7 +49,7 @@ export default async function ProgramsPage() {
         </section>
 
         {/* Programs Grid with Filtering */}
-        <ProgramsPageClient programs={programs} />
+        <ProgramsPageClient programs={programs} featuredProgram={featuredProgram} />
       </main>
     </>
   );
