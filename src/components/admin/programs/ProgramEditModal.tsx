@@ -22,10 +22,14 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
+  const [featuredDescription, setFeaturedDescription] = useState("");
   const [downloadLink, setDownloadLink] = useState("");
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
+  const [showcaseGifAssetId, setShowcaseGifAssetId] = useState<string | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [gifUploadLoading, setGifUploadLoading] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [librarySelectTarget, setLibrarySelectTarget] = useState<"image" | "gif" | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteExpanded, setDeleteExpanded] = useState(false);
@@ -39,8 +43,10 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setTitle(program.title);
       setSlug(program.slug?.current ?? "");
       setDescription(program.description ?? "");
+      setFeaturedDescription(program.featuredDescription ?? "");
       setDownloadLink(program.downloadLink ?? "");
       setImageAssetId(program.image?.asset?._ref ?? null);
+      setShowcaseGifAssetId(program.showcaseGif?.asset?._ref ?? null);
       setDeleteExpanded(false);
       setDeleteConfirm("");
       setDeleteError(null);
@@ -48,14 +54,17 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setTitle("");
       setSlug("");
       setDescription("");
+      setFeaturedDescription("");
       setDownloadLink("");
       setImageAssetId(null);
+      setShowcaseGifAssetId(null);
       setDeleteExpanded(false);
       setDeleteConfirm("");
       setDeleteError(null);
     }
     setSlugChangeConfirmOpen(false);
     setLibraryOpen(false);
+    setLibrarySelectTarget(null);
     setSaveError(null);
   }, [program]);
 
@@ -71,6 +80,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           setSlugChangeConfirmOpen(false);
         } else if (libraryOpen) {
           setLibraryOpen(false);
+          setLibrarySelectTarget(null);
         } else if (deleteExpanded) {
           setDeleteExpanded(false);
           setDeleteConfirm("");
@@ -106,8 +116,14 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
         title: title.trim(),
         slug: slugValidation.normalized,
         description: description.trim(),
+        featuredDescription: featuredDescription.trim() || undefined,
         downloadLink: downloadLink.trim() || undefined,
-        ...(program?._id ? { imageAssetId: imageAssetId ?? null } : imageAssetId ? { imageAssetId } : {})
+        ...(program?._id ? { imageAssetId: imageAssetId ?? null } : imageAssetId ? { imageAssetId } : {}),
+        ...(program?._id
+          ? { showcaseGifAssetId: showcaseGifAssetId ?? null }
+          : showcaseGifAssetId
+            ? { showcaseGifAssetId }
+            : {})
       };
       const url = program?._id ? `/api/admin/programs/${program._id}` : "/api/admin/programs";
       const method = program?._id ? "PATCH" : "POST";
@@ -139,27 +155,47 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
     performSave();
   };
 
-  const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadLoading(true);
-    try {
-      const formData = new FormData();
-      formData.set("file", file);
-      const res = await fetch("/api/admin/programs/upload-image", { method: "POST", body: formData });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setSaveError(data?.error ?? "Upload failed");
-        return;
+  const handleImageUpload = useCallback(
+    async (
+      e: React.ChangeEvent<HTMLInputElement>,
+      setAssetId: (id: string) => void,
+      setLoading: (loading: boolean) => void
+    ) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setLoading(true);
+      try {
+        const formData = new FormData();
+        formData.set("file", file);
+        const res = await fetch("/api/admin/programs/upload-image", { method: "POST", body: formData });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setSaveError(data?.error ?? "Upload failed");
+          return;
+        }
+        if (data.assetId) setAssetId(data.assetId);
+      } finally {
+        setLoading(false);
+        e.target.value = "";
       }
-      if (data.assetId) setImageAssetId(data.assetId);
-    } finally {
-      setUploadLoading(false);
-      e.target.value = "";
-    }
-  }, []);
+    },
+    []
+  );
 
-  const openLibrary = useCallback(() => setLibraryOpen(true), []);
+  const handleUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => handleImageUpload(e, setImageAssetId, setUploadLoading),
+    [handleImageUpload]
+  );
+
+  const handleGifUpload = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => handleImageUpload(e, setShowcaseGifAssetId, setGifUploadLoading),
+    [handleImageUpload]
+  );
+
+  const openLibrary = useCallback((target: "image" | "gif") => {
+    setLibrarySelectTarget(target);
+    setLibraryOpen(true);
+  }, []);
 
   const handleDelete = async () => {
     if (!program?._id || deleteConfirm.trim() !== program.title.trim()) return;
@@ -245,6 +281,20 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Featured Description
+              <span className="text-xs text-gray-500 ml-1">(for featured section)</span>
+            </label>
+            <textarea
+              value={featuredDescription}
+              onChange={e => setFeaturedDescription(e.target.value)}
+              rows={4}
+              placeholder="Optional description to display when this program is featured"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              disabled={saveLoading}
+            />
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Download link</label>
             <input
               type="url"
@@ -257,11 +307,22 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           </div>
 
           <ProgramImageField
+            label="Program Image"
             imageAssetId={imageAssetId}
             onAssetIdChange={setImageAssetId}
             uploadLoading={uploadLoading}
             onUpload={handleUpload}
-            onOpenLibrary={openLibrary}
+            onOpenLibrary={() => openLibrary("image")}
+            disabled={saveLoading}
+          />
+
+          <ProgramImageField
+            label="Showcase GIF (for featured section)"
+            imageAssetId={showcaseGifAssetId}
+            onAssetIdChange={setShowcaseGifAssetId}
+            uploadLoading={gifUploadLoading}
+            onUpload={handleGifUpload}
+            onOpenLibrary={() => openLibrary("gif")}
             disabled={saveLoading}
           />
 
@@ -308,7 +369,22 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           saving={saveLoading}
         />
 
-        <ImageLibraryModal isOpen={libraryOpen} onClose={() => setLibraryOpen(false)} onSelect={setImageAssetId} />
+        <ImageLibraryModal
+          isOpen={libraryOpen}
+          onClose={() => {
+            setLibraryOpen(false);
+            setLibrarySelectTarget(null);
+          }}
+          onSelect={assetId => {
+            if (librarySelectTarget === "image") {
+              setImageAssetId(assetId);
+            } else if (librarySelectTarget === "gif") {
+              setShowcaseGifAssetId(assetId);
+            }
+            setLibraryOpen(false);
+            setLibrarySelectTarget(null);
+          }}
+        />
 
         {deleteExpanded && program && (
           <DeleteProgramModal

@@ -1,5 +1,8 @@
+/** @fileoverview API route for creating new programs. Validates input and creates program documents in Sanity. */
+
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
+import { buildImageReference } from "@/src/lib/adminHelpers";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
@@ -37,6 +40,8 @@ export async function POST(request: NextRequest) {
     const description = typeof b.description === "string" ? b.description.trim() : "";
     if (!description) return NextResponse.json({ error: "description cannot be empty" }, { status: 400 });
 
+    const featuredDescription = typeof b.featuredDescription === "string" ? b.featuredDescription.trim() : undefined;
+
     const downloadLinkRaw = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
     if (downloadLinkRaw && !URL_REGEX.test(downloadLinkRaw)) {
       return NextResponse.json({ error: "downloadLink must be a valid URL" }, { status: 400 });
@@ -48,6 +53,13 @@ export async function POST(request: NextRequest) {
         ? undefined
         : typeof b.imageAssetId === "string"
           ? b.imageAssetId.trim() || undefined
+          : undefined;
+
+    const showcaseGifAssetId =
+      b.showcaseGifAssetId === null || b.showcaseGifAssetId === ""
+        ? undefined
+        : typeof b.showcaseGifAssetId === "string"
+          ? b.showcaseGifAssetId.trim() || undefined
           : undefined;
 
     const duplicate = await client.fetch<string | null>(`*[_type == "program" && slug.current == $slug][0]._id`, {
@@ -62,10 +74,10 @@ export async function POST(request: NextRequest) {
       title,
       slug: { _type: "slug", current: slug },
       description,
+      ...(featuredDescription && { featuredDescription }),
       ...(downloadLink && { downloadLink }),
-      ...(imageAssetId && {
-        image: { _type: "image", asset: { _type: "reference", _ref: imageAssetId } }
-      }),
+      ...(buildImageReference(imageAssetId) && { image: buildImageReference(imageAssetId) }),
+      ...(buildImageReference(showcaseGifAssetId) && { showcaseGif: buildImageReference(showcaseGifAssetId) }),
       cdKeys: []
     });
 
