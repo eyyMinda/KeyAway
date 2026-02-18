@@ -42,17 +42,17 @@ export const footerLinksQuery = `*[_type=="footerLink"] | order(_createdAt asc) 
 /* ------------ Programs ------------ */
 export const allProgramsQuery = `
 *[_type == "program"]{
-  title, slug, description, image, cdKeys[]
+  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[]
 }
 `;
 export const adminProgramsQuery = `
 *[_type == "program"]{
-  _id, title, slug, description, image, downloadLink, cdKeys[]
+  _id, title, slug, description, featuredDescription, image, showcaseGif, downloadLink, cdKeys[]
 }
 `;
 export const programBySlugQuery = `
 *[_type == "program" && slug.current == $slug][0]{
-  _id, title, description, image, downloadLink, cdKeys[]
+  _id, title, description, featuredDescription, image, showcaseGif, downloadLink, cdKeys[]
 }
 `;
 
@@ -89,7 +89,7 @@ export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt de
 
 /* ------------ Popular Programs by Page Views ------------ */
 export const popularProgramsByViewsQuery = `*[_type == "program"]{
-  title, slug, description, image, cdKeys[],
+  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[],
   "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
   "hasKeys": count(cdKeys[]) > 0,
@@ -110,7 +110,7 @@ export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekA
 
 /* ------------ Programs with Filtering ------------ */
 export const programsWithStatsQuery = `*[_type == "program"]{
-  title, slug, description, image, cdKeys[], _createdAt,
+  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[], _createdAt,
   "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
   "hasKeys": count(cdKeys[]) > 0,
@@ -119,3 +119,54 @@ export const programsWithStatsQuery = `*[_type == "program"]{
 
 /* ------------ Programs Count Query ------------ */
 export const programsCountQuery = `count(*[_type == "program"])`;
+
+/* ------------ Featured Program Settings Query ------------ */
+export const featuredProgramSettingsQuery = `*[_type == "featuredProgramSettings"][0]{
+  currentFeaturedProgram->{
+    _id,
+    title,
+    slug,
+    description,
+    featuredDescription,
+    image,
+    showcaseGif,
+    cdKeys[]
+  },
+  rotationSchedule,
+  lastRotationDate,
+  autoSelectCriteria,
+  _id
+}`;
+
+/* ------------ Featured Program Query (with key stats) ------------ */
+export const featuredProgramQuery = `*[_type == "program" && slug.current == $slug][0]{
+  _id,
+  title,
+  slug,
+  description,
+  image,
+  downloadLink,
+  cdKeys[],
+  "totalKeys": count(cdKeys[]),
+  "workingKeys": count(cdKeys[status == "active" || status == "new"]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])
+}`;
+
+/* ------------ Programs for Auto-Selection (highest working keys) ------------ */
+export const programsForAutoSelectionQuery = `*[_type == "program"]{
+  _id,
+  title,
+  slug,
+  description,
+  featuredDescription,
+  image,
+  showcaseGif,
+  downloadLink,
+  cdKeys[],
+  "totalKeys": count(cdKeys[]),
+  "workingKeys": count(cdKeys[status == "active" || status == "new"]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
+} | order(workingKeys desc, popularityScore desc)`;

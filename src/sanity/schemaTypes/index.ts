@@ -13,6 +13,7 @@ import { socialLink } from "./socialLink";
 
 import { program } from "./program";
 import { cdKey } from "./cdKey";
+import { featuredProgramSettings } from "./featuredProgramSettings";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -26,6 +27,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     footer,
     socialLink,
     program,
-    cdKey
+    cdKey,
+    featuredProgramSettings
   ]
 };
