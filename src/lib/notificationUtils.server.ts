@@ -28,7 +28,9 @@ export async function getRecentNotifications(): Promise<Notification[]> {
         title,
         slug,
         cdKeys[]
-      }`
+      }`,
+      {},
+      { next: { tags: ["notifications", "programs"] } }
     );
 
     const notifications: Notification[] = [];
