@@ -16,7 +16,9 @@ export interface Program {
   title: string;
   slug: { current: string };
   description: string;
+  featuredDescription?: string;
   image?: { asset: { url?: string; _ref?: string } };
+  showcaseGif?: { asset: { url?: string; _ref?: string } };
   downloadLink?: string;
   cdKeys: CDKey[];
   _updatedAt?: string;

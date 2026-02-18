@@ -9,12 +9,25 @@ export const program = defineType({
     { name: "slug", title: "Slug", type: "slug", options: { source: "title" }, validation: Rule => Rule.required() },
     { name: "description", title: "Description", type: "text", validation: Rule => Rule.required() },
     {
+      name: "featuredDescription",
+      title: "Featured Description",
+      type: "text",
+      description:
+        "Optional description to display when this program is featured. Should include what the program does, its capabilities. If empty, the regular description will be used."
+    },
+    {
       name: "image",
       title: "Image",
       type: "image",
       options: {
         hotspot: true
       }
+    },
+    {
+      name: "showcaseGif",
+      title: "Showcase GIF",
+      type: "image",
+      description: "Optional GIF demonstrating the program in action (used when featured)"
     },
     {
       name: "downloadLink",
