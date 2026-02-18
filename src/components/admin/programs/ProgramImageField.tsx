@@ -3,6 +3,7 @@
 import { urlFor } from "@/src/sanity/lib/image";
 
 interface ProgramImageFieldProps {
+  label?: string;
   imageAssetId: string | null;
   onAssetIdChange: (assetId: string | null) => void;
   uploadLoading: boolean;
@@ -12,6 +13,7 @@ interface ProgramImageFieldProps {
 }
 
 export default function ProgramImageField({
+  label = "Image",
   imageAssetId,
   onAssetIdChange,
   uploadLoading,
@@ -21,7 +23,7 @@ export default function ProgramImageField({
 }: ProgramImageFieldProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">Image</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {imageAssetId && (
         <div className="mb-2 relative inline-block">
           <div className="relative flex items-center justify-center max-w-32 max-h-32 rounded-lg overflow-hidden border border-gray-200 bg-gray-100">

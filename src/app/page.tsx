@@ -3,11 +3,13 @@ import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialL
 import { generateHomePageMetadata } from "@/src/lib/metadata";
 import { generateHomePageJsonLd } from "@/src/lib/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
+import { getFeaturedProgram } from "@/src/lib/sanityActions";
 
 // Import homepage sections
 import HeroSection from "@/src/components/home/HeroSection";
 import FeaturesSection from "@/src/components/home/FeaturesSection";
 import PopularProgramsSection from "@/src/components/home/PopularProgramsSection";
+import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
 import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
 import { SocialData } from "@/src/types";
@@ -25,11 +27,12 @@ export default async function HomePage() {
   const weekAgoISO = weekAgo.toISOString();
 
   // Fetch all data in parallel for better performance
-  const [popularPrograms, stats, storeData, socialLinks] = await Promise.all([
+  const [popularPrograms, stats, storeData, socialLinks, featuredProgram] = await Promise.all([
     client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
     client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } }),
     client.fetch(storeDetailsQuery, {}, { next: { tags: ["homepage"] } }),
-    client.fetch(socialLinksQuery)
+    client.fetch(socialLinksQuery),
+    getFeaturedProgram()
   ]);
 
   const socialData: SocialData = {
@@ -46,6 +49,9 @@ export default async function HomePage() {
       <main>
         {/* Hero Section */}
         <HeroSection socialData={socialData} />
+
+        {/* Featured Program Section */}
+        <FeaturedProgramSection program={featuredProgram} />
 
         {/* Popular Programs Section */}
         <PopularProgramsSection programs={popularPrograms} />

@@ -1,5 +1,8 @@
+/** @fileoverview API route for updating and deleting individual programs. Handles PATCH and DELETE operations with validation. */
+
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
+import { buildImageReference } from "@/src/lib/adminHelpers";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
@@ -17,8 +20,10 @@ function parseBody(body: unknown): {
   title?: string;
   slug?: string;
   description?: string;
+  featuredDescription?: string;
   downloadLink?: string;
   imageAssetId?: string | null;
+  showcaseGifAssetId?: string | null;
 } {
   if (!body || typeof body !== "object") return {};
   const b = body as Record<string, unknown>;
@@ -26,8 +31,10 @@ function parseBody(body: unknown): {
     title?: string;
     slug?: string;
     description?: string;
+    featuredDescription?: string;
     downloadLink?: string;
     imageAssetId?: string | null;
+    showcaseGifAssetId?: string | null;
   } = {};
 
   if (b.title !== undefined) {
@@ -45,6 +52,9 @@ function parseBody(body: unknown): {
   if (b.description !== undefined) {
     out.description = typeof b.description === "string" ? b.description.trim() : "";
   }
+  if (b.featuredDescription !== undefined) {
+    out.featuredDescription = typeof b.featuredDescription === "string" ? b.featuredDescription.trim() : undefined;
+  }
   if (b.downloadLink !== undefined) {
     const v = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
     if (v && !URL_REGEX.test(v)) throw new Error("downloadLink must be a valid URL");
@@ -56,6 +66,14 @@ function parseBody(body: unknown): {
         ? null
         : typeof b.imageAssetId === "string"
           ? b.imageAssetId.trim() || null
+          : undefined;
+  }
+  if (b.showcaseGifAssetId !== undefined) {
+    out.showcaseGifAssetId =
+      b.showcaseGifAssetId === null || b.showcaseGifAssetId === ""
+        ? null
+        : typeof b.showcaseGifAssetId === "string"
+          ? b.showcaseGifAssetId.trim() || null
           : undefined;
   }
   return out;
@@ -71,7 +89,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const keys = Object.keys(updates) as (keyof typeof updates)[];
     if (keys.length === 0) {
       return NextResponse.json(
-        { error: "No valid fields to update (allowed: title, slug, description, downloadLink, imageAssetId)" },
+        {
+          error:
+            "No valid fields to update (allowed: title, slug, description, featuredDescription, downloadLink, imageAssetId, showcaseGifAssetId)"
+        },
         { status: 400 }
       );
     }
@@ -90,14 +111,14 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (updates.title !== undefined) patch.set({ title: updates.title });
     if (updates.slug !== undefined) patch.set({ slug: { _type: "slug", current: updates.slug } });
     if (updates.description !== undefined) patch.set({ description: updates.description });
+    if (updates.featuredDescription !== undefined)
+      patch.set({ featuredDescription: updates.featuredDescription ?? null });
     if (updates.downloadLink !== undefined) patch.set({ downloadLink: updates.downloadLink ?? null });
     if (updates.imageAssetId !== undefined) {
-      patch.set({
-        image:
-          updates.imageAssetId == null || updates.imageAssetId === ""
-            ? null
-            : { _type: "image", asset: { _type: "reference", _ref: updates.imageAssetId } }
-      });
+      patch.set({ image: buildImageReference(updates.imageAssetId) });
+    }
+    if (updates.showcaseGifAssetId !== undefined) {
+      patch.set({ showcaseGif: buildImageReference(updates.showcaseGifAssetId) });
     }
 
     const result = await patch.commit();

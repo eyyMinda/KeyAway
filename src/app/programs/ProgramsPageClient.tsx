@@ -2,11 +2,25 @@
 
 import { useState, useMemo } from "react";
 import { ProgramsFilter, ProgramsGrid, ContributeSection, WhyUseSection } from "@/src/components/programs";
+import JoinCommunitySection from "@/src/components/programs/JoinCommunitySection";
+import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
 import Pagination from "@/src/components/ui/Pagination";
 import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
 import { sortPrograms, filterProgramsByKeys, searchPrograms } from "@/src/lib/programUtils";
+import { Program } from "@/src/types";
 
-export default function ProgramsPageClient({ programs }: ProgramsPageClientProps) {
+interface ExtendedProgramsPageClientProps extends ProgramsPageClientProps {
+  featuredProgram:
+    | (Program & {
+        totalKeys: number;
+        workingKeys: number;
+        viewCount: number;
+        downloadCount: number;
+      })
+    | null;
+}
+
+export default function ProgramsPageClient({ programs, featuredProgram }: ExtendedProgramsPageClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
   const [sortBy, setSortBy] = useState<SortType>("popular");
@@ -93,6 +107,8 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
       {/* Additional Sections */}
       <ContributeSection />
       <WhyUseSection />
+      <FeaturedProgramSection program={featuredProgram} />
+      <JoinCommunitySection />
     </>
   );
 }

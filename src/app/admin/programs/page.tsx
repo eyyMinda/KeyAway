@@ -10,12 +10,10 @@ import Link from "next/link";
 import { FaWrench } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import ProgramEditModal from "@/src/components/admin/programs/ProgramEditModal";
+import FeaturedProgramSettings from "@/src/components/admin/programs/FeaturedProgramSettings";
+import { getWorkingKeysCount } from "@/src/lib/adminHelpers";
 
 type ProgramFilter = "all" | "no-working-keys" | "has-working-keys";
-
-function workingKeysCount(program: Program): number {
-  return program.cdKeys?.filter(key => key.status === "active" || key.status === "new").length ?? 0;
-}
 
 export default function ProgramsPage() {
   const [programs, setPrograms] = useState<Program[]>([]);
@@ -49,7 +47,7 @@ export default function ProgramsPage() {
     )
     .filter(program => {
       if (filter === "all") return true;
-      const working = workingKeysCount(program);
+      const working = getWorkingKeysCount(program.cdKeys);
       if (filter === "no-working-keys") return working === 0;
       return working > 0;
     });
@@ -69,6 +67,15 @@ export default function ProgramsPage() {
 
   return (
     <ProtectedAdminLayout title="Programs" subtitle="Manage CD key programs and content">
+      {/* Featured Program Settings */}
+      <FeaturedProgramSettings
+        programs={programs}
+        onProgramClick={program => {
+          setSelectedProgram(program);
+          setEditModalOpen(true);
+        }}
+      />
+
       {/* Search and Actions */}
       <div className="mb-6">
         <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
@@ -125,7 +132,7 @@ export default function ProgramsPage() {
                   <span className="font-medium">{program.cdKeys?.length || 0}</span> CD Keys
                 </div>
                 <div className="text-sm text-gray-500">
-                  <span className="font-medium">{workingKeysCount(program)}</span> Working
+                  <span className="font-medium">{getWorkingKeysCount(program.cdKeys)}</span> Working
                 </div>
               </div>
 
@@ -233,12 +240,7 @@ export default function ProgramsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Working Keys</p>
               <p className="text-2xl font-bold text-gray-900">
-                {programs.reduce(
-                  (total, program) =>
-                    total +
-                    (program.cdKeys?.filter(key => key.status === "active" || key.status === "new").length || 0),
-                  0
-                )}
+                {programs.reduce((total, program) => total + getWorkingKeysCount(program.cdKeys), 0)}
               </p>
             </div>
           </div>
