@@ -14,6 +14,8 @@ import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/metadata";
 import { getRecentNotifications } from "@/src/lib/notificationUtils.server";
+import { headers } from "next/headers";
+import { unstable_noStore as noStore } from "next/cache";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,6 +26,8 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"]
 });
+
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateHomePageMetadata();
@@ -45,6 +49,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || headersList.get("referer") || "";
+  const isAdminOrStudio = pathname.includes("/admin") || pathname.includes("/studio");
+
+  // Bypass cache for admin/studio routes to ensure fresh notifications
+  if (isAdminOrStudio) {
+    noStore();
+  }
+
   const [storeData, socialLinks, notifications] = await Promise.all([
     getStoreData(),
     client.fetch(socialLinksQuery),
