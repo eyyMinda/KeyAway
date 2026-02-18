@@ -14,12 +14,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Always revalidate homepage
+    // Always revalidate homepage and notifications
     revalidateTag("homepage");
+    revalidateTag("notifications");
 
     // Revalidate program pages
     if (body._type === "program" && body.slug?.current) {
       revalidateTag(`program-${body.slug.current}`);
+    }
+
+    // Revalidate programs list if program or cdKey changed
+    if (body._type === "program" || body._type === "cdKey") {
+      revalidateTag("programs");
     }
 
     return NextResponse.json({ revalidated: true });
