@@ -1,10 +1,10 @@
 import { Metadata } from "next";
 import { CDKey } from "@/src/types";
 import { urlFor } from "@/src/sanity/lib/image";
-import { sortCdKeysByStatus } from "./cdKeyUtils";
-import { getProgramWithUpdatedKeys } from "./sanityActions";
+import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
+import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
-import { storeDetailsQuery } from "./queries";
+import { storeDetailsQuery } from "@/src/lib/sanity/queries";
 
 async function getStoreData() {
   return (
