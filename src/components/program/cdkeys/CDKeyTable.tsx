@@ -6,7 +6,7 @@ import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import CDKeyMobileCard from "@/src/components/program/cdkeys/CDKeyMobileCard";
 import KeyStatusTooltip from "@/src/components/program/KeyStatusTooltip";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
-import { getExpiringKeysMessage, sortCdKeysByScore, sortCdKeysByColumn } from "@/src/lib/cdKeyUtils";
+import { getExpiringKeysMessage, sortCdKeysByScore, sortCdKeysByColumn } from "@/src/lib/program/cdKeyUtils";
 import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 
 export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {

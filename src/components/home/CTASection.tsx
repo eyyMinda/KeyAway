@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FaGithub, FaHeart, FaCarrot, FaKey, FaArrowRight } from "react-icons/fa";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { ContactModalTrigger } from "@/src/components/contact";
 
 const supportOptions = [

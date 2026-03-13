@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { CDKeyActionsProps } from "@/src/types";
-import { trackCopyEvent } from "@/src/lib/copyTracking";
+import { trackCopyEvent } from "@/src/lib/analytics/copyTracking";
 import ReportPopup from "./ReportPopup";
 import Toast from "@/src/components/ui/Toast";
-import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src/lib/notificationUtils";
+import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src/lib/notifications/notificationUtils";
 
 /**
  * CDKeyActions component provides copy and expired reporting functionality for CD keys

@@ -2,7 +2,7 @@
 
 import { FaGithub, FaLinkedin, FaInstagram, FaYoutube, FaFacebook, FaGlobe } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import Link from "next/link";
 
 // Available social platforms from Sanity schema

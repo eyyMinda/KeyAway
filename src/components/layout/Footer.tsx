@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { FaKey, FaEnvelope, FaChevronRight } from "react-icons/fa";
 import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { Socials, FacebookGroupButton } from "@/src/components/social";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
 
 interface FooterProps {
   storeData: StoreDetails;

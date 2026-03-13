@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { client } from "@/src/sanity/lib/client";
-import { keyReportsQuery, allProgramsQuery } from "@/src/lib/queries";
+import { keyReportsQuery, allProgramsQuery } from "@/src/lib/sanity/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
 import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";

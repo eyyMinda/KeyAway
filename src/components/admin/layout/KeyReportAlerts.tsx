@@ -9,9 +9,12 @@ export function useKeyReportAlerts() {
   const [alerts, setAlerts] = useState<KeyReportNotificationItem[] | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/key-report-notifications")
+    fetch("/api/v1/admin/key-report-notifications")
       .then(res => res.json())
-      .then((data: KeyReportNotificationItem[]) => setAlerts(Array.isArray(data) ? data : []))
+      .then((data: { data?: KeyReportNotificationItem[] }) => {
+        const items = data?.data ?? data;
+        setAlerts(Array.isArray(items) ? items : []);
+      })
       .catch(() => setAlerts([]));
   }, []);
 

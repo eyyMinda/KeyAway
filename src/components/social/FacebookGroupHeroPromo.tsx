@@ -1,10 +1,10 @@
 "use client";
 
 import { FaFacebook, FaUsers, FaBell } from "react-icons/fa";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import Link from "next/link";
 import { SocialData } from "@/src/types";
-import { hasFacebookSocialLink, getFacebookSocialLink } from "@/src/lib/socialUtils";
+import { hasFacebookSocialLink, getFacebookSocialLink } from "@/src/lib/social/socialUtils";
 
 interface FacebookGroupHeroPromoProps {
   socialData?: SocialData;

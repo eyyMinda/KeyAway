@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { client } from "@/src/sanity/lib/client";
-import { keyReportsQuery } from "@/src/lib/queries";
+import { keyReportsQuery } from "@/src/lib/sanity/queries";
 import { hashCDKeyClient } from "@/src/lib/keyHashing";
 import { ReportData } from "@/src/types/program";
 import { logger } from "@/src/lib/logger";

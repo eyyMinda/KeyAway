@@ -6,12 +6,12 @@ import ContributeBanner from "@/src/components/program/ContributeBanner";
 import ActivationInstructions from "@/src/components/program/ActivationInstructions";
 import RelatedPrograms from "@/src/components/program/RelatedPrograms";
 import CommentsSection from "@/src/components/program/comments/CommentsSection";
-import { sortCdKeysByStatus } from "@/src/lib/cdKeyUtils";
-import { getProgramWithUpdatedKeys } from "@/src/lib/sanityActions";
+import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
+import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsQuery, storeDetailsQuery, socialLinksQuery } from "@/src/lib/queries";
-import { generateProgramMetadata } from "@/src/lib/metadata";
-import { generateProgramPageJsonLd } from "@/src/lib/jsonLd";
+import { popularProgramsQuery, storeDetailsQuery, socialLinksQuery } from "@/src/lib/sanity/queries";
+import { generateProgramMetadata } from "@/src/lib/seo/metadata";
+import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 
 interface ProgramPageProps {

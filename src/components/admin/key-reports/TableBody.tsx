@@ -2,7 +2,7 @@ import React from "react";
 import { CDKeyStatus } from "@/src/types/program";
 import { ExpiredKeyReport } from "@/src/types/admin";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
-import { formatSlugToTitle } from "@/src/lib/programUtils";
+import { formatSlugToTitle } from "@/src/lib/program/programUtils";
 
 interface TableBodyProps {
   reports: ExpiredKeyReport[];

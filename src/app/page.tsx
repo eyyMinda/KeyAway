@@ -1,9 +1,11 @@
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/queries";
-import { generateHomePageMetadata } from "@/src/lib/metadata";
-import { generateHomePageJsonLd } from "@/src/lib/jsonLd";
+import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
+import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
+import type { ProgramWithStats } from "@/src/types/home";
+import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
+import { generateHomePageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
-import { getFeaturedProgram } from "@/src/lib/sanityActions";
+import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 
 // Import homepage sections
 import HeroSection from "@/src/components/home/HeroSection";
@@ -27,13 +29,18 @@ export default async function HomePage() {
   const weekAgoISO = weekAgo.toISOString();
 
   // Fetch all data in parallel for better performance
-  const [popularPrograms, stats, storeData, socialLinks, featuredProgram] = await Promise.all([
+  const [rawPopularPrograms, bundleCounts, stats, storeData, socialLinks, featuredProgram] = await Promise.all([
     client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
+    getBundleCountsByProgram(),
     client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } }),
     client.fetch(storeDetailsQuery, {}, { next: { tags: ["homepage"] } }),
     client.fetch(socialLinksQuery),
     getFeaturedProgram()
   ]);
+
+  const popularPrograms = mergeProgramStats((rawPopularPrograms ?? []) as ProgramWithStats[], bundleCounts)
+    .sort((a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0))
+    .slice(0, 6) as ProgramWithStats[];
 
   const socialData: SocialData = {
     socialLinks: socialLinks || []

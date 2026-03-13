@@ -82,7 +82,7 @@ export interface ExpiredKeyReport {
   }>;
 }
 
-/** Admin header key-report notification item (from GET /api/admin/key-report-notifications). */
+/** Admin header key-report notification item (from GET /api/v1/admin/key-report-notifications). */
 export interface KeyReportNotificationItem {
   programSlug: string;
   programTitle: string;

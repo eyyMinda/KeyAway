@@ -1,4 +1,4 @@
-import { generatePrivacyMetadata } from "@/src/lib/metadata";
+import { generatePrivacyMetadata } from "@/src/lib/seo/metadata";
 import PrivacyContent from "./PrivacyContent";
 
 export async function generateMetadata() {

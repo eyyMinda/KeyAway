@@ -4,8 +4,12 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { KeyReportEvent, RenewReportRequest, RenewReportResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
-import { EVENT_TYPE_MAP, getStatusTextFromEventType, CDKeyStatus } from "@/src/lib/cdKeyUtils";
-import { NOTIFICATION_DURATION, getRenewalStatusMessage, getErrorMessage } from "@/src/lib/notificationUtils";
+import { EVENT_TYPE_MAP, getStatusTextFromEventType, CDKeyStatus } from "@/src/lib/program/cdKeyUtils";
+import {
+  NOTIFICATION_DURATION,
+  getRenewalStatusMessage,
+  getErrorMessage
+} from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
 
 interface RenewalModalProps {
@@ -82,20 +86,22 @@ export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existing
         key: cdKey
       };
 
-      const response = await fetch("/api/renew-key-report", {
+      const response = await fetch("/api/v1/key-reports/renew", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request)
       });
 
-      const result: RenewReportResponse = await response.json();
+      const res = await response.json().catch(() => ({}));
+      const data = res?.data;
+      const err = res?.error;
 
-      if (result.ok && result.updatedReport) {
+      if (response.ok && data?.updatedReport) {
         setNotification(getRenewalStatusMessage(status));
-        onRenew(); // Refresh the parent component
+        onRenew();
         onClose();
       } else {
-        setNotification(result.error || getErrorMessage("RENEWAL_FAILED"));
+        setNotification(err?.message ?? err ?? getErrorMessage("RENEWAL_FAILED"));
       }
     } catch (error) {
       console.error("Failed to renew key report:", error);

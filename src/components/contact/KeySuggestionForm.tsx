@@ -26,7 +26,7 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
     setLoading(true);
 
     try {
-      const response = await fetch("/api/suggest-key", {
+      const response = await fetch("/api/v1/key-suggestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

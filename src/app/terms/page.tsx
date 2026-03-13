@@ -1,4 +1,4 @@
-import { generateTermsMetadata } from "@/src/lib/metadata";
+import { generateTermsMetadata } from "@/src/lib/seo/metadata";
 import TermsContent from "./TermsContent";
 
 export async function generateMetadata() {

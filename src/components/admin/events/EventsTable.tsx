@@ -2,7 +2,7 @@ import React from "react";
 import { AnalyticsEventData } from "@/src/types";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import Pagination from "@/src/components/ui/Pagination";
-import { extractReferrerInfo } from "@/src/lib/analyticsUtils";
+import { extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
 
 interface EventsTableProps {
   events: AnalyticsEventData[];

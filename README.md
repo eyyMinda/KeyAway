@@ -1,6 +1,6 @@
 # 🎁 KeyAway
 
-A modern, SEO-optimized platform built with Next.js 15 and Sanity v4, showcasing the latest giveaway CD keys for PC optimization programs. Features a comprehensive admin dashboard, real-time analytics, automatic key expiration system, and user engagement tracking while maintaining fast, responsive performance.
+A modern, SEO-optimized platform built with Next.js 16 and Sanity v5, showcasing the latest giveaway CD keys for PC optimization programs. Features a comprehensive admin dashboard, real-time analytics, automatic key expiration system, and user engagement tracking while maintaining fast, responsive performance.
 
 ## 🌟 Features
 
@@ -26,7 +26,7 @@ A modern, SEO-optimized platform built with Next.js 15 and Sanity v4, showcasing
 
 - **Automatic Key Expiration**: Server-side system that automatically updates expired CD keys
 - **Real-time Tracking**: Track user interactions (copy, download, social clicks) with privacy protection
-- **Rate Limiting**: Middleware prevents excessive API calls and updates
+- **Rate Limiting**: Proxy prevents excessive API calls and updates
 - **Batch Updates**: API endpoints for bulk key status updates
 - **SEO Optimization**: Dynamic meta tags, Open Graph, and Twitter cards
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
@@ -58,8 +58,8 @@ A modern, SEO-optimized platform built with Next.js 15 and Sanity v4, showcasing
 
 # ⚡ Tech Stack
 
-- [Next.js 15](https://nextjs.org/) - React framework with App Router
-- [Sanity v4](https://www.sanity.io/) - Headless CMS with real-time updates
+- [Next.js 16](https://nextjs.org/) - React framework with App Router
+- [Sanity v5](https://www.sanity.io/) - Headless CMS with real-time updates
 - [TypeScript](https://www.typescriptlang.org/) - Type safety and developer experience
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 - [Giscus](https://giscus.app/) - GitHub-based comment system
@@ -101,6 +101,9 @@ NEXT_PUBLIC_SANITY_DATASET=production
 # Webhook Security
 SANITY_WEBHOOK_SECRET=yourWebhookSecret
 
+# Cron Security (Vercel cron / manual triggers with Bearer token)
+CRON_SECRET=yourCronSecret
+
 # Analytics Security (IP Hashing)
 ANALYTICS_SALT=yourRandomSaltString
 ```
@@ -110,6 +113,7 @@ ANALYTICS_SALT=yourRandomSaltString
 - **SANITY*STUDIO*\***: Server-side only, used by Sanity Studio and server functions
 - **NEXT*PUBLIC*\***: Available on both client and server, used for client-side Sanity queries
 - **SANITY_WEBHOOK_SECRET**: Secures webhook endpoints for content revalidation
+- **CRON_SECRET**: Optional. Auth for cron routes when calling with `Authorization: Bearer <secret>`. Vercel cron uses `x-vercel-cron` header.
 - **ANALYTICS_SALT**: Used for hashing IP addresses in analytics tracking
 
 ## 4. Run the development server
@@ -170,8 +174,8 @@ The platform includes an advanced system for automatically managing CD key expir
 
 - **Server-side Updates**: Expired keys are automatically updated in Sanity CMS
 - **Real-time Processing**: Keys are checked and updated on every program page load
-- **Rate Limiting**: Middleware prevents excessive updates (5-minute intervals per program)
-- **Batch Updates**: API endpoint (`/api/update-expired-keys`) to update all programs at once
+- **Rate Limiting**: Proxy prevents excessive updates (5-minute intervals per program)
+- **Batch Updates**: API endpoint (`/api/v1/cron/update-expired-keys`) to update all programs at once
 - **Visual Indicators**: Clear status badges and expiring soon warnings
 
 ## How It Works
@@ -210,13 +214,13 @@ The platform includes comprehensive analytics and user interaction tracking:
 - **Server Components**: Pages and most components are server-side for SEO and performance
 - **Client Components**: Only use "use client" for components requiring browser APIs (e.g., Giscus, admin dashboard)
 - **SEO Optimized**: Program pages are rendered server-side with dynamic meta tags
-- **Middleware**: Rate limiting and security middleware for API protection
+- **Proxy**: Rate limiting and security for API protection
 - **Type Safety**: Full TypeScript implementation with strict type checking
 
 # 💻 Deployment
 
 - Fully compatible with Vercel with zero configuration
-- Ensure all environment variables are set in Vercel Dashboard
+- Ensure all environment variables are set in Vercel Dashboard (including `CRON_SECRET` if using cron routes outside Vercel cron, or for manual triggers)
 - Webhook integration for automatic revalidation on content updates
 
 ## Build Commands
@@ -230,7 +234,8 @@ npm run start
 
 Set up Sanity webhooks to trigger revalidation:
 
-- **URL**: `https://yourdomain.com/api/revalidate`
+- **URL**: `https://yourdomain.com/api/v1/webhooks/revalidate`
+- **Note**: If you had `/api/revalidate` configured, update it to the v1 path in Sanity Dashboard.
 - **Secret**: Use the same value as `SANITY_WEBHOOK_SECRET`
 
 # 📄 License

@@ -5,15 +5,15 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { client } from "@/src/sanity/lib/client";
-import { storeDetailsQuery, socialLinksQuery } from "@lib/queries";
+import { storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
 import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
-import { generateHomePageMetadata } from "@/src/lib/metadata";
-import { getRecentNotifications } from "@/src/lib/notificationUtils.server";
+import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
+import { getRecentNotifications } from "@/src/lib/notifications/notificationUtils.server";
 import { headers } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 

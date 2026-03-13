@@ -28,11 +28,11 @@ export function useAdminAccess(): AdminAccessResult {
         }
 
         // If localStorage has key, check with server
-        const response = await fetch("/api/admin/check-access");
-        const data = await response.json();
+        const response = await fetch("/api/v1/admin/auth/check");
+        const { data } = await response.json();
 
         // Only set as admin if BOTH localStorage has key AND server confirms admin access
-        if (data.isAdmin) {
+        if (data?.isAdmin) {
           setIsAdmin(true);
         } else {
           // Clear localStorage if server says not admin

@@ -15,9 +15,12 @@ export default function AdminHeader() {
   const pathname = usePathname();
 
   useEffect(() => {
-    fetch("/api/admin/new-counts")
+    fetch("/api/v1/admin/dashboard/counts")
       .then(res => res.json())
-      .then(data => setNewCounts({ newMessages: data.newMessages ?? 0, newSuggestions: data.newSuggestions ?? 0 }))
+      .then(data => {
+        const d = data?.data ?? data;
+        setNewCounts({ newMessages: d?.newMessages ?? 0, newSuggestions: d?.newSuggestions ?? 0 });
+      })
       .catch(() => setNewCounts({ newMessages: 0, newSuggestions: 0 }));
   }, []);
 

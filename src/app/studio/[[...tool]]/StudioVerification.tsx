@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { clearAdminVerification } from "@/src/lib/adminAuth";
+import { clearAdminVerification } from "@/src/lib/admin/adminAuth";
 
 export default function StudioVerification() {
   useEffect(() => {

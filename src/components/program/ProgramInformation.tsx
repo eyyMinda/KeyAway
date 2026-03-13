@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { Program, SocialData } from "@/src/types";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { FacebookGroupButton } from "@/src/components/social";
 
 interface ProgramInformationProps {

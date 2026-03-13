@@ -9,13 +9,14 @@ export default function KeyStatusUpdater() {
   const updateKeyStatuses = async () => {
     setIsUpdating(true);
     try {
-      const response = await fetch("/api/update-expired-keys", {
+      const response = await fetch("/api/v1/cron/update-expired-keys", {
         method: "POST"
       });
 
       const result = await response.json();
+      const data = result?.data ?? result;
 
-      if (result.success) {
+      if (data?.success ?? result?.success) {
         setLastUpdated(new Date());
         // Optionally show a success message
         console.log("Key statuses updated successfully");

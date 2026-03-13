@@ -3,18 +3,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { CDKey } from "@/src/types/program";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { DuplicateCheckRequest, DuplicateCheckResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
 import RenewalModal from "./RenewalModal";
 import { FiCheck, FiX, FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
-import { EVENT_TYPE_MAP, getReportButtonConfig, getStatusTextFromEventType, CDKeyStatus } from "@/src/lib/cdKeyUtils";
+import {
+  EVENT_TYPE_MAP,
+  getReportButtonConfig,
+  getStatusTextFromEventType,
+  CDKeyStatus
+} from "@/src/lib/program/cdKeyUtils";
 import {
   NOTIFICATION_DURATION,
   getReportStatusMessage,
   getErrorMessage,
   getInfoMessage
-} from "@/src/lib/notificationUtils";
+} from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
 
 interface ReportPopupProps {
@@ -75,16 +80,15 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
         key: cdKey.key
       };
 
-      const response = await fetch("/api/check-duplicate-report", {
+      const response = await fetch("/api/v1/key-reports/check-duplicate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request)
       });
 
-      const result: DuplicateCheckResponse = await response.json();
-
-      if (result.ok && result.isDuplicate && result.existingReport) {
-        setDuplicateReport(result.existingReport);
+      const { data } = (await response.json()) as { data?: DuplicateCheckResponse };
+      if (data?.isDuplicate && data?.existingReport) {
+        setDuplicateReport(data.existingReport);
       }
     } catch (error) {
       console.error("Failed to check for duplicate report:", error);

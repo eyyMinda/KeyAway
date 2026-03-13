@@ -1,0 +1,183 @@
+/* ------------ Store ------------ */
+export const storeDetailsQuery = `*[_type=="storeDetails"]{
+  title,
+  description,
+  logo,
+  logoLight,
+  header->{
+    isLogo,
+    headerLinks
+  },
+  footer->{
+    isLogo,
+    footerLinks
+  }
+}`;
+
+/* ------------ Header ------------ */
+export const headerQuery = `*[_type=="header"]{
+  islogo,
+  headerLinks
+}`;
+/* ------------ Footer ------------ */
+export const footerQuery = `*[_type=="footer"]{
+  islogo,
+  footerLinks
+}`;
+
+/* Header and Footer Links */
+export const headerLinksQuery = `*[_type=="headerLink"] | order(_createdAt asc) {
+  title,
+  slug,
+  external,
+  url
+}`;
+export const footerLinksQuery = `*[_type=="footerLink"] | order(_createdAt asc) {
+  title,
+  slug,
+  external,
+  url
+}`;
+
+/* ------------ Programs ------------ */
+export const allProgramsQuery = `
+*[_type == "program"]{
+  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[]
+}
+`;
+export const adminProgramsQuery = `
+*[_type == "program"]{
+  _id, title, slug, description, featuredDescription, image, showcaseGif, downloadLink, cdKeys[]
+}
+`;
+export const programBySlugQuery = `
+*[_type == "program" && slug.current == $slug][0]{
+  _id, title, description, featuredDescription, image, showcaseGif, downloadLink, cdKeys[]
+}
+`;
+
+/* ------------ Social ------------ */
+export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) {
+  platform,
+  url
+}`;
+
+/* ------------ Analytics ------------ */
+export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
+      _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+    } | order(createdAt desc)`;
+
+/* ------------ Analytics with Custom Date Range ------------ */
+export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && createdAt >= $since && createdAt <= $until]{
+      _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+    } | order(createdAt desc)`;
+
+/* ------------ Bundle counts by program (for merging with singular counts) ------------ */
+export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
+  "events": events[]{ programSlug, event }
+}`;
+
+/* ------------ Bundled Events (overlaps range, events filtered in-doc) ------------ */
+export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
+  _id,
+  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt }
+}`;
+
+/* ------------ Key Reports ------------ */
+export const keyReportsQuery = `*[_type=="keyReport" && createdAt >= $since]{
+      _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+    } | order(createdAt desc)`;
+
+/* ------------ Duplicate Key Report Check ------------ */
+export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHash && programSlug == $programSlug && keyHash == $keyHash]{
+      _id, eventType, programSlug, keyHash, keyIdentifier, createdAt
+    } | order(createdAt desc) [0]`;
+
+/* ------------ Popular Programs ------------ */
+export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt desc) [0...6]{
+  title, slug, description, image, cdKeys[]
+}`;
+
+/* ------------ Popular Programs by Page Views ------------ */
+export const popularProgramsByViewsQuery = `*[_type == "program"]{
+  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[],
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
+  "hasKeys": count(cdKeys[]) > 0,
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3,
+  _createdAt
+} | order(popularityScore desc) [0...6]`;
+
+/* ------------ Statistics ------------ */
+export const siteStatsQuery = `{
+  "totalPrograms": count(*[_type == "program"]),
+  "totalKeys": count(*[_type == "program"].cdKeys[]._key),
+  "totalReports": count(*[_type == "keyReport"]),
+  "recentReports": count(*[_type == "keyReport" && createdAt >= $weekAgo])
+}`;
+
+/* ------------ Recent Reports Query ------------ */
+export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekAgo] | order(createdAt desc)`;
+
+/* ------------ Programs with Filtering ------------ */
+export const programsWithStatsQuery = `*[_type == "program"]{
+  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[], _createdAt,
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
+  "hasKeys": count(cdKeys[]) > 0,
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
+}`;
+
+/* ------------ Programs Count Query ------------ */
+export const programsCountQuery = `count(*[_type == "program"])`;
+
+/* ------------ Featured Program Settings Query ------------ */
+export const featuredProgramSettingsQuery = `*[_type == "featuredProgramSettings"][0]{
+  currentFeaturedProgram->{
+    _id,
+    title,
+    slug,
+    description,
+    featuredDescription,
+    image,
+    showcaseGif,
+    cdKeys[]
+  },
+  rotationSchedule,
+  lastRotationDate,
+  autoSelectCriteria,
+  _id
+}`;
+
+/* ------------ Featured Program Query (with key stats) ------------ */
+export const featuredProgramQuery = `*[_type == "program" && slug.current == $slug][0]{
+  _id,
+  title,
+  slug,
+  description,
+  image,
+  downloadLink,
+  cdKeys[],
+  "totalKeys": count(cdKeys[]),
+  "workingKeys": count(cdKeys[status == "active" || status == "new"]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])
+}`;
+
+/* ------------ Programs for Auto-Selection (highest working keys) ------------ */
+export const programsForAutoSelectionQuery = `*[_type == "program"]{
+  _id,
+  title,
+  slug,
+  description,
+  featuredDescription,
+  image,
+  showcaseGif,
+  downloadLink,
+  cdKeys[],
+  "totalKeys": count(cdKeys[]),
+  "workingKeys": count(cdKeys[status == "active" || status == "new"]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
+} | order(workingKeys desc, popularityScore desc)`;

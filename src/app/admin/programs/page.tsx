@@ -4,14 +4,14 @@ import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import SearchInput from "@/src/components/ui/SearchInput";
 import { useState, useEffect, useCallback } from "react";
 import { client } from "@/src/sanity/lib/client";
-import { adminProgramsQuery } from "@/src/lib/queries";
+import { adminProgramsQuery } from "@/src/lib/sanity/queries";
 import { Program } from "@/src/types";
 import Link from "next/link";
 import { FaWrench } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import ProgramEditModal from "@/src/components/admin/programs/ProgramEditModal";
 import FeaturedProgramSettings from "@/src/components/admin/programs/FeaturedProgramSettings";
-import { getWorkingKeysCount } from "@/src/lib/adminHelpers";
+import { getWorkingKeysCount } from "@/src/lib/admin/adminHelpers";
 
 type ProgramFilter = "all" | "no-working-keys" | "has-working-keys";
 

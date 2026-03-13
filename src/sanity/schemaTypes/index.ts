@@ -1,6 +1,7 @@
 import { type SchemaTypeDefinition } from "sanity";
 
 import { trackingEvent } from "./trackingEvent";
+import { trackingEventBundle } from "./trackingEventBundle";
 import { keyReport } from "./keyReport";
 import contactMessage from "./contactMessage";
 import keySuggestion from "./keySuggestion";
@@ -18,6 +19,7 @@ import { featuredProgramSettings } from "./featuredProgramSettings";
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     trackingEvent,
+    trackingEventBundle,
     keyReport,
     contactMessage,
     keySuggestion,

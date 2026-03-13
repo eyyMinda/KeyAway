@@ -23,7 +23,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch("/api/v1/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

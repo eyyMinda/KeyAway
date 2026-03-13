@@ -8,7 +8,7 @@ This system automatically updates CD key statuses to "expired" when their `valid
 
 - **Persistent Changes**: Expired keys are updated directly in Sanity CMS
 - **Automatic Processing**: Keys are checked and updated on every program page load
-- **Rate Limited**: Middleware prevents excessive updates (5-minute intervals per program)
+- **Rate Limited**: Proxy prevents excessive updates (5-minute intervals per program)
 - **Batch Updates**: API endpoint to update all programs at once
 
 ### Real-Time Monitoring
@@ -31,7 +31,7 @@ src/
 │       └── page.tsx             # Updated program page
 ├── components/
 │   └── KeyStatusUpdater.tsx   # Manual update component
-└── middleware.ts                 # Rate limiting middleware
+└── proxy.ts                      # Rate limiting proxy
 ```
 
 ## 🔧 How It Works
@@ -61,13 +61,13 @@ if (key.status !== "expired" && now > validUntil) {
 
 ### 3. Rate Limiting
 
-- Middleware prevents updates more than once every 5 minutes per program
+- Proxy prevents updates more than once every 5 minutes per program
 - Prevents excessive API calls and database writes
 - Uses in-memory cache for tracking
 
 ## 🛠️ API Endpoints
 
-### POST /api/update-expired-keys
+### POST /api/v1/cron/update-expired-keys
 
 Updates all expired keys across all programs.
 
@@ -88,16 +88,18 @@ Updates all expired keys across all programs.
 {
   "crons": [
     {
-      "path": "/api/update-expired-keys",
-      "schedule": "0 */6 * * *"
+      "path": "/api/v1/cron/update-expired-keys",
+      "schedule": "0 0 * * *"
     }
   ]
 }
 ```
 
-Runs every 6 hours to update all expired keys.
+Runs once a day (midnight UTC) to update all expired keys.
 
-### Middleware Rate Limiting
+**Env:** `CRON_SECRET` (optional). Vercel adds `x-vercel-cron` when invoking crons. Use `CRON_SECRET` + `Authorization: Bearer <secret>` for manual triggers.
+
+### Proxy Rate Limiting
 
 - **Interval**: 5 minutes per program
 - **Scope**: Program-specific (by slug)
@@ -117,7 +119,7 @@ import KeyStatusUpdater from "@/src/components/program/KeyStatusUpdater";
 ### Server Action Usage
 
 ```typescript
-import { getProgramWithUpdatedKeys } from "@/src/lib/sanityActions";
+import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 
 // Get program with automatically updated keys
 const program = await getProgramWithUpdatedKeys("program-slug");
@@ -126,7 +128,7 @@ const program = await getProgramWithUpdatedKeys("program-slug");
 ### Batch Update All Programs
 
 ```typescript
-import { updateAllExpiredKeys } from "@/src/lib/sanityActions";
+import { updateAllExpiredKeys } from "@/src/lib/sanity/sanityActions";
 
 // Update all programs
 await updateAllExpiredKeys();
