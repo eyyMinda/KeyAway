@@ -1,3 +1,5 @@
+import { getClientIp } from "./requestGeo";
+
 /** Simple in-memory rate limiter. Use Redis for multi-instance. */
 const store = new Map<string, { count: number; resetAt: number }>();
 
@@ -19,13 +21,7 @@ export function checkRateLimit(identifier: string): { ok: boolean; remaining: nu
   return { ok: entry.count <= MAX_REQUESTS, remaining };
 }
 
-function getClientId(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() ?? "anonymous";
-  return ip;
-}
-
 export function rateLimitMiddleware(req: Request): { ok: boolean; remaining: number } {
-  const id = getClientId(req);
+  const id = getClientIp(req) ?? "anonymous";
   return checkRateLimit(id);
 }

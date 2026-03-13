@@ -2,21 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { duplicateKeyReportQuery } from "@/src/lib/sanity/queries";
 import { hashCDKey } from "@/src/lib/keyHashing";
-import crypto from "crypto";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-
-function hashIp(ip: string | undefined) {
-  try {
-    const salt = process.env.ANALYTICS_SALT || "";
-    return crypto
-      .createHash("sha256")
-      .update((ip || "") + salt)
-      .digest("hex");
-  } catch {
-    return undefined;
-  }
-}
+import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
 
 /** POST /api/v1/key-reports/check-duplicate - Check for existing report by same visitor/program/key */
 export async function POST(req: NextRequest) {
@@ -34,8 +22,7 @@ export async function POST(req: NextRequest) {
     if (!programSlug) return Errors.validation("programSlug is required");
     if (!key) return Errors.validation("key is required");
 
-    const xff = req.headers.get("x-forwarded-for") || "";
-    const ip = xff.split(",")[0]?.trim() || undefined;
+    const ip = getClientIp(req);
     const ipHash = hashIp(ip);
     if (!ipHash) return Errors.validation("Unable to generate visitor hash");
 

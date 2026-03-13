@@ -89,10 +89,13 @@ yarn
 Create .env.local at the project root:
 
 ```bash
-# Sanity Configuration (Server-side only)
+# Sanity Configuration
 SANITY_STUDIO_API_VERSION=2025-09-07
 SANITY_STUDIO_PROJECT_ID=yourProjectId
 SANITY_STUDIO_DATASET=production
+
+# Sanity write token (required for key reports, analytics, program CRUD)
+SANITY_API_TOKEN=yourSanityApiToken
 
 # Client-side Sanity Access (Available on both client and server)
 NEXT_PUBLIC_SANITY_PROJECT_ID=yourProjectId
@@ -112,6 +115,7 @@ ANALYTICS_SALT=yourRandomSaltString
 
 - **SANITY*STUDIO*\***: Server-side only, used by Sanity Studio and server functions
 - **NEXT*PUBLIC*\***: Available on both client and server, used for client-side Sanity queries
+- **SANITY_API_TOKEN**: Required for writes (key reports, analytics events, program create/update/delete). Create in Sanity Dashboard → API → Tokens.
 - **SANITY_WEBHOOK_SECRET**: Secures webhook endpoints for content revalidation
 - **CRON_SECRET**: Optional. Auth for cron routes when calling with `Authorization: Bearer <secret>`. Vercel cron uses `x-vercel-cron` header.
 - **ANALYTICS_SALT**: Used for hashing IP addresses in analytics tracking
@@ -220,7 +224,7 @@ The platform includes comprehensive analytics and user interaction tracking:
 # 💻 Deployment
 
 - Fully compatible with Vercel with zero configuration
-- Ensure all environment variables are set in Vercel Dashboard (including `CRON_SECRET` if using cron routes outside Vercel cron, or for manual triggers)
+- Ensure all environment variables are set in Vercel Dashboard (including `SANITY_API_TOKEN` for key reports/analytics, and `CRON_SECRET` if using cron routes outside Vercel cron)
 - Webhook integration for automatic revalidation on content updates
 
 ## Build Commands
