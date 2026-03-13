@@ -62,3 +62,16 @@ export function getKeyIdentifier(key: string): string {
 export function normalizeKey(key: string): string {
   return key.replace(/\s+/g, "").toUpperCase();
 }
+
+/** Extract key string from meta (string or { key: string }) and return hash + identifier + normalized. */
+export function getKeyData(key?: unknown): { hash: string; identifier: string; normalized: string } | undefined {
+  let keyString: string | undefined;
+  if (typeof key === "string" && key) keyString = key;
+  else if (key && typeof key === "object" && "key" in key) keyString = (key as { key: string }).key;
+  if (!keyString) return undefined;
+  return {
+    hash: hashCDKey(keyString),
+    identifier: getKeyIdentifier(keyString),
+    normalized: normalizeKey(keyString)
+  };
+}

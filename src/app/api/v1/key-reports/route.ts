@@ -1,89 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
-import crypto from "crypto";
-import { hashCDKey, getKeyIdentifier, normalizeKey } from "@/src/lib/keyHashing";
+import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import type { KeyReportEvent } from "@/src/types";
 
 const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
-
-function getKeyData(key?: unknown): { hash: string; identifier: string; normalized: string } | undefined {
-  let keyString: string | undefined;
-  if (typeof key === "string" && key) keyString = key;
-  else if (key && typeof key === "object" && "key" in key) keyString = (key as { key: string }).key;
-  if (!keyString) return undefined;
-  return {
-    hash: hashCDKey(keyString),
-    identifier: getKeyIdentifier(keyString),
-    normalized: normalizeKey(keyString)
-  };
-}
-
-function hashIp(ip: string | undefined) {
-  try {
-    const salt = process.env.ANALYTICS_SALT || "";
-    return crypto
-      .createHash("sha256")
-      .update((ip || "") + salt)
-      .digest("hex");
-  } catch {
-    return undefined;
-  }
-}
-
-const locationCache = new Map<string, { data: { country?: string; city?: string }; expires: number }>();
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [ip, entry] of locationCache.entries()) {
-      if (entry.expires <= now) locationCache.delete(ip);
-    }
-  },
-  10 * 60 * 1000
-);
-
-async function getLocationFromIP(ip: string | undefined): Promise<{ country?: string; city?: string } | undefined> {
-  if (!ip) return undefined;
-  const cached = locationCache.get(ip);
-  if (cached && cached.expires > Date.now()) return cached.data;
-  const services = [
-    {
-      url: `https://ipapi.co/${ip}/json/`,
-      parser: (data: Record<string, unknown>) => ({ country: data.country_name as string, city: data.city as string })
-    },
-    {
-      url: `https://ip-api.com/json/${ip}`,
-      parser: (data: Record<string, unknown>) => ({ country: data.country as string, city: data.city as string })
-    },
-    {
-      url: `https://ipinfo.io/${ip}/json`,
-      parser: (data: Record<string, unknown>) => ({ country: data.country as string, city: data.city as string })
-    }
-  ];
-  for (const service of services) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const response = await fetch(service.url, {
-        headers: { "User-Agent": "KeyAway" },
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      if (response.ok) {
-        const data = await response.json();
-        const result = service.parser(data);
-        if (result.country || result.city) {
-          locationCache.set(ip, { data: result, expires: Date.now() + 60 * 60 * 1000 });
-          return result;
-        }
-      }
-    } catch {
-      continue;
-    }
-  }
-  return undefined;
-}
 
 /** POST /api/v1/key-reports - Create or renew a key report.
  *  New: { event, meta: { programSlug, key, path? } }
@@ -100,8 +23,7 @@ export async function POST(req: NextRequest) {
     const host = req.headers.get("host") || "";
     const isLocalhost = host.startsWith("localhost") || host.includes("127.0.0.1");
 
-    const xff = req.headers.get("x-forwarded-for") || "";
-    const ip = xff.split(",")[0]?.trim() || undefined;
+    const ip = getClientIp(req);
     const ipHash = hashIp(ip);
     if (!ipHash) return Errors.validation("Unable to generate visitor hash");
 
@@ -159,7 +81,7 @@ export async function POST(req: NextRequest) {
     const ua = req.headers.get("user-agent") || undefined;
     const ref = req.headers.get("referer") || undefined;
     const path = meta?.path as string | undefined;
-    const location = await getLocationFromIP(ip);
+    const location = await getLocationFromIP(ip, "KeyAway");
 
     const eventData: Record<string, unknown> = {
       _type: "keyReport",
