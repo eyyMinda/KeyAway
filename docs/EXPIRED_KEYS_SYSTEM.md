@@ -97,6 +97,8 @@ Updates all expired keys across all programs.
 
 Runs every 6 hours to update all expired keys.
 
+**Env:** `CRON_SECRET` (optional). Vercel adds `x-vercel-cron` when invoking crons. Use `CRON_SECRET` + `Authorization: Bearer <secret>` for manual triggers.
+
 ### Proxy Rate Limiting
 
 - **Interval**: 5 minutes per program

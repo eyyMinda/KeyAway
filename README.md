@@ -101,6 +101,9 @@ NEXT_PUBLIC_SANITY_DATASET=production
 # Webhook Security
 SANITY_WEBHOOK_SECRET=yourWebhookSecret
 
+# Cron Security (Vercel cron / manual triggers with Bearer token)
+CRON_SECRET=yourCronSecret
+
 # Analytics Security (IP Hashing)
 ANALYTICS_SALT=yourRandomSaltString
 ```
@@ -110,6 +113,7 @@ ANALYTICS_SALT=yourRandomSaltString
 - **SANITY*STUDIO*\***: Server-side only, used by Sanity Studio and server functions
 - **NEXT*PUBLIC*\***: Available on both client and server, used for client-side Sanity queries
 - **SANITY_WEBHOOK_SECRET**: Secures webhook endpoints for content revalidation
+- **CRON_SECRET**: Optional. Auth for cron routes when calling with `Authorization: Bearer <secret>`. Vercel cron uses `x-vercel-cron` header.
 - **ANALYTICS_SALT**: Used for hashing IP addresses in analytics tracking
 
 ## 4. Run the development server
@@ -216,7 +220,7 @@ The platform includes comprehensive analytics and user interaction tracking:
 # 💻 Deployment
 
 - Fully compatible with Vercel with zero configuration
-- Ensure all environment variables are set in Vercel Dashboard
+- Ensure all environment variables are set in Vercel Dashboard (including `CRON_SECRET` if using cron routes outside Vercel cron, or for manual triggers)
 - Webhook integration for automatic revalidation on content updates
 
 ## Build Commands
