@@ -1,5 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
-import { storeDetailsQuery } from "./queries";
+import { storeDetailsQuery } from "@/src/lib/sanity/queries";
 import { AdminUser } from "@/src/types";
 
 /**
