@@ -113,7 +113,7 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       created += 1;
     }
 
-    if (created > 0 || appended > 0) revalidateTag("bundle-counts");
+    if (created > 0 || appended > 0) revalidateTag("bundle-counts", "max");
     return { ok: true, created, appended };
   } catch (err) {
     console.error("Bundle-events error:", err);
