@@ -1,5 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
-import { trackingEventsWithRangeQuery, trackingEventBundlesQuery, bundleCountsQuery } from "@/src/lib/queries";
+import { trackingEventsWithRangeQuery, trackingEventBundlesQuery, bundleCountsQuery } from "@/src/lib/sanity/queries";
 import { AnalyticsEventData } from "@/src/types";
 
 const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
