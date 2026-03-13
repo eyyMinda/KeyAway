@@ -4,7 +4,7 @@ import { Errors } from "@/src/lib/api/errors";
 
 function verifyCronAuth(req: Request): boolean {
   const auth = req.headers.get("authorization");
-  const cronSecret = process.env.NEXT_PUBLIC_CRON_SECRET;
+  const cronSecret = process.env.CRON_SECRET;
   if (cronSecret && auth === `Bearer ${cronSecret}`) return true;
   if (req.headers.get("x-vercel-cron") === "1") return true;
   return false;
