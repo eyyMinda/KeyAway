@@ -3,7 +3,7 @@
 import { client } from "@/src/sanity/lib/client";
 import { CDKey, Program } from "@/src/types";
 import { programBySlugQuery, featuredProgramSettingsQuery, programsForAutoSelectionQuery } from "./queries";
-import { getBundleCountsByProgram, mergeProgramStats, mergeSingleProgramStats } from "./eventsApi";
+import { getBundleCountsByProgram, mergeProgramStats, mergeSingleProgramStats } from "@/src/lib/analytics/eventsApi";
 
 /**
  * Updates expired CD keys in Sanity for a specific program
