@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import Image from "next/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { urlFor } from "@/src/sanity/lib/image";
-import { SanityAsset } from "@sanity/image-url/lib/types/types";
+import { SanityAsset } from "@sanity/image-url";
 
 interface IdealImageProps {
   image?: SanityAsset;

@@ -1,5 +1,5 @@
 // General utility types
-import { SanityAsset } from "@sanity/image-url/lib/types/types";
+import { SanityAsset } from "@sanity/image-url";
 
 export interface User {
   id: string;

@@ -1,5 +1,5 @@
 // Layout and UI related types
-import { SanityAsset } from "@sanity/image-url/lib/types/types";
+import { SanityAsset } from "@sanity/image-url";
 
 export interface StoreDetails {
   title: string;
