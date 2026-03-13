@@ -1,6 +1,6 @@
 # 🎁 KeyAway
 
-A modern, SEO-optimized platform built with Next.js 15 and Sanity v4, showcasing the latest giveaway CD keys for PC optimization programs. Features a comprehensive admin dashboard, real-time analytics, automatic key expiration system, and user engagement tracking while maintaining fast, responsive performance.
+A modern, SEO-optimized platform built with Next.js 16 and Sanity v5, showcasing the latest giveaway CD keys for PC optimization programs. Features a comprehensive admin dashboard, real-time analytics, automatic key expiration system, and user engagement tracking while maintaining fast, responsive performance.
 
 ## 🌟 Features
 
@@ -58,8 +58,8 @@ A modern, SEO-optimized platform built with Next.js 15 and Sanity v4, showcasing
 
 # ⚡ Tech Stack
 
-- [Next.js 15](https://nextjs.org/) - React framework with App Router
-- [Sanity v4](https://www.sanity.io/) - Headless CMS with real-time updates
+- [Next.js 16](https://nextjs.org/) - React framework with App Router
+- [Sanity v5](https://www.sanity.io/) - Headless CMS with real-time updates
 - [TypeScript](https://www.typescriptlang.org/) - Type safety and developer experience
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
 - [Giscus](https://giscus.app/) - GitHub-based comment system
