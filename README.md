@@ -26,7 +26,7 @@ A modern, SEO-optimized platform built with Next.js 15 and Sanity v4, showcasing
 
 - **Automatic Key Expiration**: Server-side system that automatically updates expired CD keys
 - **Real-time Tracking**: Track user interactions (copy, download, social clicks) with privacy protection
-- **Rate Limiting**: Middleware prevents excessive API calls and updates
+- **Rate Limiting**: Proxy prevents excessive API calls and updates
 - **Batch Updates**: API endpoints for bulk key status updates
 - **SEO Optimization**: Dynamic meta tags, Open Graph, and Twitter cards
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
@@ -170,7 +170,7 @@ The platform includes an advanced system for automatically managing CD key expir
 
 - **Server-side Updates**: Expired keys are automatically updated in Sanity CMS
 - **Real-time Processing**: Keys are checked and updated on every program page load
-- **Rate Limiting**: Middleware prevents excessive updates (5-minute intervals per program)
+- **Rate Limiting**: Proxy prevents excessive updates (5-minute intervals per program)
 - **Batch Updates**: API endpoint (`/api/update-expired-keys`) to update all programs at once
 - **Visual Indicators**: Clear status badges and expiring soon warnings
 
@@ -210,7 +210,7 @@ The platform includes comprehensive analytics and user interaction tracking:
 - **Server Components**: Pages and most components are server-side for SEO and performance
 - **Client Components**: Only use "use client" for components requiring browser APIs (e.g., Giscus, admin dashboard)
 - **SEO Optimized**: Program pages are rendered server-side with dynamic meta tags
-- **Middleware**: Rate limiting and security middleware for API protection
+- **Proxy**: Rate limiting and security for API protection
 - **Type Safety**: Full TypeScript implementation with strict type checking
 
 # 💻 Deployment

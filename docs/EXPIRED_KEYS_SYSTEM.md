@@ -8,7 +8,7 @@ This system automatically updates CD key statuses to "expired" when their `valid
 
 - **Persistent Changes**: Expired keys are updated directly in Sanity CMS
 - **Automatic Processing**: Keys are checked and updated on every program page load
-- **Rate Limited**: Middleware prevents excessive updates (5-minute intervals per program)
+- **Rate Limited**: Proxy prevents excessive updates (5-minute intervals per program)
 - **Batch Updates**: API endpoint to update all programs at once
 
 ### Real-Time Monitoring
@@ -31,7 +31,7 @@ src/
 │       └── page.tsx             # Updated program page
 ├── components/
 │   └── KeyStatusUpdater.tsx   # Manual update component
-└── middleware.ts                 # Rate limiting middleware
+└── proxy.ts                      # Rate limiting proxy
 ```
 
 ## 🔧 How It Works
@@ -61,7 +61,7 @@ if (key.status !== "expired" && now > validUntil) {
 
 ### 3. Rate Limiting
 
-- Middleware prevents updates more than once every 5 minutes per program
+- Proxy prevents updates more than once every 5 minutes per program
 - Prevents excessive API calls and database writes
 - Uses in-memory cache for tracking
 
@@ -97,7 +97,7 @@ Updates all expired keys across all programs.
 
 Runs every 6 hours to update all expired keys.
 
-### Middleware Rate Limiting
+### Proxy Rate Limiting
 
 - **Interval**: 5 minutes per program
 - **Scope**: Program-specific (by slug)

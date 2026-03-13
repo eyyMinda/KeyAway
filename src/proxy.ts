@@ -5,7 +5,7 @@ import type { NextRequest } from "next/server";
 const lastUpdateTime = new Map<string, number>();
 const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
   // Add pathname header for use in server components
