@@ -90,7 +90,7 @@ export default function TimeFilter({
                 value={customDateRange?.start || ""}
                 onChange={e => handleCustomDateChange("start", e.target.value)}
                 max={customDateRange?.end || new Date().toISOString().split("T")[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
             <div>
@@ -101,7 +101,7 @@ export default function TimeFilter({
                 onChange={e => handleCustomDateChange("end", e.target.value)}
                 min={customDateRange?.start || ""}
                 max={new Date().toISOString().split("T")[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
           </div>
