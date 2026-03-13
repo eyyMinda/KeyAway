@@ -12,6 +12,8 @@ export function errorResponse(error: ApiError, status: number) {
 }
 
 export const Errors = {
+  badRequest: (message = "Bad request", details?: ApiError["details"]) =>
+    errorResponse({ code: "BAD_REQUEST", message, details }, 400),
   unauthorized: (message = "Admin access required") => errorResponse({ code: "UNAUTHORIZED", message }, 401),
   forbidden: (message = "Forbidden") => errorResponse({ code: "FORBIDDEN", message }, 403),
   notFound: (message = "Resource not found") => errorResponse({ code: "NOT_FOUND", message }, 404),
