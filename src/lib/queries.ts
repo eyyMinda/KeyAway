@@ -72,6 +72,17 @@ export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && created
       _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
 
+/* ------------ Bundle counts by program (for merging with singular counts) ------------ */
+export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
+  "events": events[]{ programSlug, event }
+}`;
+
+/* ------------ Bundled Events (overlaps range, events filtered in-doc) ------------ */
+export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
+  _id,
+  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt }
+}`;
+
 /* ------------ Key Reports ------------ */
 export const keyReportsQuery = `*[_type=="keyReport" && createdAt >= $since]{
       _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
