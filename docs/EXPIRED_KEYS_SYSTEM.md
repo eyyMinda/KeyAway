@@ -67,7 +67,7 @@ if (key.status !== "expired" && now > validUntil) {
 
 ## 🛠️ API Endpoints
 
-### POST /api/update-expired-keys
+### POST /api/v1/cron/update-expired-keys
 
 Updates all expired keys across all programs.
 
@@ -88,7 +88,7 @@ Updates all expired keys across all programs.
 {
   "crons": [
     {
-      "path": "/api/update-expired-keys",
+      "path": "/api/v1/cron/update-expired-keys",
       "schedule": "0 */6 * * *"
     }
   ]

@@ -171,7 +171,7 @@ The platform includes an advanced system for automatically managing CD key expir
 - **Server-side Updates**: Expired keys are automatically updated in Sanity CMS
 - **Real-time Processing**: Keys are checked and updated on every program page load
 - **Rate Limiting**: Proxy prevents excessive updates (5-minute intervals per program)
-- **Batch Updates**: API endpoint (`/api/update-expired-keys`) to update all programs at once
+- **Batch Updates**: API endpoint (`/api/v1/cron/update-expired-keys`) to update all programs at once
 - **Visual Indicators**: Clear status badges and expiring soon warnings
 
 ## How It Works
@@ -230,7 +230,8 @@ npm run start
 
 Set up Sanity webhooks to trigger revalidation:
 
-- **URL**: `https://yourdomain.com/api/revalidate`
+- **URL**: `https://yourdomain.com/api/v1/webhooks/revalidate`
+- **Note**: If you had `/api/revalidate` configured, update it to the v1 path in Sanity Dashboard.
 - **Secret**: Use the same value as `SANITY_WEBHOOK_SECRET`
 
 # 📄 License
