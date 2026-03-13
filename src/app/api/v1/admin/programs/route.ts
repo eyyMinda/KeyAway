@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
@@ -90,6 +91,7 @@ export async function POST(req: NextRequest) {
       cdKeys: []
     });
 
+    revalidatePath("/sitemap.xml");
     return NextResponse.json({ data: doc, meta: {} }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/v1/admin/programs]", err);

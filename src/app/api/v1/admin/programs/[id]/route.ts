@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
@@ -134,6 +135,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const result = await patch.commit();
+    revalidatePath("/sitemap.xml");
     return NextResponse.json({ data: result, meta: {} });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update program";
@@ -163,6 +165,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     if (!existing) return Errors.notFound("Program not found");
 
     await client.delete(id);
+    revalidatePath("/sitemap.xml");
     return new NextResponse(null, { status: 204 });
   } catch (err) {
     console.error("[DELETE /api/v1/admin/programs/[id]]", err);

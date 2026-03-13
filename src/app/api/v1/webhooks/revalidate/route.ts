@@ -1,4 +1,4 @@
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { Errors } from "@/src/lib/api/errors";
 
@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     }
     if (body?._type === "program" || body?._type === "cdKey") {
       revalidateTag("programs", "max");
+      revalidatePath("/sitemap.xml");
     }
 
     return NextResponse.json({ data: { revalidated: true }, meta: {} });
