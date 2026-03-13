@@ -3,7 +3,7 @@
 import { CDKeyItemProps } from "@/src/types";
 import CDKeyActions from "@/src/components/program/cdkeys/CDKeyActions";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
-import { getStatusColor } from "@/src/lib/cdKeyUtils";
+import { getStatusColor } from "@/src/lib/program/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
 
 export default function CDKeyItem({ cdKey, index, slug, reportData, onReportSubmitted }: CDKeyItemProps) {

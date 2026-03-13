@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
-import { duplicateKeyReportQuery } from "@/src/lib/queries";
+import { duplicateKeyReportQuery } from "@/src/lib/sanity/queries";
 import { hashCDKey } from "@/src/lib/keyHashing";
 import crypto from "crypto";
 

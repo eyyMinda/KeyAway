@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
-import { keyReportsQuery } from "@/src/lib/queries";
+import { keyReportsQuery } from "@/src/lib/sanity/queries";
 import type { KeyReportNotificationItem } from "@/src/types/admin";
 
 const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;

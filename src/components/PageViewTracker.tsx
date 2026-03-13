@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { trackEvent } from "@/src/lib/trackEvent";
-import { getUTMParameters } from "@/src/lib/utmUtils";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
+import { getUTMParameters } from "@/src/lib/analytics/utmUtils";
 
 // Debug logger
 const log = (...args: unknown[]) => {

@@ -1,5 +1,5 @@
 import { AnalyticsEventData } from "@/src/types";
-import { getEventDotColor, formatEventName, extractReferrerInfo } from "@/src/lib/analyticsUtils";
+import { getEventDotColor, formatEventName, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
 
 interface RecentActivityProps {
   events: AnalyticsEventData[];

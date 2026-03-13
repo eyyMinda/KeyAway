@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { allProgramsQuery } from "@/src/lib/queries";
+import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { client } from "@/src/sanity/lib/client";
-import { fetchEventsForRange } from "@/src/lib/eventsApi";
+import { fetchEventsForRange } from "@/src/lib/analytics/eventsApi";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
@@ -20,7 +20,7 @@ import {
   transformPathData,
   transformCountryData,
   transformReferrerDataWithParams
-} from "@/src/lib/analyticsUtils";
+} from "@/src/lib/analytics/analyticsUtils";
 
 export default function AnalyticsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);

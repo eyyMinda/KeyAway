@@ -3,7 +3,7 @@
 import { FaFire } from "react-icons/fa";
 import { ProgramsGrid } from "@/src/components/programs";
 import { PopularProgramsSectionProps } from "@/src/types/home";
-import { sortByPopularity } from "@/src/lib/programUtils";
+import { sortByPopularity } from "@/src/lib/program/programUtils";
 
 export default function PopularProgramsSection({ programs }: PopularProgramsSectionProps) {
   // Sort programs by popularity score (highest first)

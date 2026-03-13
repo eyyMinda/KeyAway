@@ -6,7 +6,7 @@ import JoinCommunitySection from "@/src/components/programs/JoinCommunitySection
 import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
 import Pagination from "@/src/components/ui/Pagination";
 import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
-import { sortPrograms, filterProgramsByKeys, searchPrograms } from "@/src/lib/programUtils";
+import { sortPrograms, filterProgramsByKeys, searchPrograms } from "@/src/lib/program/programUtils";
 import { Program } from "@/src/types";
 
 interface ExtendedProgramsPageClientProps extends ProgramsPageClientProps {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { checkAdminAccess } from "@/src/lib/adminAuth";
+import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
 
 export async function GET() {
   try {

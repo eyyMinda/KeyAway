@@ -4,7 +4,7 @@ import { CDKeyStatus } from "@/src/types/program";
 import TableHead, { HeaderDef, SortColumn, SortDirection } from "@/src/components/admin/key-reports/TableHead";
 import TableBody from "@/src/components/admin/key-reports/TableBody";
 import Pagination from "@/src/components/ui/Pagination";
-import { formatSlugToTitle } from "@/src/lib/programUtils";
+import { formatSlugToTitle } from "@/src/lib/program/programUtils";
 
 interface KeyReportsTableProps {
   reports: ExpiredKeyReport[];

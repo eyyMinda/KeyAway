@@ -1,4 +1,4 @@
-import { updateAllExpiredKeys } from "@/src/lib/sanityActions";
+import { updateAllExpiredKeys } from "@/src/lib/sanity/sanityActions";
 import { NextResponse } from "next/server";
 
 function isCronRequest(req: Request): boolean {

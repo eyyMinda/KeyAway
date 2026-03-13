@@ -3,7 +3,7 @@
 import { CDKey, ReportData } from "@/src/types";
 import CDKeyActions from "./CDKeyActions";
 import ReportProgressBar from "./ReportProgressBar";
-import { getStatusColor } from "@/src/lib/cdKeyUtils";
+import { getStatusColor } from "@/src/lib/program/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
 
 interface CDKeyMobileCardProps {

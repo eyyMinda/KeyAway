@@ -1,7 +1,7 @@
 "use client";
 
 import Giscus from "@giscus/react";
-import { trackEvent } from "@/src/lib/trackEvent";
+import { trackEvent } from "@/src/lib/analytics/trackEvent";
 
 export default function ProgramComments() {
   // Show fallback if Giscus fails to load (currently disabled)

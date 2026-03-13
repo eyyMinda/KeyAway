@@ -7,7 +7,7 @@ import {
   removeFromPendingChanges,
   removeFromSaving,
   addToSaving
-} from "@/src/lib/adminUtils";
+} from "@/src/lib/admin/adminUtils";
 
 interface UseStatusChangeProps {
   programs: Program[];

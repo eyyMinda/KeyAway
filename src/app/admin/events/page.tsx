@@ -7,8 +7,8 @@ import EventsTable from "@/src/components/admin/events/EventsTable";
 import { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AnalyticsEventData } from "@/src/types";
-import { getDateRange } from "@/src/lib/analyticsUtils";
-import { fetchEventsForRange } from "@/src/lib/eventsApi";
+import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
+import { fetchEventsForRange } from "@/src/lib/analytics/eventsApi";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);

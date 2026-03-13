@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
-import { requireAdminAccess } from "@/src/lib/adminAuth";
+import { requireAdminAccess } from "@/src/lib/admin/adminAuth";
 
 export async function PATCH(request: NextRequest) {
   try {

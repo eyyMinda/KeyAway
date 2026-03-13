@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
-import { buildImageReference } from "@/src/lib/adminHelpers";
+import { buildImageReference } from "@/src/lib/admin/adminHelpers";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;

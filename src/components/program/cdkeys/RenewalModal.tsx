@@ -4,8 +4,12 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { KeyReportEvent, RenewReportRequest, RenewReportResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
-import { EVENT_TYPE_MAP, getStatusTextFromEventType, CDKeyStatus } from "@/src/lib/cdKeyUtils";
-import { NOTIFICATION_DURATION, getRenewalStatusMessage, getErrorMessage } from "@/src/lib/notificationUtils";
+import { EVENT_TYPE_MAP, getStatusTextFromEventType, CDKeyStatus } from "@/src/lib/program/cdKeyUtils";
+import {
+  NOTIFICATION_DURATION,
+  getRenewalStatusMessage,
+  getErrorMessage
+} from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
 
 interface RenewalModalProps {

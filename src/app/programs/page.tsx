@@ -1,14 +1,14 @@
 import { client } from "@/src/sanity/lib/client";
-import { programsWithStatsQuery, programsCountQuery, socialLinksQuery } from "@lib/queries";
-import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/eventsApi";
+import { programsWithStatsQuery, programsCountQuery, socialLinksQuery } from "@lib/sanity/queries";
+import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
-import { generateProgramsPageMetadata } from "@/src/lib/metadata";
-import { generateProgramsPageJsonLd } from "@/src/lib/jsonLd";
+import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
+import { generateProgramsPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
 import ProgramsHero from "@/src/components/programs/ProgramsHero";
 import { FacebookGroupButton } from "@/src/components/social";
-import { getFeaturedProgram } from "@/src/lib/sanityActions";
+import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 import type { SocialData } from "@/src/types";
 
 export const revalidate = 60;

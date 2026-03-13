@@ -4,9 +4,9 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { client } from "@/src/sanity/lib/client";
-import { featuredProgramSettingsQuery } from "@/src/lib/queries";
+import { featuredProgramSettingsQuery } from "@/src/lib/sanity/queries";
 import { IdealImage } from "@/src/components/general/IdealImage";
-import { getWorkingKeysCount } from "@/src/lib/adminHelpers";
+import { getWorkingKeysCount } from "@/src/lib/admin/adminHelpers";
 import type { Program } from "@/src/types/program";
 
 interface FeaturedProgramSettingsData {

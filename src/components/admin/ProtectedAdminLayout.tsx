@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AdminLayout from "./AdminLayout";
-import { isAuthenticatedInBrowser } from "@/src/lib/adminAuth";
+import { isAuthenticatedInBrowser } from "@/src/lib/admin/adminAuth";
 import { ProtectedAdminLayoutProps } from "@/src/types";
 
 export default function ProtectedAdminLayout({ title, subtitle, children }: ProtectedAdminLayoutProps) {

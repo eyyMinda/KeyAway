@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { runBundleEvents } from "@/src/lib/bundleEvents";
+import { runBundleEvents } from "@/src/lib/analytics/bundleEvents";
 
 function verifyCronAuth(req: Request): boolean {
   const auth = req.headers.get("authorization");

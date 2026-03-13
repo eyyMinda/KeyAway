@@ -117,7 +117,7 @@ import KeyStatusUpdater from "@/src/components/program/KeyStatusUpdater";
 ### Server Action Usage
 
 ```typescript
-import { getProgramWithUpdatedKeys } from "@/src/lib/sanityActions";
+import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 
 // Get program with automatically updated keys
 const program = await getProgramWithUpdatedKeys("program-slug");
@@ -126,7 +126,7 @@ const program = await getProgramWithUpdatedKeys("program-slug");
 ### Batch Update All Programs
 
 ```typescript
-import { updateAllExpiredKeys } from "@/src/lib/sanityActions";
+import { updateAllExpiredKeys } from "@/src/lib/sanity/sanityActions";
 
 // Update all programs
 await updateAllExpiredKeys();

@@ -1,11 +1,11 @@
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/queries";
-import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/eventsApi";
+import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
+import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
-import { generateHomePageMetadata } from "@/src/lib/metadata";
-import { generateHomePageJsonLd } from "@/src/lib/jsonLd";
+import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
+import { generateHomePageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
-import { getFeaturedProgram } from "@/src/lib/sanityActions";
+import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 
 // Import homepage sections
 import HeroSection from "@/src/components/home/HeroSection";

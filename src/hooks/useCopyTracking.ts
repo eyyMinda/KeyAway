@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { trackCopyEvent } from "@/src/lib/copyTracking";
+import { trackCopyEvent } from "@/src/lib/analytics/copyTracking";
 import { UseCopyTrackingProps } from "@/src/types";
 
 export function useCopyTracking({ cdKey, slug }: UseCopyTrackingProps) {
