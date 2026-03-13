@@ -80,16 +80,15 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
         key: cdKey.key
       };
 
-      const response = await fetch("/api/check-duplicate-report", {
+      const response = await fetch("/api/v1/key-reports/check-duplicate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request)
       });
 
-      const result: DuplicateCheckResponse = await response.json();
-
-      if (result.ok && result.isDuplicate && result.existingReport) {
-        setDuplicateReport(result.existingReport);
+      const { data } = (await response.json()) as { data?: DuplicateCheckResponse };
+      if (data?.isDuplicate && data?.existingReport) {
+        setDuplicateReport(data.existingReport);
       }
     } catch (error) {
       console.error("Failed to check for duplicate report:", error);

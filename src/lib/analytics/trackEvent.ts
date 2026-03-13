@@ -2,7 +2,7 @@ import { AnalyticsEvent, KeyReportEvent, TrackEventMeta } from "@/src/types";
 
 export async function trackEvent(event: AnalyticsEvent | KeyReportEvent, meta?: TrackEventMeta) {
   try {
-    await fetch("/api/track", {
+    await fetch("/api/v1/analytics/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event, meta }),
