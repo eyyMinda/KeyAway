@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { CDKey } from "@/src/types/program";
-import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { DuplicateCheckRequest, DuplicateCheckResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
 import RenewalModal from "./RenewalModal";
@@ -110,11 +109,21 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
     setIsSubmitting(true);
 
     try {
-      await trackEvent(EVENT_TYPE_MAP[status], {
-        programSlug: slug,
-        key: cdKey,
-        path: window.location.pathname
+      const res = await fetch("/api/v1/key-reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          event: EVENT_TYPE_MAP[status],
+          meta: { programSlug: slug, key: cdKey, path: window.location.pathname }
+        })
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("[Report] API error:", res.status, err);
+        setNotification(getErrorMessage("REPORT_FAILED"));
+        return;
+      }
 
       setNotification(getReportStatusMessage(status));
       onReportSubmitted?.();

@@ -86,7 +86,7 @@ export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existing
         key: cdKey
       };
 
-      const response = await fetch("/api/v1/key-reports/renew", {
+      const response = await fetch("/api/v1/key-reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request)
