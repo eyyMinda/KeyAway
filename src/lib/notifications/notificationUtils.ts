@@ -1,4 +1,4 @@
-import { CDKeyStatus } from "./cdKeyUtils";
+import { CDKeyStatus } from "@/src/lib/program/cdKeyUtils";
 
 // Notification Duration Constants
 export const NOTIFICATION_DURATION = {
