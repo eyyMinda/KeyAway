@@ -125,7 +125,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
             ? { showcaseGifAssetId }
             : {})
       };
-      const url = program?._id ? `/api/admin/programs/${program._id}` : "/api/admin/programs";
+      const url = program?._id ? `/api/v1/admin/programs/${program._id}` : "/api/v1/admin/programs";
       const method = program?._id ? "PATCH" : "POST";
       const res = await fetch(url, {
         method,
@@ -134,7 +134,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setSaveError(data?.error ?? "Failed to save");
+        setSaveError(data?.error?.message ?? data?.error ?? "Failed to save");
         return;
       }
       onSaved();
@@ -167,13 +167,14 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       try {
         const formData = new FormData();
         formData.set("file", file);
-        const res = await fetch("/api/admin/programs/upload-image", { method: "POST", body: formData });
+        const res = await fetch("/api/v1/admin/program-images", { method: "POST", body: formData });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
-          setSaveError(data?.error ?? "Upload failed");
+          setSaveError(data?.error?.message ?? data?.error ?? "Upload failed");
           return;
         }
-        if (data.assetId) setAssetId(data.assetId);
+        const assetIdRes = data?.data?.assetId ?? data?.assetId;
+        if (assetIdRes) setAssetId(assetIdRes);
       } finally {
         setLoading(false);
         e.target.value = "";
@@ -202,10 +203,10 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
     setDeleteError(null);
     setDeleteLoading(true);
     try {
-      const res = await fetch(`/api/admin/programs/${program._id}`, { method: "DELETE" });
+      const res = await fetch(`/api/v1/admin/programs/${program._id}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setDeleteError(data?.error ?? "Failed to delete");
+        setDeleteError(data?.error?.message ?? data?.error ?? "Failed to delete");
         return;
       }
       onDeleted();

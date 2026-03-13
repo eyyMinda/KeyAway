@@ -101,7 +101,7 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
         return;
       }
 
-      const res = await fetch("/api/admin/featured-program-settings", {
+      const res = await fetch("/api/v1/admin/featured-program-settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -109,7 +109,7 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data?.error ?? "Failed to update settings");
+        setError(data?.error?.message ?? data?.error ?? "Failed to update settings");
         return;
       }
 

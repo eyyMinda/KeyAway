@@ -39,9 +39,9 @@ export async function requireAdminAccess() {
  */
 export async function checkAdminAccessClient(): Promise<boolean> {
   try {
-    const response = await fetch("/api/admin/check-access");
-    const data = await response.json();
-    return data.isAdmin;
+    const response = await fetch("/api/v1/admin/auth/check");
+    const { data } = await response.json();
+    return data?.isAdmin ?? false;
   } catch {
     return false;
   }

@@ -28,10 +28,10 @@ export default function ProtectedAdminLayout({ title, subtitle, children }: Prot
           return;
         }
 
-        const response = await fetch("/api/admin/check-access");
-        const data = await response.json();
+        const response = await fetch("/api/v1/admin/auth/check");
+        const { data } = await response.json();
 
-        if (data.isAdmin) {
+        if (data?.isAdmin) {
           setIsAuthenticated(true);
         } else {
           router.push("/");

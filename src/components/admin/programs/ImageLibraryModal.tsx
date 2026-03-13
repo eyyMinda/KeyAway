@@ -16,10 +16,11 @@ export default function ImageLibraryModal({ isOpen, onClose, onSelect }: ImageLi
   useEffect(() => {
     if (!isOpen) return;
     let cancelled = false;
-    fetch("/api/admin/programs/image-assets")
+    fetch("/api/v1/admin/program-images")
       .then(res => res.json().catch(() => ({})))
       .then(data => {
-        if (!cancelled && Array.isArray(data.assets)) setAssets(data.assets);
+        const list = data?.data?.assets ?? data?.assets;
+        if (!cancelled && Array.isArray(list)) setAssets(list);
         else if (!cancelled) setAssets([]);
       })
       .catch(() => {

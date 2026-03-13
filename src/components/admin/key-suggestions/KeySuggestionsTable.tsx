@@ -36,13 +36,13 @@ export default function KeySuggestionsTable({
     if (Object.keys(updates).length === 0) return;
     setUpdating(suggestionId);
     try {
-      const res = await fetch("/api/admin/update-key-suggestion", {
+      const res = await fetch(`/api/v1/admin/key-suggestions/${suggestionId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ suggestionId, ...updates })
+        body: JSON.stringify(updates)
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Update failed");
+      if (!res.ok) throw new Error(data?.error?.message ?? data?.error ?? "Update failed");
       onUpdate();
     } catch (error) {
       console.error("Error updating suggestion:", error);

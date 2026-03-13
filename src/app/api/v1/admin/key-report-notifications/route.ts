@@ -1,7 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { keyReportsQuery } from "@/src/lib/sanity/queries";
 import type { KeyReportNotificationItem } from "@/src/types/admin";
+import { Errors } from "@/src/lib/api/errors";
+import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
 const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
 const MAX_ITEMS = 20;
@@ -24,8 +27,14 @@ interface Group {
   limit_reached: number;
 }
 
-/** Keys that need attention: at least one negative report in last 60 days. */
-export async function GET() {
+/** GET /api/v1/admin/key-report-notifications - Keys needing attention (negative reports, 60d) */
+export async function GET(req: NextRequest) {
+  const { ok: rateOk } = rateLimitMiddleware(req);
+  if (!rateOk) return Errors.tooManyRequests();
+
+  const { isAdmin } = await checkAdminAccess();
+  if (!isAdmin) return Errors.unauthorized();
+
   try {
     const since = new Date(Date.now() - SIXTY_DAYS_MS).toISOString();
 
@@ -35,13 +44,13 @@ export async function GET() {
     ]);
 
     const programTitleBySlug = new Map<string, string>();
-    for (const p of programs) {
+    for (const p of programs ?? []) {
       if (p.slug) programTitleBySlug.set(p.slug, p.title ?? p.slug);
     }
 
     const groups = new Map<string, Group>();
 
-    for (const report of events) {
+    for (const report of events ?? []) {
       const programSlug = (report.programSlug ?? "").trim() || "unknown";
       const keyHash = (report.keyHash ?? "").trim() || "unknown";
       const keyIdentifier = (report.keyIdentifier ?? "").trim() || "unknown";
@@ -80,14 +89,13 @@ export async function GET() {
 
     const items: KeyReportNotificationItem[] = negativeFiltered.slice(0, MAX_ITEMS).map(g => {
       const total = g.working + g.expired + g.limit_reached;
-      const positiveCount = g.working;
       const ratioLabel = total > 0 ? `${g.working}/${total} positive (60d)` : "0 positive (60d)";
       return {
         programSlug: g.programSlug,
         programTitle: programTitleBySlug.get(g.programSlug) ?? g.programSlug,
         keyIdentifier: g.keyIdentifier,
         negativeCount: g.negativeCount,
-        positiveCount,
+        positiveCount: g.working,
         working: g.working,
         expired: g.expired,
         limit_reached: g.limit_reached,
@@ -96,9 +104,9 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(items);
-  } catch (error) {
-    console.error("Error fetching key-report notifications:", error);
-    return NextResponse.json([], { status: 500 });
+    return NextResponse.json({ data: items, meta: {} });
+  } catch (err) {
+    console.error("[GET /api/v1/admin/key-report-notifications]", err);
+    return Errors.internal();
   }
 }

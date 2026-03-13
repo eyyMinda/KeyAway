@@ -1,8 +1,9 @@
-/** @fileoverview API route for creating new programs. Validates input and creates program documents in Sanity. */
-
 import { NextRequest, NextResponse } from "next/server";
+import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
+import { Errors } from "@/src/lib/api/errors";
+import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
@@ -16,35 +17,41 @@ function normalizeSlug(s: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
-export async function POST(request: NextRequest) {
+/** POST /api/v1/admin/programs - Create program */
+export async function POST(req: NextRequest) {
+  const { ok: rateOk } = rateLimitMiddleware(req);
+  if (!rateOk) return Errors.tooManyRequests();
+
+  const { isAdmin } = await checkAdminAccess();
+  if (!isAdmin) return Errors.unauthorized();
+
   try {
-    const body = await request.json().catch(() => ({}));
-    if (!body || typeof body !== "object") {
-      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
-    }
+    const body = await req.json().catch(() => ({}));
+    if (!body || typeof body !== "object") return Errors.badRequest("Request body is required");
+
     const b = body as Record<string, unknown>;
 
     const title = typeof b.title === "string" ? b.title.trim() : "";
-    if (!title) return NextResponse.json({ error: "title cannot be empty" }, { status: 400 });
+    if (!title) return Errors.validation("title cannot be empty", [{ field: "title", message: "Required" }]);
 
     const slugRaw = typeof b.slug === "string" ? b.slug.trim() : "";
-    if (!slugRaw) return NextResponse.json({ error: "slug cannot be empty" }, { status: 400 });
+    if (!slugRaw) return Errors.validation("slug cannot be empty", [{ field: "slug", message: "Required" }]);
     const slug = normalizeSlug(slugRaw);
     if (!SLUG_REGEX.test(slug)) {
-      return NextResponse.json(
-        { error: "slug must contain only lowercase letters, numbers, and hyphens" },
-        { status: 400 }
-      );
+      return Errors.validation("slug must contain only lowercase letters, numbers, and hyphens", [
+        { field: "slug", message: "Invalid format" }
+      ]);
     }
 
     const description = typeof b.description === "string" ? b.description.trim() : "";
-    if (!description) return NextResponse.json({ error: "description cannot be empty" }, { status: 400 });
+    if (!description)
+      return Errors.validation("description cannot be empty", [{ field: "description", message: "Required" }]);
 
     const featuredDescription = typeof b.featuredDescription === "string" ? b.featuredDescription.trim() : undefined;
 
     const downloadLinkRaw = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
     if (downloadLinkRaw && !URL_REGEX.test(downloadLinkRaw)) {
-      return NextResponse.json({ error: "downloadLink must be a valid URL" }, { status: 400 });
+      return Errors.validation("downloadLink must be a valid URL", [{ field: "downloadLink", message: "Invalid URL" }]);
     }
     const downloadLink = downloadLinkRaw || undefined;
 
@@ -66,7 +73,9 @@ export async function POST(request: NextRequest) {
       slug
     });
     if (duplicate) {
-      return NextResponse.json({ error: "A program with this slug already exists" }, { status: 400 });
+      return Errors.validation("A program with this slug already exists", [
+        { field: "slug", message: "Already exists" }
+      ]);
     }
 
     const doc = await client.create({
@@ -81,12 +90,9 @@ export async function POST(request: NextRequest) {
       cdKeys: []
     });
 
-    return NextResponse.json({ success: true, result: doc }, { status: 201 });
-  } catch (error) {
-    console.error("Error creating program:", error);
-    const message = error instanceof Error ? error.message : "Failed to create program";
-    const status =
-      message.includes("cannot be empty") || message.includes("must be") || message.includes("already") ? 400 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json({ data: doc, meta: {} }, { status: 201 });
+  } catch (err) {
+    console.error("[POST /api/v1/admin/programs]", err);
+    return Errors.internal();
   }
 }

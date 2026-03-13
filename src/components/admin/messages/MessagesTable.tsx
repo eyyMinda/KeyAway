@@ -39,13 +39,13 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
     if (Object.keys(updates).length === 0) return;
     setUpdating(messageId);
     try {
-      const res = await fetch("/api/admin/update-message", {
+      const res = await fetch(`/api/v1/admin/messages/${messageId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messageId, ...updates })
+        body: JSON.stringify(updates)
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "Update failed");
+      if (!res.ok) throw new Error(data?.error?.message ?? data?.error ?? "Update failed");
       onUpdate();
     } catch (error) {
       console.error("Error updating message:", error);

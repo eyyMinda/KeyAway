@@ -101,11 +101,9 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
         }
 
         // Update the key status via API route
-        const response = await fetch("/api/admin/update-key-status", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+        const response = await fetch("/api/v1/admin/key-reports", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             programSlug: program.slug?.current,
             keyIndex,
@@ -114,9 +112,9 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorData = await response.json().catch(() => ({}));
           console.error("API Error:", errorData);
-          throw new Error(errorData.error || "Failed to update key status");
+          throw new Error(errorData?.error?.message ?? errorData?.error ?? "Failed to update key status");
         }
 
         const result = await response.json();
