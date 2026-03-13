@@ -3,6 +3,7 @@
 import { client } from "@/src/sanity/lib/client";
 import { CDKey, Program } from "@/src/types";
 import { programBySlugQuery, featuredProgramSettingsQuery, programsForAutoSelectionQuery } from "./queries";
+import { getBundleCountsByProgram, mergeProgramStats, mergeSingleProgramStats } from "./eventsApi";
 
 /**
  * Updates expired CD keys in Sanity for a specific program
@@ -148,27 +149,39 @@ export async function getProgramWithUpdatedKeys(slug: string) {
 }
 
 /**
- * Helper: Get program stats (keys, views, downloads)
+ * Helper: Get program stats (keys, views, downloads) including bundled events
  */
-async function getProgramStats(program: Program) {
+async function getProgramStats(
+  program: Program,
+  bundleCounts?: Map<string, { page_viewed: number; download_click: number }>
+) {
   const sortedCdKeys = program.cdKeys || [];
   const totalKeys = sortedCdKeys.length;
   const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
 
-  const [viewCount, downloadCount] = await Promise.all([
-    client.fetch(
-      `count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == $slug])`,
-      { slug: program.slug.current },
-      { next: { tags: ["featured-program"] } }
-    ),
-    client.fetch(
-      `count(*[_type == "trackingEvent" && event == "download_click" && programSlug == $slug])`,
-      { slug: program.slug.current },
-      { next: { tags: ["featured-program"] } }
-    )
+  const [singularCounts, counts] = await Promise.all([
+    Promise.all([
+      client.fetch(
+        `count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == $slug])`,
+        { slug: program.slug.current },
+        { next: { tags: ["featured-program"] } }
+      ),
+      client.fetch(
+        `count(*[_type == "trackingEvent" && event == "download_click" && programSlug == $slug])`,
+        { slug: program.slug.current },
+        { next: { tags: ["featured-program"] } }
+      )
+    ]),
+    bundleCounts ?? getBundleCountsByProgram()
   ]);
 
-  return { ...program, totalKeys, workingKeys, viewCount: viewCount || 0, downloadCount: downloadCount || 0 };
+  const { viewCount, downloadCount } = mergeSingleProgramStats(
+    { viewCount: singularCounts[0] || 0, downloadCount: singularCounts[1] || 0 },
+    program.slug?.current,
+    counts
+  );
+
+  return { ...program, totalKeys, workingKeys, viewCount, downloadCount };
 }
 
 /**
@@ -221,8 +234,15 @@ export async function getFeaturedProgram(): Promise<
 
     if (!settings) {
       // No settings: auto-select first program with working keys
-      const programs = await client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: ["featured-program"] } });
-      for (const p of programs as Array<{ slug: { current: string }; viewCount?: number; downloadCount?: number }>) {
+      const [rawPrograms, bundleCounts] = await Promise.all([
+        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: ["featured-program"] } }),
+        getBundleCountsByProgram()
+      ]);
+      const programs = mergeProgramStats(
+        (rawPrograms ?? []) as Array<{ slug: { current: string }; viewCount?: number; downloadCount?: number }>,
+        bundleCounts
+      );
+      for (const p of programs) {
         const program = await getProgramWithUpdatedKeys(p.slug.current);
         if (!program) continue;
         const workingKeys = (program.cdKeys || []).filter(
@@ -251,7 +271,14 @@ export async function getFeaturedProgram(): Promise<
 
     // Auto-select when rotation needed
     if (needsRot) {
-      const programs = await client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: ["featured-program"] } });
+      const [rawPrograms, bundleCounts] = await Promise.all([
+        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: ["featured-program"] } }),
+        getBundleCountsByProgram()
+      ]);
+      const programs = mergeProgramStats(
+        (rawPrograms ?? []) as Array<{ slug: { current: string }; viewCount?: number; downloadCount?: number }>,
+        bundleCounts
+      );
       const programsWithStats = await Promise.all(
         programs.map(
           async (p: {
@@ -293,7 +320,7 @@ export async function getFeaturedProgram(): Promise<
           .catch(err => console.error("Failed to update rotation:", err));
       }
 
-      return await getProgramStats(selected.program);
+      return await getProgramStats(selected.program, bundleCounts);
     }
 
     return null;

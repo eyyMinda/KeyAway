@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { trackingEventsQuery, allProgramsQuery } from "@/src/lib/queries";
+import { allProgramsQuery } from "@/src/lib/queries";
 import { client } from "@/src/sanity/lib/client";
+import { fetchEventsForRange } from "@/src/lib/eventsApi";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
@@ -11,7 +12,7 @@ import TimeFilter from "@/src/components/admin/TimeFilter";
 import RecentActivity from "@/src/components/admin/RecentActivity";
 import { Program, AnalyticsEventData } from "@/src/types";
 import {
-  getDateFromPeriod,
+  getDateRange,
   aggregateEvents,
   transformEventData,
   transformProgramData,
@@ -34,9 +35,15 @@ export default function AnalyticsPage() {
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const since = getDateFromPeriod(selectedPeriod, customDateRange);
+      if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
+        setEvents([]);
+        setPrograms([]);
+        setLoading(false);
+        return;
+      }
+      const { since, until } = getDateRange(selectedPeriod, customDateRange);
       const [eventsData, programsData] = await Promise.all([
-        client.fetch(trackingEventsQuery, { since }),
+        fetchEventsForRange(since, until),
         client.fetch(allProgramsQuery)
       ]);
       setEvents(eventsData);

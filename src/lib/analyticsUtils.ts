@@ -1,6 +1,42 @@
 import { AnalyticsEventData } from "@/src/types";
 
 // Date utilities
+export function getDateRange(
+  period: string,
+  customDateRange?: { start: string; end: string }
+): { since: string; until: string } {
+  const now = new Date();
+  const until = now.toISOString();
+  let since: string;
+  switch (period) {
+    case "1h":
+      since = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+      break;
+    case "24h":
+      since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+      break;
+    case "7d":
+      since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      break;
+    case "30d":
+      since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      break;
+    case "90d":
+      since = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
+      break;
+    case "custom":
+      if (customDateRange?.start && customDateRange?.end) {
+        since = new Date(customDateRange.start).toISOString();
+        return { since, until: new Date(customDateRange.end + "T23:59:59.999Z").toISOString() };
+      }
+      since = new Date("1970-01-01").toISOString();
+      break;
+    default:
+      since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  }
+  return { since, until };
+}
+
 export function getDateFromPeriod(period: string, customDateRange?: { start: string; end: string }): string {
   const now = new Date();
   switch (period) {

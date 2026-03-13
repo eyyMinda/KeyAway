@@ -6,10 +6,9 @@ import EventsFilter from "@/src/components/admin/events/EventsFilter";
 import EventsTable from "@/src/components/admin/events/EventsTable";
 import { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { client } from "@/src/sanity/lib/client";
-import { trackingEventsQuery, trackingEventsWithRangeQuery } from "@/src/lib/queries";
 import { AnalyticsEventData } from "@/src/types";
-import { getDateFromPeriod } from "@/src/lib/analyticsUtils";
+import { getDateRange } from "@/src/lib/analyticsUtils";
+import { fetchEventsForRange } from "@/src/lib/eventsApi";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);
@@ -38,24 +37,13 @@ export default function EventsPage() {
   const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const since = getDateFromPeriod(selectedPeriod, customDateRange);
-
-      let eventsData: AnalyticsEventData[];
-
-      if (selectedPeriod === "custom" && customDateRange.start && customDateRange.end) {
-        // Use custom range query only when both dates are selected
-        const until = new Date(customDateRange.end + "T23:59:59.999Z").toISOString();
-        eventsData = await client.fetch(trackingEventsWithRangeQuery, { since, until });
-      } else if (selectedPeriod === "custom") {
-        // Don't fetch if custom is selected but dates are incomplete
+      if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
         setEvents([]);
         setLoading(false);
         return;
-      } else {
-        // Use regular query for non-custom periods
-        eventsData = await client.fetch(trackingEventsQuery, { since });
       }
-
+      const { since, until } = getDateRange(selectedPeriod, customDateRange);
+      const eventsData = await fetchEventsForRange(since, until);
       setEvents(eventsData);
     } catch (error) {
       console.error("Error fetching events:", error);

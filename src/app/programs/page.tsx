@@ -1,5 +1,7 @@
 import { client } from "@/src/sanity/lib/client";
 import { programsWithStatsQuery, programsCountQuery, socialLinksQuery } from "@lib/queries";
+import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/eventsApi";
+import type { ProgramWithStats } from "@/src/types/home";
 import { generateProgramsPageMetadata } from "@/src/lib/metadata";
 import { generateProgramsPageJsonLd } from "@/src/lib/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
@@ -7,7 +9,7 @@ import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
 import ProgramsHero from "@/src/components/programs/ProgramsHero";
 import { FacebookGroupButton } from "@/src/components/social";
 import { getFeaturedProgram } from "@/src/lib/sanityActions";
-import type { Program, SocialData } from "@/src/types";
+import type { SocialData } from "@/src/types";
 
 export const revalidate = 60;
 
@@ -17,12 +19,15 @@ export async function generateMetadata() {
 
 export default async function ProgramsPage() {
   // Fetch all programs with stats for client-side filtering
-  const [programs, totalCount, socialLinks, featuredProgram] = await Promise.all([
+  const [rawPrograms, bundleCounts, totalCount, socialLinks, featuredProgram] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: ["programs"] } }),
+    getBundleCountsByProgram(),
     client.fetch(programsCountQuery, {}, { next: { tags: ["programs"] } }),
     client.fetch(socialLinksQuery),
     getFeaturedProgram()
   ]);
+
+  const programs = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts) as ProgramWithStats[];
 
   const socialData: SocialData = {
     socialLinks: socialLinks || []
@@ -38,7 +43,7 @@ export default async function ProgramsPage() {
         {/* Hero Section */}
         <ProgramsHero
           totalCount={totalCount}
-          totalKeys={programs.reduce((sum: number, p: Program) => sum + (p.cdKeys?.length || 0), 0)}
+          totalKeys={programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0)}
         />
 
         {/* Facebook Group Button */}
