@@ -6,7 +6,12 @@ import { useSession } from "next-auth/react";
 import AdminLayout from "./AdminLayout";
 import type { ProtectedAdminLayoutProps } from "@/src/types";
 
-export default function ProtectedAdminLayout({ title, subtitle, children }: ProtectedAdminLayoutProps) {
+export default function ProtectedAdminLayout({
+  title,
+  subtitle,
+  headerContent,
+  children
+}: ProtectedAdminLayoutProps) {
   const { data: session, status } = useSession();
   const [isChecking, setIsChecking] = useState(true);
   const router = useRouter();
@@ -47,7 +52,7 @@ export default function ProtectedAdminLayout({ title, subtitle, children }: Prot
   }
 
   return (
-    <AdminLayout title={title} subtitle={subtitle}>
+    <AdminLayout title={title} subtitle={subtitle} headerContent={headerContent}>
       {children}
     </AdminLayout>
   );
