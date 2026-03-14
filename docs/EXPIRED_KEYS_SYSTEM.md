@@ -89,15 +89,17 @@ Updates all expired keys across all programs.
   "crons": [
     {
       "path": "/api/v1/cron/update-expired-keys",
-      "schedule": "0 0 * * *"
+      "schedule": "0 20 * * *"
     }
   ]
 }
 ```
 
-Runs once a day (midnight UTC) to update all expired keys.
+Runs once a day (20:00 UTC) to update all expired keys.
 
 **Env:** `CRON_SECRET` (optional). Vercel adds `x-vercel-cron` when invoking crons. Use `CRON_SECRET` + `Authorization: Bearer <secret>` for manual triggers.
+
+**Tracking:** Each run is logged to Sanity (`cronRun`). View last runs in Admin Dashboard → System → Cron Jobs.
 
 ### Proxy Rate Limiting
 
