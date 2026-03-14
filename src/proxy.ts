@@ -5,14 +5,17 @@ import type { NextRequest } from "next/server";
 const lastUpdateTime = new Map<string, number>();
 const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
+// Auth redirect in proxy caused 302 loop with Auth.js v5 beta. Protection handled by ProtectedAdminLayout.
 export function proxy(request: NextRequest) {
-  const response = NextResponse.next();
+  // Forward pathname to request so layout can read it (headers() returns request headers)
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
-  // Add pathname header for use in server components
-  response.headers.set("x-pathname", request.nextUrl.pathname);
+  const response = NextResponse.next({
+    request: { headers: requestHeaders }
+  });
 
   // Only handle program pages for key updates
-  // Admin authentication is handled client-side in ProtectedAdminLayout
   if (request.nextUrl.pathname.startsWith("/program/")) {
     const slug = request.nextUrl.pathname.split("/program/")[1];
 
@@ -20,12 +23,8 @@ export function proxy(request: NextRequest) {
       const now = Date.now();
       const lastUpdate = lastUpdateTime.get(slug) || 0;
 
-      // If it's been more than 5 minutes since last update for this program
       if (now - lastUpdate > UPDATE_INTERVAL) {
-        // Set the last update time
         lastUpdateTime.set(slug, now);
-
-        // Add a header to indicate that keys should be updated
         response.headers.set("x-update-keys", "true");
       }
     }

@@ -28,43 +28,52 @@ export function formatDateOnly(dateString: string): string {
   });
 }
 
-// Format date for display with relative time (e.g., "2 hours ago", "3 days ago")
+const MS = { min: 60_000, hour: 3_600_000, day: 86_400_000 };
+
+function getRelativeParts(iso?: string): { d: Date; mins: number; hours: number; days: number } | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  const diffMs = Date.now() - d.getTime();
+  return {
+    d,
+    mins: Math.floor(diffMs / MS.min),
+    hours: Math.floor(diffMs / MS.hour),
+    days: Math.floor(diffMs / MS.day)
+  };
+}
+
+const s = (n: number) => (n === 1 ? "" : "s");
+
+/** Compact relative time for notifications/badges (e.g. "2m ago", "5h ago", "3d ago", "Jan 15") */
+export function formatRelativeTimeCompact(iso?: string): string {
+  const p = getRelativeParts(iso);
+  if (!p) return "";
+  if (p.mins < 1) return "just now";
+  if (p.mins < 60) return `${p.mins}m ago`;
+  if (p.hours < 24) return `${p.hours}h ago`;
+  if (p.days < 7) return `${p.days}d ago`;
+  return p.d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    ...(p.d.getFullYear() !== new Date().getFullYear() ? { year: "numeric" } : {})
+  });
+}
+
+/** Format date with relative time (e.g. "2 hours ago", "3 days ago") */
 export function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (diffInSeconds < 60) {
-    return "just now";
-  }
-
-  const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) {
-    return `${diffInMinutes} minute${diffInMinutes === 1 ? "" : "s"} ago`;
-  }
-
-  const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) {
-    return `${diffInHours} hour${diffInHours === 1 ? "" : "s"} ago`;
-  }
-
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) {
-    return `${diffInDays} day${diffInDays === 1 ? "" : "s"} ago`;
-  }
-
-  const diffInWeeks = Math.floor(diffInDays / 7);
-  if (diffInWeeks < 4) {
-    return `${diffInWeeks} week${diffInWeeks === 1 ? "" : "s"} ago`;
-  }
-
-  const diffInMonths = Math.floor(diffInDays / 30);
-  if (diffInMonths < 12) {
-    return `${diffInMonths} month${diffInMonths === 1 ? "" : "s"} ago`;
-  }
-
-  const diffInYears = Math.floor(diffInDays / 365);
-  return `${diffInYears} year${diffInYears === 1 ? "" : "s"} ago`;
+  const p = getRelativeParts(dateString);
+  if (!p) return dateString;
+  if (p.mins < 1) return "just now";
+  if (p.mins < 60) return `${p.mins} minute${s(p.mins)} ago`;
+  if (p.hours < 24) return `${p.hours} hour${s(p.hours)} ago`;
+  if (p.days < 7) return `${p.days} day${s(p.days)} ago`;
+  const weeks = Math.floor(p.days / 7);
+  if (weeks < 4) return `${weeks} week${s(weeks)} ago`;
+  const months = Math.floor(p.days / 30);
+  if (months < 12) return `${months} month${s(months)} ago`;
+  const years = Math.floor(p.days / 365);
+  return `${years} year${s(years)} ago`;
 }
 
 // Get current timestamp in ISO format

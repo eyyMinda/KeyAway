@@ -8,7 +8,7 @@ import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
 import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";
 import { Program, ExpiredKeyReport } from "@/src/types";
-import { hashCDKey } from "@/src/lib/keyHashing";
+import { hashCDKey, hashCDKeyClient, normalizeKey } from "@/src/lib/keyHashing";
 import { logger } from "@/src/lib/logger";
 import { useStatusChange } from "@/src/hooks/useStatusChange";
 
@@ -21,6 +21,7 @@ function KeyReportsPageContent() {
   const [selectedReport, setSelectedReport] = useState<ExpiredKeyReport | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasAppliedProgramParam = useRef(false);
+  const [keyFilterHash, setKeyFilterHash] = useState<string | null>(null);
 
   // Use custom hook for status change management
   const { pendingChanges, saving, handleStatusChange, saveStatusChange, cancelStatusChange } = useStatusChange({
@@ -48,9 +49,7 @@ function KeyReportsPageContent() {
           logger.collapse(events[0], "Sample tracking event data", "info");
         }
 
-        // All events are key reports from keyReportsQuery
         const keyReportEvents = events;
-
         // Group by actual CD key within each program using hash matching
         const keyReports = new Map<string, ExpiredKeyReport>();
 
@@ -167,26 +166,53 @@ function KeyReportsPageContent() {
     fetchData();
   }, []);
 
-  // Apply ?program= from URL once when programs are loaded
+  // Apply ?program= and ?key= from URL when programs are loaded
   useEffect(() => {
-    if (hasAppliedProgramParam.current || programs.length === 0) return;
     const programSlug = searchParams.get("program");
-    if (!programSlug) return;
-    const valid = programs.some(p => p.slug?.current === programSlug);
-    if (valid) {
-      setSelectedProgram(programSlug);
-      hasAppliedProgramParam.current = true;
+    const keyParam = searchParams.get("key");
+
+    if (keyParam) {
+      hashCDKeyClient(keyParam).then(hash => {
+        setKeyFilterHash(hash);
+      });
+    } else {
+      setKeyFilterHash(null);
+    }
+
+    if (programs.length === 0) return;
+
+    if (programSlug) {
+      const valid = programs.some(p => p.slug?.current === programSlug);
+      if (valid && !hasAppliedProgramParam.current) {
+        setSelectedProgram(programSlug);
+        hasAppliedProgramParam.current = true;
+      }
+    } else if (keyParam) {
+      const norm = normalizeKey(keyParam);
+      const program = programs.find(p => p.cdKeys?.some(k => k.key && normalizeKey(k.key) === norm));
+      if (program?.slug?.current) {
+        setSelectedProgram(program.slug.current);
+      }
+      // If key not found in programs (e.g. removed), selectedProgram stays "all" - filter will still apply by keyHash once loaded
     }
   }, [programs, searchParams]);
 
-  const filteredReports =
-    selectedProgram === "all"
-      ? reports
-      : reports.filter(report => {
-          // Match by slug or _id
-          const program = programs.find(p => p.slug?.current === selectedProgram || p._id === selectedProgram);
-          return program && report.programSlug === program.slug?.current;
-        });
+  const keyParam = searchParams.get("key");
+  const keyParamNorm = keyParam ? normalizeKey(keyParam) : null;
+
+  const filteredReports = reports.filter(report => {
+    if (selectedProgram !== "all") {
+      const program = programs.find(p => p.slug?.current === selectedProgram || p._id === selectedProgram);
+      if (!program || report.programSlug !== program.slug?.current) return false;
+    }
+    if (keyParam) {
+      const keyMatches =
+        (keyFilterHash && report.keyHash === keyFilterHash) ||
+        (keyParamNorm && report.key !== "Unknown Key" && normalizeKey(report.key) === keyParamNorm);
+      if (!keyMatches) return false;
+    }
+    return true;
+  });
 
   if (loading) {
     return (

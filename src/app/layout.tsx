@@ -9,6 +9,8 @@ import { storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
+import { auth } from "@/auth";
+import { SessionProvider } from "@components/providers/SessionProvider";
 import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
@@ -53,12 +55,12 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") || headersList.get("referer") || "";
   const isAdminOrStudio = pathname.includes("/admin") || pathname.includes("/studio");
 
-  // Bypass cache for admin/studio routes to ensure fresh notifications
   if (isAdminOrStudio) {
     noStore();
   }
 
-  const [storeData, socialLinks, notifications] = await Promise.all([
+  const [session, storeData, socialLinks, notifications] = await Promise.all([
+    auth(),
     getStoreData(),
     client.fetch(socialLinksQuery),
     getRecentNotifications()
@@ -98,14 +100,16 @@ export default async function RootLayout({
         <meta name="cdn" content="Vercel Edge Network" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <PageViewTracker />
-        <div className="mainContent flex flex-col min-h-screen">
-          <Header storeData={storeData} logoData={logoData} notifications={notifications} socialData={socialData} />
-          {children}
-          <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
-        </div>
-        <Analytics />
-        <SpeedInsights />
+        <SessionProvider session={session}>
+          <PageViewTracker />
+          <div className="mainContent flex flex-col min-h-screen">
+            <Header storeData={storeData} logoData={logoData} notifications={notifications} socialData={socialData} />
+            {children}
+            <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
+          </div>
+          <Analytics />
+          <SpeedInsights />
+        </SessionProvider>
       </body>
     </html>
   );

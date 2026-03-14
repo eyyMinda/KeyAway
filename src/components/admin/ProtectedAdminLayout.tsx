@@ -2,64 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import AdminLayout from "./AdminLayout";
-import { isAuthenticatedInBrowser } from "@/src/lib/admin/adminAuth";
-import { ProtectedAdminLayoutProps } from "@/src/types";
+import type { ProtectedAdminLayoutProps } from "@/src/types";
 
 export default function ProtectedAdminLayout({ title, subtitle, children }: ProtectedAdminLayoutProps) {
+  const { data: session, status } = useSession();
   const [isChecking, setIsChecking] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // In development mode, always allow admin access
-        if (process.env.NODE_ENV === "development") {
-          setIsAuthenticated(true);
-          setIsChecking(false);
-          return;
-        }
+    if (status === "loading") return;
 
-        const browserAuth = isAuthenticatedInBrowser();
+    const isAdmin = (session?.user as { isAdmin?: boolean })?.isAdmin === true;
+    if (!isAdmin) {
+      router.push("/api/auth/signin?callbackUrl=/admin");
+      return;
+    }
 
-        if (!browserAuth) {
-          router.push("/");
-          return;
-        }
+    setIsChecking(false);
+  }, [session, status, router]);
 
-        const response = await fetch("/api/v1/admin/auth/check");
-        const { data } = await response.json();
-
-        if (data?.isAdmin) {
-          setIsAuthenticated(true);
-        } else {
-          router.push("/");
-        }
-      } catch {
-        router.push("/");
-      } finally {
-        setIsChecking(false);
-      }
-    };
-
-    checkAuth();
-
-    const interval = setInterval(() => {
-      // Skip auth checks in development mode
-      if (process.env.NODE_ENV === "development") {
-        return;
-      }
-
-      if (!isAuthenticatedInBrowser()) {
-        router.push("/");
-      }
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [router]);
-
-  if (isChecking) {
+  if (status === "loading" || isChecking) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -70,12 +34,13 @@ export default function ProtectedAdminLayout({ title, subtitle, children }: Prot
     );
   }
 
-  if (!isAuthenticated) {
+  const isAdmin = (session?.user as { isAdmin?: boolean })?.isAdmin === true;
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to homepage...</p>
+          <p className="text-gray-600">Redirecting to sign in...</p>
         </div>
       </div>
     );

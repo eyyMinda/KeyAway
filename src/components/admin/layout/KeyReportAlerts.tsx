@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { MdWarning } from "react-icons/md";
+import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 import type { KeyReportNotificationItem } from "@/src/types/admin";
 
 export function useKeyReportAlerts() {
@@ -78,6 +79,7 @@ export function KeyReportAlertsDesktop({ alerts }: KeyReportAlertsDesktopProps) 
                 <p className="text-xs font-mono text-gray-600 truncate">{item.keyIdentifier}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {item.negativeCount} negative · {item.ratioLabel}
+                  {item.lastReportAt && ` · ${formatRelativeTimeCompact(item.lastReportAt)}`}
                 </p>
                 <Link
                   href={item.link}
@@ -116,6 +118,7 @@ export function KeyReportAlertsMobile({ alerts, onLinkClick }: KeyReportAlertsMo
             <p className="text-xs font-mono text-gray-600 truncate">{item.keyIdentifier}</p>
             <p className="text-xs text-gray-500 mt-0.5">
               {item.negativeCount} negative · {item.ratioLabel}
+              {item.lastReportAt && ` · ${formatRelativeTimeCompact(item.lastReportAt)}`}
             </p>
             <Link
               href={item.link}

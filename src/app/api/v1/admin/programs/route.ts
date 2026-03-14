@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
+import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
 import { Errors } from "@/src/lib/api/errors";
@@ -23,8 +23,8 @@ export async function POST(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
 
-  const { isAdmin } = await checkAdminAccess();
-  if (!isAdmin) return Errors.unauthorized();
+  const admin = await requireAdminSession();
+  if (admin instanceof Response) return admin;
 
   try {
     const body = await req.json().catch(() => ({}));

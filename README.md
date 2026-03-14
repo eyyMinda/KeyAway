@@ -109,6 +109,18 @@ CRON_SECRET=yourCronSecret
 
 # Analytics Security (IP Hashing)
 ANALYTICS_SALT=yourRandomSaltString
+
+# Admin OAuth (Auth.js / NextAuth v5) - Required for /admin access
+AUTH_SECRET=yourAuthSecret  # Generate: openssl rand -base64 32
+AUTH_GOOGLE_ID=yourGoogleClientId
+AUTH_GOOGLE_SECRET=yourGoogleClientSecret
+AUTH_GITHUB_ID=yourGitHubClientId
+AUTH_GITHUB_SECRET=yourGitHubClientSecret
+
+# Admin membership verification (one of these required in production)
+ADMIN_ALLOWED_EMAILS=admin@example.com  # Comma-separated allowlist
+# OR use Sanity Access API (token needs sanity.project.members.read)
+# SANITY_ACCESS_TOKEN=optional  # Falls back to SANITY_API_TOKEN if not set
 ```
 
 ### Environment Variable Types:
@@ -144,7 +156,7 @@ npm run dev
 
 # 🔐 Admin Dashboard
 
-Access the admin dashboard at `/admin` with Sanity user authentication:
+Access the admin dashboard at `/admin` via OAuth (Google or GitHub). Only users whose email is in the Sanity project (via Access API) or `ADMIN_ALLOWED_EMAILS` can sign in. Session lasts 2 hours.
 
 ## Analytics Dashboard
 

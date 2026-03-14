@@ -93,5 +93,7 @@ export interface KeyReportNotificationItem {
   expired: number;
   limit_reached: number;
   ratioLabel: string;
+  /** ISO date of most recent report */
+  lastReportAt?: string;
   link: string;
 }

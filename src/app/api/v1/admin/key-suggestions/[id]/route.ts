@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
+import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
@@ -35,8 +35,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
 
-  const { isAdmin } = await checkAdminAccess();
-  if (!isAdmin) return Errors.unauthorized();
+  const admin = await requireAdminSession();
+  if (admin instanceof Response) return admin;
 
   try {
     const { id } = await params;
