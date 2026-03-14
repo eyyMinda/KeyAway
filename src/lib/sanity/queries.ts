@@ -84,9 +84,9 @@ export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && ti
 }`;
 
 /* ------------ Key Reports ------------ */
-export const keyReportsQuery = `*[_type=="keyReport" && createdAt >= $since]{
-      _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
-    } | order(createdAt desc)`;
+export const keyReportsQuery = `*[_type=="keyReport" && _createdAt >= $since]{
+      _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _createdAt
+    } | order(_createdAt desc)`;
 
 /* ------------ Duplicate Key Report Check ------------ */
 export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHash && programSlug == $programSlug && keyHash == $keyHash]{
