@@ -26,6 +26,13 @@ export const trackingEventBundle = defineType({
   type: "document",
   fields: [
     {
+      name: "updatedAt",
+      title: "Updated At",
+      type: "datetime",
+      description: "Last time cron added events to this bundle",
+      readOnly: true
+    },
+    {
       name: "bundledAt",
       title: "Bundled At",
       type: "datetime",
