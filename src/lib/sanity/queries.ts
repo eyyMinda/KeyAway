@@ -88,6 +88,15 @@ export const keyReportsQuery = `*[_type=="keyReport" && _createdAt >= $since]{
       _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _createdAt
     } | order(_createdAt desc)`;
 
+/* ------------ Cron Runs ------------ */
+export const cronRunsQuery = `*[_type == "cronRun" && ranAt >= $since]{
+  _id, job, source, status, details, ranAt
+} | order(ranAt desc) [0...$limit]`;
+
+export const lastCronRunByJobQuery = `*[_type == "cronRun" && job == $job] | order(ranAt desc) [0]{
+  ranAt, source, status, details
+}`;
+
 /* ------------ Duplicate Key Report Check ------------ */
 export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHash && programSlug == $programSlug && keyHash == $keyHash]{
       _id, eventType, programSlug, keyHash, keyIdentifier, createdAt

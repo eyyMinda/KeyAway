@@ -3,6 +3,7 @@ import { type SchemaTypeDefinition } from "sanity";
 import { trackingEvent } from "./trackingEvent";
 import { trackingEventBundle } from "./trackingEventBundle";
 import { keyReport } from "./keyReport";
+import { cronRun } from "./cronRun";
 import contactMessage from "./contactMessage";
 import keySuggestion from "./keySuggestion";
 
@@ -21,6 +22,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     trackingEvent,
     trackingEventBundle,
     keyReport,
+    cronRun,
     contactMessage,
     keySuggestion,
     link,
