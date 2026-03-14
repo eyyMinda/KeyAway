@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkAdminAccess } from "@/src/lib/admin/adminAuth";
+import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
@@ -74,10 +74,8 @@ export async function GET(req: NextRequest) {
     return Errors.tooManyRequests();
   }
 
-  const { isAdmin } = await checkAdminAccess();
-  if (!isAdmin) {
-    return Errors.unauthorized();
-  }
+  const admin = await requireAdminSession();
+  if (admin instanceof Response) return admin;
 
   const params = parseGetParams(req.nextUrl.searchParams);
   if (!params) {
@@ -209,8 +207,8 @@ export async function PATCH(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
 
-  const { isAdmin } = await checkAdminAccess();
-  if (!isAdmin) return Errors.unauthorized();
+  const admin = await requireAdminSession();
+  if (admin instanceof Response) return admin;
 
   let body: unknown;
   try {
