@@ -55,7 +55,6 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") || headersList.get("referer") || "";
   const isAdminOrStudio = pathname.includes("/admin") || pathname.includes("/studio");
 
-  // Bypass cache for admin/studio routes to ensure fresh notifications
   if (isAdminOrStudio) {
     noStore();
   }
