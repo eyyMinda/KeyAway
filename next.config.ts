@@ -66,7 +66,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: https: blob:",
               "object-src 'none'",
               "base-uri 'self'",
-              "frame-src 'self' https://giscus.app",
+              "frame-src 'self' https://giscus.app https://vercel.live",
               "connect-src 'self' https://cdn.sanity.io https://*.sanity.io https://vitals.vercel-insights.com https://va.vercel-scripts.com wss://*.sanity.io https://giscus.app",
               "media-src 'self'",
               "worker-src 'self' blob:",
