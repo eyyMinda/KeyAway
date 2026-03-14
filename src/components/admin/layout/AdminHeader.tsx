@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-import { HiChartBar, HiViewGrid, HiCog, HiLogout } from "react-icons/hi";
+import { HiChartBar, HiViewGrid } from "react-icons/hi";
 import { MdRateReview, MdEventNote } from "react-icons/md";
 import { FaKey, FaEnvelopeOpenText } from "react-icons/fa";
 import { useKeyReportAlerts, KeyReportAlertsDesktop, KeyReportAlertsMobile } from "./KeyReportAlerts";
@@ -61,12 +60,6 @@ export default function AdminHeader() {
 
           {/* Desktop Navigation - Icons Only */}
           <nav className="hidden md:flex items-center space-x-2">
-            <Link
-              href="/studio"
-              title="Sanity Studio"
-              className="p-2.5 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors">
-              <HiCog size={20} />
-            </Link>
             <KeyReportAlertsDesktop alerts={keyReportAlerts} />
             {navLinks.map(link => {
               const Icon = link.icon;
@@ -93,12 +86,6 @@ export default function AdminHeader() {
                 </Link>
               );
             })}
-            <button
-              onClick={() => signOut({ callbackUrl: "/" })}
-              title="Sign out"
-              className="p-2.5 rounded-md text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors">
-              <HiLogout size={20} />
-            </button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -120,21 +107,6 @@ export default function AdminHeader() {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 py-4">
             <KeyReportAlertsMobile alerts={keyReportAlerts} onLinkClick={() => setIsMobileMenuOpen(false)} />
-            <div className="flex gap-2 px-3 py-2 border-b border-gray-100">
-              <Link
-                href="/studio"
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-50"
-                onClick={() => setIsMobileMenuOpen(false)}>
-                <HiCog size={18} />
-                Studio
-              </Link>
-              <button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50">
-                <HiLogout size={18} />
-                Sign out
-              </button>
-            </div>
             <nav className="flex flex-col space-y-2">
               {navLinks.map(link => {
                 const Icon = link.icon;
