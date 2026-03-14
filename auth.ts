@@ -48,8 +48,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     }
-  },
-  pages: {
-    signIn: "/api/auth/signin"
   }
 });
