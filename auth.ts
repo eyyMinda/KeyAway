@@ -12,7 +12,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // }),
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID!,
-      clientSecret: process.env.AUTH_GITHUB_SECRET!
+      clientSecret: process.env.AUTH_GITHUB_SECRET!,
+      profile(profile) {
+        return {
+          id: profile.id.toString(),
+          name: profile.name ?? profile.login,
+          email: profile.email ?? null,
+          image: profile.avatar_url,
+          username: profile.login
+        };
+      }
     })
   ],
   session: {
@@ -24,17 +33,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!user?.email) return false;
       return verifyAdminMembership(user.email);
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, profile }) {
       if (user?.email) {
         token.email = user.email;
         token.isAdmin = true;
       }
+      const username = (user as { username?: string })?.username ?? (profile && "login" in profile ? (profile.login as string) : undefined);
+      if (username) token.username = username;
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.email = token.email ?? session.user.email;
         (session.user as { isAdmin?: boolean }).isAdmin = token.isAdmin === true;
+        (session.user as { username?: string }).username = token.username as string | undefined;
       }
       return session;
     },
