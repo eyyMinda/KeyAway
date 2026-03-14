@@ -74,6 +74,21 @@ src/
 
 ---
 
+## Implementations in detail
+
+Short notes on what each part does and why.
+
+- **Event bundling (cron)** — Raw tracking events (copy, download, social, etc.) are rolled up into `trackingEventBundle` documents. Reduces document count and keeps within Sanity quota instead of one row per click.
+- **Expired-key updates** — Keys past `validUntil` are marked expired in Sanity. Triggered by a cron job (all programs) and on program page load via middleware (rate-limited to once per 5 minutes per program) so the CMS stays in sync without hammering the API.
+- **Key reports** — Visitors submit “working” / “expired” / “limit reached” for a key. Stored as `keyReport` with hashed key and hashed IP; same visitor can update an existing report (e.g. key stopped working). Feeds admin key-reports and notifications.
+- **Key-report notifications** — API aggregates negative reports over the last 60 days, excludes keys already marked expired/limit in the CMS, and returns `lastReportAt`. Admin header shows alerts with links to filtered key-reports (`?program=` and `?key=`).
+- **Analytics tracking** — Copy, download, and social events sent to `/api/v1/analytics/track`. IP is hashed with `ANALYTICS_SALT`; no PII stored. Data is used for popularity and dashboard stats.
+- **Webhook revalidation** — Sanity webhook calls `/api/v1/webhooks/revalidate` with a shared secret. On valid payload, Next.js cache is invalidated so published content changes show up without a redeploy.
+- **Admin auth** — Auth.js (NextAuth v5) with GitHub (and optional Google). Access to `/admin` is restricted by email allowlist (`ADMIN_ALLOWED_EMAILS`) or Sanity project membership; JWT session (e.g. 2h prod, 7d dev).
+- **Featured program** — One program is pinned as “featured” in Sanity and highlighted on the home page. Auto-rotation cycles through eligible programs over time so each gets exposure and visitors discover new options.
+
+---
+
 ## Getting started
 
 ### 1. Clone and install
