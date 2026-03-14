@@ -72,8 +72,11 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       const newEventCount = incomplete.eventCount + toAdd.length;
       const idsToDelete = toAdd.map(e => e._id);
       const tx = client.transaction();
+      const now = new Date().toISOString();
       tx.patch(incomplete._id, p =>
-        p.append("events", newEvents).set({ timeRangeEnd: newTimeRangeEnd, eventCount: newEventCount })
+        p
+          .append("events", newEvents)
+          .set({ timeRangeEnd: newTimeRangeEnd, eventCount: newEventCount, updatedAt: now })
       );
       idsToDelete.forEach(id => tx.delete(id));
       await tx.commit();
@@ -100,9 +103,11 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       after = timeRangeEnd;
       const idsToDelete = batch.map(e => e._id);
       const tx = client.transaction();
+      const now = new Date().toISOString();
       tx.create({
         _type: "trackingEventBundle",
-        bundledAt: new Date().toISOString(),
+        bundledAt: now,
+        updatedAt: now,
         timeRangeStart,
         timeRangeEnd,
         eventCount: events.length,
