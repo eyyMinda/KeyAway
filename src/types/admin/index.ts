@@ -20,8 +20,10 @@ export interface AdminLayoutProps {
 }
 
 export interface ProtectedAdminLayoutProps {
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
+  /** Custom header (e.g. WelcomeHeader). Replaces title+subtitle when provided */
+  headerContent?: React.ReactNode;
   children: React.ReactNode;
 }
 

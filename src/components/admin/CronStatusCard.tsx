@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { FiInfo } from "react-icons/fi";
 import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 
 interface CronRun {
@@ -72,69 +73,88 @@ export default function CronStatusCard() {
     );
   }
 
-  const byJob = {
+  const vercelByJob = {
     "bundle-events": runs.find(r => r.job === "bundle-events" && r.source === "vercel_cron"),
     "update-expired-keys": runs.find(r => r.job === "update-expired-keys" && r.source === "vercel_cron")
   };
+  const lastByJob = {
+    "bundle-events": runs.find(r => r.job === "bundle-events"),
+    "update-expired-keys": runs.find(r => r.job === "update-expired-keys")
+  };
+
+  function JobStatusRow({ job, schedule, label }: { job: "bundle-events" | "update-expired-keys"; schedule: string; label: string }) {
+    const vercelRun = vercelByJob[job];
+    const lastRun = lastByJob[job];
+    return (
+      <div className="flex items-center justify-between py-2 border-b border-gray-100">
+        <div>
+          <span className="font-medium text-gray-900">{label}</span>
+          <p className="text-xs text-gray-500">{schedule}</p>
+        </div>
+        {vercelRun ? (
+          <div className="text-right">
+            <span className={`text-sm font-medium ${vercelRun.status === "ok" ? "text-green-600" : "text-red-600"}`}>
+              {vercelRun.status === "ok" ? "✓" : "✗"}
+            </span>
+            <p className="text-xs text-gray-500">{formatRelativeTimeCompact(vercelRun.ranAt)}</p>
+          </div>
+        ) : lastRun ? (
+          <div className="text-right">
+            <p className="text-xs text-gray-600">
+              Last: <SourceBadge source={lastRun.source} /> {formatRelativeTimeCompact(lastRun.ranAt)}
+            </p>
+            <p className="text-xs text-amber-600 flex items-center justify-end gap-1.5">
+              <FiInfo
+                className="w-4 h-4 shrink-0"
+                title="Automatic Vercel cron runs on schedule. This job was triggered manually (Bearer) or via POST."
+              />
+              No automatic run yet
+            </p>
+          </div>
+        ) : (
+          <span className="text-amber-600 text-sm">No runs yet</span>
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 w-full">
       <h3 className="text-lg font-semibold text-gray-900 mb-2">🕐 Cron Jobs</h3>
-      <p className="text-gray-500 text-sm mb-4">Last Vercel cron runs (manual runs shown in history)</p>
+      <p className="text-gray-500 text-sm mb-4">
+        Automatic runs via Vercel cron. Manual/Bearer runs appear in recent history.
+      </p>
 
-      <div className="space-y-4 mb-4">
-        <div className="flex items-center justify-between py-2 border-b border-gray-100">
-          <div>
-            <span className="font-medium text-gray-900">Bundle Events</span>
-            <p className="text-xs text-gray-500">Daily at 21:00 UTC</p>
-          </div>
-          {byJob["bundle-events"] ? (
-            <div className="text-right">
-              <span className={`text-sm font-medium ${byJob["bundle-events"].status === "ok" ? "text-green-600" : "text-red-600"}`}>
-                {byJob["bundle-events"].status === "ok" ? "✓" : "✗"}
-              </span>
-              <p className="text-xs text-gray-500">{formatRelativeTimeCompact(byJob["bundle-events"].ranAt)}</p>
-            </div>
-          ) : (
-            <span className="text-amber-600 text-sm">No Vercel run yet</span>
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-0 min-w-0 lg:pr-8">
+          <JobStatusRow job="bundle-events" schedule="Daily at 21:00 UTC" label="Bundle Events" />
+          <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
         </div>
-        <div className="flex items-center justify-between py-2 border-b border-gray-100">
-          <div>
-            <span className="font-medium text-gray-900">Update Expired Keys</span>
-            <p className="text-xs text-gray-500">Daily at 20:00 UTC</p>
-          </div>
-          {byJob["update-expired-keys"] ? (
-            <div className="text-right">
-              <span className={`text-sm font-medium ${byJob["update-expired-keys"].status === "ok" ? "text-green-600" : "text-red-600"}`}>
-                {byJob["update-expired-keys"].status === "ok" ? "✓" : "✗"}
-              </span>
-              <p className="text-xs text-gray-500">{formatRelativeTimeCompact(byJob["update-expired-keys"].ranAt)}</p>
-            </div>
+
+        <div className="min-w-0 lg:border-l lg:pl-8 border-gray-200">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent runs</h4>
+          {runs.length > 0 ? (
+            <ul className="space-y-1.5 text-sm max-h-40 overflow-y-auto">
+              {runs.slice(0, 20).map(run => (
+                <li key={run._id} className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-50 last:border-0">
+                  <span className="text-gray-900 font-medium shrink-0">
+                    <JobLabel job={run.job} />
+                  </span>
+                  <span className="flex items-center gap-2 flex-wrap justify-end">
+                    <SourceBadge source={run.source} />
+                    {run.details && <span className="text-gray-500 text-xs">({run.details})</span>}
+                    <span className={`font-medium shrink-0 ${run.status === "ok" ? "text-green-600" : "text-red-600"}`}>
+                      {formatRelativeTimeCompact(run.ranAt)}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <span className="text-amber-600 text-sm">No Vercel run yet</span>
+            <p className="text-gray-500 text-sm">No runs recorded yet</p>
           )}
         </div>
       </div>
-
-      {runs.length > 0 && (
-        <details className="mt-4">
-          <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">Recent runs ({runs.length})</summary>
-          <ul className="mt-2 space-y-1 text-xs max-h-48 overflow-y-auto">
-            {runs.slice(0, 20).map(run => (
-              <li key={run._id} className="flex items-center justify-between py-1 border-b border-gray-50 last:border-0">
-                <span>
-                  <JobLabel job={run.job} /> <SourceBadge source={run.source} />
-                  {run.details && <span className="text-gray-500 ml-1">({run.details})</span>}
-                </span>
-                <span className={`font-medium ${run.status === "ok" ? "text-green-600" : "text-red-600"}`}>
-                  {formatRelativeTimeCompact(run.ranAt)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
     </div>
   );
 }
