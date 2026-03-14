@@ -7,10 +7,13 @@ const UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 // Auth redirect in proxy caused 302 loop with Auth.js v5 beta. Protection handled by ProtectedAdminLayout.
 export function proxy(request: NextRequest) {
-  const response = NextResponse.next();
+  // Forward pathname to request so layout can read it (headers() returns request headers)
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
-  // Add pathname header for use in server components
-  response.headers.set("x-pathname", request.nextUrl.pathname);
+  const response = NextResponse.next({
+    request: { headers: requestHeaders }
+  });
 
   // Only handle program pages for key updates
   if (request.nextUrl.pathname.startsWith("/program/")) {
