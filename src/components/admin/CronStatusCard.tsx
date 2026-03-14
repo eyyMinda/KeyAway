@@ -16,12 +16,12 @@ interface CronRun {
 function SourceBadge({ source }: { source: string }) {
   const styles: Record<string, string> = {
     vercel_cron: "bg-blue-100 text-blue-800",
-    bearer: "bg-amber-100 text-amber-800",
+    bearer: "bg-blue-100 text-blue-800",
     manual: "bg-gray-100 text-gray-700"
   };
   const labels: Record<string, string> = {
     vercel_cron: "Vercel",
-    bearer: "Bearer",
+    bearer: "Vercel",
     manual: "Manual"
   };
   return (
@@ -74,8 +74,8 @@ export default function CronStatusCard() {
   }
 
   const vercelByJob = {
-    "bundle-events": runs.find(r => r.job === "bundle-events" && r.source === "vercel_cron"),
-    "update-expired-keys": runs.find(r => r.job === "update-expired-keys" && r.source === "vercel_cron")
+    "bundle-events": runs.find(r => r.job === "bundle-events" && (r.source === "vercel_cron" || r.source === "bearer")),
+    "update-expired-keys": runs.find(r => r.job === "update-expired-keys" && (r.source === "vercel_cron" || r.source === "bearer"))
   };
   const lastByJob = {
     "bundle-events": runs.find(r => r.job === "bundle-events"),
@@ -106,7 +106,7 @@ export default function CronStatusCard() {
             <p className="text-xs text-amber-600 flex items-center justify-end gap-1.5">
               <FiInfo
                 className="w-4 h-4 shrink-0"
-                title="Automatic Vercel cron runs on schedule. This job was triggered manually (Bearer) or via POST."
+                title="Automatic Vercel cron runs on schedule. This job was triggered manually via POST."
               />
               No automatic run yet
             </p>
@@ -122,7 +122,7 @@ export default function CronStatusCard() {
     <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 w-full">
       <h3 className="text-lg font-semibold text-gray-900 mb-2">🕐 Cron Jobs</h3>
       <p className="text-gray-500 text-sm mb-4">
-        Automatic runs via Vercel cron. Manual/Bearer runs appear in recent history.
+        Automatic runs via Vercel cron. Manual runs appear in recent history.
       </p>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
