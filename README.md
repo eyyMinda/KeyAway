@@ -1,259 +1,164 @@
-# 🎁 KeyAway
+# KeyAway
 
-A modern, SEO-optimized platform built with Next.js 16 and Sanity v5, showcasing the latest giveaway CD keys for PC optimization programs. Features a comprehensive admin dashboard, real-time analytics, automatic key expiration system, and user engagement tracking while maintaining fast, responsive performance.
+**A centralized place to get free CD keys** for PC optimization and utility software. KeyAway is a full-stack web app that lets visitors browse and copy giveaway keys in one place, while admins manage programs and keys via a headless CMS and a protected dashboard with analytics and key health monitoring.
 
-## 🌟 Features
+---
 
-### Core Platform
+## For visitors
 
-- **Latest CD Keys**: Display multiple programs with CD keys, versions, and real-time status updates
-- **Sanity CMS**: Manage programs and CD keys through an embedded studio dashboard
-- **Server-side Rendering**: Optimized for SEO with server-rendered pages and dynamic metadata
-- **Dynamic Program Pages**: Each program has its own slug-based route with custom SEO
-- **Comments System**: Giscus integration for GitHub-based user comments
-- **Privacy & Terms**: Complete legal pages with transparent content policies
+- **One place for giveaway keys** — Browse programs, see which keys are working or expiring, copy keys and follow activation instructions.
+- **Always up to date** — Keys are managed in a CMS; expired keys are automatically marked and can be updated in bulk.
+- **Privacy-aware** — Interaction tracking uses hashed identifiers; no personal data is stored.
 
-### Admin Dashboard
+---
 
-- **Analytics Dashboard**: Real-time user behavior tracking and engagement metrics
-- **Event Tracking**: Monitor CD key copies, downloads, and social clicks
-- **Program Management**: View and manage all programs with detailed statistics
-- **Time-based Filtering**: Analyze data across different time periods
-- **Visual Charts**: Interactive doughnut and bar charts for data visualization
-- **Protected Access**: Secure admin authentication with Sanity user verification
+## Under the hood
 
-### Advanced Features
+KeyAway is a **production-style side project** that demonstrates:
 
-- **Automatic Key Expiration**: Server-side system that automatically updates expired CD keys
-- **Real-time Tracking**: Track user interactions (copy, download, social clicks) with privacy protection
-- **Rate Limiting**: Proxy prevents excessive API calls and updates
-- **Batch Updates**: API endpoints for bulk key status updates
-- **SEO Optimization**: Dynamic meta tags, Open Graph, and Twitter cards
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Full-stack Next.js (16)** — App Router, server/client components, API routes, middleware-style proxy, and incremental adoption of React 19.
+- **Content & auth** — **Sanity v5** as headless CMS with embedded Studio; **Auth.js (NextAuth v5)** with GitHub (and optional Google) OAuth for admin; JWT sessions and org/allowlist-based access control.
+- **API design** — Versioned REST-style API (`/api/v1/...`): analytics tracking, key reports, key suggestions, contact, cron jobs (expired-key updates, event bundling), webhooks for revalidation, and protected admin endpoints.
+- **Data & DX** — TypeScript end-to-end; server actions and shared Sanity client; rate limiting, IP hashing for analytics, and structured error handling.
+- **SEO & performance** — Dynamic metadata and JSON-LD, server-rendered program pages, and optional Vercel Analytics / Speed Insights.
 
-# 📂 Project Structure
+No database beyond Sanity (document store); no separate backend service. Suited to reading as a single full-stack codebase.
 
-```
-/src
-  /app                    → Next.js App Router pages
-    /admin               → Admin dashboard (analytics, programs, events)
-    /api                 → API routes (tracking, admin auth, key updates)
-    /program             → Dynamic program pages
-    /privacy             → Privacy policy page
-    /terms               → Terms of service page
-    /studio              → Embedded Sanity Studio
-  /components            → Reusable UI components
-    /admin               → Admin dashboard components
-    /program             → Program-specific components
-    /layout              → Header, footer, navigation
-  /lib                   → Utilities and configurations
-    adminAuth.ts         → Admin authentication logic
-    cdKeyUtils.ts        → CD key processing utilities
-    sanityActions.ts     → Server actions for Sanity updates
-    trackEvent.ts        → Event tracking functions
-  /sanity                → Sanity configuration
-    /schemaTypes         → Content schemas
-  /types                 → TypeScript type definitions
-```
+---
 
-# ⚡ Tech Stack
+## Tech stack
 
-- [Next.js 16](https://nextjs.org/) - React framework with App Router
-- [Sanity v5](https://www.sanity.io/) - Headless CMS with real-time updates
-- [TypeScript](https://www.typescriptlang.org/) - Type safety and developer experience
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [Giscus](https://giscus.app/) - GitHub-based comment system
-- [Vercel Analytics](https://vercel.com/analytics) - Performance and user analytics
-- [React Icons](https://react-icons.github.io/react-icons/) - Icon library
-- [Vercel](https://vercel.com/) - Deployment platform
+| Area        | Choices |
+|------------|---------|
+| Framework  | [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/) |
+| CMS        | [Sanity v5](https://www.sanity.io/) (Studio embedded at `/studio`) |
+| Auth       | [Auth.js (NextAuth v5)](https://authjs.dev/) — GitHub (Google optional) |
+| Language   | [TypeScript](https://www.typescriptlang.org/) |
+| Styling    | [Tailwind CSS](https://tailwindcss.com/) v4 |
+| Comments   | [Giscus](https://giscus.app/) (GitHub-based) |
+| Hosting    | [Vercel](https://vercel.com/) (Analytics, Speed Insights, Cron) |
 
-🚀 Getting Started
+---
 
-## 1. Clone the repo
+## Project structure (high level)
 
 ```
-git clone https://github.com/yourusername/your-repo.git
-cd your-repo
+src/
+  app/
+    page.tsx, layout.tsx          # Home, global layout
+    program/[slug]/               # Program pages (CD keys, instructions, related)
+    programs/                     # Programs listing
+    privacy/, terms/              # Legal pages
+    studio/[[...tool]]/           # Embedded Sanity Studio
+    admin/                        # Dashboard (auth required)
+      analytics, events, programs, key-reports, key-suggestions, messages
+    api/v1/                       # API
+      analytics/track, key-reports, key-suggestions, contact
+      cron/update-expired-keys, cron/bundle-events
+      webhooks/revalidate
+      admin/*                     # Protected admin APIs
+  components/                     # UI (layout, program, admin, home)
+  lib/                            # Sanity client, queries, actions, utils, auth
+  sanity/                         # Sanity schemas and config
+  types/                          # Shared TypeScript types
 ```
 
-## 2. Install dependencies
+---
 
-```
-npm install
-# or
-yarn
-```
+## Features (summary)
 
-## 3. Configure environment variables
+- **Public:** Home (featured + popular programs), program pages with CD key table and status, activation instructions, related programs, Giscus comments, privacy/terms.
+- **Admin (OAuth):** Analytics dashboard, events, program management, key reports (with notifications and `?key=` filtering), key suggestions, messages, featured program settings. Sign-out and Studio link in site nav.
+- **Automation:** Expired keys updated on program load (rate-limited) and via cron; event bundling cron; webhook revalidation on Sanity changes.
+- **Security & privacy:** Auth.js sessions; admin allowlist or Sanity Access; hashed IPs for analytics; rate limiting on APIs.
 
-Create .env.local at the project root:
+---
+
+## Implementations in detail
+
+Short notes on what each part does and why.
+
+- **Event bundling (cron)** — Raw tracking events (copy, download, social, etc.) are rolled up into `trackingEventBundle` documents. Reduces document count and keeps within Sanity quota instead of one row per click.
+- **Expired-key updates** — Keys past `validUntil` are marked expired in Sanity. Triggered by a cron job (all programs) and on program page load via middleware (rate-limited to once per 5 minutes per program) so the CMS stays in sync without hammering the API.
+- **Key reports** — Visitors submit “working” / “expired” / “limit reached” for a key. Stored as `keyReport` with hashed key and hashed IP; same visitor can update an existing report (e.g. key stopped working). Feeds admin key-reports and notifications.
+- **Key-report notifications** — API aggregates negative reports over the last 60 days, excludes keys already marked expired/limit in the CMS, and returns `lastReportAt`. Admin header shows alerts with links to filtered key-reports (`?program=` and `?key=`).
+- **Analytics tracking** — Copy, download, and social events sent to `/api/v1/analytics/track`. IP is hashed with `ANALYTICS_SALT`; no PII stored. Data is used for popularity and dashboard stats.
+- **Webhook revalidation** — Sanity webhook calls `/api/v1/webhooks/revalidate` with a shared secret. On valid payload, Next.js cache is invalidated so published content changes show up without a redeploy.
+- **Admin auth** — Auth.js (NextAuth v5) with GitHub (and optional Google). Access to `/admin` is restricted by email allowlist (`ADMIN_ALLOWED_EMAILS`) or Sanity project membership; JWT session (e.g. 2h prod, 7d dev).
+- **Featured program** — One program is pinned as “featured” in Sanity and highlighted on the home page. Auto-rotation cycles through eligible programs over time so each gets exposure and visitors discover new options.
+
+---
+
+## Getting started
+
+### 1. Clone and install
 
 ```bash
-# Sanity Configuration
-SANITY_STUDIO_API_VERSION=2025-09-07
-SANITY_STUDIO_PROJECT_ID=yourProjectId
-SANITY_STUDIO_DATASET=production
+git clone https://github.com/yourusername/keyaway.git
+cd keyaway
+npm install
+```
 
-# Sanity write token (required for key reports, analytics, program CRUD)
-SANITY_API_TOKEN=yourSanityApiToken
+### 2. Environment variables
 
-# Client-side Sanity Access (Available on both client and server)
-NEXT_PUBLIC_SANITY_PROJECT_ID=yourProjectId
-NEXT_PUBLIC_SANITY_DATASET=production
+Create `.env.local` in the project root. Required for a working setup:
 
-# Webhook Security
-SANITY_WEBHOOK_SECRET=yourWebhookSecret
+```bash
+# Sanity
+NEXT_PUBLIC_SANITY_STUDIO_PROJECT_ID=yourProjectId
+NEXT_PUBLIC_SANITY_STUDIO_DATASET=production
+SANITY_API_TOKEN=yourSanityApiToken          # Writes: key reports, analytics, CRUD
+SANITY_WEBHOOK_SECRET=yourWebhookSecret     # Webhook revalidation
 
-# Cron Security (Vercel cron / manual triggers with Bearer token)
-CRON_SECRET=yourCronSecret
-
-# Analytics Security (IP Hashing)
-ANALYTICS_SALT=yourRandomSaltString
-
-# Admin OAuth (Auth.js / NextAuth v5) - Required for /admin access
-AUTH_SECRET=yourAuthSecret  # Generate: openssl rand -base64 32
-AUTH_GOOGLE_ID=yourGoogleClientId
-AUTH_GOOGLE_SECRET=yourGoogleClientSecret
+# Auth (admin)
+AUTH_SECRET=yourAuthSecret                   # e.g. openssl rand -base64 32
 AUTH_GITHUB_ID=yourGitHubClientId
 AUTH_GITHUB_SECRET=yourGitHubClientSecret
+ADMIN_ALLOWED_EMAILS=you@example.com        # Or use Sanity Access (SANITY_ACCESS_TOKEN)
 
-# Admin membership verification (one of these required in production)
-ADMIN_ALLOWED_EMAILS=admin@example.com  # Comma-separated allowlist
-# OR use Sanity Access API (token needs sanity.project.members.read)
-# SANITY_ACCESS_TOKEN=optional  # Falls back to SANITY_API_TOKEN if not set
+# Optional
+CRON_SECRET=yourCronSecret                   # Cron routes (e.g. update-expired-keys)
+ANALYTICS_SALT=yourRandomSalt                # IP hashing for analytics
 ```
 
-### Environment Variable Types:
+**Google login (optional):** Set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`, then in `auth.ts` uncomment the Google provider import and the `Google({ ... })` block in the `providers` array.
 
-- **SANITY*STUDIO*\***: Server-side only, used by Sanity Studio and server functions
-- **NEXT*PUBLIC*\***: Available on both client and server, used for client-side Sanity queries
-- **SANITY_API_TOKEN**: Required for writes (key reports, analytics events, program create/update/delete). Create in Sanity Dashboard → API → Tokens.
-- **SANITY_WEBHOOK_SECRET**: Secures webhook endpoints for content revalidation
-- **CRON_SECRET**: Optional. Auth for cron routes when calling with `Authorization: Bearer <secret>`. Vercel cron uses `x-vercel-cron` header.
-- **ANALYTICS_SALT**: Used for hashing IP addresses in analytics tracking
+### 3. Run
 
-## 4. Run the development server
-
-```
+```bash
 npm run dev
 ```
 
-- Next.js: http://localhost:3000
-- Embedded Studio: http://localhost:3000/studio
-- Admin Dashboard: http://localhost:3000/admin
+- **Site:** http://localhost:3000  
+- **Sanity Studio:** http://localhost:3000/studio  
+- **Admin:** http://localhost:3000/admin (GitHub sign-in)
 
-# 📝 Adding Programs & CD Keys
+### 4. Content
 
-1. Open the Studio dashboard: http://localhost:3000/studio
-2. Add a Program document.
-3. For each program, add CD Keys:
-   - Key
-   - Status (new, active, expired, limit)
-   - Version
-   - Valid from / until dates
-   - Notes (optional)
-4. Save → changes automatically appear on the frontend.
+In Studio, create **Program** documents and add CD keys (key, status, version, valid from/until). Program pages and home will reflect changes; expired keys can be updated automatically or via cron.
 
-# 🔐 Admin Dashboard
+---
 
-Access the admin dashboard at `/admin` via OAuth (Google or GitHub). Only users whose email is in the Sanity project (via Access API) or `ADMIN_ALLOWED_EMAILS` can sign in. Session lasts 2 hours.
+## Scripts
 
-## Analytics Dashboard
+| Command        | Description        |
+|----------------|--------------------|
+| `npm run dev`  | Start dev server   |
+| `npm run build`| Production build   |
+| `npm run start`| Start production   |
+| `npm run lint` | Run ESLint         |
 
-- **Real-time Metrics**: Track total events, active programs, social clicks, and unique pages
-- **Interactive Charts**: Doughnut and bar charts for event distribution
-- **Time Filtering**: Analyze data across different time periods (7 days, 30 days, custom range)
-- **Event Details**: View detailed event logs with filtering capabilities
+---
 
-## Program Management
+## Deployment (Vercel)
 
-- **Program Overview**: View all programs with key statistics
-- **CD Key Status**: Monitor working vs expired keys across all programs
-- **Quick Actions**: Access Sanity Studio directly from admin panel
+- Set all required env vars in the Vercel project.
+- Build command: `npm run build`; output: default Next.js.
+- Optional: Vercel Cron for `/api/v1/cron/update-expired-keys` and `/api/v1/cron/bundle-events` (use `CRON_SECRET` or Vercel’s cron headers).
+- **Webhook:** Point Sanity revalidate webhook to `https://yourdomain.com/api/v1/webhooks/revalidate` and set `SANITY_WEBHOOK_SECRET`.
 
-## Event Tracking
+---
 
-- **User Interactions**: Track CD key copies, download clicks, and social media engagement
-- **Privacy Protection**: IP addresses are hashed, no personal data stored
-- **Real-time Updates**: Events are tracked and displayed in real-time
+## License
 
-# 💬 Comments Integration
-
-- Uses [Giscus](https://giscus.app/) to allow visitors to leave comments.
-- Requires configuring your GitHub repo and category IDs in the ProgramComments client component.
-
-# 🔄 Automatic Key Expiration System
-
-The platform includes an advanced system for automatically managing CD key expiration:
-
-## Features
-
-- **Server-side Updates**: Expired keys are automatically updated in Sanity CMS
-- **Real-time Processing**: Keys are checked and updated on every program page load
-- **Rate Limiting**: Proxy prevents excessive updates (5-minute intervals per program)
-- **Batch Updates**: API endpoint (`/api/v1/cron/update-expired-keys`) to update all programs at once
-- **Visual Indicators**: Clear status badges and expiring soon warnings
-
-## How It Works
-
-1. When a program page loads, the system checks all CD keys for expiration
-2. Keys past their `validUntil` date are automatically marked as "expired"
-3. Changes are persisted directly to Sanity CMS
-4. Users see real-time status updates without page refresh
-
-# 🖼 Image Handling
-
-- Images use Sanity ImageObject type.
-- Optimized with Next.js <Image> component for automatic resizing and blur placeholders.
-
-# 📊 Analytics & Tracking
-
-The platform includes comprehensive analytics and user interaction tracking:
-
-## Tracked Events
-
-- **CD Key Copies**: When users copy CD keys to clipboard
-- **Download Clicks**: When users click download buttons
-- **Social Clicks**: When users click social media links
-- **Page Views**: Automatic tracking of page visits
-
-## Privacy & Security
-
-- **IP Hashing**: User IP addresses are hashed using `ANALYTICS_SALT` for privacy
-- **No Personal Data**: Only interaction events are tracked, no personal information
-- **Rate Limiting**: API endpoints are protected against abuse
-- **Secure Storage**: All data stored securely in Sanity CMS
-- **Salt-based Security**: IP addresses are hashed with a configurable salt for additional security
-
-# 📌 Technical Notes
-
-- **Server Components**: Pages and most components are server-side for SEO and performance
-- **Client Components**: Only use "use client" for components requiring browser APIs (e.g., Giscus, admin dashboard)
-- **SEO Optimized**: Program pages are rendered server-side with dynamic meta tags
-- **Proxy**: Rate limiting and security for API protection
-- **Type Safety**: Full TypeScript implementation with strict type checking
-
-# 💻 Deployment
-
-- Fully compatible with Vercel with zero configuration
-- Ensure all environment variables are set in Vercel Dashboard (including `SANITY_API_TOKEN` for key reports/analytics, and `CRON_SECRET` if using cron routes outside Vercel cron)
-- Webhook integration for automatic revalidation on content updates
-
-## Build Commands
-
-```bash
-npm run build
-npm run start
-```
-
-## Webhook Configuration
-
-Set up Sanity webhooks to trigger revalidation:
-
-- **URL**: `https://yourdomain.com/api/v1/webhooks/revalidate`
-- **Note**: If you had `/api/revalidate` configured, update it to the v1 path in Sanity Dashboard.
-- **Secret**: Use the same value as `SANITY_WEBHOOK_SECRET`
-
-# 📄 License
-
-MIT License © [eyyMinda](https://github.com/eyyMinda)
+MIT © [eyyMinda](https://github.com/eyyMinda)
