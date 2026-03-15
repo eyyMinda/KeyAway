@@ -20,26 +20,32 @@ export async function PATCH(req: NextRequest) {
 
     const b = body as Record<string, unknown>;
     const programSlug = typeof b.programSlug === "string" ? b.programSlug.trim() : "";
-    const keyIndex = b.keyIndex;
+    const keyIndex =
+      typeof b.keyIndex === "number" ? b.keyIndex : parseInt(String(b.keyIndex ?? ""), 10);
     const newStatus = typeof b.newStatus === "string" ? b.newStatus.trim() : "";
 
-    if (!programSlug || keyIndex === undefined || !newStatus) {
+    if (!programSlug || keyIndex < 0 || Number.isNaN(keyIndex) || !newStatus) {
       return Errors.validation("Missing required fields: programSlug, keyIndex, newStatus");
     }
     if (!VALID_STATUSES.includes(newStatus as (typeof VALID_STATUSES)[number])) {
       return Errors.validation(`Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`);
     }
 
-    const programDoc = await client.fetch<{ _id: string } | null>(
-      `*[_type == "program" && slug.current == $slug][0]{ _id }`,
+    const programDoc = await client.fetch<{ _id: string; cdKeys?: Array<{ key?: string; status?: string; _key?: string }> } | null>(
+      `*[_type == "program" && slug.current == $slug][0]{ _id, cdKeys }`,
       { slug: programSlug }
     );
     if (!programDoc) return Errors.notFound(`Program not found for slug: ${programSlug}`);
 
-    const result = await client
-      .patch(programDoc._id)
-      .set({ [`cdKeys[${keyIndex}].status`]: newStatus })
-      .commit();
+    const cdKeys = programDoc.cdKeys ?? [];
+    if (keyIndex < 0 || keyIndex >= cdKeys.length) {
+      return Errors.validation(`Invalid keyIndex: ${keyIndex} (program has ${cdKeys.length} keys)`);
+    }
+
+    const updatedKeys = cdKeys.map((k, i) =>
+      i === keyIndex ? { ...k, status: newStatus } : k
+    );
+    const result = await client.patch(programDoc._id).set({ cdKeys: updatedKeys }).commit();
 
     return NextResponse.json({ data: result, meta: {} });
   } catch (err) {

@@ -39,7 +39,19 @@ export const program = defineType({
       name: "cdKeys",
       title: "CD Keys",
       type: "array",
-      of: [{ type: "cdKey" }]
+      of: [{ type: "cdKey" }],
+      validation: Rule =>
+        Rule.custom((keys: { key?: string }[] | undefined) => {
+          if (!keys || keys.length === 0) return true;
+          const normalized = (keys ?? [])
+            .map(k => (typeof k?.key === "string" ? k.key.trim().toUpperCase().replace(/\s+/g, "") : ""))
+            .filter(Boolean);
+          const unique = new Set(normalized);
+          if (unique.size < normalized.length) {
+            return "Duplicate CD keys are not allowed within the same program.";
+          }
+          return true;
+        })
     }
   ],
   preview: {

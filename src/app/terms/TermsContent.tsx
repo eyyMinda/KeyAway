@@ -12,7 +12,11 @@ export default function TermsContent() {
             <h1 className="text-4xl font-bold text-white mb-4">Terms of Service</h1>
             <p className="text-lg text-neutral-300 mb-2">Last updated: October 12, 2025</p>
             <p className="text-neutral-400">
-              Read the terms of service for using our platform for sharing publicly available giveaway CD keys.
+              KeyAway is the service operated at{" "}
+              <a href="https://www.keyaway.app" className="text-primary-400 hover:text-primary-300 underline">
+                keyaway.app
+              </a>
+              . These terms govern your use of our platform for sharing publicly available giveaway CD keys.
             </p>
           </div>
         </div>

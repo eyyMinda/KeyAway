@@ -12,7 +12,8 @@ export default function PrivacyContent() {
             <h1 className="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
             <p className="text-lg text-neutral-300 mb-2">Last updated: October 12, 2025</p>
             <p className="text-neutral-400">
-              Learn how we handle your personal data, comments, and contributions while keeping the site transparent.
+              KeyAway (keyaway.app) is the service described in this policy. Learn how we handle your personal data,
+              comments, and contributions while keeping the site transparent.
             </p>
           </div>
         </div>
