@@ -83,6 +83,7 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <meta name="google-site-verification" content="jCM2s4y7bLvOzH32pe8QtRIdwbgEOmntka957Z-tXKI" />
+        <meta name="websitelaunches-verification" content="dd1325f78db38d8052054c8b99e596eb">
 
         {/* Technology Stack Metadata */}
         <meta name="generator" content="Next.js" />
