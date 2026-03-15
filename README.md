@@ -159,6 +159,13 @@ In Studio, create **Program** documents and add CD keys (key, status, version, v
 
 ---
 
+## Legal
+
+- [Terms of Service](docs/TERMS_OF_SERVICE.md)
+- [Privacy Policy](docs/PRIVACY_POLICY.md)
+
+---
+
 ## License
 
-MIT © [eyyMinda](https://github.com/eyyMinda)
+MIT. See [LICENSE](LICENSE) for details. KeyAway (keyaway.app) retains all rights to the KeyAway name and branding.
