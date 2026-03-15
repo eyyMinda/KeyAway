@@ -2,7 +2,7 @@
 
 **Last updated: October 12, 2025**
 
-KeyAway (keyaway.app) is the service described in this policy. Learn how we handle your personal data, comments, and contributions while keeping the site transparent.
+KeyAway ([keyaway.app](https://www.keyaway.app)) is the service described in this policy. Learn how we handle your personal data, comments, and contributions while keeping the site transparent.
 
 ---
 
