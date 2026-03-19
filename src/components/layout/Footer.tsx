@@ -9,6 +9,7 @@ import { FaKey, FaEnvelope, FaChevronRight } from "react-icons/fa";
 import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { Socials, FacebookGroupButton } from "@/src/components/social";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
+import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 
 interface FooterProps {
   storeData: StoreDetails;
@@ -19,6 +20,7 @@ interface FooterProps {
 export default function Footer({ storeData, logoData, socialData }: FooterProps) {
   const pathname = usePathname();
   const footer = storeData?.footer;
+  const shouldShowTrustpilot = !pathname.startsWith("/admin") && !pathname.startsWith("/studio");
   let isLogo = false;
   let footerLinks: SanityLink[] = [];
   if (footer && (footer.footerLinks || footer.isLogo)) {
@@ -82,6 +84,12 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                   );
                 })}
             </ul>
+
+            {shouldShowTrustpilot && (
+              <div className="mt-6">
+                <TrustpilotReviewWidget />
+              </div>
+            )}
           </div>
 
           {/* Contribute Section */}
