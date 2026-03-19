@@ -6,6 +6,7 @@ import { IdealImage } from "@/src/components/general/IdealImage";
 import { Program, SocialData } from "@/src/types";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { FacebookGroupButton } from "@/src/components/social";
+import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 
 interface ProgramInformationProps {
   program: Program;
@@ -30,6 +31,11 @@ export default function ProgramInformation({ program, totalKeys, workingKeys, so
                 <div className="text-neutral-500 text-6xl">💻</div>
               </div>
             )}
+
+            {/* Trustpilot CTA: below the main image */}
+            <div className="mt-4 flex justify-center">
+              <TrustpilotReviewWidget />
+            </div>
           </div>
 
           {/* Content */}
