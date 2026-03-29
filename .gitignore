@@ -44,5 +44,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Crules CLI
+# CRules CLI
 .crules-cli-config.json
