@@ -1,3 +1,4 @@
+/** @fileoverview Public POST tracking: creates `trackingEvent` or `keyReport`, geo + visitor upsert on page views, spammer skip on reports. */
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { TrackRequestBody } from "@/src/types";
@@ -5,11 +6,18 @@ import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
+import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
+import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
+import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 
-const ANALYTICS_EVENTS = new Set(["copy_cdkey", "download_click", "social_click", "page_viewed"]);
+const ANALYTICS_EVENTS = new Set([
+  "copy_cdkey",
+  "download_click",
+  "social_click",
+  "page_viewed"
+]);
 const REPORT_EVENTS = new Set(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
-/** POST /api/v1/analytics/track - Track analytics or key report event */
 export async function POST(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
@@ -30,7 +38,7 @@ export async function POST(req: NextRequest) {
     const ip = getClientIp(req);
     const location = await getLocationFromIP(ip, "KeyAway Analytics");
 
-    const programSlug = body.meta?.programSlug as string | undefined;
+    let programSlug = body.meta?.programSlug as string | undefined;
     const keyData = getKeyData(body.meta?.key);
     const social = body.meta?.social as string | undefined;
     const path = body.meta?.path as string | undefined;
@@ -40,17 +48,35 @@ export async function POST(req: NextRequest) {
     const utmCampaign = body.meta?.utm_campaign as string | undefined;
 
     const isReportEvent = REPORT_EVENTS.has(body.event);
+    const slugWasProvided = Boolean(programSlug?.trim());
+
+    if (!isReportEvent && programSlug) {
+      const ok = await isProgramSlugPublished(programSlug);
+      if (!ok) programSlug = undefined;
+    }
+
+    const ipHash = hashIp(ip);
+    if (isReportEvent && (await isVisitorSpammerByHash(ipHash))) {
+      return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
+    }
+
     const documentType = isReportEvent ? "keyReport" : "trackingEvent";
 
     const eventData: Record<string, unknown> = {
       _type: documentType,
       referrer: ref,
       userAgent: ua,
-      ipHash: hashIp(ip),
+      ipHash,
       createdAt: new Date().toISOString()
     };
     if (isReportEvent) (eventData as Record<string, string>).eventType = body.event;
     else (eventData as Record<string, string>).event = body.event;
+    if (body.event === "page_viewed") {
+      let notFound = body.meta?.notFound === true;
+      if (slugWasProvided && !programSlug) notFound = true;
+      if (notFound) programSlug = undefined;
+      eventData.notFound = notFound;
+    }
     if (programSlug) eventData.programSlug = programSlug;
     if (keyData) {
       eventData.keyHash = keyData.hash;
@@ -67,6 +93,14 @@ export async function POST(req: NextRequest) {
     if (location?.city) eventData.city = location.city;
 
     await client.create(eventData as { _type: string } & Record<string, unknown>);
+
+    if (body.event === "page_viewed") {
+      try {
+        await upsertVisitorOnPageView(ipHash);
+      } catch (e) {
+        console.error("[track] visitor upsert", e);
+      }
+    }
 
     return NextResponse.json({ data: { accepted: true }, meta: {} });
   } catch (err) {
