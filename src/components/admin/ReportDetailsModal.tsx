@@ -174,7 +174,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
 
   const modalContent = (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-opacity duration-300 ${
+      className={`fixed inset-0 z-9999 flex items-center justify-center p-4 transition-opacity duration-300 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
       onClick={handleBackdropClick}>
@@ -404,17 +404,13 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                         <div className="text-[10px] text-gray-400">Referrer: —</div>
                       )}
                     </div>
-                    <div className="flex flex-col gap-1.5 sm:items-end sm:text-right text-[11px] text-gray-600 shrink-0">
-                      <span
-                        className="truncate max-w-[12rem] sm:max-w-[10rem]"
-                        title={`${reportItem.city}, ${reportItem.country}`}>
+                    <div className="flex flex-col gap-1.5 sm:items-end sm:text-right text-xs text-gray-600 shrink-0">
+                      <span className="max-w-72" title={`${reportItem.city}, ${reportItem.country}`}>
                         {reportItem.city}, {reportItem.country}
                       </span>
                       <div className="flex flex-wrap items-center justify-end gap-1.5 w-full sm:max-w-[20rem]">
                         <span className={visitorTierBadgeClasses(tier, false)}>{tier}</span>
-                        {isSpam ? (
-                          <span className={visitorTierBadgeClasses("new", true)}>spammer</span>
-                        ) : null}
+                        {isSpam ? <span className={visitorTierBadgeClasses("new", true)}>spammer</span> : null}
                         <span className="font-mono text-[10px] text-gray-500 break-all text-right min-w-0" title={hash}>
                           {hashShort}
                         </span>
