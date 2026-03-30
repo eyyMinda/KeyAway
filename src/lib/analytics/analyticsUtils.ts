@@ -2,6 +2,11 @@
 import { AnalyticsEventData } from "@/src/types";
 import { resolveEffectiveReferrer } from "@/src/lib/analytics/referrerResolve";
 import { isPageViewNotFoundRow } from "@/src/lib/analytics/pageViewDisplay";
+import {
+  getAnalyticsEventChartHex,
+  getAnalyticsEventDotClass,
+  pageViewNotFoundDotClass
+} from "@/src/theme/colorSchema";
 
 function referrerBucketHostname(hostname: string): string {
   const h = hostname.trim().toLowerCase();
@@ -68,40 +73,18 @@ export function getDateFromPeriod(period: string, customDateRange?: { start: str
   }
 }
 
-// Event colors: hex for charts, Tailwind for dots / UI
+// Event colors: hex for charts, Tailwind for dots / UI (`src/theme/colorSchema.ts`)
 export function getEventColor(event: string): string {
-  switch (event) {
-    case "copy_cdkey":
-      return "#10B981"; // green
-    case "download_click":
-      return "#3B82F6"; // blue
-    case "social_click":
-      return "#8B5CF6"; // purple
-    case "page_viewed":
-      return "#F59E0B"; // amber
-    default:
-      return "#6B7280"; // gray
-  }
+  return getAnalyticsEventChartHex(event);
 }
 
 export function getEventDotColor(event: string): string {
-  switch (event) {
-    case "copy_cdkey":
-      return "bg-green-500"; // green
-    case "download_click":
-      return "bg-blue-500"; // blue
-    case "social_click":
-      return "bg-purple-500"; // purple
-    case "page_viewed":
-      return "bg-amber-500"; // amber
-    default:
-      return "bg-gray-500"; // gray
-  }
+  return getAnalyticsEventDotClass(event);
 }
 
-/** Dot color for a row; not-found `page_viewed` uses rose. */
+/** Dot color for a row; not-found `page_viewed` uses analytics accent. */
 export function getTrackingRowDotClass(event: AnalyticsEventData): string {
-  if (isPageViewNotFoundRow(event)) return "bg-rose-500";
+  if (isPageViewNotFoundRow(event)) return pageViewNotFoundDotClass;
   return getEventDotColor(event.event);
 }
 

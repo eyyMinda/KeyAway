@@ -1,3 +1,5 @@
+import { devConsoleBadge } from "@/src/theme/colorSchema";
+
 type LogStatus = "success" | "error" | "info" | "warning";
 
 interface Logger {
@@ -25,13 +27,7 @@ class LoggerClass {
   }
 
   private getStatusColor(status: LogStatus): string {
-    const colors = {
-      success: "background-color: #10B981; color: white; font-weight: bold; padding: 6px; border-radius: 4px;",
-      error: "background-color: #EF4444; color: white; font-weight: bold; padding: 6px; border-radius: 4px;",
-      info: "background-color: #3B82F6; color: white; font-weight: bold; padding: 6px; border-radius: 4px;",
-      warning: "background-color: #F59E0B; color: white; font-weight: bold; padding: 6px; border-radius: 4px;"
-    };
-    return colors[status];
+    return devConsoleBadge[status];
   }
 
   private getTitleColor(): string {

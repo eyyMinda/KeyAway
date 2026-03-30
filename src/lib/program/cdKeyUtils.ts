@@ -118,13 +118,13 @@ export function getStatusColor(status: string): string {
     case "new":
       return "bg-primary-500 text-white";
     case "active":
-      return "bg-green-500 text-white";
+      return "bg-success-500 text-white";
     case "expired":
-      return "bg-red-500 text-white";
+      return "bg-error-500 text-white";
     case "limit":
-      return "bg-orange-500 text-white";
+      return "bg-warning-500 text-white";
     default:
-      return "bg-gray-500 text-white";
+      return "bg-neutral-500 text-white";
   }
 }
 
