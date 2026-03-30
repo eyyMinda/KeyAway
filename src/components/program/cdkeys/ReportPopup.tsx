@@ -118,9 +118,14 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
         })
       });
 
+      const payload = await res.json().catch(() => ({}));
+      if (res.ok && payload?.data?.skipped) {
+        onClose();
+        return;
+      }
+
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error("[Report] API error:", res.status, err);
+        console.error("[Report] API error:", res.status, payload);
         setNotification(getErrorMessage("REPORT_FAILED"));
         return;
       }

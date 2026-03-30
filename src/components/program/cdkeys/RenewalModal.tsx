@@ -96,8 +96,8 @@ export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existing
       const data = res?.data;
       const err = res?.error;
 
-      if (response.ok && data?.updatedReport) {
-        setNotification(getRenewalStatusMessage(status));
+      if (response.ok && (data?.updatedReport || data?.skipped)) {
+        if (!data?.skipped) setNotification(getRenewalStatusMessage(status));
         onRenew();
         onClose();
       } else {

@@ -1,5 +1,6 @@
 "use client";
 
+/** @fileoverview Program CD key grid/table with report counts, sort, mobile cards. */
 import { useState, useEffect, useMemo } from "react";
 import { CDKey, CDKeyTableProps, ReportData } from "@/src/types";
 import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
@@ -9,14 +10,13 @@ import SortableTableHead, { SortableColumn, SortDirection } from "@/src/componen
 import { getExpiringKeysMessage, sortCdKeysByScore, sortCdKeysByColumn } from "@/src/lib/program/cdKeyUtils";
 import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 
-export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
+export default function CDKeyTable({ cdKeys, slug, isSpammerVisitor = false }: CDKeyTableProps) {
   const expiringKeysMessage = getExpiringKeysMessage(cdKeys);
   const { getReportData, loading, refreshReportData } = useKeyReportData(slug, cdKeys);
   const [reportDataMap, setReportDataMap] = useState<Map<string, ReportData>>(new Map());
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
-  // Load report data for all keys
   useEffect(() => {
     const loadReportData = async () => {
       const dataMap = new Map<string, ReportData>();
@@ -32,12 +32,10 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
     }
   }, [cdKeys, getReportData, loading]);
 
-  // Handle report submission refresh
   const handleReportSubmitted = () => {
     refreshReportData();
   };
 
-  // Define table columns
   const tableColumns: SortableColumn[] = [
     { key: "key", label: "Key", sortable: false, className: "text-left" },
     { key: "status", label: "Status", sortable: true, className: "text-center" },
@@ -48,7 +46,6 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
     { key: "actions", label: "Actions", sortable: false, className: "text-center" }
   ];
 
-  // Handle sort
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -59,7 +56,6 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
     }
   };
 
-  // Sort keys
   const sortedKeys = useMemo(() => {
     if (!sortColumn) {
       return sortCdKeysByScore(cdKeys, reportDataMap);
@@ -126,6 +122,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
                       slug={slug}
                       reportData={reportDataMap.get(cdKey.key) || { working: 0, expired: 0, limit_reached: 0 }}
                       onReportSubmitted={handleReportSubmitted}
+                      isSpammerVisitor={isSpammerVisitor}
                     />
                   ))}
                 </div>
@@ -150,6 +147,7 @@ export default function CDKeyTable({ cdKeys, slug }: CDKeyTableProps) {
                         slug={slug}
                         reportData={reportDataMap.get(cdKey.key) || { working: 0, expired: 0, limit_reached: 0 }}
                         onReportSubmitted={handleReportSubmitted}
+                        isSpammerVisitor={isSpammerVisitor}
                       />
                     ))}
                   </tbody>
