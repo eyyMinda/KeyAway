@@ -1,16 +1,17 @@
 "use client";
 
+/** @fileoverview Sends `page_viewed` with program slug, UTM, and resolved referrer; skips admin/studio, localhost, and paths handled by NotFoundTracker. */
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { getUTMParameters } from "@/src/lib/analytics/utmUtils";
+import { pageViewSkipKey } from "@/src/lib/analytics/pageViewSkip";
+import { primaryReferrerForPageView } from "@/src/lib/analytics/referrerResolve";
 
-// Debug logger
 const log = (...args: unknown[]) => {
   console.info("PageViewTracker:", ...args);
 };
 
-// Exclusion rules
 const EXCLUDED_HOSTNAMES = new Set(["localhost"]);
 const EXCLUDED_PATH_PREFIXES = ["/admin", "/studio"] as const;
 
@@ -20,58 +21,64 @@ function isExcludedPath(pathname: string): boolean {
 
 export default function PageViewTracker() {
   const pathname = usePathname();
-  const prevPathRef = useRef<string | null>(null);
+  const prevFullUrlRef = useRef<string | undefined>(undefined);
+  const lastSentKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    // Skip tracking if running on excluded hostnames
     if (typeof window !== "undefined" && EXCLUDED_HOSTNAMES.has(window.location.hostname)) {
       return log("skipped on hostname", window.location.hostname, "path:", pathname);
     }
-    // Skip tracking for excluded path prefixes
     if (isExcludedPath(pathname)) return log("skipped excluded path", pathname);
-    // Avoid duplicate sends for the exact same path
-    if (prevPathRef.current === pathname) return; // log("skipped duplicate path", pathname);
+
+    const search = typeof window !== "undefined" ? window.location.search : "";
+    const dedupeKey = `${pathname}${search}`;
+    if (lastSentKeyRef.current === dedupeKey) return;
 
     const trackPageView = async () => {
       try {
-        // Prefer internal referrer (previous path) for SPA nav; fallback to document.referrer
-        const externalReferrer = document.referrer || undefined;
-        const internalReferrer =
-          prevPathRef.current && prevPathRef.current !== pathname
-            ? `https://www.keyaway.app${prevPathRef.current}`
-            : undefined;
+        try {
+          const sk = pageViewSkipKey(pathname);
+          if (sessionStorage.getItem(sk)) {
+            sessionStorage.removeItem(sk);
+            lastSentKeyRef.current = dedupeKey;
+            prevFullUrlRef.current = typeof window !== "undefined" ? window.location.href : undefined;
+            return;
+          }
+        } catch {
+          // sessionStorage unavailable
+        }
 
-        // Extract program slug from pathname if it's a program page
+        const href = typeof window !== "undefined" ? window.location.href : "";
+        const referrer = primaryReferrerForPageView({
+          currentHref: href,
+          documentReferrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
+          previousFullUrl: prevFullUrlRef.current
+        });
+
         const programSlug = pathname.startsWith("/program/")
           ? pathname.split("/program/")[1]?.split("/")[0]
           : undefined;
 
-        // Get UTM parameters from URL
         const utmParams = getUTMParameters();
 
-        // Track the page view
         const payload = {
           path: pathname,
           programSlug,
-          referrer: internalReferrer || externalReferrer,
+          referrer,
           ...utmParams
         } as const;
 
-        // log("sending page_viewed", payload);
-
         await trackEvent("page_viewed", payload);
-        prevPathRef.current = pathname;
+        lastSentKeyRef.current = dedupeKey;
+        prevFullUrlRef.current = typeof window !== "undefined" ? window.location.href : undefined;
       } catch (error) {
         console.error("Error tracking page view:", error);
       }
     };
 
-    // Small delay to ensure page is fully loaded
     const timer = setTimeout(trackPageView, 200);
-
     return () => clearTimeout(timer);
   }, [pathname]);
 
-  // This component doesn't render anything visible
   return null;
 }
