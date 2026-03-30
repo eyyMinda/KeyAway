@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { FaTimes } from "react-icons/fa";
+import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import type { Program } from "@/src/types/program";
 import { titleToSlug, validateSlug } from "./programSlugUtils";
 import DeleteProgramModal from "./DeleteProgramModal";
@@ -226,12 +226,11 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
         className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
           <h2 className="text-2xl font-bold text-gray-900">{program ? "Edit program" : "Add program"}</h2>
-          <button
+          <ModalCloseButton
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-            aria-label="Close">
-            <FaTimes size={20} />
-          </button>
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg"
+            iconClassName="h-5 w-5"
+          />
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] space-y-4">

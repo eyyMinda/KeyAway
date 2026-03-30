@@ -13,7 +13,13 @@ import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src
  * @param isDisabled - Whether the actions should be disabled
  * @param slug - The program slug for tracking purposes
  */
-export default function CDKeyActions({ cdKey, isDisabled, slug, onReportSubmitted }: CDKeyActionsProps) {
+export default function CDKeyActions({
+  cdKey,
+  isDisabled,
+  slug,
+  onReportSubmitted,
+  isSpammerVisitor = false
+}: CDKeyActionsProps) {
   const [notification, setNotification] = useState<string | null>(null);
   const [isReportPopupOpen, setIsReportPopupOpen] = useState(false);
 
@@ -31,9 +37,6 @@ export default function CDKeyActions({ cdKey, isDisabled, slug, onReportSubmitte
     }
   };
 
-  /**
-   * Handles opening the report popup
-   */
   const handleReportClick = () => {
     setIsReportPopupOpen(true);
   };
@@ -64,6 +67,7 @@ export default function CDKeyActions({ cdKey, isDisabled, slug, onReportSubmitte
         cdKey={cdKey}
         slug={slug}
         onReportSubmitted={onReportSubmitted}
+        isSpammerVisitor={isSpammerVisitor}
       />
 
       {/* Action Buttons */}
@@ -85,8 +89,9 @@ export default function CDKeyActions({ cdKey, isDisabled, slug, onReportSubmitte
         </button>
 
         <button
+          type="button"
           onClick={handleReportClick}
-          className="inline-flex items-center px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed group relative cursor-pointer"
+          className="inline-flex items-center px-3 py-1 text-white text-xs font-medium rounded-lg transition-colors duration-200 group relative bg-orange-600 hover:bg-orange-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isDisabled}
           title="Report the status of this CD key">
           Report

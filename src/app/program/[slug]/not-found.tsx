@@ -1,8 +1,11 @@
+// TODO: remove legacy — duplicate 404 UI vs `src/app/not-found.tsx`; extract shared layout + copy variants.
 import Link from "next/link";
+import NotFoundTracker from "@/src/components/NotFoundTracker";
 
 export default function NotFound() {
   return (
     <main className="min-h-screen bg-neutral-900 flex items-center justify-center">
+      <NotFoundTracker />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {/* 404 Illustration */}
         <div className="mb-8">
@@ -21,7 +24,6 @@ export default function NotFound() {
             claimed or moved.
           </p>
 
-          {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/"

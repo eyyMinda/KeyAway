@@ -44,4 +44,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# CRules CLI
+.crules-cli-config.json

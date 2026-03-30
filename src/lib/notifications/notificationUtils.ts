@@ -45,6 +45,14 @@ export const INFO_MESSAGES = {
   REPORT_INSTRUCTIONS: "Your feedback helps us maintain accurate key statuses"
 } as const;
 
+/** Report / renew modals when `isSpammerVisitor` — full sentence, second person. */
+export const SPAMMER_REPORT_RESTRICTION_NOTICE =
+  "Because your recent reports were marked as spam, you can no longer report keys as expired or limit reached. You can still report them as working.";
+
+/** `title` on disabled Expired / Limit reached actions (keep short). */
+export const SPAMMER_REPORT_DISABLED_OPTION_TITLE =
+  "Not available — your recent reports were flagged as spam.";
+
 // Get report status message
 export function getReportStatusMessage(status: CDKeyStatus): string {
   return REPORT_STATUS_MESSAGES[status];

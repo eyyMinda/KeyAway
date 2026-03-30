@@ -1,13 +1,25 @@
-// Analytics tracking types
-export type AnalyticsEvent = "copy_cdkey" | "download_click" | "social_click" | "page_viewed" | "facebook_group_click";
+/**
+ * @fileoverview Client tracking payloads, Sanity-shaped events, and related request/response types.
+ */
 
-// Key report types
+export type AnalyticsEvent =
+  | "copy_cdkey"
+  | "download_click"
+  | "social_click"
+  | "page_viewed"
+  | "facebook_group_click";
+
 export type KeyReportEvent = "report_key_working" | "report_key_expired" | "report_key_limit_reached";
 
 export interface AnalyticsEventData {
   _id: string;
   event: AnalyticsEvent;
   programSlug?: string;
+  /** `page_viewed` only: true when the URL was not found or program slug was invalid. */
+  notFound?: boolean;
+  /** From `visitor` by `ipHash` (admin queries only). */
+  visitTier?: string;
+  visitorIsSpammer?: boolean;
   social?: string;
   path?: string;
   referrer?: string;
@@ -45,6 +57,8 @@ export interface KeyReportData {
 
 export interface TrackEventMeta {
   programSlug?: string;
+  /** When true, stored on `page_viewed` as not-found traffic (no program slug). */
+  notFound?: boolean;
   key?: unknown; // CDKey type
   path?: string;
   social?: string;
@@ -99,13 +113,11 @@ export interface RenewReportResponse {
   error?: string;
 }
 
-// Geolocation types
 export interface LocationData {
   country?: string;
   city?: string;
 }
 
-// Analytics aggregation types
 export interface EventAggregation {
   byEvent: Map<string, number>;
   byProgram: Map<string, number>;

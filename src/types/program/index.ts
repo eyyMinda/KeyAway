@@ -1,4 +1,7 @@
-// Program and CD Key related types
+/**
+ * @fileoverview Program/CDKey shapes and props for program UI.
+ */
+import type { SocialData } from "../layout";
 
 export type CDKeyStatus = "new" | "active" | "expired" | "limit";
 
@@ -24,10 +27,11 @@ export interface Program {
   _updatedAt?: string;
 }
 
-// Component props for program-related components
 export interface CDKeyTableProps {
   cdKeys: CDKey[];
   slug: string;
+  /** When true (visitor marked spammer), only “Working” reports are allowed; negative statuses are disabled in UI and API. */
+  isSpammerVisitor?: boolean;
 }
 
 export interface ReportData {
@@ -42,6 +46,7 @@ export interface CDKeyItemProps {
   slug: string;
   reportData: ReportData;
   onReportSubmitted?: () => void;
+  isSpammerVisitor?: boolean;
 }
 
 export interface CDKeyActionsProps {
@@ -49,12 +54,15 @@ export interface CDKeyActionsProps {
   isDisabled: boolean;
   slug: string;
   onReportSubmitted?: () => void;
+  isSpammerVisitor?: boolean;
 }
 
 export interface ProgramInformationProps {
   program: Program;
   totalKeys: number;
   workingKeys: number;
+  socialData?: SocialData;
+  visitorWelcomeLine?: string | null;
 }
 
 export interface ProgramPageProps {
@@ -66,7 +74,6 @@ export interface KeyStatusUpdaterProps {
   onKeysUpdate: (updatedKeys: CDKey[]) => void;
 }
 
-// Hook props
 export interface UseCopyTrackingProps {
   cdKey: CDKey;
   slug: string;

@@ -19,6 +19,12 @@ export const trackingEvent = defineType({
       },
       validation: Rule => Rule.required()
     },
+    {
+      name: "notFound",
+      title: "Not found page view",
+      type: "boolean",
+      description: "True for 404 / invalid program URL on a page_viewed event (no program slug stored)."
+    },
     { name: "programSlug", title: "Program Slug", type: "string" },
     { name: "keyHash", title: "Key Hash", type: "string", description: "SHA-256 hash of the CD key for privacy" },
     { name: "keyIdentifier", title: "Key Identifier", type: "string", description: "Short identifier like ABC***XYZ" },

@@ -6,7 +6,14 @@ import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar
 import { getStatusColor } from "@/src/lib/program/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
 
-export default function CDKeyItem({ cdKey, index, slug, reportData, onReportSubmitted }: CDKeyItemProps) {
+export default function CDKeyItem({
+  cdKey,
+  index,
+  slug,
+  reportData,
+  onReportSubmitted,
+  isSpammerVisitor = false
+}: CDKeyItemProps) {
   const isDisabled = cdKey.status === "limit" || cdKey.status === "expired";
 
   useCopyTracking({ cdKey, slug });
@@ -46,6 +53,7 @@ export default function CDKeyItem({ cdKey, index, slug, reportData, onReportSubm
             isDisabled={isDisabled}
             slug={slug}
             onReportSubmitted={onReportSubmitted}
+            isSpammerVisitor={isSpammerVisitor}
           />
         </td>
       )}

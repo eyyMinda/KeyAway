@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { adminChrome } from "@/src/theme/colorSchema";
 
 interface TimeFilterProps {
   selectedPeriod: string;
@@ -64,7 +65,7 @@ export default function TimeFilter({
             key={period.value}
             onClick={() => handlePeriodChange(period.value)}
             className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
-              selectedPeriod === period.value ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              selectedPeriod === period.value ? adminChrome.filterPillActive : adminChrome.filterPillIdle
             }`}>
             {period.label}
             {period.value === "custom" && (

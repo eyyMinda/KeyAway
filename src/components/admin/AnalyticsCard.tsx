@@ -1,3 +1,5 @@
+import { analyticsCardIconMap } from "@/src/theme/colorSchema";
+
 interface AnalyticsCardProps {
   title: string;
   value: number;
@@ -10,16 +12,8 @@ interface AnalyticsCardProps {
   color?: "blue" | "green" | "purple" | "orange" | "red";
 }
 
-const colorMap = {
-  blue: { bg: "bg-blue-500/50", text: "text-blue-600", border: "border-blue-200" },
-  green: { bg: "bg-green-500/50", text: "text-green-600", border: "border-green-200" },
-  purple: { bg: "bg-purple-500/50", text: "text-purple-600", border: "border-purple-200" },
-  orange: { bg: "bg-orange-500/50", text: "text-orange-600", border: "border-orange-200" },
-  red: { bg: "bg-red-500/50", text: "text-red-600", border: "border-red-200" }
-} as const;
-
 export default function AnalyticsCard({ title, value, subtitle, trend, icon, color = "blue" }: AnalyticsCardProps) {
-  const c = colorMap[color];
+  const c = analyticsCardIconMap[color];
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
@@ -43,7 +37,7 @@ export default function AnalyticsCard({ title, value, subtitle, trend, icon, col
             {subtitle && <span className="truncate">{subtitle}</span>}
             {trend && (
               <span>
-                <span className={`font-medium ${trend.isPositive ? "text-green-600" : "text-red-600"}`}>
+                <span className={`font-medium ${trend.isPositive ? "text-success-600" : "text-error-600"}`}>
                   {trend.isPositive ? "+" : ""}
                   {trend.value}%
                 </span>

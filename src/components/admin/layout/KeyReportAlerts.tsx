@@ -9,14 +9,20 @@ import type { KeyReportNotificationItem } from "@/src/types/admin";
 export function useKeyReportAlerts() {
   const [alerts, setAlerts] = useState<KeyReportNotificationItem[] | null>(null);
 
-  useEffect(() => {
-    fetch("/api/v1/admin/key-report-notifications")
+  const load = () => {
+    fetch("/api/v1/admin/key-report-notifications", { credentials: "include" })
       .then(res => res.json())
       .then((data: { data?: KeyReportNotificationItem[] }) => {
         const items = data?.data ?? data;
         setAlerts(Array.isArray(items) ? items : []);
       })
       .catch(() => setAlerts([]));
+  };
+
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 60_000);
+    return () => clearInterval(t);
   }, []);
 
   return { alerts };

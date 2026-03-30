@@ -4,11 +4,14 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { KeyReportEvent, RenewReportRequest, RenewReportResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
+import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { EVENT_TYPE_MAP, getStatusTextFromEventType, CDKeyStatus } from "@/src/lib/program/cdKeyUtils";
 import {
   NOTIFICATION_DURATION,
   getRenewalStatusMessage,
-  getErrorMessage
+  getErrorMessage,
+  SPAMMER_REPORT_RESTRICTION_NOTICE,
+  SPAMMER_REPORT_DISABLED_OPTION_TITLE
 } from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
 
@@ -26,6 +29,7 @@ interface RenewalModalProps {
     createdAt: string;
   };
   slug: string;
+  isSpammerVisitor?: boolean;
 }
 
 interface RenewButtonProps {
@@ -33,14 +37,18 @@ interface RenewButtonProps {
   isSubmitting: boolean;
   onRenew: (status: CDKeyStatus) => void;
   currentStatus: KeyReportEvent;
+  blockedBySpammer?: boolean;
 }
 
-function RenewButton({ status, isSubmitting, onRenew, currentStatus }: RenewButtonProps) {
+function RenewButton({ status, isSubmitting, onRenew, currentStatus, blockedBySpammer }: RenewButtonProps) {
   const isCurrentStatus = EVENT_TYPE_MAP[status] === currentStatus;
 
   const getButtonStyles = () => {
     if (isCurrentStatus) {
       return "bg-gray-500 text-gray-300 cursor-not-allowed";
+    }
+    if (blockedBySpammer) {
+      return "bg-neutral-700 text-neutral-500 cursor-not-allowed";
     }
 
     switch (status) {
@@ -61,15 +69,25 @@ function RenewButton({ status, isSubmitting, onRenew, currentStatus }: RenewButt
 
   return (
     <button
-      onClick={() => onRenew(status)}
-      disabled={isSubmitting || isCurrentStatus}
+      type="button"
+      onClick={() => !blockedBySpammer && !isCurrentStatus && onRenew(status)}
+      disabled={isSubmitting || isCurrentStatus || Boolean(blockedBySpammer)}
+      title={blockedBySpammer ? SPAMMER_REPORT_DISABLED_OPTION_TITLE : undefined}
       className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${getButtonStyles()}`}>
       {isCurrentStatus ? `${getStatusText()} (Current)` : `Renew as ${getStatusText()}`}
     </button>
   );
 }
 
-export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existingReport, slug }: RenewalModalProps) {
+export default function RenewalModal({
+  isOpen,
+  onClose,
+  onRenew,
+  cdKey,
+  existingReport,
+  slug,
+  isSpammerVisitor = false
+}: RenewalModalProps) {
   const [notification, setNotification] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -96,12 +114,13 @@ export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existing
       const data = res?.data;
       const err = res?.error;
 
-      if (response.ok && data?.updatedReport) {
-        setNotification(getRenewalStatusMessage(status));
+      if (response.ok && (data?.updatedReport || data?.skipped)) {
+        if (!data?.skipped) setNotification(getRenewalStatusMessage(status));
         onRenew();
         onClose();
       } else {
-        setNotification(err?.message ?? err ?? getErrorMessage("RENEWAL_FAILED"));
+        const apiMsg = err?.message ?? (typeof err === "string" ? err : null);
+        setNotification(apiMsg ?? getErrorMessage("RENEWAL_FAILED"));
       }
     } catch (error) {
       console.error("Failed to renew key report:", error);
@@ -146,11 +165,7 @@ export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existing
         <div className="bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Renew Key Report</h3>
-            <button onClick={onClose} className="text-neutral-400 hover:text-white transition-colors">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <ModalCloseButton onClick={onClose} className="p-1 text-neutral-400 hover:text-white" />
           </div>
 
           <div className="mb-4">
@@ -164,6 +179,11 @@ export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existing
               <p className="text-neutral-400 text-xs mt-1">Last reported: {formatDate(existingReport.createdAt)}</p>
             </div>
             <p className="text-neutral-400 text-sm">Update the status of this key:</p>
+            {isSpammerVisitor && (
+              <p className="text-amber-200/90 text-sm mt-3 leading-relaxed border border-amber-500/25 bg-amber-950/30 rounded-lg px-3 py-2">
+                {SPAMMER_REPORT_RESTRICTION_NOTICE}
+              </p>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -178,12 +198,14 @@ export default function RenewalModal({ isOpen, onClose, onRenew, cdKey, existing
               isSubmitting={isSubmitting}
               onRenew={handleRenew}
               currentStatus={existingReport.eventType}
+              blockedBySpammer={isSpammerVisitor}
             />
             <RenewButton
               status="limit_reached"
               isSubmitting={isSubmitting}
               onRenew={handleRenew}
               currentStatus={existingReport.eventType}
+              blockedBySpammer={isSpammerVisitor}
             />
           </div>
 

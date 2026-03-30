@@ -3,7 +3,12 @@ import crypto from "crypto";
 
 /** Extract client IP from request (x-forwarded-for, first hop). */
 export function getClientIp(req: NextRequest | Request): string | undefined {
-  const xff = req.headers.get("x-forwarded-for") || "";
+  return getClientIpFromForwardedHeaders(req.headers);
+}
+
+/** For RSC `headers()` / plain `Headers` (same logic as `getClientIp`). */
+export function getClientIpFromForwardedHeaders(h: Headers): string | undefined {
+  const xff = h.get("x-forwarded-for") || "";
   return xff.split(",")[0]?.trim() || undefined;
 }
 

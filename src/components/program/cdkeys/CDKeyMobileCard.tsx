@@ -11,9 +11,16 @@ interface CDKeyMobileCardProps {
   slug: string;
   reportData: ReportData;
   onReportSubmitted?: () => void;
+  isSpammerVisitor?: boolean;
 }
 
-export default function CDKeyMobileCard({ cdKey, slug, reportData, onReportSubmitted }: CDKeyMobileCardProps) {
+export default function CDKeyMobileCard({
+  cdKey,
+  slug,
+  reportData,
+  onReportSubmitted,
+  isSpammerVisitor = false
+}: CDKeyMobileCardProps) {
   const isDisabled = cdKey.status === "limit" || cdKey.status === "expired";
 
   useCopyTracking({ cdKey, slug });
@@ -65,7 +72,13 @@ export default function CDKeyMobileCard({ cdKey, slug, reportData, onReportSubmi
       {/* Actions */}
       {!isDisabled && (
         <div className="pt-3 border-t border-white/10">
-          <CDKeyActions cdKey={cdKey} isDisabled={isDisabled} slug={slug} onReportSubmitted={onReportSubmitted} />
+          <CDKeyActions
+            cdKey={cdKey}
+            isDisabled={isDisabled}
+            slug={slug}
+            onReportSubmitted={onReportSubmitted}
+            isSpammerVisitor={isSpammerVisitor}
+          />
         </div>
       )}
     </div>

@@ -1,6 +1,19 @@
+/** @fileoverview Analytics helpers: date ranges, aggregates, chart/table transforms, referrer display, event labels. */
 import { AnalyticsEventData } from "@/src/types";
+import { resolveEffectiveReferrer } from "@/src/lib/analytics/referrerResolve";
+import { isPageViewNotFoundRow } from "@/src/lib/analytics/pageViewDisplay";
+import {
+  getAnalyticsEventChartHex,
+  getAnalyticsEventDotClass,
+  pageViewNotFoundDotClass
+} from "@/src/theme/colorSchema";
 
-// Date utilities
+function referrerBucketHostname(hostname: string): string {
+  const h = hostname.trim().toLowerCase();
+  return h.startsWith("www.") ? h.slice(4) : h;
+}
+
+// Date range helpers (admin time filter → GROQ since/until)
 export function getDateRange(
   period: string,
   customDateRange?: { start: string; end: string }
@@ -52,48 +65,30 @@ export function getDateFromPeriod(period: string, customDateRange?: { start: str
       return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
     case "custom":
       if (customDateRange?.start && customDateRange?.end) {
-        // Return the start date for the query
         return new Date(customDateRange.start).toISOString();
       }
-      // Return a very old date if custom range is not properly set (will result in no events)
       return new Date("1970-01-01").toISOString();
     default:
       return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
   }
 }
 
-// Event color utilities
+// Event colors: hex for charts, Tailwind for dots / UI (`src/theme/colorSchema.ts`)
 export function getEventColor(event: string): string {
-  switch (event) {
-    case "copy_cdkey":
-      return "#10B981"; // green
-    case "download_click":
-      return "#3B82F6"; // blue
-    case "social_click":
-      return "#8B5CF6"; // purple
-    case "page_viewed":
-      return "#F59E0B"; // amber
-    default:
-      return "#6B7280"; // gray
-  }
+  return getAnalyticsEventChartHex(event);
 }
 
 export function getEventDotColor(event: string): string {
-  switch (event) {
-    case "copy_cdkey":
-      return "bg-green-500";
-    case "download_click":
-      return "bg-blue-500";
-    case "social_click":
-      return "bg-purple-500";
-    case "page_viewed":
-      return "bg-amber-500";
-    default:
-      return "bg-gray-500";
-  }
+  return getAnalyticsEventDotClass(event);
 }
 
-// Data aggregation utilities
+/** Dot color for a row; not-found `page_viewed` uses analytics accent. */
+export function getTrackingRowDotClass(event: AnalyticsEventData): string {
+  if (isPageViewNotFoundRow(event)) return pageViewNotFoundDotClass;
+  return getEventDotColor(event.event);
+}
+
+// Roll up raw events into maps for dashboard tables
 export interface AggregatedData {
   totals: Map<string, number>;
   byProgram: Map<string, number>;
@@ -113,24 +108,24 @@ export function aggregateEvents(events: AnalyticsEventData[]): AggregatedData {
 
   for (const event of events) {
     totals.set(event.event, (totals.get(event.event) || 0) + 1);
-    if (event.programSlug) byProgram.set(event.programSlug, (byProgram.get(event.programSlug) || 0) + 1);
+    if (event.programSlug && !(event.event === "page_viewed" && event.notFound === true)) {
+      byProgram.set(event.programSlug, (byProgram.get(event.programSlug) || 0) + 1);
+    }
     if (event.social) bySocial.set(event.social, (bySocial.get(event.social) || 0) + 1);
-    if (event.path) byPath.set(event.path, (byPath.get(event.path) || 0) + 1);
+    if (event.path && !isPageViewNotFoundRow(event)) {
+      byPath.set(event.path, (byPath.get(event.path) || 0) + 1);
+    }
     if (event.country) byCountry.set(event.country, (byCountry.get(event.country) || 0) + 1);
     if (event.referrer) {
-      try {
-        const hostname = event.referrer.startsWith("http") ? new URL(event.referrer).hostname : "www.keyaway.app";
-        byReferrer.set(hostname, (byReferrer.get(hostname) || 0) + 1);
-      } catch {
-        // Invalid URL, skip
-      }
+      const { hostname } = extractReferrerInfo(event.referrer);
+      if (hostname) byReferrer.set(hostname, (byReferrer.get(hostname) || 0) + 1);
     }
   }
 
   return { totals, byProgram, bySocial, byPath, byCountry, byReferrer };
 }
 
-// Data transformation utilities
+// Maps → chart rows / table rows for DataTable & EventChart
 export interface ChartDataItem {
   name: string;
   value: number;
@@ -182,6 +177,20 @@ export function transformPathData(byPath: Map<string, number>): TableDataItem[] 
   }));
 }
 
+/** Page activity: paths + one “Not Found” row (when count > 0), all sorted by view count descending. */
+export function transformPathActivityTable(events: AnalyticsEventData[], byPath: Map<string, number>): TableDataItem[] {
+  const notFoundCount = events.filter(isPageViewNotFoundRow).length;
+  const rows: TableDataItem[] = Array.from(byPath).map(([path, count]) => ({
+    key: path,
+    value: count,
+    label: path === "/" ? "Home" : formatPath(path)
+  }));
+  if (notFoundCount > 0) {
+    rows.push({ key: "__not_found__", value: notFoundCount, label: "Not Found" });
+  }
+  return rows.sort((a, b) => b.value - a.value);
+}
+
 export function transformCountryData(byCountry: Map<string, number>): TableDataItem[] {
   return Array.from(byCountry).map(([country, count]) => ({
     key: country,
@@ -206,9 +215,8 @@ export function transformReferrerDataWithParams(
   for (const event of events) {
     if (event.referrer) {
       const { hostname, referrerParam } = extractReferrerInfo(event.referrer);
-      const key = hostname;
-      const existing = referrerMap.get(key);
-      referrerMap.set(key, {
+      const existing = referrerMap.get(hostname);
+      referrerMap.set(hostname, {
         count: (existing?.count || 0) + 1,
         referrerParam: referrerParam || existing?.referrerParam
       });
@@ -223,34 +231,20 @@ export function transformReferrerDataWithParams(
   }));
 }
 
-// Referrer utilities
+// Referrer: unwrap nested `?referrer=`; bucket hostnames for Top Referrers
+/** Hostname (www-stripped for bucketing) and optional nested `referrer` on the effective URL. */
 export function extractReferrerInfo(referrer: string): { hostname: string; referrerParam?: string } {
-  try {
-    if (referrer.startsWith("http")) {
-      const url = new URL(referrer);
-      const referrerParam = url.searchParams.get("referrer");
-      return {
-        hostname: url.hostname,
-        referrerParam: referrerParam || undefined
-      };
-    } else {
-      // For relative URLs, assume it's from keyaway.app
-      const url = new URL(`https://www.keyaway.app${referrer}`);
-      const referrerParam = url.searchParams.get("referrer");
-      return {
-        hostname: "www.keyaway.app",
-        referrerParam: referrerParam || undefined
-      };
-    }
-  } catch {
-    return {
-      hostname: "www.keyaway.app",
-      referrerParam: undefined
-    };
-  }
+  const { hostname, nestedReferrerParam } = resolveEffectiveReferrer(referrer);
+  return { hostname: referrerBucketHostname(hostname), referrerParam: nestedReferrerParam };
 }
 
-// Format utilities
+/** Full effective URL for admin links (after re-attribution). */
+export function effectiveReferrerHref(referrer: string): string {
+  const { effectiveHref } = resolveEffectiveReferrer(referrer);
+  return effectiveHref || referrer;
+}
+
+// Labels for admin UI (event type, slug, path segments)
 export function formatEventName(event: string): string {
   return event.replace(/_/g, " ").toUpperCase();
 }

@@ -1,3 +1,4 @@
+/** @fileoverview Cron/migration: moves old `trackingEvent` docs into `trackingEventBundle`, deletes sources, optional retention window. */
 import { revalidateTag } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
 
@@ -6,7 +7,7 @@ const BUNDLE_SIZE = 1000;
 const MAX_ITERATIONS = 10;
 
 const EVENT_FIELDS =
-  "event, programSlug, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
+  "event, programSlug, notFound, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
 
 function toBundleEvent(doc: Record<string, unknown> & { _id?: string }, index: number) {
   const id = doc._id ?? `evt-${index}`;
@@ -18,6 +19,7 @@ function toBundleEvent(doc: Record<string, unknown> & { _id?: string }, index: n
     _key: key,
     event: doc.event,
     programSlug: doc.programSlug,
+    notFound: doc.notFound,
     path: doc.path,
     referrer: doc.referrer,
     country: doc.country,
@@ -51,7 +53,6 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
   let appended = 0;
 
   try {
-    // Phase 1: Fill incomplete bundles
     while (true) {
       const incomplete = await client.fetch<{ _id: string; eventCount: number; timeRangeEnd: string } | null>(
         `*[_type == "trackingEventBundle" && eventCount < $limit] | order(timeRangeEnd desc) [0]{ _id, eventCount, timeRangeEnd }`,
@@ -83,7 +84,6 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       appended += toAdd.length;
     }
 
-    // Phase 2: Create new bundles (each batch picks up after the previous one's timeRangeEnd)
     const latestBundle = await client.fetch<{ timeRangeEnd: string } | null>(
       `*[_type == "trackingEventBundle"] | order(timeRangeEnd desc) [0]{ timeRangeEnd }`
     );

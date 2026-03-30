@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FaTimes } from "react-icons/fa";
+import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import ContactForm from "./ContactForm";
 import KeySuggestionForm from "./KeySuggestionForm";
 
@@ -69,12 +69,12 @@ export default function ContactModal({ isOpen, onClose, defaultTab = "suggest" }
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
           <h2 className="text-2xl font-bold text-gray-900">Get in Touch</h2>
-          <button
+          <ModalCloseButton
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-            aria-label="Close modal">
-            <FaTimes size={20} />
-          </button>
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg"
+            iconClassName="h-5 w-5"
+            aria-label="Close modal"
+          />
         </div>
 
         {/* Tabs */}

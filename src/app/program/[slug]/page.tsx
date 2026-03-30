@@ -1,3 +1,4 @@
+/** @fileoverview Program detail: keys, related programs, JSON-LD; visitor context for hero and spammer gate on reports. */
 import { CDKey, SocialData } from "@/src/types";
 import { notFound } from "next/navigation";
 import ProgramInformation from "@/src/components/program/ProgramInformation";
@@ -13,6 +14,8 @@ import { popularProgramsQuery, storeDetailsQuery, socialLinksQuery } from "@/src
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
+import { headers } from "next/headers";
+import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -28,19 +31,15 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   try {
     const { slug } = await params;
 
-    // Get program with automatically updated expired keys
     const program = await getProgramWithUpdatedKeys(slug);
 
     if (!program) return notFound();
 
-    // Sort CD keys by status (they're already updated in Sanity)
     const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
 
-    // Calculate stats for the program information
     const totalKeys = sortedCdKeys.length;
     const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
 
-    // Get related programs, store data, and social data (excluding current program)
     const [allPrograms, storeData, socialLinks] = await Promise.all([
       client.fetch(popularProgramsQuery),
       client.fetch(storeDetailsQuery),
@@ -50,11 +49,13 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     const socialData: SocialData = {
       socialLinks: socialLinks || []
     };
+
+    const hdrs = await headers();
+    const { isSpammer, visitorWelcomeLine } = await getVisitorContextForPublicPage(hdrs);
     const relatedPrograms = allPrograms
       .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
       .slice(0, 5);
 
-    // Generate JSON-LD for program page
     const storeInfo = storeData?.[0] || { title: "KeyAway" };
     const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
 
@@ -62,27 +63,17 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       <>
         <JsonLd data={jsonLd} />
         <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-          {/* 1. Program Information - Most Important */}
           <ProgramInformation
             program={program}
             totalKeys={totalKeys}
             workingKeys={workingKeys}
             socialData={socialData}
+            visitorWelcomeLine={visitorWelcomeLine}
           />
-
-          {/* 2. CD Key Table - Second Most Important */}
-          <CDKeyTable cdKeys={sortedCdKeys} slug={slug} />
-
-          {/* 3. Contribute Banner - Encourage User Participation */}
+          <CDKeyTable cdKeys={sortedCdKeys} slug={slug} isSpammerVisitor={isSpammer} />
           <ContributeBanner />
-
-          {/* 4. Activation Instructions */}
           <ActivationInstructions />
-
-          {/* 5. Related Programs */}
           <RelatedPrograms programs={relatedPrograms} />
-
-          {/* 6. Comments Section */}
           <CommentsSection />
         </main>
       </>

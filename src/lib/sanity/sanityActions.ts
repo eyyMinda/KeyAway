@@ -162,7 +162,7 @@ async function getProgramStats(
   const [singularCounts, counts] = await Promise.all([
     Promise.all([
       client.fetch(
-        `count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == $slug])`,
+        `count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == $slug && (notFound != true)])`,
         { slug: program.slug.current },
         { next: { tags: ["featured-program"] } }
       ),

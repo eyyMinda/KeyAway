@@ -1,5 +1,6 @@
 "use client";
 
+/** @fileoverview Admin key reports: aggregate Sanity keyReport docs by program+key, filters, modal detail. */
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { client } from "@/src/sanity/lib/client";
@@ -23,7 +24,6 @@ function KeyReportsPageContent() {
   const hasAppliedProgramParam = useRef(false);
   const [keyFilterHash, setKeyFilterHash] = useState<string | null>(null);
 
-  // Use custom hook for status change management
   const { pendingChanges, saving, handleStatusChange, saveStatusChange, cancelStatusChange } = useStatusChange({
     programs,
     setReports,
@@ -34,23 +34,14 @@ function KeyReportsPageContent() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch programs
         const programsData: Program[] = await client.fetch(allProgramsQuery);
         setPrograms(programsData);
 
-        // Fetch key reports from last 30 days
-        // const since = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString();
-        // Fetch all historical key reports
+        // TODO: remove legacy — optional rolling window instead of full history (`since` was 30d; now epoch).
         const since = "1970-01-01T00:00:00.000Z";
         const events = await client.fetch(keyReportsQuery, { since });
 
-        // Debug: Log a sample event to see the data structure
-        if (events.length > 0) {
-          logger.collapse(events[0], "Sample tracking event data", "info");
-        }
-
         const keyReportEvents = events;
-        // Group by actual CD key within each program using hash matching
         const keyReports = new Map<string, ExpiredKeyReport>();
 
         for (const report of keyReportEvents) {
@@ -59,7 +50,6 @@ function KeyReportsPageContent() {
           const keyIdentifier = (report.keyIdentifier as string) || "unknown";
           const program = programsData.find(p => p.slug?.current === programSlug);
 
-          // Find the actual CD key from the program by matching hash
           let actualKey = null;
           if (program?.cdKeys) {
             actualKey = program.cdKeys.find(k => {
@@ -76,7 +66,6 @@ function KeyReportsPageContent() {
             }
           }
 
-          // Use the actual key for grouping, or fallback to hash if not found
           const keyForGrouping = actualKey?.key || keyHash;
           const groupKey = `${programSlug}:${keyForGrouping}`;
 
@@ -108,7 +97,6 @@ function KeyReportsPageContent() {
 
           const eventType = report.eventType as string;
 
-          // Update report data based on event type
           switch (eventType) {
             case "report_key_working":
               keyReport.reportData.working++;
@@ -138,13 +126,15 @@ function KeyReportsPageContent() {
           );
 
           keyReport.reports.push({
+            _id: report._id as string,
+            ipHash: (report.ipHash as string) || undefined,
+            referrer: (report.referrer as string) || undefined,
             createdAt: report.createdAt as string,
             country: (report.country as string) || "Unknown",
             city: (report.city as string) || "Unknown",
             eventType: eventType as "report_key_working" | "report_key_expired" | "report_key_limit_reached"
           });
 
-          // Update first and last reported dates
           if (new Date(report.createdAt as string) < new Date(keyReport.firstReported)) {
             keyReport.firstReported = report.createdAt as string;
           }
@@ -166,7 +156,6 @@ function KeyReportsPageContent() {
     fetchData();
   }, []);
 
-  // Apply ?program= and ?key= from URL when programs are loaded
   useEffect(() => {
     const programSlug = searchParams.get("program");
     const keyParam = searchParams.get("key");
@@ -193,7 +182,6 @@ function KeyReportsPageContent() {
       if (program?.slug?.current) {
         setSelectedProgram(program.slug.current);
       }
-      // If key not found in programs (e.g. removed), selectedProgram stays "all" - filter will still apply by keyHash once loaded
     }
   }, [programs, searchParams]);
 
@@ -253,7 +241,6 @@ function KeyReportsPageContent() {
           </div>
         </div>
 
-        {/* Reports Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <KeyReportsTable
             reports={filteredReports}
@@ -270,7 +257,6 @@ function KeyReportsPageContent() {
         </div>
       </div>
 
-      {/* Report Details Modal */}
       <ReportDetailsModal
         isOpen={isModalOpen}
         onClose={() => {

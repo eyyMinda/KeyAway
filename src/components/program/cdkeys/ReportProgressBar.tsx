@@ -42,18 +42,18 @@ export default function ReportProgressBar({
     <div className={`flex flex-col items-center space-y-2 ${className}`}>
       {showPercentage && (
         <div className="text-xs font-medium text-center">
-          <span className="text-green-400">{workingPercentRounded}%</span>
+          <span className="text-success-400">{workingPercentRounded}%</span>
         </div>
       )}
 
       <div className="w-24 bg-neutral-600 rounded-full h-2 overflow-hidden">
         <div className="flex h-full w-full">
           {/* Working (Primary/Green) */}
-          {workingPercent > 0 && <div className="bg-green-500 h-full" style={{ width: `${workingPercent}%` }} />}
+          {workingPercent > 0 && <div className="bg-success-500 h-full" style={{ width: `${workingPercent}%` }} />}
           {/* Expired (Error/Red) */}
-          {expiredPercent > 0 && <div className="bg-red-500 h-full" style={{ width: `${expiredPercent}%` }} />}
+          {expiredPercent > 0 && <div className="bg-error-500 h-full" style={{ width: `${expiredPercent}%` }} />}
           {/* Limit Reached (Warning/Orange) */}
-          {limitPercent > 0 && <div className="bg-orange-500 h-full" style={{ width: `${limitPercent}%` }} />}
+          {limitPercent > 0 && <div className="bg-warning-500 h-full" style={{ width: `${limitPercent}%` }} />}
         </div>
       </div>
     </div>

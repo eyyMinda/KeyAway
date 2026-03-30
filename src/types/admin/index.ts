@@ -77,6 +77,9 @@ export interface ExpiredKeyReport {
     limit_reached: number;
   };
   reports: Array<{
+    _id: string;
+    ipHash?: string;
+    referrer?: string;
     createdAt: string;
     country?: string;
     city?: string;

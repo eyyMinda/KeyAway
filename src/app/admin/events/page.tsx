@@ -1,5 +1,6 @@
 "use client";
 
+/** @fileoverview Admin events list with filters, sort, pagination. */
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import TimeFilter from "@/src/components/admin/TimeFilter";
 import EventsFilter from "@/src/components/admin/events/EventsFilter";
@@ -24,6 +25,7 @@ export default function EventsPage() {
   });
 
   const tableColumns: SortableColumn[] = [
+    { key: "visitorTags", label: "Visitor", sortable: true },
     { key: "event", label: "Event Type", sortable: true },
     { key: "program", label: "Program", sortable: true },
     { key: "social", label: "Social Platform", sortable: true },
@@ -58,25 +60,21 @@ export default function EventsPage() {
 
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
-    setCurrentPage(1); // Reset to first page when period changes
+    setCurrentPage(1);
   };
 
   const handleCustomDateChange = (start: string, end: string) => {
     setCustomDateRange({ start, end });
-    setCurrentPage(1); // Reset to first page when date range changes
-    // Only trigger fetch if both dates are selected and we're in custom mode
-    if (start && end && selectedPeriod === "custom") {
-      // The useEffect will trigger the fetch automatically
-    }
+    setCurrentPage(1);
   };
 
   const handleEventFilterChange = (eventType: string) => {
     setSelectedEvent(eventType);
-    setCurrentPage(1); // Reset to first page when event filter changes
+    setCurrentPage(1);
   };
 
   const handleSort = (column: string) => {
-    setCurrentPage(1); // Reset to first page when sorting changes
+    setCurrentPage(1);
     if (sortColumn === column) {
       setSortDirection(prev => (prev === "asc" ? "desc" : "asc"));
     } else {
@@ -87,11 +85,16 @@ export default function EventsPage() {
 
   const filteredEvents = selectedEvent === "all" ? events : events.filter(event => event.event === selectedEvent);
 
-  // Sorting logic
   const sortedEvents = useMemo(() => {
     return [...filteredEvents].sort((a, b) => {
       let cmp = 0;
       switch (sortColumn) {
+        case "visitorTags": {
+          const tag = (e: (typeof filteredEvents)[number]) =>
+            !e.ipHash ? "" : e.visitorIsSpammer ? "spammer" : e.visitTier || "new";
+          cmp = tag(a).localeCompare(tag(b));
+          break;
+        }
         case "event":
           cmp = a.event.localeCompare(b.event);
           break;
@@ -130,7 +133,6 @@ export default function EventsPage() {
     });
   }, [filteredEvents, sortColumn, sortDirection]);
 
-  // Pagination logic
   const totalPages = Math.max(1, Math.ceil(sortedEvents.length / eventsPerPage));
   const clampedPage = Math.min(currentPage, totalPages);
   const pageStartIndex = (clampedPage - 1) * eventsPerPage;
@@ -152,11 +154,9 @@ export default function EventsPage() {
     );
   }
 
-  // Show message when custom range is selected but dates are incomplete
   if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
     return (
       <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
-        {/* Time Filter */}
         <div className="mb-6">
           <TimeFilter
             selectedPeriod={selectedPeriod}
@@ -166,7 +166,6 @@ export default function EventsPage() {
           />
         </div>
 
-        {/* Event Filter */}
         <EventsFilter
           selectedEvent={selectedEvent}
           eventTypes={[]}
@@ -200,7 +199,6 @@ export default function EventsPage() {
 
   return (
     <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
-      {/* Time Filter */}
       <div className="mb-6">
         <TimeFilter
           selectedPeriod={selectedPeriod}
@@ -210,7 +208,6 @@ export default function EventsPage() {
         />
       </div>
 
-      {/* Event Filter */}
       <EventsFilter
         selectedEvent={selectedEvent}
         eventTypes={eventTypes}
@@ -218,7 +215,6 @@ export default function EventsPage() {
         onEventChange={handleEventFilterChange}
       />
 
-      {/* Events Table */}
       <EventsTable
         events={paginatedEvents}
         totalItems={sortedEvents.length}

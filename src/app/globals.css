@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+/* Canonical palette + semantics: `src/theme/colorSchema.ts`. Keep :root hex aligned when changing scales. */
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -514,6 +516,23 @@ body {
   }
   .bg-success-950 {
     background-color: var(--success-950);
+  }
+
+  /* 50% tints: HTML uses `bg-*-500/50`; hand-written utilities above omit `/50`, so nothing matched. */
+  .bg-primary-500\/50 {
+    background-color: color-mix(in srgb, var(--primary-500) 50%, transparent);
+  }
+  .bg-success-500\/50 {
+    background-color: color-mix(in srgb, var(--success-500) 50%, transparent);
+  }
+  .bg-accent-500\/50 {
+    background-color: color-mix(in srgb, var(--accent-500) 50%, transparent);
+  }
+  .bg-warning-500\/50 {
+    background-color: color-mix(in srgb, var(--warning-500) 50%, transparent);
+  }
+  .bg-error-500\/50 {
+    background-color: color-mix(in srgb, var(--error-500) 50%, transparent);
   }
 
   .text-success-50 {
@@ -1163,6 +1182,26 @@ body {
   }
   .hover\:text-accent-950:hover {
     color: var(--accent-950);
+  }
+
+  /* Analytics event dots — same hex as tailwind-palette.json analyticsAccents (ensures bg-analytics-* when Tailwind theme from config is not applied) */
+  .bg-analytics-copy {
+    background-color: #10b981;
+  }
+  .bg-analytics-download {
+    background-color: #3b82f6;
+  }
+  .bg-analytics-social {
+    background-color: #8b5cf6;
+  }
+  .bg-analytics-pageview {
+    background-color: #f59e0b;
+  }
+  .bg-analytics-default {
+    background-color: #6b7280;
+  }
+  .bg-analytics-notfound {
+    background-color: #f43f5e;
   }
 
   /* Custom gradient text utility */

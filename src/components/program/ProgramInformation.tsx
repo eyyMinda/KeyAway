@@ -7,15 +7,25 @@ import { Program, SocialData } from "@/src/types";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { FacebookGroupButton } from "@/src/components/social";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
+import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
 
 interface ProgramInformationProps {
   program: Program;
   totalKeys: number;
   workingKeys: number;
   socialData?: SocialData;
+  /** Optional line from visit tier (server); omit for default hero only. */
+  visitorWelcomeLine?: string | null;
 }
 
-export default function ProgramInformation({ program, totalKeys, workingKeys, socialData }: ProgramInformationProps) {
+export default function ProgramInformation({
+  program,
+  totalKeys,
+  workingKeys,
+  socialData,
+  visitorWelcomeLine
+}: ProgramInformationProps) {
+  const trustpilotUrl = getTrustpilotReviewUrl(socialData);
   return (
     <section className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 py-6 sm:py-10">
       <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,9 +43,11 @@ export default function ProgramInformation({ program, totalKeys, workingKeys, so
             )}
 
             {/* Trustpilot CTA: below the main image */}
-            <div className="mt-4 flex justify-center">
-              <TrustpilotReviewWidget />
-            </div>
+            {trustpilotUrl ? (
+              <div className="mt-4 flex justify-center">
+                <TrustpilotReviewWidget reviewUrl={trustpilotUrl} />
+              </div>
+            ) : null}
           </div>
 
           {/* Content */}
@@ -48,6 +60,9 @@ export default function ProgramInformation({ program, totalKeys, workingKeys, so
                 <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed">
                   Download premium software for free and activate one of the working CD keys
                 </p>
+                {visitorWelcomeLine ? (
+                  <p className="mt-2 text-sm text-primary-300/90">{visitorWelcomeLine}</p>
+                ) : null}
               </div>
 
               {program.description && (

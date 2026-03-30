@@ -28,14 +28,14 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
         {/* Badges */}
         <div className="absolute top-2 sm:top-3 lg:top-4 left-2 sm:left-3 lg:left-4 flex flex-col gap-1.5 sm:gap-2">
           {badges?.mostViewed && (
-            <div className="bg-blue-500 text-white px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1">
+            <div className="bg-primary-500 text-white px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1">
               <FaEye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span className="hidden xs:inline">Most Viewed</span>
               <span className="xs:hidden">Top</span>
             </div>
           )}
           {badges?.mostDownloaded && (
-            <div className="bg-green-500 text-white px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1">
+            <div className="bg-success-500 text-white px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1">
               <FaDownload className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span className="hidden xs:inline">Most Downloaded</span>
               <span className="xs:hidden">Top</span>
