@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { ExpiredKeyReport, KeyReportEvent } from "@/src/types";
 import ModalSection from "./ModalSection";
+import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { FiAlertTriangle, FiCheck, FiX } from "react-icons/fi";
 import { client } from "@/src/sanity/lib/client";
 import { effectiveReferrerHref, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
@@ -26,9 +27,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
   const [rowEventTypes, setRowEventTypes] = useState<Record<string, KeyReportEvent>>({});
   const [savingReportId, setSavingReportId] = useState<string | null>(null);
   const [spamBusyHash, setSpamBusyHash] = useState<string | null>(null);
-  const [visitorByHash, setVisitorByHash] = useState<
-    Record<string, { visitTier?: string; isSpammer?: boolean }>
-  >({});
+  const [visitorByHash, setVisitorByHash] = useState<Record<string, { visitTier?: string; isSpammer?: boolean }>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -111,7 +110,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
   const patchVisitorSpam = useCallback(async (visitorHash: string, isSpammer: boolean) => {
     const ok = window.confirm(
       isSpammer
-        ? "Mark this visitor as spammer? They won’t be able to submit public key reports."
+        ? "Mark this visitor as spammer? They can still report keys as working, but not expired or limit reached."
         : "Unmark spammer for this visitor?"
     );
     if (!ok) return;
@@ -188,18 +187,16 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
         }`}
         onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between py-2 px-6 border-b-2 border-blue-200 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+        <div className="flex items-center justify-between py-2 px-6 border-b-2 border-blue-200 bg-white">
           <div>
             <h2 className="text-3xl font-bold text-black mb-2">Report Details</h2>
             <p className="text-primary-700 font-medium text-lg">{report.programTitle}</p>
           </div>
-          <button
+          <ModalCloseButton
             onClick={onClose}
-            className="text-white hover:text-red-200 transition-colors p-3 rounded-full hover:bg-red-500 hover:bg-opacity-20">
-            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            className="p-3 rounded-full text-gray-700 hover:text-gray-950 hover:bg-gray-100 active:bg-gray-200/80 transition-colors duration-200"
+            iconClassName="h-7 w-7"
+          />
         </div>
 
         {/* Content */}
@@ -382,7 +379,9 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                         <button
                           type="button"
                           disabled={
-                            !reportItem._id || savingReportId === reportItem._id || currentSelect === reportItem.eventType
+                            !reportItem._id ||
+                            savingReportId === reportItem._id ||
+                            currentSelect === reportItem.eventType
                           }
                           onClick={() => reportItem._id && void saveReportEventType(reportItem._id)}
                           className="h-7 px-2 rounded bg-indigo-600 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
@@ -405,7 +404,9 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                       )}
                     </div>
                     <div className="flex flex-col gap-1.5 sm:items-end sm:text-right text-[11px] text-gray-600 shrink-0">
-                      <span className="truncate max-w-[12rem] sm:max-w-[10rem]" title={`${reportItem.city}, ${reportItem.country}`}>
+                      <span
+                        className="truncate max-w-[12rem] sm:max-w-[10rem]"
+                        title={`${reportItem.city}, ${reportItem.country}`}>
                         {reportItem.city}, {reportItem.country}
                       </span>
                       <div className="flex flex-wrap items-center justify-end gap-1.5 w-full sm:max-w-[20rem]">
@@ -417,9 +418,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                             spammer
                           </span>
                         ) : null}
-                        <span
-                          className="font-mono text-[10px] text-gray-500 break-all text-right min-w-0"
-                          title={hash}>
+                        <span className="font-mono text-[10px] text-gray-500 break-all text-right min-w-0" title={hash}>
                           {hashShort}
                         </span>
                       </div>
@@ -449,11 +448,11 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
           <div className="text-sm text-gray-600 font-medium">
             {report.reportCount} total reports • Last updated: {new Date(report.lastReported).toLocaleDateString()}
           </div>
-          <button
+          <ModalCloseButton
             onClick={onClose}
-            className="px-8 py-3 text-base font-bold text-white bg-blue-600 border-2 border-blue-600 rounded-xl hover:bg-blue-700 hover:border-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+            className="px-8 py-3 text-base font-bold text-white bg-blue-600 border-2 border-blue-600 rounded-xl hover:bg-blue-700 hover:border-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 focus-visible:ring-4 focus-visible:ring-blue-300 focus-visible:ring-offset-2">
             Close
-          </button>
+          </ModalCloseButton>
         </div>
       </div>
     </div>

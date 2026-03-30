@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaTimes } from "react-icons/fa";
+import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { urlFor } from "@/src/sanity/lib/image";
 
 interface ImageLibraryModalProps {
@@ -42,12 +42,11 @@ export default function ImageLibraryModal({ isOpen, onClose, onSelect }: ImageLi
         onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
           <h3 className="font-semibold text-gray-900">Choose image</h3>
-          <button
-            type="button"
+          <ModalCloseButton
             onClick={onClose}
-            className="p-2 text-gray-500 hover:bg-gray-200 rounded-lg cursor-pointer">
-            <FaTimes size={18} />
-          </button>
+            className="p-2 text-gray-500 hover:bg-gray-200 rounded-lg"
+            iconClassName="h-[18px] w-[18px]"
+          />
         </div>
         <div className="p-4 overflow-y-auto flex-1">
           {assets.length === 0 ? (
