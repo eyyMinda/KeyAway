@@ -1,6 +1,7 @@
 /** @fileoverview Analytics dashboard “Recent activity” list: event line + meta row; visitor tier/hash on the right under the timestamp. */
 import { AnalyticsEventData } from "@/src/types";
 import { getTrackingRowDotClass, formatEventName, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
+import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import { isPageViewNotFoundRow } from "@/src/lib/analytics/pageViewDisplay";
 
 interface RecentActivityProps {
@@ -85,11 +86,9 @@ export default function RecentActivity({
                     {hash ? (
                       <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-56">
                         {event.visitorIsSpammer ? (
-                          <span className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded">
-                            spammer
-                          </span>
+                          <span className={visitorTierBadgeClasses("new", true)}>spammer</span>
                         ) : null}
-                        <span className="text-xs text-violet-900 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded capitalize">
+                        <span className={visitorTierBadgeClasses(event.visitTier, false)}>
                           {event.visitTier || "new"}
                         </span>
                         <span className="font-mono text-[10px] text-gray-500 truncate" title={hash}>

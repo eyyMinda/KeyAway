@@ -1,22 +1,13 @@
 "use client";
 
+import { chartSeriesFallback } from "@/src/theme/colorSchema";
+
 interface EventChartProps {
   data: Array<{ name: string; value: number; color?: string }>;
   title: string;
   type?: "bar" | "doughnut" | "line";
   className?: string;
 }
-
-const defaultColors = [
-  "#3B82F6", // blue
-  "#10B981", // green
-  "#8B5CF6", // purple
-  "#F59E0B", // orange
-  "#EF4444", // red
-  "#06B6D4", // cyan
-  "#84CC16", // lime
-  "#F97316" // orange-500
-];
 
 export default function EventChart({ data, title, type = "doughnut", className = "" }: EventChartProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
@@ -51,7 +42,7 @@ export default function EventChart({ data, title, type = "doughnut", className =
                 const startAngle = (cumulativePercentage / 100) * 360;
                 // const endAngle = ((cumulativePercentage + percentage) / 100) * 360;
 
-                const color = item.color || defaultColors[index % defaultColors.length];
+                const color = item.color || chartSeriesFallback[index % chartSeriesFallback.length];
 
                 const radius = 40;
                 const circumference = 2 * Math.PI * radius;
@@ -83,20 +74,22 @@ export default function EventChart({ data, title, type = "doughnut", className =
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 w-full">
           {data.map((item, index) => {
             const percentage = ((item.value / total) * 100).toFixed(1);
-            const color = item.color || defaultColors[index % defaultColors.length];
+            const color = item.color || chartSeriesFallback[index % chartSeriesFallback.length];
 
             return (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: color }} />
-                  <span className="text-sm font-medium text-gray-900">{item.name}</span>
+              <div key={item.name} className="flex items-center justify-between gap-2 min-w-0">
+                <div className="flex items-center min-w-0 gap-2">
+                  <div className="size-3 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                  <span className="text-sm font-medium text-gray-900 truncate">{item.name}</span>
                 </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</div>
-                  <div className="text-xs text-gray-500">{percentage}%</div>
+                <div className="text-right shrink-0 leading-tight flex items-center gap-1">
+                  <span className="text-sm font-semibold text-gray-900 tabular-nums">
+                    {item.value.toLocaleString()}
+                  </span>
+                  <span className="text-xs text-gray-500 tabular-nums">({percentage}%)</span>
                 </div>
               </div>
             );
@@ -112,28 +105,30 @@ export default function EventChart({ data, title, type = "doughnut", className =
         <h3 className="text-lg font-semibold text-gray-900 mb-6">{title}</h3>
 
         <div className="space-y-4">
-          {data.map((item, index) => {
-            const percentage = (item.value / maxValue) * 100;
-            const color = item.color || defaultColors[index % defaultColors.length];
+          {data
+            .sort((a, b) => b.value - a.value)
+            .map((item, index) => {
+              const percentage = (item.value / maxValue) * 100;
+              const color = item.color || chartSeriesFallback[index % chartSeriesFallback.length];
 
-            return (
-              <div key={item.name} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900">{item.name}</span>
-                  <span className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</span>
+              return (
+                <div key={item.name} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                    <span className="text-sm font-semibold text-gray-900">{item.value.toLocaleString()}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div
+                      className="h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${percentage}%`,
+                        backgroundColor: color
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div
-                    className="h-3 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${percentage}%`,
-                      backgroundColor: color
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
     );

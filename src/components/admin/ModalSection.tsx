@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { modalSectionStyles } from "@/src/theme/colorSchema";
 
 interface ModalSectionProps {
   title: string;
@@ -9,46 +10,8 @@ interface ModalSectionProps {
   className?: string;
 }
 
-const colorConfig = {
-  blue: {
-    bar: "bg-blue-500",
-    title: "text-blue-700",
-    background: "bg-gradient-to-br from-blue-50 to-indigo-50",
-    border: "border-blue-100",
-    content: "border-blue-200"
-  },
-  green: {
-    bar: "bg-green-500",
-    title: "text-green-700",
-    background: "bg-gradient-to-br from-green-50 to-emerald-50",
-    border: "border-green-100",
-    content: "border-green-200"
-  },
-  red: {
-    bar: "bg-red-500",
-    title: "text-red-700",
-    background: "bg-gradient-to-br from-red-50 to-pink-50",
-    border: "border-red-100",
-    content: "border-red-200"
-  },
-  purple: {
-    bar: "bg-purple-500",
-    title: "text-purple-700",
-    background: "bg-gradient-to-br from-purple-50 to-indigo-50",
-    border: "border-purple-100",
-    content: "border-purple-200"
-  },
-  gray: {
-    bar: "bg-gray-500",
-    title: "text-gray-700",
-    background: "bg-gradient-to-br from-gray-50 to-slate-50",
-    border: "border-gray-100",
-    content: "border-gray-200"
-  }
-};
-
 export default function ModalSection({ title, color, children, className = "" }: ModalSectionProps) {
-  const config = colorConfig[color];
+  const config = modalSectionStyles[color];
 
   return (
     <div className={`mb-6 ${className}`}>

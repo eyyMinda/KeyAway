@@ -6,6 +6,7 @@ import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { client } from "@/src/sanity/lib/client";
 import { fetchEventsForRange, fetchVisitorTagAggregatesForRange } from "@/src/lib/analytics/eventsApi";
 import type { VisitorTagAggregateRow } from "@/src/lib/analytics/eventsApi";
+import { visitorTierSwatchBgClass } from "@/src/theme/colorSchema";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
@@ -166,7 +167,12 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <DataTable
           title="Visitor tags"
-          data={visitorTagRows.map(r => ({ key: r.key, value: r.value, label: r.label }))}
+          data={visitorTagRows.map(r => ({
+            key: r.key,
+            value: r.value,
+            label: r.label,
+            swatchClass: visitorTierSwatchBgClass(r.key)
+          }))}
           maxItems={10}
           showPercentage={true}
         />

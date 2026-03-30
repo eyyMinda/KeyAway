@@ -1,6 +1,15 @@
+import { adminChrome } from "@/src/theme/colorSchema";
+
 interface DataTableProps {
   title: string;
-  data: Array<{ key: string; value: number; label?: string; referrerParam?: string }>;
+  data: Array<{
+    key: string;
+    value: number;
+    label?: string;
+    referrerParam?: string;
+    /** Tailwind bg-* only — small dot before the label when set. */
+    swatchClass?: string;
+  }>;
   maxItems?: number;
   showPercentage?: boolean;
   className?: string;
@@ -42,8 +51,16 @@ export default function DataTable({
                   <div className="flex items-center flex-1 min-w-0">
                     <span className="text-sm font-medium text-gray-500 w-6">#{index + 1}</span>
                     <div className="flex-1 min-w-0 ml-3">
-                      <div className="flex flex-col">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.label || item.key}</p>
+                      <div className="flex flex-col min-w-0">
+                        <div className="text-sm font-medium text-gray-900 flex items-center gap-2 min-w-0">
+                          {item.swatchClass ? (
+                            <span
+                              className={`size-2.5 rounded-full shrink-0 ${item.swatchClass}`}
+                              aria-hidden
+                            />
+                          ) : null}
+                          <span className="truncate">{item.label || item.key}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -55,7 +72,7 @@ export default function DataTable({
                       )}
                       <div className="w-24 bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                          className={`${adminChrome.progressBarFill} h-2 rounded-full transition-all duration-300`}
                           style={{ width: `${(item.value / barMax) * 100}%` }}
                         />
                       </div>
