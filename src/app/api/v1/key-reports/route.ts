@@ -4,6 +4,7 @@ import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
+import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import type { KeyReportEvent } from "@/src/types";
 
 const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest) {
     const ipHash = hashIp(ip);
     if (!ipHash) return Errors.validation("Unable to generate visitor hash");
 
+    const spammerSkip = async () =>
+      NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
+
     // --- Renew: update existing report (same visitor) ---
     const reportId = typeof b.reportId === "string" ? b.reportId.trim() : "";
     const newEventType = typeof b.newEventType === "string" ? b.newEventType.trim() : "";
@@ -38,6 +42,12 @@ export async function POST(req: NextRequest) {
         return Errors.validation(
           "Invalid newEventType. Use report_key_working, report_key_expired, or report_key_limit_reached"
         );
+      }
+      if (!isLocalhost && (await isVisitorSpammerByHash(ipHash))) {
+        return NextResponse.json({
+          data: { updatedReport: { _id: reportId, eventType: newEventType }, skipped: true },
+          meta: {}
+        });
       }
       if (isLocalhost) {
         return NextResponse.json({
@@ -70,6 +80,10 @@ export async function POST(req: NextRequest) {
 
     if (isLocalhost) {
       return NextResponse.json({ data: { created: true, skipped: true }, meta: {} });
+    }
+
+    if (await isVisitorSpammerByHash(ipHash)) {
+      return spammerSkip();
     }
 
     const programSlug = meta?.programSlug as string | undefined;

@@ -29,6 +29,8 @@ interface Group {
   expired: number;
   limit_reached: number;
   lastReportAt: string;
+  /** Chronologically latest report type in the aggregation window */
+  lastEventType?: KeyReportEventType;
 }
 
 interface ProgramWithKeys {
@@ -85,11 +87,15 @@ export async function GET(req: NextRequest) {
           working: 0,
           expired: 0,
           limit_reached: 0,
-          lastReportAt: reportAt
+          lastReportAt: reportAt,
+          lastEventType: eventType
         });
       }
       const g = groups.get(groupKey)!;
-      if (reportAt && reportAt > g.lastReportAt) g.lastReportAt = reportAt;
+      if (reportAt && reportAt >= g.lastReportAt) {
+        g.lastReportAt = reportAt;
+        g.lastEventType = eventType;
+      }
       if (eventType === "report_key_working") g.working++;
       else if (eventType === "report_key_expired") g.expired++;
       else if (eventType === "report_key_limit_reached") g.limit_reached++;
@@ -99,6 +105,8 @@ export async function GET(req: NextRequest) {
     for (const g of groups.values()) {
       const negativeCount = g.expired + g.limit_reached;
       if (negativeCount < 1) continue;
+      // Latest signal is "working" while some negatives exist — treat as resolved by user re-check
+      if (g.working > 0 && g.lastEventType === "report_key_working") continue;
       if (resolvedKeys.has(`${g.programSlug}:${g.keyHash}`)) continue; // key already marked expired/limit
       const total = g.working + g.expired + g.limit_reached;
       negativeFiltered.push({ ...g, negativeCount, total });
