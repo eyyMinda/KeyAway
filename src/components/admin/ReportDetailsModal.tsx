@@ -405,9 +405,6 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                       )}
                     </div>
                     <div className="flex flex-col gap-1.5 sm:items-end sm:text-right text-xs text-gray-600 shrink-0">
-                      <span className="max-w-72" title={`${reportItem.city}, ${reportItem.country}`}>
-                        {reportItem.city}, {reportItem.country}
-                      </span>
                       <div className="flex flex-wrap items-center justify-end gap-1.5 w-full sm:max-w-[20rem]">
                         <span className={visitorTierBadgeClasses(tier, false)}>{tier}</span>
                         {isSpam ? <span className={visitorTierBadgeClasses("new", true)}>spammer</span> : null}
@@ -415,6 +412,9 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                           {hashShort}
                         </span>
                       </div>
+                      <span className="max-w-72" title={`${reportItem.city}, ${reportItem.country}`}>
+                        {reportItem.city}, {reportItem.country}
+                      </span>
                       {hash ? (
                         <button
                           type="button"
