@@ -26,7 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: {
     strategy: "jwt",
-    maxAge: process.env.NODE_ENV === "development" ? 7 * 24 * 60 * 60 : 2 * 60 * 60 // 7 days dev, 2 hours prod
+    maxAge: 7 * 24 * 60 * 60 // 7 days
   },
   callbacks: {
     async signIn({ user }) {
