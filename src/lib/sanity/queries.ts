@@ -69,18 +69,20 @@ export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $si
 
 /* ------------ Analytics with Custom Date Range ------------ */
 export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && createdAt >= $since && createdAt <= $until]{
-      _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+      _id, event, programSlug, notFound, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
+      "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier,
+      "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer
     } | order(createdAt desc)`;
 
 /* ------------ Bundle counts by program (for merging with singular counts) ------------ */
 export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
-  "events": events[]{ programSlug, event }
+  "events": events[]{ programSlug, event, notFound }
 }`;
 
 /* ------------ Bundled Events (overlaps range, events filtered in-doc) ------------ */
 export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
   _id,
-  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt }
+  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier, "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer }
 }`;
 
 /* ------------ Key Reports ------------ */
@@ -110,10 +112,10 @@ export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt de
 /* ------------ Popular Programs by Page Views ------------ */
 export const popularProgramsByViewsQuery = `*[_type == "program"]{
   title, slug, description, featuredDescription, image, showcaseGif, cdKeys[],
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
   "hasKeys": count(cdKeys[]) > 0,
-  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3,
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3,
   _createdAt
 } | order(popularityScore desc) [0...6]`;
 
@@ -131,10 +133,10 @@ export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekA
 /* ------------ Programs with Filtering ------------ */
 export const programsWithStatsQuery = `*[_type == "program"]{
   title, slug, description, featuredDescription, image, showcaseGif, cdKeys[], _createdAt,
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
   "hasKeys": count(cdKeys[]) > 0,
-  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
 }`;
 
 /* ------------ Programs Count Query ------------ */
@@ -169,7 +171,7 @@ export const featuredProgramQuery = `*[_type == "program" && slug.current == $sl
   cdKeys[],
   "totalKeys": count(cdKeys[]),
   "workingKeys": count(cdKeys[status == "active" || status == "new"]),
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])
 }`;
 
@@ -186,7 +188,7 @@ export const programsForAutoSelectionQuery = `*[_type == "program"]{
   cdKeys[],
   "totalKeys": count(cdKeys[]),
   "workingKeys": count(cdKeys[status == "active" || status == "new"]),
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]),
+  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
-  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
+  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
 } | order(workingKeys desc, popularityScore desc)`;

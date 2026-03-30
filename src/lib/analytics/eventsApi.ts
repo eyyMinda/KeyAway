@@ -1,3 +1,4 @@
+/** @fileoverview Fetches merged tracking events for admin ranges, bundle program counts for homepage, visitor tag aggregates. */
 import { client } from "@/src/sanity/lib/client";
 import { trackingEventsWithRangeQuery, trackingEventBundlesQuery, bundleCountsQuery } from "@/src/lib/sanity/queries";
 import { AnalyticsEventData } from "@/src/types";
@@ -11,7 +12,7 @@ export interface BundleCountsByProgram {
 
 /** Fetches bundle event counts aggregated by programSlug. Cached via Next.js. */
 export async function getBundleCountsByProgram(): Promise<Map<string, BundleCountsByProgram>> {
-  const bundles = await client.fetch<{ events: Array<{ programSlug?: string; event?: string }> }[]>(
+  const bundles = await client.fetch<{ events: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }[]>(
     bundleCountsQuery,
     {},
     { next: { revalidate: 60, tags: ["bundle-counts"] } }
@@ -22,7 +23,7 @@ export async function getBundleCountsByProgram(): Promise<Map<string, BundleCoun
       const slug = e.programSlug;
       if (!slug || !e.event) continue;
       const curr = map.get(slug) ?? { page_viewed: 0, download_click: 0 };
-      if (e.event === "page_viewed") curr.page_viewed++;
+      if (e.event === "page_viewed" && !e.notFound) curr.page_viewed++;
       else if (e.event === "download_click") curr.download_click++;
       map.set(slug, curr);
     }
@@ -79,4 +80,40 @@ export async function fetchEventsForRange(since: string, until: string): Promise
 
   const merged = [...(singular as AnalyticsEventData[]), ...bundleEvents];
   return merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export interface VisitorTagAggregateRow {
+  key: string;
+  label: string;
+  value: number;
+}
+
+/** Visitors with `lastActivityAt` in range; tier and flagged-spammer counts (display order is by count in the table component). */
+export async function fetchVisitorTagAggregatesForRange(
+  since: string,
+  until: string
+): Promise<VisitorTagAggregateRow[]> {
+  const rows = await client.fetch<Array<{ visitTier?: string; isSpammer?: boolean }>>(
+    `*[_type == "visitor" && lastActivityAt >= $since && lastActivityAt <= $until]{ visitTier, isSpammer }`,
+    { since, until }
+  );
+  const tierOrder = ["new", "returning", "regular", "star"] as const;
+  const tierCounts = new Map<string, number>();
+  let spammers = 0;
+  for (const r of rows ?? []) {
+    const tier = (r.visitTier || "new").toLowerCase();
+    tierCounts.set(tier, (tierCounts.get(tier) || 0) + 1);
+    if (r.isSpammer === true) spammers++;
+  }
+  const out: VisitorTagAggregateRow[] = tierOrder.map(t => ({
+    key: t,
+    label: t.charAt(0).toUpperCase() + t.slice(1),
+    value: tierCounts.get(t) ?? 0
+  }));
+  const extraTiers = [...tierCounts.keys()].filter(t => !tierOrder.includes(t as (typeof tierOrder)[number]));
+  for (const t of extraTiers.sort()) {
+    out.push({ key: t, label: t, value: tierCounts.get(t) ?? 0 });
+  }
+  out.push({ key: "spammer", label: "Spammers (flagged)", value: spammers });
+  return out;
 }
