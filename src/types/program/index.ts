@@ -30,7 +30,7 @@ export interface Program {
 export interface CDKeyTableProps {
   cdKeys: CDKey[];
   slug: string;
-  /** When true (visitor marked spammer), reporting UI is disabled. */
+  /** When true (visitor marked spammer), only “Working” reports are allowed; negative statuses are disabled in UI and API. */
   isSpammerVisitor?: boolean;
 }
 

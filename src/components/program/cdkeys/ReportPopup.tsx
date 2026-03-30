@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { CDKey } from "@/src/types/program";
 import { DuplicateCheckRequest, DuplicateCheckResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
+import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import RenewalModal from "./RenewalModal";
 import { FiCheck, FiX, FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
 import {
@@ -17,7 +18,9 @@ import {
   NOTIFICATION_DURATION,
   getReportStatusMessage,
   getErrorMessage,
-  getInfoMessage
+  getInfoMessage,
+  SPAMMER_REPORT_RESTRICTION_NOTICE,
+  SPAMMER_REPORT_DISABLED_OPTION_TITLE
 } from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
 
@@ -27,16 +30,20 @@ interface ReportPopupProps {
   cdKey: CDKey;
   slug: string;
   onReportSubmitted?: () => void;
+  /** Negative statuses disabled in UI; API enforces the same. */
+  isSpammerVisitor?: boolean;
 }
 
 interface ReportButtonProps {
   status: CDKeyStatus;
   isSubmitting: boolean;
   onReport: (status: CDKeyStatus) => void;
+  blockedBySpammer?: boolean;
 }
 
-function ReportButton({ status, isSubmitting, onReport }: ReportButtonProps) {
+function ReportButton({ status, isSubmitting, onReport, blockedBySpammer }: ReportButtonProps) {
   const config = getReportButtonConfig(status);
+  const disabled = isSubmitting || blockedBySpammer;
 
   // Get the appropriate icon for the status
   const getIcon = () => {
@@ -52,18 +59,31 @@ function ReportButton({ status, isSubmitting, onReport }: ReportButtonProps) {
     }
   };
 
+  const styleClass = blockedBySpammer
+    ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"
+    : `${config.bgColor} text-white cursor-pointer`;
+
   return (
     <button
-      onClick={() => onReport(status)}
-      disabled={isSubmitting}
-      className={`w-full flex items-center justify-center px-4 py-3 cursor-pointer ${config.bgColor} text-white font-medium rounded-lg transition-colors`}>
+      type="button"
+      onClick={() => !blockedBySpammer && onReport(status)}
+      disabled={disabled}
+      title={blockedBySpammer ? SPAMMER_REPORT_DISABLED_OPTION_TITLE : undefined}
+      className={`w-full flex items-center justify-center px-4 py-3 font-medium rounded-lg transition-colors ${styleClass}`}>
       <span className="mr-2">{getIcon()}</span>
       {config.label}
     </button>
   );
 }
 
-export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubmitted }: ReportPopupProps) {
+export default function ReportPopup({
+  isOpen,
+  onClose,
+  cdKey,
+  slug,
+  onReportSubmitted,
+  isSpammerVisitor = false
+}: ReportPopupProps) {
   const [notification, setNotification] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
@@ -71,6 +91,7 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
   const [showRenewalModal, setShowRenewalModal] = useState(false);
 
   const checkForDuplicate = useCallback(async () => {
+    setDuplicateReport(null);
     setIsCheckingDuplicate(true);
 
     try {
@@ -96,12 +117,9 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
     }
   }, [slug, cdKey.key]);
 
-  // Check for duplicate reports when modal opens
   useEffect(() => {
-    if (isOpen && !duplicateReport) {
-      checkForDuplicate();
-    }
-  }, [isOpen, duplicateReport, checkForDuplicate]);
+    if (isOpen) void checkForDuplicate();
+  }, [isOpen, slug, cdKey.key, checkForDuplicate]);
 
   const handleReport = async (status: CDKeyStatus) => {
     if (isSubmitting) return;
@@ -126,7 +144,8 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
 
       if (!res.ok) {
         console.error("[Report] API error:", res.status, payload);
-        setNotification(getErrorMessage("REPORT_FAILED"));
+        const msg = payload?.error?.message;
+        setNotification(typeof msg === "string" ? msg : getErrorMessage("REPORT_FAILED"));
         return;
       }
 
@@ -195,6 +214,7 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
           cdKey={cdKey.key}
           existingReport={duplicateReport}
           slug={slug}
+          isSpammerVisitor={isSpammerVisitor}
         />
       )}
 
@@ -205,11 +225,10 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
         <div className="bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Report Key Status</h3>
-            <button onClick={handleClose} className="text-neutral-400 hover:text-white transition-colors">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <ModalCloseButton
+              onClick={handleClose}
+              className="p-1 text-neutral-400 hover:text-white"
+            />
           </div>
 
           <div className="mb-4">
@@ -253,7 +272,14 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
 
             {/* Normal report interface */}
             {!duplicateReport && !isCheckingDuplicate && (
-              <p className="text-neutral-400 text-sm">How is this key working for you?</p>
+              <>
+                <p className="text-neutral-400 text-sm">How is this key working for you?</p>
+                {isSpammerVisitor && (
+                  <p className="text-amber-200/90 text-sm mt-3 leading-relaxed border border-amber-500/25 bg-amber-950/30 rounded-lg px-3 py-2">
+                    {SPAMMER_REPORT_RESTRICTION_NOTICE}
+                  </p>
+                )}
+              </>
             )}
           </div>
 
@@ -261,8 +287,18 @@ export default function ReportPopup({ isOpen, onClose, cdKey, slug, onReportSubm
           {!duplicateReport && !isCheckingDuplicate && (
             <div className="space-y-3">
               <ReportButton status="working" isSubmitting={isSubmitting} onReport={handleReport} />
-              <ReportButton status="expired" isSubmitting={isSubmitting} onReport={handleReport} />
-              <ReportButton status="limit_reached" isSubmitting={isSubmitting} onReport={handleReport} />
+              <ReportButton
+                status="expired"
+                isSubmitting={isSubmitting}
+                onReport={handleReport}
+                blockedBySpammer={isSpammerVisitor}
+              />
+              <ReportButton
+                status="limit_reached"
+                isSubmitting={isSubmitting}
+                onReport={handleReport}
+                blockedBySpammer={isSpammerVisitor}
+              />
             </div>
           )}
 

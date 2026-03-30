@@ -37,13 +37,7 @@ export default function CDKeyActions({
     }
   };
 
-  /**
-   * Handles opening the report popup
-   */
-  const reportInert = isSpammerVisitor;
-
   const handleReportClick = () => {
-    if (reportInert) return;
     setIsReportPopupOpen(true);
   };
 
@@ -73,6 +67,7 @@ export default function CDKeyActions({
         cdKey={cdKey}
         slug={slug}
         onReportSubmitted={onReportSubmitted}
+        isSpammerVisitor={isSpammerVisitor}
       />
 
       {/* Action Buttons */}
@@ -96,14 +91,9 @@ export default function CDKeyActions({
         <button
           type="button"
           onClick={handleReportClick}
-          aria-disabled={reportInert}
-          className={`inline-flex items-center px-3 py-1 text-white text-xs font-medium rounded-lg transition-colors duration-200 group relative ${
-            reportInert
-              ? "bg-neutral-600 opacity-40 cursor-not-allowed pointer-events-none"
-              : "bg-orange-600 hover:bg-orange-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-          }`}
-          disabled={isDisabled && !reportInert}
-          title={reportInert ? "Reporting unavailable" : "Report the status of this CD key"}>
+          className="inline-flex items-center px-3 py-1 text-white text-xs font-medium rounded-lg transition-colors duration-200 group relative bg-orange-600 hover:bg-orange-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isDisabled}
+          title="Report the status of this CD key">
           Report
         </button>
       </div>
