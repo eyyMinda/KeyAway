@@ -56,7 +56,7 @@ export default function EventsTable({
               const hashShort = hash ? `${hash.slice(0, 10)}…` : null;
               return (
                 <tr key={event._id} className="hover:bg-gray-50">
-                  <td className="max-w-52 px-6 py-4 align-top text-sm text-gray-900">
+                  <td className="max-w-52 p-4 align-top text-sm text-gray-900">
                     {hash ? (
                       <div className="flex flex-wrap items-center gap-1.5">
                         {event.visitorIsSpammer ? (
@@ -75,7 +75,7 @@ export default function EventsTable({
                       <span className="text-gray-400 text-xs">—</span>
                     )}
                   </td>
-                  <td className="max-w-44 px-6 py-4 align-top whitespace-nowrap">
+                  <td className="max-w-44 p-4 align-top whitespace-nowrap">
                     <div className="flex flex-col gap-0 items-start">
                       {event.notFound === true && (
                         <span className="text-xs font-semibold text-rose-900 mx-auto">Not Found</span>
@@ -96,7 +96,7 @@ export default function EventsTable({
                       </span>
                     </div>
                   </td>
-                  <td className="max-w-3xs px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="max-w-3xs p-4 whitespace-nowrap text-sm text-gray-900">
                     {event.programSlug && !isPageViewNotFoundRow(event) ? (
                       <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded capitalize">
                         {event.programSlug.replace(/-/g, " ")}
@@ -105,17 +105,17 @@ export default function EventsTable({
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-                  <td className="max-w-3xs px-6 py-4 text-sm text-gray-900">
+                  <td className="max-w-3xs p-4 text-sm text-gray-900">
                     {event.social ? (
                       <span className="capitalize">{event.social}</span>
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-                  <td className="max-w-3xs px-6 py-4 text-sm text-gray-900">
+                  <td className="max-w-3xs p-4 text-sm text-gray-900">
                     <span className="font-mono text-xs">{event.path || "/"}</span>
                   </td>
-                  <td className="max-w-44 px-6 py-4 text-sm text-gray-900">
+                  <td className="max-w-44 p-4 text-sm text-gray-900">
                     {event.country || event.city ? (
                       <div className="flex flex-col">
                         {event.country && <span className="font-medium">{event.country}</span>}
@@ -125,7 +125,7 @@ export default function EventsTable({
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-                  <td className="max-w-3xs px-6 py-4 text-sm text-gray-900">
+                  <td className="max-w-3xs p-4 text-sm text-gray-900">
                     {event.referrer ? (
                       <div className="flex flex-col whitespace-nowrap">
                         <a
@@ -141,7 +141,7 @@ export default function EventsTable({
                       <span className="text-gray-400">-</span>
                     )}
                   </td>
-                  <td className="max-w-3xs px-6 py-4 text-sm text-gray-500">
+                  <td className="max-w-3xs p-4 text-sm text-gray-500">
                     <div className="flex flex-col">
                       <span className="font-medium">{new Date(event.createdAt).toLocaleDateString()}</span>
                       <span className="text-xs text-gray-400">{new Date(event.createdAt).toLocaleTimeString()}</span>

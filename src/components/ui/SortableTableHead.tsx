@@ -40,7 +40,7 @@ function renderHeaderCell(
         key={column.key}
         scope="col"
         aria-sort={aria}
-        className={`px-8 py-6 text-sm font-semibold ${isActive ? activeColor : baseColor} tracking-wider select-none ${column.className || ""}`}>
+        className={`p-4 text-sm font-semibold ${isActive ? activeColor : baseColor} tracking-wider select-none ${column.className || ""}`}>
         <button onClick={() => onSort(column.key)} className="flex items-center group cursor-pointer w-full">
           <span>{column.label}</span>
           <span className={`ml-1 ${hoverColor} ${isActive ? activeColor : baseColor}`}>
@@ -60,7 +60,7 @@ function renderHeaderCell(
   return (
     <th
       key={column.key}
-      className={`px-8 py-6 text-sm font-semibold tracking-wider ${nonSortableColor} ${column.className || ""}`}>
+      className={`p-4 text-sm font-semibold tracking-wider ${nonSortableColor} ${column.className || ""}`}>
       {column.label}
     </th>
   );
