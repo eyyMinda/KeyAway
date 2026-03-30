@@ -2,7 +2,12 @@ import React from "react";
 import { AnalyticsEventData } from "@/src/types";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import Pagination from "@/src/components/ui/Pagination";
-import { extractReferrerInfo, effectiveReferrerHref, formatEventName } from "@/src/lib/analytics/analyticsUtils";
+import {
+  extractReferrerInfo,
+  effectiveReferrerHref,
+  formatEventName
+} from "@/src/lib/analytics/analyticsUtils";
+import { analyticsEventPillClasses, visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import { isPageViewNotFoundRow } from "@/src/lib/analytics/pageViewDisplay";
 
 interface EventsTableProps {
@@ -60,11 +65,9 @@ export default function EventsTable({
                     {hash ? (
                       <div className="flex flex-wrap items-center gap-1.5">
                         {event.visitorIsSpammer ? (
-                          <span className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded shrink-0">
-                            spammer
-                          </span>
+                          <span className={visitorTierBadgeClasses("new", true)}>spammer</span>
                         ) : null}
-                        <span className="text-xs text-violet-900 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded capitalize shrink-0">
+                        <span className={visitorTierBadgeClasses(event.visitTier, false)}>
                           {event.visitTier || "new"}
                         </span>
                         <span className="font-mono text-[10px] text-gray-500 truncate min-w-0" title={hash}>
@@ -81,17 +84,9 @@ export default function EventsTable({
                         <span className="text-xs font-semibold text-rose-900 mx-auto">Not Found</span>
                       )}
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          event.event === "copy_cdkey"
-                            ? "bg-green-100 text-green-800"
-                            : event.event === "download_click"
-                              ? "bg-blue-100 text-primary-800"
-                              : event.event === "social_click"
-                                ? "bg-red-100 text-red-800"
-                                : isPageViewNotFoundRow(event)
-                                  ? "bg-rose-100 text-rose-900"
-                                  : "bg-purple-100 text-purple-800"
-                        }`}>
+                        className={analyticsEventPillClasses(event.event, {
+                          isPageViewNotFound: isPageViewNotFoundRow(event)
+                        })}>
                         {formatEventName(event.event)}
                       </span>
                     </div>

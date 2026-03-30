@@ -1,5 +1,6 @@
 import React from "react";
 import { AnalyticsEventData } from "@/src/types";
+import { adminChrome } from "@/src/theme/colorSchema";
 
 interface EventsFilterProps {
   selectedEvent: string;
@@ -17,7 +18,7 @@ export default function EventsFilter({ selectedEvent, eventTypes, events, onEven
           <button
             onClick={() => onEventChange("all")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-              selectedEvent === "all" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              selectedEvent === "all" ? adminChrome.filterPillActive : adminChrome.filterPillIdle
             }`}>
             All Events ({events.length})
           </button>
@@ -26,7 +27,7 @@ export default function EventsFilter({ selectedEvent, eventTypes, events, onEven
               key={eventType}
               onClick={() => onEventChange(eventType)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                selectedEvent === eventType ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                selectedEvent === eventType ? adminChrome.filterPillActive : adminChrome.filterPillIdle
               }`}>
               {eventType.replace(/_/g, " ").toUpperCase()} ({events.filter(e => e.event === eventType).length})
             </button>
