@@ -1,9 +1,11 @@
 "use client";
 
+/** @fileoverview Admin analytics dashboard: time filter, charts, ranked tables, recent activity. */
 import { useState, useEffect, useCallback } from "react";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { client } from "@/src/sanity/lib/client";
-import { fetchEventsForRange } from "@/src/lib/analytics/eventsApi";
+import { fetchEventsForRange, fetchVisitorTagAggregatesForRange } from "@/src/lib/analytics/eventsApi";
+import type { VisitorTagAggregateRow } from "@/src/lib/analytics/eventsApi";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
@@ -17,7 +19,7 @@ import {
   transformEventData,
   transformProgramData,
   transformSocialData,
-  transformPathData,
+  transformPathActivityTable,
   transformCountryData,
   transformReferrerDataWithParams
 } from "@/src/lib/analytics/analyticsUtils";
@@ -25,6 +27,7 @@ import {
 export default function AnalyticsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
+  const [visitorTagRows, setVisitorTagRows] = useState<VisitorTagAggregateRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState("30d");
   const [customDateRange, setCustomDateRange] = useState({
@@ -38,16 +41,19 @@ export default function AnalyticsPage() {
       if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
         setEvents([]);
         setPrograms([]);
+        setVisitorTagRows([]);
         setLoading(false);
         return;
       }
       const { since, until } = getDateRange(selectedPeriod, customDateRange);
-      const [eventsData, programsData] = await Promise.all([
+      const [eventsData, programsData, visitorRows] = await Promise.all([
         fetchEventsForRange(since, until),
-        client.fetch(allProgramsQuery)
+        client.fetch(allProgramsQuery),
+        fetchVisitorTagAggregatesForRange(since, until)
       ]);
       setEvents(eventsData);
       setPrograms(programsData);
+      setVisitorTagRows(visitorRows);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
@@ -67,7 +73,6 @@ export default function AnalyticsPage() {
     setCustomDateRange({ start, end });
   };
 
-  // Aggregate data
   const { totals, byProgram, bySocial, byPath, byCountry } = aggregateEvents(events);
   const totalEvents = events.length;
   const totalPrograms = programs.filter(p => p.slug?.current).length;
@@ -86,17 +91,15 @@ export default function AnalyticsPage() {
     );
   }
 
-  // Convert maps to arrays for components
   const eventData = transformEventData(totals);
   const programData = transformProgramData(byProgram);
   const socialData = transformSocialData(bySocial);
-  const pathData = transformPathData(byPath);
+  const pathData = transformPathActivityTable(events, byPath);
   const countryData = transformCountryData(byCountry);
   const referrerData = transformReferrerDataWithParams(events);
 
   return (
     <ProtectedAdminLayout title="Analytics Dashboard" subtitle="Real-time insights into user behavior and engagement">
-      {/* Time Filter */}
       <div className="mb-8">
         <TimeFilter
           selectedPeriod={selectedPeriod}
@@ -106,7 +109,6 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 mb-8">
         <AnalyticsCard title="Total Events" value={totalEvents} subtitle="Last 30 days" icon="📊" color="blue" />
         <AnalyticsCard
@@ -146,30 +148,31 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <EventChart data={eventData} title="Events Distribution" type="doughnut" />
         <EventChart data={eventData} title="Events Overview" type="bar" />
       </div>
 
-      {/* Data Tables Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <DataTable title="Top Programs" data={programData} maxItems={10} showPercentage={true} />
-        <DataTable title="Social Media Engagement" data={socialData} maxItems={8} showPercentage={true} />
+        <DataTable title="Top Programs" data={programData} maxItems={12} showPercentage={true} />
+        <DataTable title="Top Referrers" data={referrerData} maxItems={12} showPercentage={true} />
       </div>
 
-      {/* Location & Referrer Data */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <DataTable title="Top Countries" data={countryData} maxItems={10} showPercentage={true} />
-        <DataTable title="Top Referrers" data={referrerData} maxItems={8} showPercentage={true} />
+        <DataTable title="Top Countries" data={countryData} maxItems={20} showPercentage={true} />
+        <DataTable title="Page Activity" data={pathData} maxItems={20} showPercentage={true} />
       </div>
 
-      {/* Page Activity */}
-      <div className="mb-8">
-        <DataTable title="Page Activity" data={pathData} maxItems={15} showPercentage={true} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <DataTable
+          title="Visitor tags"
+          data={visitorTagRows.map(r => ({ key: r.key, value: r.value, label: r.label }))}
+          maxItems={10}
+          showPercentage={true}
+        />
+        <DataTable title="Social Media Engagement" data={socialData} maxItems={10} showPercentage={true} />
       </div>
 
-      {/* Recent Activity */}
       <RecentActivity events={events} maxItems={10} />
     </ProtectedAdminLayout>
   );
