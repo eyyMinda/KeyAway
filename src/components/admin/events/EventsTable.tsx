@@ -2,11 +2,7 @@ import React from "react";
 import { AnalyticsEventData } from "@/src/types";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import Pagination from "@/src/components/ui/Pagination";
-import {
-  extractReferrerInfo,
-  effectiveReferrerHref,
-  formatEventName
-} from "@/src/lib/analytics/analyticsUtils";
+import { extractReferrerInfo, effectiveReferrerHref, formatEventName } from "@/src/lib/analytics/analyticsUtils";
 import { analyticsEventPillClasses, visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import { isPageViewNotFoundRow } from "@/src/lib/analytics/pageViewDisplay";
 
@@ -61,25 +57,27 @@ export default function EventsTable({
               const hashShort = hash ? `${hash.slice(0, 10)}…` : null;
               return (
                 <tr key={event._id} className="hover:bg-gray-50">
-                  <td className="max-w-52 p-4 align-top text-sm text-gray-900">
+                  <td className="max-w-40 p-4 align-top text-sm text-gray-900">
                     {hash ? (
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {event.visitorIsSpammer ? (
-                          <span className={visitorTierBadgeClasses("new", true)}>spammer</span>
-                        ) : null}
-                        <span className={visitorTierBadgeClasses(event.visitTier, false)}>
-                          {event.visitTier || "new"}
-                        </span>
-                        <span className="font-mono text-[10px] text-gray-500 truncate min-w-0" title={hash}>
+                      <div className="flex flex-col gap-0">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className={visitorTierBadgeClasses(event.visitTier, false)}>
+                            {event.visitTier || "new"}
+                          </span>
+                          {event.visitorIsSpammer ? (
+                            <span className={visitorTierBadgeClasses("new", true)}>spammer</span>
+                          ) : null}
+                        </div>
+                        <div className="font-mono text-[10px] text-gray-500 truncate min-w-0" title={hash}>
                           {hashShort}
-                        </span>
+                        </div>
                       </div>
                     ) : (
                       <span className="text-gray-400 text-xs">—</span>
                     )}
                   </td>
                   <td className="max-w-44 p-4 align-top whitespace-nowrap">
-                    <div className="flex flex-col gap-0 items-start">
+                    <div className="flex flex-col gap-0 items-center">
                       {event.notFound === true && (
                         <span className="text-xs font-semibold text-rose-900 mx-auto">Not Found</span>
                       )}
