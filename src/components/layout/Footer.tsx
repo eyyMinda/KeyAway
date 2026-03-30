@@ -10,6 +10,7 @@ import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { Socials, FacebookGroupButton } from "@/src/components/social";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
+import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
 
 interface FooterProps {
   storeData: StoreDetails;
@@ -19,6 +20,7 @@ interface FooterProps {
 
 export default function Footer({ storeData, logoData, socialData }: FooterProps) {
   const pathname = usePathname();
+  const trustpilotUrl = getTrustpilotReviewUrl(socialData);
   const footer = storeData?.footer;
   const shouldShowTrustpilot = !pathname.startsWith("/admin") && !pathname.startsWith("/studio");
   let isLogo = false;
@@ -85,9 +87,9 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                 })}
             </ul>
 
-            {shouldShowTrustpilot && (
+            {shouldShowTrustpilot && trustpilotUrl && (
               <div className="mt-6">
-                <TrustpilotReviewWidget />
+                <TrustpilotReviewWidget reviewUrl={trustpilotUrl} />
               </div>
             )}
           </div>

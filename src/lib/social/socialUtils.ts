@@ -23,3 +23,12 @@ export function getFacebookSocialLink(socialData?: SocialData): string | null {
 
   return facebookLink?.url || null;
 }
+
+/** Trustpilot business/review URL from Sanity `socialLinks` only (no fallback). */
+export function getTrustpilotReviewUrl(
+  socialData?: { socialLinks?: Array<{ platform: string; url: string }> }
+): string | null {
+  const link = socialData?.socialLinks?.find(l => l.platform?.toLowerCase() === "trustpilot");
+  if (link?.url && link.url.startsWith("http")) return link.url;
+  return null;
+}

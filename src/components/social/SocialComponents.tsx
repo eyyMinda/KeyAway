@@ -1,6 +1,7 @@
 "use client";
 
 import { FaGithub, FaLinkedin, FaInstagram, FaYoutube, FaFacebook, FaGlobe } from "react-icons/fa";
+import { SiTrustpilot } from "react-icons/si";
 import { FaXTwitter } from "react-icons/fa6";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import Link from "next/link";
@@ -14,6 +15,7 @@ export const SOCIAL_PLATFORMS = {
   x: { icon: FaXTwitter, name: "X" },
   youtube: { icon: FaYoutube, name: "YouTube" },
   facebook: { icon: FaFacebook, name: "Facebook" },
+  trustpilot: { icon: SiTrustpilot, name: "Trustpilot" },
   website: { icon: FaGlobe, name: "Website" },
   portfolio: { icon: FaGlobe, name: "Portfolio" }
 } as const;

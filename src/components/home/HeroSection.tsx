@@ -8,6 +8,7 @@ import { SocialData } from "@/src/types";
 
 interface HeroSectionProps {
   socialData?: SocialData;
+  visitorWelcomeLine?: string | null;
 }
 
 const heroFeatures = [
@@ -34,7 +35,7 @@ const heroFeatures = [
   }
 ];
 
-export default function HeroSection({ socialData }: HeroSectionProps) {
+export default function HeroSection({ socialData, visitorWelcomeLine }: HeroSectionProps) {
   return (
     <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-28">
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
@@ -49,6 +50,9 @@ export default function HeroSection({ socialData }: HeroSectionProps) {
               <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed">
                 Unlock premium features and pro versions of your favorite software with verified, working CD keys.
               </p>
+              {visitorWelcomeLine ? (
+                <p className="text-sm text-primary-300/90">{visitorWelcomeLine}</p>
+              ) : null}
             </div>
 
             {/* Features */}
