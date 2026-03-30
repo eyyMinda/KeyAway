@@ -1,3 +1,4 @@
+/** @fileoverview Homepage: parallel Sanity fetch, bundle merge for popular programs, visitor welcome line, JSON-LD. */
 import { client } from "@/src/sanity/lib/client";
 import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
 import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
@@ -6,8 +7,6 @@ import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { generateHomePageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
-
-// Import homepage sections
 import HeroSection from "@/src/components/home/HeroSection";
 import FeaturesSection from "@/src/components/home/FeaturesSection";
 import PopularProgramsSection from "@/src/components/home/PopularProgramsSection";
@@ -15,6 +14,8 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
 import { SocialData } from "@/src/types";
+import { headers } from "next/headers";
+import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
 
 export const revalidate = 60;
 
@@ -23,12 +24,10 @@ export async function generateMetadata() {
 }
 
 export default async function HomePage() {
-  // Calculate date one week ago
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
   const weekAgoISO = weekAgo.toISOString();
 
-  // Fetch all data in parallel for better performance
   const [rawPopularPrograms, bundleCounts, stats, storeData, socialLinks, featuredProgram] = await Promise.all([
     client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
     getBundleCountsByProgram(),
@@ -46,6 +45,9 @@ export default async function HomePage() {
     socialLinks: socialLinks || []
   };
 
+  const hdrs = await headers();
+  const { visitorWelcomeLine } = await getVisitorContextForPublicPage(hdrs);
+
   // Generate JSON-LD for homepage
   const storeInfo = storeData?.[0] || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
   const jsonLd = generateHomePageJsonLd(storeInfo);
@@ -54,22 +56,11 @@ export default async function HomePage() {
     <>
       <JsonLd data={jsonLd} />
       <main>
-        {/* Hero Section */}
-        <HeroSection socialData={socialData} />
-
-        {/* Featured Program Section */}
+        <HeroSection socialData={socialData} visitorWelcomeLine={visitorWelcomeLine} />
         <FeaturedProgramSection program={featuredProgram} />
-
-        {/* Popular Programs Section */}
         <PopularProgramsSection programs={popularPrograms} />
-
-        {/* Features Section */}
         <FeaturesSection />
-
-        {/* Statistics Section */}
         <StatsSection stats={stats} />
-
-        {/* Call-to-Action Section */}
         <CTASection />
       </main>
     </>
