@@ -14,7 +14,8 @@ export default function DataTable({
   className = ""
 }: DataTableProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  const sortedData = data.sort((a, b) => b.value - a.value).slice(0, maxItems);
+  const sortedData = [...data].sort((a, b) => b.value - a.value).slice(0, maxItems);
+  const barMax = Math.max(...sortedData.map(i => i.value), 1);
 
   return (
     <div className={`bg-white rounded-xl shadow-soft border border-gray-200 ${className}`}>
@@ -43,7 +44,6 @@ export default function DataTable({
                     <div className="flex-1 min-w-0 ml-3">
                       <div className="flex flex-col">
                         <p className="text-sm font-medium text-gray-900 truncate">{item.label || item.key}</p>
-                        {item.referrerParam && <p className="text-xs text-gray-500">({item.referrerParam})</p>}
                       </div>
                     </div>
                   </div>
@@ -56,7 +56,7 @@ export default function DataTable({
                       <div className="w-24 bg-gray-200 rounded-full h-2">
                         <div
                           className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(item.value / sortedData[0].value) * 100}%` }}
+                          style={{ width: `${(item.value / barMax) * 100}%` }}
                         />
                       </div>
                     </div>
