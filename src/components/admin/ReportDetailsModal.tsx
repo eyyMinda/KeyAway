@@ -8,6 +8,7 @@ import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { FiAlertTriangle, FiCheck, FiX } from "react-icons/fi";
 import { client } from "@/src/sanity/lib/client";
 import { effectiveReferrerHref, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
+import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 
 const EVENT_OPTIONS: { value: KeyReportEvent; label: string }[] = [
   { value: "report_key_working", label: "Working" },
@@ -410,13 +411,9 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                         {reportItem.city}, {reportItem.country}
                       </span>
                       <div className="flex flex-wrap items-center justify-end gap-1.5 w-full sm:max-w-[20rem]">
-                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-violet-100 text-violet-900 border border-violet-200 shrink-0">
-                          {tier}
-                        </span>
+                        <span className={visitorTierBadgeClasses(tier, false)}>{tier}</span>
                         {isSpam ? (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-100 text-red-800 border border-red-200 shrink-0">
-                            spammer
-                          </span>
+                          <span className={visitorTierBadgeClasses("new", true)}>spammer</span>
                         ) : null}
                         <span className="font-mono text-[10px] text-gray-500 break-all text-right min-w-0" title={hash}>
                           {hashShort}
