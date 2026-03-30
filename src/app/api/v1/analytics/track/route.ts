@@ -56,7 +56,11 @@ export async function POST(req: NextRequest) {
     }
 
     const ipHash = hashIp(ip);
-    if (isReportEvent && (await isVisitorSpammerByHash(ipHash))) {
+    if (
+      isReportEvent &&
+      (await isVisitorSpammerByHash(ipHash)) &&
+      body.event !== "report_key_working"
+    ) {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
     }
 

@@ -21,15 +21,13 @@ export async function POST(req: NextRequest) {
     if (!body || typeof body !== "object") return Errors.badRequest("Request body required");
 
     const b = body as Record<string, unknown>;
-    const host = req.headers.get("host") || "";
-    const isLocalhost = host.startsWith("localhost") || host.includes("127.0.0.1");
 
     const ip = getClientIp(req);
     const ipHash = hashIp(ip);
     if (!ipHash) return Errors.validation("Unable to generate visitor hash");
 
-    const spammerSkip = async () =>
-      NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
+    const spammerNegativeForbidden = () =>
+      Errors.forbidden("Spam-flagged visitors may only report keys as working.");
 
     // --- Renew: update existing report (same visitor) ---
     const reportId = typeof b.reportId === "string" ? b.reportId.trim() : "";
@@ -43,17 +41,8 @@ export async function POST(req: NextRequest) {
           "Invalid newEventType. Use report_key_working, report_key_expired, or report_key_limit_reached"
         );
       }
-      if (!isLocalhost && (await isVisitorSpammerByHash(ipHash))) {
-        return NextResponse.json({
-          data: { updatedReport: { _id: reportId, eventType: newEventType }, skipped: true },
-          meta: {}
-        });
-      }
-      if (isLocalhost) {
-        return NextResponse.json({
-          data: { updatedReport: { _id: reportId, eventType: newEventType }, skipped: true },
-          meta: {}
-        });
+      if ((await isVisitorSpammerByHash(ipHash)) && newEventType !== "report_key_working") {
+        return spammerNegativeForbidden();
       }
       const existingReport = await client.fetch<{ _id: string } | null>(
         `*[_type=="keyReport" && _id == $reportId && ipHash == $ipHash][0]{ _id }`,
@@ -78,12 +67,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (isLocalhost) {
-      return NextResponse.json({ data: { created: true, skipped: true }, meta: {} });
-    }
-
-    if (await isVisitorSpammerByHash(ipHash)) {
-      return spammerSkip();
+    if ((await isVisitorSpammerByHash(ipHash)) && event !== "report_key_working") {
+      return spammerNegativeForbidden();
     }
 
     const programSlug = meta?.programSlug as string | undefined;
