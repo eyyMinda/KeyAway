@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
+import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 
 const MAX_FIELD = 500;
 const MAX_MSG = 2000;
@@ -12,6 +14,7 @@ export async function POST(req: NextRequest) {
   if (!rateOk) return Errors.tooManyRequests();
 
   try {
+    const visitorHash = hashIp(getClientIp(req));
     const body = await req.json().catch(() => ({}));
     if (!body || typeof body !== "object") return Errors.badRequest("Request body is required");
 
@@ -45,8 +48,15 @@ export async function POST(req: NextRequest) {
       email: email || undefined,
       message: message.length > MAX_MSG ? message.slice(0, MAX_MSG) : message || undefined,
       status: "new",
+      ipHash: visitorHash || undefined,
       createdAt: new Date().toISOString()
     });
+
+    try {
+      await upsertVisitorContribution(visitorHash, "suggestion");
+    } catch (e) {
+      console.error("[POST /api/v1/key-suggestions] visitor contribution upsert failed", e);
+    }
 
     return NextResponse.json({ data: { id: result._id }, meta: {} }, { status: 201 });
   } catch (err) {
