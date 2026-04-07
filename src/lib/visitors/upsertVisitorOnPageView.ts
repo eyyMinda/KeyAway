@@ -1,5 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
-import { visitTierFromSessionCount } from "@/src/lib/visitors/visitTier";
+import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
 
 const SESSION_GAP_MS = 60 * 60 * 1000;
 
@@ -14,8 +14,10 @@ export async function upsertVisitorOnPageView(visitorHash: string | undefined): 
     _id: string;
     visitCount: number;
     lastActivityAt: string;
+    contributionScore?: number;
+    isSpammer?: boolean;
   } | null>(
-    `*[_type == "visitor" && visitorHash == $h][0]{ _id, visitCount, lastActivityAt }`,
+    `*[_type == "visitor" && visitorHash == $h][0]{ _id, visitCount, lastActivityAt, contributionScore, isSpammer }`,
     { h: visitorHash }
   );
 
@@ -25,8 +27,11 @@ export async function upsertVisitorOnPageView(visitorHash: string | undefined): 
       visitorHash,
       visitCount: 1,
       lastActivityAt: now,
-      visitTier: visitTierFromSessionCount(1),
+      visitTier: resolveVisitTier(1, 0, false),
       isSpammer: false,
+      reportCount: 0,
+      suggestionCount: 0,
+      contributionScore: 0,
       createdAt: now,
       updatedAt: now
     });
@@ -36,13 +41,15 @@ export async function upsertVisitorOnPageView(visitorHash: string | undefined): 
   const lastMs = new Date(existing.lastActivityAt).getTime();
   const newSession = !Number.isFinite(lastMs) || nowMs - lastMs > SESSION_GAP_MS;
   const nextCount = newSession ? existing.visitCount + 1 : existing.visitCount;
+  const contributionScore = existing.contributionScore ?? 0;
+  const isSpammer = existing.isSpammer === true;
 
   await client
     .patch(existing._id)
     .set({
       visitCount: nextCount,
       lastActivityAt: now,
-      visitTier: visitTierFromSessionCount(nextCount),
+      visitTier: resolveVisitTier(nextCount, contributionScore, isSpammer),
       updatedAt: now
     })
     .commit();
