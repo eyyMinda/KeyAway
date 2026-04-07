@@ -51,7 +51,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     };
 
     const hdrs = await headers();
-    const { isSpammer, visitorWelcomeLine } = await getVisitorContextForPublicPage(hdrs);
+    const { isSpammer, visitorWelcomeLine, visitorHint } = await getVisitorContextForPublicPage(hdrs);
     const relatedPrograms = allPrograms
       .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
       .slice(0, 5);
@@ -69,6 +69,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             workingKeys={workingKeys}
             socialData={socialData}
             visitorWelcomeLine={visitorWelcomeLine}
+            visitorHint={visitorHint}
           />
           <CDKeyTable cdKeys={sortedCdKeys} slug={slug} isSpammerVisitor={isSpammer} />
           <ContributeBanner />

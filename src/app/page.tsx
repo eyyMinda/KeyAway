@@ -46,7 +46,7 @@ export default async function HomePage() {
   };
 
   const hdrs = await headers();
-  const { visitorWelcomeLine } = await getVisitorContextForPublicPage(hdrs);
+  const { visitorWelcomeLine, visitorHint } = await getVisitorContextForPublicPage(hdrs);
 
   // Generate JSON-LD for homepage
   const storeInfo = storeData?.[0] || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
@@ -56,7 +56,7 @@ export default async function HomePage() {
     <>
       <JsonLd data={jsonLd} />
       <main>
-        <HeroSection socialData={socialData} visitorWelcomeLine={visitorWelcomeLine} />
+        <HeroSection socialData={socialData} visitorWelcomeLine={visitorWelcomeLine} visitorHint={visitorHint} />
         <FeaturedProgramSection program={featuredProgram} />
         <PopularProgramsSection programs={popularPrograms} />
         <FeaturesSection />

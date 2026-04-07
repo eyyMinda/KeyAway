@@ -5,10 +5,13 @@ import HeroVisual from "./HeroVisual";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { FacebookGroupHeroPromo } from "@/src/components/social";
 import { SocialData } from "@/src/types";
+import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
+import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 
 interface HeroSectionProps {
   socialData?: SocialData;
   visitorWelcomeLine?: string | null;
+  visitorHint?: VisitorHintData | null;
 }
 
 const heroFeatures = [
@@ -35,7 +38,7 @@ const heroFeatures = [
   }
 ];
 
-export default function HeroSection({ socialData, visitorWelcomeLine }: HeroSectionProps) {
+export default function HeroSection({ socialData, visitorWelcomeLine, visitorHint }: HeroSectionProps) {
   return (
     <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-28">
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
@@ -52,6 +55,11 @@ export default function HeroSection({ socialData, visitorWelcomeLine }: HeroSect
               </p>
               {visitorWelcomeLine ? (
                 <p className="text-sm text-primary-300/90">{visitorWelcomeLine}</p>
+              ) : null}
+              {visitorHint ? (
+                <div className="pt-1">
+                  <VisitorTierHint hint={visitorHint} />
+                </div>
               ) : null}
             </div>
 
