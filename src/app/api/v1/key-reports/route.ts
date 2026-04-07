@@ -5,6 +5,7 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
+import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 import type { KeyReportEvent } from "@/src/types";
 
 const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
@@ -53,6 +54,11 @@ export async function POST(req: NextRequest) {
         .patch(reportId)
         .set({ eventType: newEventType, createdAt: new Date().toISOString() })
         .commit();
+      try {
+        await upsertVisitorContribution(ipHash, "report");
+      } catch (e) {
+        console.error("[POST /api/v1/key-reports] visitor contribution upsert failed (renew)", e);
+      }
       const u = updated as Record<string, unknown>;
       return NextResponse.json({ data: { updatedReport: { _id: u._id, eventType: u.eventType } }, meta: {} });
     }
@@ -103,6 +109,11 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await client.create(eventData as { _type: string } & Record<string, unknown>);
+    try {
+      await upsertVisitorContribution(ipHash, "report");
+    } catch (e) {
+      console.error("[POST /api/v1/key-reports] visitor contribution upsert failed (create)", e);
+    }
 
     return NextResponse.json({ data: { created: true, reportId: created._id }, meta: {} });
   } catch (err) {
