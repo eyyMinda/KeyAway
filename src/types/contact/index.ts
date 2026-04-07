@@ -5,6 +5,7 @@ export interface ContactMessage {
   message: string;
   name?: string;
   email?: string;
+  ipHash?: string;
   status: "new" | "read" | "replied" | "archived";
   createdAt: string;
 }
