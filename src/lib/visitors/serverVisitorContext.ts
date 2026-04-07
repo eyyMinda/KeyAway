@@ -9,9 +9,9 @@ function welcomeLineForTier(tier: VisitTier | undefined): string | null {
     case "returning":
       return "Good to see you again — grab a key below.";
     case "regular":
-      return "Thanks for coming back — here are the latest keys.";
+      return "You're a regular here — here are the latest keys.";
     case "star":
-      return "You're a regular — here's what's live right now.";
+      return "You're one of our stars — here's what's live right now.";
     default:
       return null;
   }
