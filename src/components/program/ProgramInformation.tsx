@@ -8,6 +8,8 @@ import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { FacebookGroupButton } from "@/src/components/social";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
+import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
+import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 
 interface ProgramInformationProps {
   program: Program;
@@ -16,6 +18,7 @@ interface ProgramInformationProps {
   socialData?: SocialData;
   /** Optional line from visit tier (server); omit for default hero only. */
   visitorWelcomeLine?: string | null;
+  visitorHint?: VisitorHintData | null;
 }
 
 export default function ProgramInformation({
@@ -23,7 +26,8 @@ export default function ProgramInformation({
   totalKeys,
   workingKeys,
   socialData,
-  visitorWelcomeLine
+  visitorWelcomeLine,
+  visitorHint
 }: ProgramInformationProps) {
   const trustpilotUrl = getTrustpilotReviewUrl(socialData);
   return (
@@ -62,6 +66,11 @@ export default function ProgramInformation({
                 </p>
                 {visitorWelcomeLine ? (
                   <p className="mt-2 text-sm text-primary-300/90">{visitorWelcomeLine}</p>
+                ) : null}
+                {visitorHint ? (
+                  <div className="mt-2 inline-flex">
+                    <VisitorTierHint hint={visitorHint} />
+                  </div>
                 ) : null}
               </div>
 

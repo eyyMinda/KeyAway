@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
 
 const MAX_TITLE = 200;
 const MAX_MESSAGE = 5000;
@@ -14,6 +15,7 @@ export async function POST(req: NextRequest) {
   if (!rateOk) return Errors.tooManyRequests();
 
   try {
+    const ipHash = hashIp(getClientIp(req));
     const body = await req.json().catch(() => ({}));
     if (!body || typeof body !== "object") return Errors.badRequest("Request body is required");
 
@@ -40,6 +42,7 @@ export async function POST(req: NextRequest) {
       message,
       name: name || undefined,
       email: email || undefined,
+      ipHash: ipHash || undefined,
       status: "new",
       createdAt: new Date().toISOString()
     });

@@ -4,6 +4,7 @@ import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
 
 export async function PATCH(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
@@ -34,6 +35,9 @@ export async function PATCH(req: NextRequest) {
         lastActivityAt: now,
         visitTier: "new",
         isSpammer: true,
+        reportCount: 0,
+        suggestionCount: 0,
+        contributionScore: 0,
         spamMarkedAt: now,
         createdAt: now,
         updatedAt: now
@@ -41,10 +45,22 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ data: { ok: true, visitorHash, isSpammer: true }, meta: {} });
     }
 
+    const current = await client.fetch<{ visitCount?: number; contributionScore?: number } | null>(
+      `*[_type == "visitor" && _id == $id][0]{ visitCount, contributionScore }`,
+      { id: docId }
+    );
+    const visitCount = current?.visitCount ?? 0;
+    const contributionScore = current?.contributionScore ?? 0;
+    const visitTier = resolveVisitTier(visitCount, contributionScore, isSpammer);
+
     if (isSpammer) {
-      await client.patch(docId).set({ isSpammer: true, spamMarkedAt: now, updatedAt: now }).commit();
+      await client.patch(docId).set({ isSpammer: true, spamMarkedAt: now, visitTier, updatedAt: now }).commit();
     } else {
-      await client.patch(docId).set({ isSpammer: false, updatedAt: now }).unset(["spamMarkedAt"]).commit();
+      await client
+        .patch(docId)
+        .set({ isSpammer: false, visitTier, updatedAt: now })
+        .unset(["spamMarkedAt"])
+        .commit();
     }
 
     return NextResponse.json({ data: { ok: true, visitorHash, isSpammer }, meta: {} });

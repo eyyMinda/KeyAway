@@ -30,6 +30,7 @@ export default function MessagesPage() {
           message,
           name,
           email,
+          ipHash,
           status,
           createdAt
         }`

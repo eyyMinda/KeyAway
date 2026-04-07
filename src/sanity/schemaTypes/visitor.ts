@@ -1,10 +1,10 @@
 import { defineType } from "sanity";
 
 const VISIT_TIERS = [
-  { title: "New (0–1 sessions)", value: "new" },
-  { title: "Returning (2–5)", value: "returning" },
-  { title: "Regular (6–15)", value: "regular" },
-  { title: "Star (16+)", value: "star" }
+  { title: "New (0-1 sessions)", value: "new" },
+  { title: "Returning (2-5)", value: "returning" },
+  { title: "Regular (6-15)", value: "regular" },
+  { title: "Star (16+ sessions & 5+ contributions)", value: "star" }
 ] as const;
 
 export const visitor = defineType({
@@ -46,6 +46,28 @@ export const visitor = defineType({
       title: "Spammer",
       type: "boolean",
       initialValue: false
+    },
+    {
+      name: "reportCount",
+      title: "Key reports submitted",
+      type: "number",
+      initialValue: 0,
+      validation: Rule => Rule.required().min(0)
+    },
+    {
+      name: "suggestionCount",
+      title: "Key suggestions submitted",
+      type: "number",
+      initialValue: 0,
+      validation: Rule => Rule.required().min(0)
+    },
+    {
+      name: "contributionScore",
+      title: "Contribution score",
+      type: "number",
+      description: "Incremented for each valid key report and key suggestion.",
+      initialValue: 0,
+      validation: Rule => Rule.required().min(0)
     },
     {
       name: "spamMarkedAt",

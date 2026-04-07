@@ -46,6 +46,12 @@ export default defineType({
       title: "Created At",
       type: "datetime",
       initialValue: () => new Date().toISOString()
+    },
+    {
+      name: "ipHash",
+      title: "Visitor Hash",
+      type: "string",
+      description: "Hashed IP + salt. Used to associate messages with visitor records."
     }
   ],
   preview: {
