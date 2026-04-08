@@ -6,33 +6,58 @@ import {
   FaCheckCircle,
   FaCircle,
   FaClock,
-  FaExclamationTriangle,
   FaKey,
   FaMedal,
   FaStar,
+  FaTimes,
   FaUser
 } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 
+export type VisitorTierHintVariant = "pill" | "feature";
+
 interface VisitorTierHintProps {
   hint: VisitorHintData;
+  /** `pill` = compact chip (default). `feature` = hero-style icon tile + title + short line. */
+  variant?: VisitorTierHintVariant;
 }
 
-function tierIcon(tier: VisitorHintData["tier"]) {
+const ICON_SM = 12;
+const ICON_MD = 16;
+const ICON_LG = 20;
+
+function tierIcon(tier: VisitorHintData["tier"], size: "sm" | "md" | "lg") {
+  const px = size === "lg" ? ICON_LG : size === "md" ? ICON_MD : ICON_SM;
+  const smColor =
+    tier === "star" ? "text-yellow-300" : "text-primary-300";
+  const colorClass = size === "sm" ? smColor : "";
   switch (tier) {
     case "star":
-      return <FaStar className="text-yellow-300" size={12} aria-hidden="true" />;
+      return <FaStar className={colorClass} size={px} aria-hidden="true" />;
     case "regular":
-      return <FaMedal className="text-primary-300" size={12} aria-hidden="true" />;
+      return <FaMedal className={colorClass} size={px} aria-hidden="true" />;
     case "returning":
-      return <FaChartLine className="text-primary-300" size={12} aria-hidden="true" />;
+      return <FaChartLine className={colorClass} size={px} aria-hidden="true" />;
     default:
-      return <FaUser className="text-primary-300" size={12} aria-hidden="true" />;
+      return <FaUser className={colorClass} size={px} aria-hidden="true" />;
   }
 }
 
-export default function VisitorTierHint({ hint }: VisitorTierHintProps) {
+function tierFeatureShell(tier: VisitorHintData["tier"]): { boxClass: string; iconClass: string } {
+  switch (tier) {
+    case "star":
+      return { boxClass: "bg-yellow-500/20", iconClass: "text-yellow-400" };
+    case "regular":
+      return { boxClass: "bg-primary-500/20", iconClass: "text-primary-400" };
+    case "returning":
+      return { boxClass: "bg-primary-500/20", iconClass: "text-primary-400" };
+    default:
+      return { boxClass: "bg-primary-500/20", iconClass: "text-primary-400" };
+  }
+}
+
+export default function VisitorTierHint({ hint, variant = "pill" }: VisitorTierHintProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const trackedVisibleRef = useRef(false);
@@ -45,6 +70,8 @@ export default function VisitorTierHint({ hint }: VisitorTierHintProps) {
     ],
     [hint.reportCount, hint.suggestionCount, hint.visitCount]
   );
+
+  const shell = variant === "feature" ? tierFeatureShell(hint.tier) : null;
 
   useEffect(() => {
     if (trackedVisibleRef.current) return;
@@ -70,38 +97,62 @@ export default function VisitorTierHint({ hint }: VisitorTierHintProps) {
     }
   };
 
+  const statsRow = (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-400">
+      {stats.map(item => (
+        <span key={item.label} className="inline-flex items-center gap-1">
+          <span className="text-primary-300/90">{item.icon}</span>
+          <span className="tabular-nums text-gray-300">{item.value}</span>
+          <span>{item.label}</span>
+        </span>
+      ))}
+    </div>
+  );
+
   return (
-    <div ref={rootRef} className="relative inline-flex">
-      <button
-        type="button"
-        onClick={togglePopover}
-        className="inline-flex items-center gap-2 rounded-full border border-primary-400/30 bg-primary-500/10 px-2 py-1 text-[11px] text-primary-200 hover:bg-primary-500/20"
-        aria-expanded={open}
-        aria-label={`Visitor status: ${hint.label}`}>
-        {tierIcon(hint.tier)}
-        <span className="hidden sm:inline">{hint.label}</span>
-        <FaCircle size={5} aria-hidden="true" />
-      </button>
-      {open ? (
-        <div className="absolute left-0 top-9 z-30 w-72 rounded-xl border border-white/15 bg-gray-900/95 p-3 shadow-2xl backdrop-blur-sm">
-          <p className="text-xs font-semibold text-white">{hint.label}</p>
-          <p className="mt-1 text-xs text-gray-300">{hint.message}</p>
-          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/10 pt-2 text-[11px] text-gray-300">
-            {stats.map(item => (
-              <span key={item.label} className="inline-flex items-center gap-1">
-                <span className="text-primary-300">{item.icon}</span>
-                <span className="text-gray-400">{item.value}</span>
-                <span>{item.label}</span>
+    <div ref={rootRef} className={variant === "feature" ? "relative w-full" : "relative inline-flex"}>
+      {variant === "feature" ? (
+        <section
+          className="w-full rounded-xl border border-white/10 bg-linear-to-br from-primary-500/12 via-white/5 to-white/2 px-3 py-2 shadow-lg shadow-black/20 ring-1 ring-inset ring-white/6 backdrop-blur-sm"
+          aria-label={`Visitor status: ${hint.label}`}>
+          <div className="flex items-start gap-2.5">
+            <div
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${shell?.boxClass ?? ""}`}>
+              <span className={shell?.iconClass ?? ""} aria-hidden="true">
+                {tierIcon(hint.tier, "md")}
               </span>
-            ))}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold leading-tight text-white">{hint.label}</p>
+              <p className="mt-0.5 text-xs leading-snug text-gray-400">{hint.message}</p>
+            </div>
           </div>
+          <div className="mt-2 border-t border-white/10 pt-2">{statsRow}</div>
+        </section>
+      ) : (
+        <button
+          type="button"
+          onClick={togglePopover}
+          className="inline-flex items-center gap-2 rounded-full border border-primary-400/30 bg-primary-500/10 px-2 py-1 text-[11px] text-primary-200 hover:bg-primary-500/20"
+          aria-expanded={open}
+          aria-label={`Visitor status: ${hint.label}`}>
+          {tierIcon(hint.tier, "sm")}
+          <span className="hidden sm:inline">{hint.label}</span>
+          <FaCircle size={5} aria-hidden="true" />
+        </button>
+      )}
+      {open ? (
+        <div className="absolute left-0 top-9 z-30 w-72 rounded-xl border border-white/15 bg-gray-900/95 p-3 pr-9 pt-3 shadow-2xl backdrop-blur-sm">
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="mt-2 inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-gray-200">
-            <FaExclamationTriangle size={10} aria-hidden="true" />
-            Close
+            className="absolute right-2 top-2 rounded p-1 text-gray-400 hover:bg-white/10 hover:text-white"
+            aria-label="Close">
+            <FaTimes size={14} aria-hidden="true" />
           </button>
+          <p className="text-xs font-semibold text-white">{hint.label}</p>
+          <p className="mt-1 text-xs text-gray-300">{hint.message}</p>
+          <div className="mt-3 border-t border-white/10 pt-2">{statsRow}</div>
         </div>
       ) : null}
     </div>
