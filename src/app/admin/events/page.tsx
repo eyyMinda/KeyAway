@@ -28,7 +28,8 @@ export default function EventsPage() {
     { key: "visitorTags", label: "Visitor", sortable: true },
     { key: "event", label: "Event Type", sortable: true },
     { key: "program", label: "Program", sortable: true },
-    { key: "social", label: "Social Platform", sortable: true },
+    { key: "social", label: "Social", sortable: true },
+    { key: "interaction", label: "Interaction", sortable: true },
     { key: "path", label: "Path", sortable: true },
     { key: "location", label: "Location", sortable: true },
     { key: "referrer", label: "Referrer", sortable: true },
@@ -103,11 +104,14 @@ export default function EventsPage() {
           const bProgram = b.programSlug || "";
           cmp = aProgram.localeCompare(bProgram);
           break;
-        case "social":
-          const aSocial = a.social || "";
-          const bSocial = b.social || "";
-          cmp = aSocial.localeCompare(bSocial);
+        case "social": {
+          cmp = (a.social || "").localeCompare(b.social || "");
           break;
+        }
+        case "interaction": {
+          cmp = (a.interaction || "").localeCompare(b.interaction || "");
+          break;
+        }
         case "path":
           const aPath = a.path || "";
           const bPath = b.path || "";

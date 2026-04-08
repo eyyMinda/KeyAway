@@ -60,6 +60,11 @@ export default function RecentActivity({
                         {event.social && (
                           <span className="text-xs text-gray-500 bg-blue-100 px-2 py-1 rounded">{event.social}</span>
                         )}
+                        {event.interaction && (
+                          <span className="text-xs text-cyan-900 bg-cyan-100 px-2 py-1 rounded font-mono">
+                            {event.interaction}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center space-x-2 mt-1">
                         {event.country && (
