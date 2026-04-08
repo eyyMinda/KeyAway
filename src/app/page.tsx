@@ -1,4 +1,4 @@
-/** @fileoverview Homepage: parallel Sanity fetch, bundle merge for popular programs, visitor welcome line, JSON-LD. */
+/** @fileoverview Homepage: parallel Sanity fetch, bundle merge for popular programs, visitor hint, JSON-LD. */
 import { client } from "@/src/sanity/lib/client";
 import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
 import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
@@ -46,7 +46,7 @@ export default async function HomePage() {
   };
 
   const hdrs = await headers();
-  const { visitorWelcomeLine, visitorHint } = await getVisitorContextForPublicPage(hdrs);
+  const { visitorHint } = await getVisitorContextForPublicPage(hdrs);
 
   // Generate JSON-LD for homepage
   const storeInfo = storeData?.[0] || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
@@ -56,7 +56,7 @@ export default async function HomePage() {
     <>
       <JsonLd data={jsonLd} />
       <main>
-        <HeroSection socialData={socialData} visitorWelcomeLine={visitorWelcomeLine} visitorHint={visitorHint} />
+        <HeroSection socialData={socialData} visitorHint={visitorHint} />
         <FeaturedProgramSection program={featuredProgram} />
         <PopularProgramsSection programs={popularPrograms} />
         <FeaturesSection />

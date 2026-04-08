@@ -31,9 +31,9 @@ export function FacebookGroupHeroPromo({ socialData, className = "", path }: Fac
 
   return (
     <div
-      className={`bg-gradient-to-r from-blue-600/10 to-blue-700/10 border border-blue-500/20 rounded-xl p-4 ${className}`}>
-      <div className="flex flex-col sm:flex-row items-center gap-3">
-        <div className="hidden sm:block flex-shrink-0">
+      className={`bg-linear-to-r from-blue-600/10 to-blue-700/10 border border-blue-500/20 rounded-xl p-4 ${className}`}>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="hidden sm:block shrink-0">
           <div className="bg-blue-600 p-2 rounded-lg">
             <FaFacebook className="h-5 w-5 text-white" />
           </div>
@@ -41,13 +41,15 @@ export function FacebookGroupHeroPromo({ socialData, className = "", path }: Fac
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-sm font-semibold text-white">Stay Updated</h3>
-            <FaBell className="h-3 w-3 text-blue-400" />
+            <span className="inline-flex shrink-0 animate-bell-ring" aria-hidden>
+              <FaBell className="h-3 w-3 text-blue-400" />
+            </span>
           </div>
           <p className="text-xs text-gray-300 leading-relaxed">
             Join our Facebook group to get notified about new programs, CD keys, and website updates.
           </p>
         </div>
-        <div className="flex-shrink-0 w-full sm:w-auto">
+        <div className="shrink-0 w-full sm:w-auto">
           <Link
             href={facebookUrl}
             target="_blank"

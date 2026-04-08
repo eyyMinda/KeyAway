@@ -34,8 +34,8 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white mt-auto">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 text-white mt-auto">
+      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
@@ -53,7 +53,12 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
 
             {/* Facebook Group Button */}
             <div className="mt-auto w-fit">
-              <FacebookGroupButton socialData={socialData} path={pathname} variant="outline" className="text-sm" />
+              <FacebookGroupButton
+                socialData={socialData}
+                path={pathname}
+                variant="outline"
+                className="text-sm items-center"
+              />
             </div>
           </div>
 
@@ -101,9 +106,9 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
               {/* Suggest a Key Button */}
               <ContactModalTrigger
                 tab="suggest"
-                className="group w-full bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-4 py-4 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl border-2 border-primary-400/30 cursor-pointer">
+                className="group w-full bg-linear-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-4 py-4 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl border-2 border-primary-400/30 cursor-pointer">
                 <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                  <div className="shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                     <FaKey className="w-5 h-5" />
                   </div>
                   <div className="text-left flex-1">
@@ -119,7 +124,7 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                 tab="contact"
                 className="group w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg border border-gray-600/50 cursor-pointer">
                 <div className="flex items-center space-x-3">
-                  <FaEnvelope className="w-5 h-5 flex-shrink-0" />
+                  <FaEnvelope className="w-5 h-5 shrink-0" />
                   <div className="text-left flex-1">
                     <div className="text-sm font-semibold">Contact Us</div>
                   </div>

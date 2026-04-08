@@ -5,7 +5,7 @@ import { FaCheckCircle, FaClock, FaUsers } from "react-icons/fa";
 export default function WhyUseSection() {
   return (
     <section className="bg-white py-12 sm:py-16 lg:py-20">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 sm:mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">Why Use KeyAway?</h2>
           <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
@@ -15,7 +15,7 @@ export default function WhyUseSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Easy Access */}
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all duration-300">
+          <div className="bg-linear-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all duration-300">
             <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-100 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
               <FaCheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-600" />
             </div>
@@ -27,7 +27,7 @@ export default function WhyUseSection() {
           </div>
 
           {/* Community Powered */}
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all duration-300">
+          <div className="bg-linear-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all duration-300">
             <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
               <FaUsers className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
             </div>
@@ -39,7 +39,7 @@ export default function WhyUseSection() {
           </div>
 
           {/* Always Updated */}
-          <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all duration-300">
+          <div className="bg-linear-to-br from-gray-50 to-white rounded-xl sm:rounded-2xl p-6 sm:p-8 border-2 border-gray-100 hover:border-primary-200 hover:shadow-xl transition-all duration-300">
             <div className="w-12 h-12 sm:w-14 sm:h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
               <FaClock className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" />
             </div>

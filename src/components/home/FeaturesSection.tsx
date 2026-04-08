@@ -71,7 +71,7 @@ export default function FeaturesSection() {
 
   return (
     <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
+      <div className="max-w-360 mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">How KeyAway Works</h2>
@@ -120,7 +120,7 @@ export default function FeaturesSection() {
                     <IconComponent className="w-8 h-8" />
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-3">
-                    <div className="flex-shrink-0 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    <div className="shrink-0 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
                       {step.step}
                     </div>
                     <h4 className="text-xl font-semibold text-gray-900">{step.title}</h4>
@@ -160,7 +160,7 @@ export default function FeaturesSection() {
           </div>
 
           {/* Contribution CTA */}
-          <div className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 border-t border-gray-200 bg-gradient-to-br from-primary-50 to-blue-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8">
+          <div className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 border-t border-gray-200 bg-linear-to-br from-primary-50 to-blue-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8">
             <div className="text-center max-w-2xl mx-auto">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-primary-100 rounded-full mb-3 sm:mb-4">
                 <FaUsers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600" />

@@ -6,7 +6,7 @@ import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
 type BundledEvent = Record<string, unknown> & { _key?: string };
 
-const SORT_FIELDS = ["createdAt", "event", "programSlug", "path", "social"] as const;
+const SORT_FIELDS = ["createdAt", "event", "programSlug", "path", "social", "interaction"] as const;
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     const singularFilter =
       term !== ""
         ? `&& (
-          path == $term || programSlug == $term || social == $term || referrer == $term ||
+          path == $term || programSlug == $term || social == $term || interaction == $term || referrer == $term ||
           country == $term || city == $term || keyHash == $term || keyIdentifier == $term ||
           keyNormalized == $term || userAgent == $term || utm_source == $term ||
           utm_medium == $term || utm_campaign == $term
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
 
     const singular = await client.fetch<Array<Record<string, unknown> & { _id: string; _type: string }>>(
       `*[_type == "trackingEvent" ${singularFilter} ${programFilter} ${pathFilter}]{
-        _id, _type, event, programSlug, social, path, referrer, country, city,
+        _id, _type, event, programSlug, social, interaction, path, referrer, country, city,
         keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
       } | order(${sort} ${order})`,
       { term, programSlug: programSlug ?? "", path: path ?? "" }
@@ -242,7 +242,7 @@ export async function PATCH(req: NextRequest) {
     }
     if (filter.search) {
       groqFilterParts.push(
-        `(path == $term || programSlug == $term || social == $term || referrer == $term || country == $term || city == $term || keyHash == $term || keyIdentifier == $term || keyNormalized == $term || userAgent == $term || utm_source == $term || utm_medium == $term || utm_campaign == $term)`
+        `(path == $term || programSlug == $term || social == $term || interaction == $term || referrer == $term || country == $term || city == $term || keyHash == $term || keyIdentifier == $term || keyNormalized == $term || userAgent == $term || utm_source == $term || utm_medium == $term || utm_campaign == $term)`
       );
       params.term = filter.search;
     }

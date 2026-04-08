@@ -63,7 +63,7 @@ export default function ProgramsPageClient({ programs, featuredProgram }: Extend
 
   return (
     <>
-      <div id="programs-grid" className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+      <div id="programs-grid" className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
         {/* Filters and Search */}
         <ProgramsFilter
           searchTerm={searchTerm}

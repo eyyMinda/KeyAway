@@ -5,7 +5,7 @@ import { ProgramCardProps } from "@/src/types/home";
 
 export default function ProgramCard({ program, stats, badges, showStats = true }: ProgramCardProps) {
   return (
-    <div className="group bg-white rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-primary-400 animate-fade-in flex flex-col transform hover:-translate-y-2 relative before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary-50/30 before:to-transparent before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-300">
+    <div className="group bg-white rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-primary-400 animate-fade-in flex flex-col transform hover:-translate-y-2 relative before:absolute before:inset-0 before:bg-linear-to-br before:from-primary-50/30 before:to-transparent before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-300">
       {/* Image Container */}
       <Link href={`/program/${program.slug.current}`} title={program.title} className="relative overflow-hidden">
         {program.image ? (
@@ -15,12 +15,12 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
             className="w-full h-36 sm:h-40 lg:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <div className="w-full h-36 sm:h-40 lg:h-48 bg-gradient-to-br from-primary-50 to-accent-50 flex items-center justify-center">
+          <div className="w-full h-36 sm:h-40 lg:h-48 bg-linear-to-br from-primary-50 to-accent-50 flex items-center justify-center">
             <div className="text-neutral-400 text-3xl sm:text-4xl">💻</div>
           </div>
         )}
         {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Subtle border overlay */}
         <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary-200/50 transition-colors duration-300 rounded-xl sm:rounded-2xl" />
@@ -55,7 +55,7 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
       </Link>
 
       {/* Content */}
-      <div className="py-4 sm:py-5 lg:py-6 px-4 sm:px-5 flex flex-col flex-grow bg-gradient-to-b from-white to-gray-50/50">
+      <div className="py-4 sm:py-5 lg:py-6 px-4 sm:px-5 flex flex-col flex-grow bg-linear-to-b from-white to-gray-50/50">
         <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2 group-hover:text-primary-700 transition-colors leading-tight">
           {program.title}
         </h2>
@@ -85,16 +85,16 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
         {/* Action Button */}
         <Link
           href={`/program/${program.slug.current}`}
-          className="inline-flex items-center justify-center w-full bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 mt-auto relative overflow-hidden">
+          className="inline-flex items-center justify-center w-full bg-linear-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-4 sm:px-5 lg:px-6 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 mt-auto relative overflow-hidden">
           <span className="relative z-10">View Keys</span>
           <FaChevronRight className="ml-1.5 sm:ml-2 w-3 h-3 sm:w-3.5 sm:h-3.5 transition-transform group-hover:translate-x-1 relative z-10" />
           {/* Button shine effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
         </Link>
       </div>
 
       {/* Decorative accent */}
-      <div className="h-0.5 sm:h-1 bg-gradient-to-r from-primary-500 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="h-0.5 sm:h-1 bg-linear-to-r from-primary-500 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 }

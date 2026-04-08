@@ -437,7 +437,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between py-2 px-6 border-t-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-lg">
+        <div className="flex items-center justify-between py-2 px-6 border-t-2 border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50 shadow-lg">
           <div className="text-sm text-gray-600 font-medium">
             {report.reportCount} total reports • Last updated: {new Date(report.lastReported).toLocaleDateString()}
           </div>

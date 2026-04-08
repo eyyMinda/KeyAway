@@ -1,16 +1,15 @@
 "use client";
 
 import { FaDownload, FaKey, FaShieldAlt } from "react-icons/fa";
-import HeroVisual from "./HeroVisual";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { FacebookGroupHeroPromo } from "@/src/components/social";
+import HeroLaptopImage from "./HeroLaptopImage";
 import { SocialData } from "@/src/types";
 import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 
 interface HeroSectionProps {
   socialData?: SocialData;
-  visitorWelcomeLine?: string | null;
   visitorHint?: VisitorHintData | null;
 }
 
@@ -38,39 +37,76 @@ const heroFeatures = [
   }
 ];
 
-export default function HeroSection({ socialData, visitorWelcomeLine, visitorHint }: HeroSectionProps) {
+export default function HeroSection({ socialData, visitorHint }: HeroSectionProps) {
   return (
-    <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-28">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
-      <div className="relative max-w-[90rem] mx-auto px-4 sm:px-6">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+    <section className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-28">
+      <div className="absolute inset-0 bg-linear-to-br from-gray-900 via-gray-800 to-gray-900"></div>
+      <div className="relative max-w-360 mx-auto px-4 sm:px-6">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           {/* Content */}
-          <div className="space-y-6 sm:space-y-8">
-            <div className="space-y-4 sm:space-y-5">
-              <h1 className="max-w-xl text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
-                Free CD Keys for <span className="text-gradient-pro">Pro Software</span>
-              </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-300 leading-relaxed">
-                Unlock premium features and pro versions of your favorite software with verified, working CD keys.
-              </p>
-              {visitorWelcomeLine ? (
-                <p className="text-sm text-primary-300/90">{visitorWelcomeLine}</p>
-              ) : null}
+          <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-4">
               {visitorHint ? (
-                <div className="pt-1">
-                  <VisitorTierHint hint={visitorHint} />
+                <div className="w-full pt-1">
+                  <VisitorTierHint hint={visitorHint} variant="feature" />
                 </div>
               ) : null}
+
+              <h1 className="max-w-xl text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+                Free CD Keys for <span className="text-gradient-pro">Pro Software</span>
+              </h1>
+              <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
+                Unlock premium features and pro versions of your favorite software with verified, working CD keys.
+              </p>
+
+              <div className="w-full pt-2 lg:hidden">
+                <HeroLaptopImage variant="mobile" sizes="(max-width: 1023px) 100vw, 32px" />
+              </div>
             </div>
 
+            {/* Primary CTA - Better mobile layout */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+              <ContactModalTrigger
+                tab="suggest"
+                className="inline-flex items-center justify-center px-6 py-3 sm:px-6 bg-linear-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] shadow-2xl text-sm sm:text-base cursor-pointer ring-2 ring-accent-400/50 hover:ring-accent-400/70">
+                <FaKey className="mr-2 sm:mr-3 text-base sm:text-lg" />
+                <span className="whitespace-nowrap">Suggest a CD Key</span>
+              </ContactModalTrigger>
+
+              <button
+                onClick={() => {
+                  document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className="inline-flex items-center justify-center px-4 py-3 sm:px-6 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base cursor-pointer">
+                <span className="whitespace-nowrap">How It Works</span>
+              </button>
+            </div>
+
+            {/* Pull-quote style community line */}
+            <figure className="m-0 w-full py-3 pl-0 pr-3 sm:pr-4">
+              <blockquote className="m-0 border-none py-0 pl-0 pr-0">
+                <div className="flex border-l-[3px] border-accent-400/70 pl-4">
+                  <div className="min-w-0 pl-3">
+                    <p className="font-serif text-sm italic leading-relaxed text-gray-200/95 sm:text-base">
+                      Help grow our library—suggest CD keys for any program, even ones not listed yet. After
+                      verification, they&apos;re available to everyone.
+                    </p>
+                    <cite className="mt-2 block text-xs font-medium tracking-wide text-gray-500 not-italic no-underline">
+                      Community-powered
+                    </cite>
+                  </div>
+                </div>
+              </blockquote>
+            </figure>
+
             {/* Features */}
-            <div className="flex flex-wrap gap-4 sm:gap-5">
+            <div className="flex flex-wrap gap-4 sm:gap-5 border-t border-white/10 pt-2">
               {heroFeatures.map((feature, index) => {
                 const IconComponent = feature.icon;
                 return (
                   <div key={index} className="flex items-center space-x-3">
                     <div
-                      className={`flex-shrink-0 w-11 h-11 ${feature.bgColor} rounded-lg flex items-center justify-center`}>
+                      className={`shrink-0 w-11 h-11 ${feature.bgColor} rounded-lg flex items-center justify-center`}>
                       <IconComponent className={`w-5 h-5 ${feature.iconColor}`} />
                     </div>
                     <div>
@@ -81,40 +117,12 @@ export default function HeroSection({ socialData, visitorWelcomeLine, visitorHin
                 );
               })}
             </div>
-
-            {/* Contribution Notice */}
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-5">
-              <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
-                <span className="font-semibold text-white">Community-powered:</span> Help grow our library! Suggest CD
-                keys for any program—even ones not listed yet. After verification, they&apos;ll be available to
-                everyone.
-              </p>
-            </div>
-
-            {/* Primary CTA - Better mobile layout */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
-              <ContactModalTrigger
-                tab="suggest"
-                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 lg:px-10 lg:py-5 bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] shadow-2xl text-sm sm:text-base lg:text-lg cursor-pointer ring-2 ring-accent-400/50 hover:ring-accent-400/70">
-                <FaKey className="mr-2 sm:mr-3 text-base sm:text-lg" />
-                <span className="whitespace-nowrap">Suggest a CD Key</span>
-              </ContactModalTrigger>
-
-              <button
-                onClick={() => {
-                  document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="inline-flex items-center justify-center px-4 py-3 sm:px-6 sm:py-4 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base cursor-pointer">
-                <span className="whitespace-nowrap">How It Works</span>
-              </button>
-            </div>
           </div>
 
           {/* Right Side - Visual and Facebook Promo */}
           <div className="flex flex-col gap-6">
-            {/* Visual Element */}
-            <div className="order-2 lg:order-1">
-              <HeroVisual />
+            <div className="relative order-2 hidden w-full lg:order-1 lg:block">
+              <HeroLaptopImage variant="desktop" sizes="(max-width: 1023px) 32px, (max-width: 1536px) 50vw, 720px" />
             </div>
 
             {/* Facebook Group Promotion - Moved to right side */}

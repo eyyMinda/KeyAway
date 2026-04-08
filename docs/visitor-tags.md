@@ -53,7 +53,7 @@ Studio option labels in `src/sanity/schemaTypes/visitor.ts` describe the same ba
 - **Admin-only** mutation: `PATCH /api/v1/admin/visitor-spammer` (`src/app/api/v1/admin/visitor-spammer/route.ts`).
 - If no `visitor` exists and admin sets **spammer = true**, a document can be **created** with `visitCount: 0`, `visitTier: "new"`, `isSpammer: true`, `spamMarkedAt` set (edge case for blocking without a prior page view).
 - **Public key reports:** if `isVisitorSpammerByHash(ipHash)` is true, the track route **accepts but skips** creating `keyReport` (`src/lib/visitors/isVisitorSpammerByHash.ts`).
-- **Public pages:** `getVisitorContextForPublicPage` returns `isSpammer` and suppresses welcome copy when spammer (`src/lib/visitors/serverVisitorContext.ts`). Program UI uses this to disable reporting (`isSpammerVisitor` on `CDKeyTable`).
+- **Public pages:** `getVisitorContextForPublicPage` returns `isSpammer` and omits `visitorHint` when spammer (`src/lib/visitors/serverVisitorContext.ts`). Program UI uses this to disable reporting (`isSpammerVisitor` on `CDKeyTable`).
 
 Spammer does **not** change tier math in `upsertVisitorOnPageView`; tier still follows `visitCount` when patches run.
 
@@ -62,7 +62,7 @@ Spammer does **not** change tier math in `upsertVisitorOnPageView`; tier still f
 
 | Surface                                  | Behavior                                                                                                                                                                                                                                                                                          |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Homepage hero**                        | Optional **welcome line** from tier (`returning` / `regular` / `star`); `**new` has no line** (`serverVisitorContext.ts`).                                                                                                                                                                        |
+| **Homepage hero**                        | Optional **visitor tier hint** (button + popover) when `visitorHint` is built from tier and contributions (`serverVisitorContext.ts` + `VisitorTierHint`).                                                                                                                                         |
 | **Admin events / bundles**               | `visitTier` and `visitorIsSpammer` joined in GROQ from `visitor` by `ipHash` (`queries.ts`).                                                                                                                                                                                                      |
 | **Admin analytics “Visitor tags” table** | `fetchVisitorTagAggregatesForRange` counts `**visitor` documents whose `lastActivityAt` is in the selected range**, grouped by `visitTier`, plus a row **“Spammers (flagged)”** = count of those rows with `isSpammer === true` (`src/lib/analytics/eventsApi.ts`). Table UI sorts rows by count. |
 
@@ -93,7 +93,7 @@ Important: the **analytics visitor-tags table** is **not** “events in range”
 
 - `src/lib/visitors/upsertVisitorOnPageView.ts` — create/patch and session logic  
 - `src/lib/visitors/visitTier.ts` — tier thresholds  
-- `src/lib/visitors/serverVisitorContext.ts` — RSC welcome line + spammer for public pages  
+- `src/lib/visitors/serverVisitorContext.ts` — RSC visitor hint + spammer for public pages  
 - `src/lib/visitors/isVisitorSpammerByHash.ts` — key-report gate  
 - `src/sanity/schemaTypes/visitor.ts` — CMS schema  
 - `src/app/api/v1/analytics/track/route.ts` — triggers upsert on `page_viewed`  

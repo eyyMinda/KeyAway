@@ -225,10 +225,7 @@ export default function ReportPopup({
         <div className="bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-white">Report Key Status</h3>
-            <ModalCloseButton
-              onClick={handleClose}
-              className="p-1 text-neutral-400 hover:text-white"
-            />
+            <ModalCloseButton onClick={handleClose} className="p-1 text-neutral-400 hover:text-white" />
           </div>
 
           <div className="mb-4">
@@ -248,7 +245,7 @@ export default function ReportPopup({
             {duplicateReport && !isCheckingDuplicate && (
               <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4 mb-4">
                 <div className="flex items-start space-x-3">
-                  <FiRefreshCw className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                  <FiRefreshCw className="w-5 h-5 text-orange-400 mt-0.5 shrink-0" />
                   <div className="flex-1">
                     <h4 className="text-orange-300 font-medium text-sm mb-1">{getInfoMessage("DUPLICATE_FOUND")}</h4>
                     <p className="text-orange-200 text-xs mb-2">Status: {getStatusText(duplicateReport.eventType)}</p>

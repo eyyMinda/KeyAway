@@ -13,7 +13,7 @@ export default function NotFound() {
             <div className="text-8xl font-bold text-primary-500 mb-4">404</div>
             <div className="absolute -top-2 -right-2 text-4xl animate-bounce">🔑</div>
           </div>
-          <div className="w-24 h-1 bg-gradient-to-r from-primary-500 to-accent-500 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-linear-to-r from-primary-500 to-accent-500 mx-auto rounded-full"></div>
         </div>
 
         {/* Content */}

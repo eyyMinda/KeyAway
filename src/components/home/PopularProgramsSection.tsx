@@ -15,7 +15,7 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
 
   return (
     <section id="popular-programs" className="py-8 sm:py-12 bg-white">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
+      <div className="max-w-360 mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <div className="inline-flex items-center space-x-2 bg-red-100 text-red-600 px-4 py-2 rounded-full text-sm font-semibold mb-4">

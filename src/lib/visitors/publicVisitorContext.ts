@@ -12,6 +12,5 @@ export interface VisitorHintData {
 
 export interface PublicVisitorContext {
   isSpammer: boolean;
-  visitorWelcomeLine: string | null;
   visitorHint: VisitorHintData | null;
 }

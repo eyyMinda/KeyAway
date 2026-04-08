@@ -2,6 +2,7 @@
 
 import { FaKey, FaDownload, FaShieldAlt, FaCheckCircle } from "react-icons/fa";
 
+/** Interactive hero collage (CSS + icons). Not mounted on the homepage — homepage uses static WebP for LCP. Kept for reuse or A/B. */
 export default function HeroVisual() {
   const handleScrollToPrograms = () => {
     document.querySelector("#popular-programs")?.scrollIntoView({ behavior: "smooth" });
@@ -21,8 +22,8 @@ export default function HeroVisual() {
       }}
       aria-label="Scroll to programs">
       {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-500/10 to-accent-500/10 rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
-      <div className="absolute inset-0 bg-gradient-to-tl from-accent-500/10 to-primary-500/10 rounded-3xl transform -rotate-2 group-hover:-rotate-4 transition-transform duration-300"></div>
+      <div className="absolute inset-0 bg-linear-to-br from-primary-500/10 to-accent-500/10 rounded-3xl transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
+      <div className="absolute inset-0 bg-linear-to-tl from-accent-500/10 to-primary-500/10 rounded-3xl transform -rotate-2 group-hover:-rotate-4 transition-transform duration-300"></div>
 
       {/* Main Visual Container */}
       <div className="relative bg-white/5 backdrop-blur-sm rounded-3xl p-8 lg:p-12 border border-white/10 group-hover:border-white/20 transition-all duration-300">
@@ -44,7 +45,7 @@ export default function HeroVisual() {
         {/* Central Content */}
         <div className="text-center space-y-6">
           {/* Main Icon */}
-          <div className="mx-auto w-24 h-24 bg-gradient-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-2xl">
+          <div className="mx-auto w-24 h-24 bg-linear-to-br from-primary-500 to-accent-500 rounded-2xl flex items-center justify-center shadow-2xl">
             <FaDownload className="w-12 h-12 text-white" />
           </div>
 

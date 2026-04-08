@@ -48,7 +48,7 @@ export default function Header({ storeData, logoData, notifications, socialData 
 
   return (
     <header className="bg-gray-900 shadow-lg sticky top-0 z-[101]">
-      <div className="max-w-[90rem] mx-auto p-4 sm:px-6 lg:px-8 flex items-center justify-between max-h-20">
+      <div className="max-w-360 mx-auto p-4 sm:px-6 lg:px-8 flex items-center justify-between max-h-20">
         <Link
           href="/"
           title={storeData.title}

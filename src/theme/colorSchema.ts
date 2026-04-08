@@ -38,6 +38,10 @@ export const analyticsEvent = {
   page_viewed: {
     chartHex: analyticsAccents.pageview,
     dotClass: "bg-analytics-pageview"
+  },
+  interaction: {
+    chartHex: "#06B6D4",
+    dotClass: "bg-cyan-500"
   }
 } as const;
 
@@ -58,7 +62,8 @@ export const eventTypePillClass: Record<AnalyticsEventKey, string> = {
   copy_cdkey: `${trackingTagTierBackgroundClass.new} ${trackingTagPillTextClass}`,
   download_click: `${trackingTagTierBackgroundClass.returning} ${trackingTagPillTextClass}`,
   social_click: `${trackingTagTierBackgroundClass.regular} ${trackingTagPillTextClass}`,
-  page_viewed: `${trackingTagTierBackgroundClass.star} ${trackingTagPillTextClass}`
+  page_viewed: `${trackingTagTierBackgroundClass.star} ${trackingTagPillTextClass}`,
+  interaction: `bg-cyan-600 ${trackingTagPillTextClass}`
 };
 
 /** Not in tier set — saturated enough for white label text. */
@@ -140,31 +145,31 @@ export const adminChrome = {
 export const modalSectionStyles = {
   blue: {
     bar: "bg-primary-500",
-    background: "bg-gradient-to-br from-primary-50 to-indigo-50",
+    background: "bg-linear-to-br from-primary-50 to-indigo-50",
     border: "border-primary-100",
     content: "border-primary-200"
   },
   green: {
     bar: "bg-success-500",
-    background: "bg-gradient-to-br from-success-50 to-success-100",
+    background: "bg-linear-to-br from-success-50 to-success-100",
     border: "border-success-100",
     content: "border-success-200"
   },
   red: {
     bar: "bg-error-500",
-    background: "bg-gradient-to-br from-error-50 to-pink-50",
+    background: "bg-linear-to-br from-error-50 to-pink-50",
     border: "border-error-100",
     content: "border-error-200"
   },
   purple: {
     bar: "bg-accent-600",
-    background: "bg-gradient-to-br from-accent-50 to-primary-50",
+    background: "bg-linear-to-br from-accent-50 to-primary-50",
     border: "border-accent-100",
     content: "border-accent-200"
   },
   gray: {
     bar: "bg-neutral-500",
-    background: "bg-gradient-to-br from-neutral-50 to-neutral-100",
+    background: "bg-linear-to-br from-neutral-50 to-neutral-100",
     border: "border-neutral-100",
     content: "border-neutral-200"
   }

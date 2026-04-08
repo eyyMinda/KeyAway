@@ -14,9 +14,9 @@ export default function NotificationItem({ notification, onClose }: Notification
   const createdAt = new Date(notification.createdAt);
   const daysOld = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Determine prominence level
-  const isFresh = daysOld <= 30; // 1 month and 14 days
-  const isRecent = daysOld > 30 && daysOld <= 90; // Under 3 months
+  // Match ~1 month getRecentNotifications window: strong → softer → dim past cutoff
+  const isFresh = daysOld <= 14;
+  const isRecent = daysOld > 14 && daysOld <= 31;
 
   // Dynamic styling based on age
   const baseOpacity = isFresh ? "opacity-100" : isRecent ? "opacity-75" : "opacity-60";
@@ -30,7 +30,7 @@ export default function NotificationItem({ notification, onClose }: Notification
       <div className="flex items-start gap-3">
         {/* Icon Badge */}
         <div
-          className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+          className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
             isNewProgram ? "bg-blue-500/10 border border-blue-500/30" : "bg-green-500/10 border border-green-500/30"
           } ${isFresh ? "group-hover:scale-110" : ""}`}>
           {isNewProgram ? (
@@ -80,7 +80,7 @@ export default function NotificationItem({ notification, onClose }: Notification
         </div>
 
         {/* Arrow - Blinking animation */}
-        <div className="flex-shrink-0 text-gray-600 group-hover:text-white transition-colors">
+        <div className="shrink-0 text-gray-600 group-hover:text-white transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

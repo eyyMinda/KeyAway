@@ -64,8 +64,8 @@ export default function CDKeyTable({ cdKeys, slug, isSpammerVisitor = false }: C
   }, [cdKeys, sortColumn, sortDirection, reportDataMap]);
 
   return (
-    <section className="py-6 sm:py-10 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-6 sm:py-10 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
+      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-600">
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">
             <div className="flex items-start justify-between gap-3">
@@ -77,7 +77,7 @@ export default function CDKeyTable({ cdKeys, slug, isSpammerVisitor = false }: C
                   Activate working CD keys for premium software
                 </p>
               </div>
-              <div className="flex-shrink-0">
+              <div className="shrink-0">
                 <KeyStatusTooltip />
               </div>
             </div>
@@ -85,7 +85,7 @@ export default function CDKeyTable({ cdKeys, slug, isSpammerVisitor = false }: C
               <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-amber-500/10 border border-amber-400/30 rounded-lg sm:rounded-xl">
                 <div className="flex items-start gap-2 sm:gap-3">
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 mt-0.5 flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 mt-0.5 shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -114,7 +114,7 @@ export default function CDKeyTable({ cdKeys, slug, isSpammerVisitor = false }: C
             <>
               {/* Mobile Card Layout */}
               <div className="block lg:hidden px-3 sm:px-4 py-4 sm:py-6">
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                <div className="grid auto-rows-auto grid-flow-dense grid-cols-[repeat(auto-fit,minmax(290px,1fr))] gap-3">
                   {sortedKeys.map((cdKey: CDKey, i: number) => (
                     <CDKeyMobileCard
                       key={i}

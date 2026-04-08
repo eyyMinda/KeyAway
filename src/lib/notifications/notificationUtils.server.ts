@@ -2,12 +2,11 @@ import { client } from "@/src/sanity/lib/client";
 import { Notification } from "@/src/types/notifications";
 
 /**
- * Get recent notifications (new programs and newly added CD keys within last 30 days)
+ * Get recent notifications (new programs and newly added CD keys within the last calendar month)
  */
 export async function getRecentNotifications(): Promise<Notification[]> {
   const filterAgo = new Date();
   filterAgo.setMonth(filterAgo.getMonth() - 1);
-  filterAgo.setDate(filterAgo.getDate() - 14);
 
   try {
     // Fetch all programs once
@@ -54,7 +53,7 @@ export async function getRecentNotifications(): Promise<Notification[]> {
 
       // Check for newly added keys (both new and existing programs)
       if (program.cdKeys && program.cdKeys.length > 0) {
-        // Find keys that were created in the last 30 days
+        // Find keys that were created in the last calendar month
         const newlyAddedKeys = program.cdKeys.filter(key => {
           const keyDate = key.createdAt || key.validFrom;
           if (!keyDate) return false;

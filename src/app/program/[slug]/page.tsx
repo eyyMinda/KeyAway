@@ -51,7 +51,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     };
 
     const hdrs = await headers();
-    const { isSpammer, visitorWelcomeLine, visitorHint } = await getVisitorContextForPublicPage(hdrs);
+    const { isSpammer, visitorHint } = await getVisitorContextForPublicPage(hdrs);
     const relatedPrograms = allPrograms
       .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
       .slice(0, 5);
@@ -62,13 +62,12 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     return (
       <>
         <JsonLd data={jsonLd} />
-        <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
+        <main className="min-h-screen bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
           <ProgramInformation
             program={program}
             totalKeys={totalKeys}
             workingKeys={workingKeys}
             socialData={socialData}
-            visitorWelcomeLine={visitorWelcomeLine}
             visitorHint={visitorHint}
           />
           <CDKeyTable cdKeys={sortedCdKeys} slug={slug} isSpammerVisitor={isSpammer} />

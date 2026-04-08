@@ -113,7 +113,7 @@ export default function ProgramsPage() {
             key={program._id ?? program.slug.current}
             className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
             {/* Program Image */}
-            <div className="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <div className="h-48 bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
               {program.image ? (
                 <IdealImage image={program.image} alt={program.title} className="w-full h-full object-cover" />
               ) : (

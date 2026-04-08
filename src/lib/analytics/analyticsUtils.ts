@@ -111,7 +111,9 @@ export function aggregateEvents(events: AnalyticsEventData[]): AggregatedData {
     if (event.programSlug && !(event.event === "page_viewed" && event.notFound === true)) {
       byProgram.set(event.programSlug, (byProgram.get(event.programSlug) || 0) + 1);
     }
-    if (event.social) bySocial.set(event.social, (bySocial.get(event.social) || 0) + 1);
+    if (event.event === "social_click" && event.social) {
+      bySocial.set(event.social, (bySocial.get(event.social) || 0) + 1);
+    }
     if (event.path && !isPageViewNotFoundRow(event)) {
       byPath.set(event.path, (byPath.get(event.path) || 0) + 1);
     }

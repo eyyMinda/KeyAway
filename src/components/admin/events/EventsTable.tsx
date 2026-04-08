@@ -106,6 +106,13 @@ export default function EventsTable({
                     )}
                   </td>
                   <td className="max-w-3xs p-4 text-sm text-gray-900">
+                    {event.interaction ? (
+                      <span className="font-mono text-xs text-cyan-800">{event.interaction}</span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="max-w-3xs p-4 text-sm text-gray-900">
                     <span className="font-mono text-xs">{event.path || "/"}</span>
                   </td>
                   <td className="max-w-44 p-4 text-sm text-gray-900">

@@ -14,7 +14,8 @@ const ANALYTICS_EVENTS = new Set([
   "copy_cdkey",
   "download_click",
   "social_click",
-  "page_viewed"
+  "page_viewed",
+  "interaction"
 ]);
 const REPORT_EVENTS = new Set(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
@@ -26,6 +27,11 @@ export async function POST(req: NextRequest) {
     const body = (await req.json()) as TrackRequestBody;
     if (!body?.event || (!ANALYTICS_EVENTS.has(body.event) && !REPORT_EVENTS.has(body.event))) {
       return Errors.validation("Invalid event");
+    }
+
+    if (body.event === "interaction") {
+      const id = typeof body.meta?.interaction === "string" ? body.meta.interaction.trim() : "";
+      if (!id) return Errors.validation("interaction id required in meta.interaction");
     }
 
     const host = req.headers.get("host") || "";
@@ -41,6 +47,7 @@ export async function POST(req: NextRequest) {
     let programSlug = body.meta?.programSlug as string | undefined;
     const keyData = getKeyData(body.meta?.key);
     const social = body.meta?.social as string | undefined;
+    const interaction = body.meta?.interaction as string | undefined;
     const path = body.meta?.path as string | undefined;
     const referrer = body.meta?.referrer as string | undefined;
     const utmSource = body.meta?.utm_source as string | undefined;
@@ -88,6 +95,7 @@ export async function POST(req: NextRequest) {
       eventData.keyNormalized = keyData.normalized;
     }
     if (social) eventData.social = social;
+    if (interaction?.trim()) eventData.interaction = interaction.trim();
     if (path) eventData.path = path;
     if (referrer) eventData.referrer = referrer;
     if (utmSource) eventData.utm_source = utmSource;
