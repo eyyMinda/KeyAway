@@ -54,8 +54,8 @@ export default function StatsSection({ stats }: StatsSectionProps) {
   };
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-gray-800 via-sky-500 via-50% via-sky-800 via-80% to-gray-900 text-white">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
+    <section className="py-12 sm:py-16 lg:py-20 bg-linear-to-b from-gray-800 via-sky-500 via-50% via-sky-800 via-80% to-gray-900 text-white">
+      <div className="max-w-360 mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Community Impact</h2>

@@ -53,7 +53,7 @@ const helpWays = [
 export default function CTASection() {
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-gray-900 text-white">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6">
+      <div className="max-w-360 mx-auto px-4 sm:px-6">
         <div className="text-center">
           {/* Main CTA */}
           <div className="max-w-4xl mx-auto mb-10 sm:mb-12 lg:mb-16">
