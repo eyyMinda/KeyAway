@@ -14,9 +14,9 @@ export default function NotificationItem({ notification, onClose }: Notification
   const createdAt = new Date(notification.createdAt);
   const daysOld = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Determine prominence level
-  const isFresh = daysOld <= 30; // 1 month and 14 days
-  const isRecent = daysOld > 30 && daysOld <= 90; // Under 3 months
+  // Match ~1 month getRecentNotifications window: strong → softer → dim past cutoff
+  const isFresh = daysOld <= 14;
+  const isRecent = daysOld > 14 && daysOld <= 31;
 
   // Dynamic styling based on age
   const baseOpacity = isFresh ? "opacity-100" : isRecent ? "opacity-75" : "opacity-60";
