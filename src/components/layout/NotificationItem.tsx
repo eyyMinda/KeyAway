@@ -30,7 +30,7 @@ export default function NotificationItem({ notification, onClose }: Notification
       <div className="flex items-start gap-3">
         {/* Icon Badge */}
         <div
-          className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
+          className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-all ${
             isNewProgram ? "bg-blue-500/10 border border-blue-500/30" : "bg-green-500/10 border border-green-500/30"
           } ${isFresh ? "group-hover:scale-110" : ""}`}>
           {isNewProgram ? (
@@ -80,7 +80,7 @@ export default function NotificationItem({ notification, onClose }: Notification
         </div>
 
         {/* Arrow - Blinking animation */}
-        <div className="flex-shrink-0 text-gray-600 group-hover:text-white transition-colors">
+        <div className="shrink-0 text-gray-600 group-hover:text-white transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

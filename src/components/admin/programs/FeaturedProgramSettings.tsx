@@ -223,7 +223,7 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
                   className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer bg-gray-50">
                   <div className="flex items-start gap-3">
                     {featuredProgram.image && (
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                         <IdealImage
                           image={featuredProgram.image}
                           alt={featuredProgram.title}

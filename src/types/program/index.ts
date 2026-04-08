@@ -1,6 +1,7 @@
 /**
  * @fileoverview Program/CDKey shapes and props for program UI.
  */
+import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 import type { SocialData } from "../layout";
 
 export type CDKeyStatus = "new" | "active" | "expired" | "limit";
@@ -62,7 +63,7 @@ export interface ProgramInformationProps {
   totalKeys: number;
   workingKeys: number;
   socialData?: SocialData;
-  visitorWelcomeLine?: string | null;
+  visitorHint?: VisitorHintData | null;
 }
 
 export interface ProgramPageProps {
