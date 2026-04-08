@@ -10,6 +10,7 @@ const bundledEventFields = [
   { name: "country", title: "Country", type: "string" },
   { name: "city", title: "City", type: "string" },
   { name: "social", title: "Social Name", type: "string" },
+  { name: "interaction", title: "Interaction id", type: "string" },
   { name: "keyHash", title: "Key Hash", type: "string" },
   { name: "keyIdentifier", title: "Key Identifier", type: "string" },
   { name: "keyNormalized", title: "Key Normalized", type: "string" },

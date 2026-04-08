@@ -14,7 +14,8 @@ export const trackingEvent = defineType({
           { title: "Copy CD Key", value: "copy_cdkey" },
           { title: "Download Click", value: "download_click" },
           { title: "Social Click", value: "social_click" },
-          { title: "Page Viewed", value: "page_viewed" }
+          { title: "Page Viewed", value: "page_viewed" },
+          { title: "Interaction", value: "interaction" }
         ]
       },
       validation: Rule => Rule.required()
@@ -30,6 +31,12 @@ export const trackingEvent = defineType({
     { name: "keyIdentifier", title: "Key Identifier", type: "string", description: "Short identifier like ABC***XYZ" },
     { name: "keyNormalized", title: "Key Normalized", type: "string", description: "Normalized key for matching" },
     { name: "social", title: "Social Name", type: "string" },
+    {
+      name: "interaction",
+      title: "Interaction id",
+      type: "string",
+      description: "Stable id for UI engagement (event type interaction), e.g. visitor_hint_visible"
+    },
     { name: "path", title: "Path", type: "string" },
     { name: "referrer", title: "Referrer", type: "url" },
     { name: "userAgent", title: "User Agent", type: "string" },
