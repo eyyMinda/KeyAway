@@ -45,7 +45,7 @@ export default function Loading() {
             </div>
 
             <div className="bg-neutral-800/50 backdrop-blur-sm rounded-2xl border border-neutral-700/50 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-6 border-b border-neutral-700/50">
+              <div className="bg-linear-to-r from-blue-500/10 to-purple-500/10 p-6 border-b border-neutral-700/50">
                 <div className="h-6 bg-neutral-700 rounded w-1/4"></div>
               </div>
 

@@ -43,8 +43,8 @@ export default function ActivationInstructions() {
   ];
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-8 sm:py-12 lg:py-16 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
+      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <h2 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-3 sm:mb-4">
             How to Activate Your <span className="text-gradient-pro">Pro Software</span>
@@ -76,7 +76,7 @@ export default function ActivationInstructions() {
           <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
             {tips.map((tip, index) => (
               <div key={index} className="flex items-start space-x-2 sm:space-x-3">
-                <div className="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-500/20 rounded-full flex items-center justify-center mt-0.5">
+                <div className="shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-500/20 rounded-full flex items-center justify-center mt-0.5">
                   <tip.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400" />
                 </div>
                 <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">{tip.text}</p>
