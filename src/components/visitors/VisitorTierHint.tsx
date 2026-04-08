@@ -12,7 +12,6 @@ import {
   FaTimes,
   FaUser
 } from "react-icons/fa";
-import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 
 export type VisitorTierHintVariant = "pill" | "feature";
@@ -60,7 +59,6 @@ function tierFeatureShell(tier: VisitorHintData["tier"]): { boxClass: string; ic
 export default function VisitorTierHint({ hint, variant = "pill" }: VisitorTierHintProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const trackedVisibleRef = useRef(false);
 
   const stats = useMemo(
     () => [
@@ -74,12 +72,6 @@ export default function VisitorTierHint({ hint, variant = "pill" }: VisitorTierH
   const shell = variant === "feature" ? tierFeatureShell(hint.tier) : null;
 
   useEffect(() => {
-    if (trackedVisibleRef.current) return;
-    trackedVisibleRef.current = true;
-    trackEvent("social_click", { social: "visitor_hint_visible", path: window.location.pathname });
-  }, []);
-
-  useEffect(() => {
     if (!open) return;
     const onClickOutside = (event: MouseEvent) => {
       if (!rootRef.current) return;
@@ -90,11 +82,7 @@ export default function VisitorTierHint({ hint, variant = "pill" }: VisitorTierH
   }, [open]);
 
   const togglePopover = () => {
-    const next = !open;
-    setOpen(next);
-    if (next) {
-      trackEvent("social_click", { social: "visitor_hint_open", path: window.location.pathname });
-    }
+    setOpen(!open);
   };
 
   const statsRow = (
