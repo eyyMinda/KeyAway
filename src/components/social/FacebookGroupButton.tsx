@@ -6,18 +6,26 @@ import Link from "next/link";
 import { SocialData } from "@/src/types";
 import { hasFacebookSocialLink, getFacebookSocialLink } from "@/src/lib/social/socialUtils";
 
+const TAGLINE = "Get notified about new programs & CD keys";
+
 interface FacebookGroupButtonProps {
   socialData?: SocialData;
   className?: string;
   path?: string;
   variant?: "primary" | "secondary" | "outline";
+  /** `below` = caption under the link (default). `inside` = caption inside the button under “Join Group”. */
+  taglinePlacement?: "below" | "inside";
+  /** When false, tagline is omitted (both placements). Default true. */
+  showTagline?: boolean;
 }
 
 export function FacebookGroupButton({
   socialData,
   className = "",
   path,
-  variant = "primary"
+  variant = "primary",
+  taglinePlacement = "below",
+  showTagline = true
 }: FacebookGroupButtonProps) {
   // Check if Facebook social link exists
   const hasFacebook = hasFacebookSocialLink(socialData);
@@ -46,18 +54,58 @@ export function FacebookGroupButton({
     }
   };
 
+  const taglineMuted =
+    variant === "outline" ? "text-blue-200/85" : variant === "secondary" ? "text-white/80" : "text-white/85";
+
+  const linkBase = `rounded-lg font-medium transition-colors ${getVariantClasses()}`;
+
+  const joinRow = (
+    <>
+      <FaUsers className="h-4 w-4 shrink-0" />
+      <span>Join Group</span>
+    </>
+  );
+
+  if (taglinePlacement === "inside") {
+    return (
+      <div className={`flex flex-col text-start ${className}`}>
+        <Link
+          href={facebookUrl}
+          target="_blank"
+          rel="noreferrer"
+          onClick={handleClick}
+          className={
+            showTagline
+              ? `w-fit inline-flex flex-col items-start gap-1 px-4 py-2.5 ${linkBase}`
+              : `w-fit inline-flex items-center gap-2 px-4 py-2 ${linkBase}`
+          }>
+          {showTagline ? (
+            <>
+              <span className="inline-flex items-center gap-2">{joinRow}</span>
+              <span className={`text-start text-[10px] leading-snug font-normal sm:text-xs ${taglineMuted}`}>
+                {TAGLINE}
+              </span>
+            </>
+          ) : (
+            joinRow
+          )}
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex flex-col items-center text-center ${className}`}>
+    <div className={`flex flex-col text-center ${className}`}>
       <Link
         href={facebookUrl}
         target="_blank"
         rel="noreferrer"
         onClick={handleClick}
-        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${getVariantClasses()}`}>
+        className={`w-fit inline-flex items-center gap-2 px-4 py-2 ${linkBase}`}>
         <FaUsers className="h-4 w-4" />
         <span>Join Group</span>
       </Link>
-      <span className="text-xs text-gray-400 mt-1 leading-tight">Get notified about new programs & CD keys</span>
+      {showTagline ? <span className="mt-1 text-xs leading-tight text-gray-400">{TAGLINE}</span> : null}
     </div>
   );
 }
