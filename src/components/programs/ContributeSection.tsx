@@ -5,8 +5,8 @@ import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function ContributeSection() {
   return (
-    <section className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 py-12 sm:py-16 lg:py-20">
-      <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="bg-linear-to-br from-gray-800 via-gray-900 to-gray-800 py-12 sm:py-16 lg:py-20">
+      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 sm:mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 sm:mb-6">
             Help Us Grow the Library
@@ -18,7 +18,7 @@ export default function ContributeSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-10 sm:mb-12">
           {/* Share Keys */}
-          <div className="bg-gradient-to-br from-primary-600/20 to-primary-700/10 backdrop-blur-sm border border-primary-400/30 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center hover:border-primary-400/50 hover:from-primary-600/30 hover:to-primary-700/20 transition-all duration-300">
+          <div className="bg-linear-to-br from-primary-600/20 to-primary-700/10 backdrop-blur-sm border border-primary-400/30 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center hover:border-primary-400/50 hover:from-primary-600/30 hover:to-primary-700/20 transition-all duration-300">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary-500/20 border border-primary-400/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <FaKey className="w-6 h-6 sm:w-7 sm:h-7 text-primary-300" />
             </div>
@@ -29,7 +29,7 @@ export default function ContributeSection() {
           </div>
 
           {/* Report Status */}
-          <div className="bg-gradient-to-br from-green-600/20 to-green-700/10 backdrop-blur-sm border border-green-400/30 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center hover:border-green-400/50 hover:from-green-600/30 hover:to-green-700/20 transition-all duration-300">
+          <div className="bg-linear-to-br from-green-600/20 to-green-700/10 backdrop-blur-sm border border-green-400/30 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center hover:border-green-400/50 hover:from-green-600/30 hover:to-green-700/20 transition-all duration-300">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-500/20 border border-green-400/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <FaCheckCircle className="w-6 h-6 sm:w-7 sm:h-7 text-green-300" />
             </div>
@@ -40,7 +40,7 @@ export default function ContributeSection() {
           </div>
 
           {/* Spread the Word */}
-          <div className="bg-gradient-to-br from-accent-600/20 to-accent-700/10 backdrop-blur-sm border border-accent-400/30 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center hover:border-accent-400/50 hover:from-accent-600/30 hover:to-accent-700/20 transition-all duration-300 sm:col-span-2 lg:col-span-1">
+          <div className="bg-linear-to-br from-accent-600/20 to-accent-700/10 backdrop-blur-sm border border-accent-400/30 rounded-xl sm:rounded-2xl p-6 sm:p-8 text-center hover:border-accent-400/50 hover:from-accent-600/30 hover:to-accent-700/20 transition-all duration-300 sm:col-span-2 lg:col-span-1">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-accent-500/20 border border-accent-400/30 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
               <FaHeart className="w-6 h-6 sm:w-7 sm:h-7 text-accent-300" />
             </div>
@@ -55,7 +55,7 @@ export default function ContributeSection() {
         <div className="text-center">
           <ContactModalTrigger
             tab="suggest"
-            className="inline-flex items-center bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] shadow-[0_8px_30px_rgb(255,255,255,0.12)] hover:shadow-[0_12px_40px_rgb(255,255,255,0.2)] text-sm sm:text-base cursor-pointer">
+            className="inline-flex items-center bg-linear-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] shadow-[0_8px_30px_rgb(255,255,255,0.12)] hover:shadow-[0_12px_40px_rgb(255,255,255,0.2)] text-sm sm:text-base cursor-pointer">
             <FaKey className="mr-2 sm:mr-3" />
             Suggest a CD Key Now
           </ContactModalTrigger>

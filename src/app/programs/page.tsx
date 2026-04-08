@@ -47,8 +47,8 @@ export default async function ProgramsPage() {
         />
 
         {/* Facebook Group Button */}
-        <section className="py-8 bg-gradient-to-b from-gray-50 to-gray-100">
-          <div className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+        <section className="py-8 bg-linear-to-b from-gray-50 to-gray-100">
+          <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
             <FacebookGroupButton socialData={socialData} variant="outline" className="text-base" />
           </div>
         </section>
