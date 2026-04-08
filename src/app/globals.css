@@ -130,7 +130,7 @@ body {
   }
 
   /* Gradient utilities */
-  .bg-gradient-to-r {
+  .bg-linear-to-r {
     background-image: linear-gradient(to right, var(--tw-gradient-stops));
   }
 
@@ -1250,5 +1250,49 @@ body {
 
   .animate-fadeIn {
     animation: fadeIn 0.5s ease-out;
+  }
+
+  /* Facebook promo bell — rotation wobble */
+  @keyframes bellRing {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    5% {
+      transform: rotate(-16deg);
+    }
+    8% {
+      transform: rotate(14deg);
+    }
+    11% {
+      transform: rotate(-11deg);
+    }
+    14% {
+      transform: rotate(9deg);
+    }
+    18% {
+      transform: rotate(-6deg);
+    }
+    22% {
+      transform: rotate(4deg);
+    }
+    26% {
+      transform: rotate(-2deg);
+    }
+    30%,
+    65% {
+      transform: rotate(0deg);
+    }
+  }
+
+  .animate-bell-ring {
+    transform-origin: top center;
+    animation: bellRing 4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-bell-ring {
+      animation: none;
+    }
   }
 }
