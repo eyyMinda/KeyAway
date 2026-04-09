@@ -101,12 +101,12 @@ export default function ProgramInformation({
                     href={program.downloadLink}
                     target="_blank"
                     rel="noreferrer"
-                    onClick={() =>
+                    onClick={() => {
                       trackEvent("download_click", {
                         programSlug: program.slug.current,
                         path: window.location.pathname
-                      })
-                    }
+                      });
+                    }}
                     className="inline-flex items-center bg-linear-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-5 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800 shadow-lg text-sm sm:text-base">
                     <FaDownload size={18} className="mr-2 sm:mr-3" />
                     Download Program
