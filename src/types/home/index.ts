@@ -19,6 +19,7 @@ export interface ProgramCardProps {
     mostDownloaded?: boolean;
   };
   showStats?: boolean;
+  sectionId?: string;
 }
 
 export interface PopularProgramsSectionProps {

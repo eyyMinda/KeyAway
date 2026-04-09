@@ -31,6 +31,7 @@ export default function ProgramsGrid({
         <ProgramCard
           key={program.slug.current}
           program={program}
+          sectionId={limit ? "popular_programs" : "programs_page"}
           stats={{
             viewCount: program.viewCount,
             downloadCount: program.downloadCount
@@ -44,8 +45,8 @@ export default function ProgramsGrid({
       ))}
 
       {/* CTA Cards */}
-      <SuggestKeyCTA />
-      {showBrowseAllCTA && <BrowseAllCTA />}
+      <SuggestKeyCTA sectionId={limit ? "popular_programs" : "programs_page"} />
+      {showBrowseAllCTA && <BrowseAllCTA sectionId={limit ? "popular_programs" : "programs_page"} />}
     </div>
   );
 }

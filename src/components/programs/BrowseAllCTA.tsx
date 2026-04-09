@@ -2,11 +2,22 @@
 
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
+import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 
-export default function BrowseAllCTA() {
+interface BrowseAllCTAProps {
+  sectionId?: string;
+}
+
+export default function BrowseAllCTA({ sectionId = "programs_page" }: BrowseAllCTAProps) {
   return (
     <Link
       href="/programs"
+      onClick={() =>
+        void trackInteraction({
+          interactionId: "programs_browse_all",
+          sectionId
+        })
+      }
       className="group relative bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 hover:border-primary-400 rounded-xl sm:rounded-2xl p-6 transition-all duration-300 hover:shadow-xl cursor-pointer flex flex-col items-center justify-center min-h-[280px] text-center">
       <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
         <FaArrowRight className="w-8 h-8 text-white" />
