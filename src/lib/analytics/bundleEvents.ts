@@ -7,7 +7,7 @@ const BUNDLE_SIZE = 1000;
 const MAX_ITERATIONS = 10;
 
 const EVENT_FIELDS =
-  "event, programSlug, notFound, path, referrer, country, city, social, interaction, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
+  "event, programSlug, notFound, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
 
 function toBundleEvent(doc: Record<string, unknown> & { _id?: string }, index: number) {
   const id = doc._id ?? `evt-${index}`;
@@ -25,7 +25,6 @@ function toBundleEvent(doc: Record<string, unknown> & { _id?: string }, index: n
     country: doc.country,
     city: doc.city,
     social: doc.social,
-    interaction: doc.interaction,
     keyHash: doc.keyHash,
     keyIdentifier: doc.keyIdentifier,
     keyNormalized: doc.keyNormalized,
