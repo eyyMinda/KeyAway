@@ -4,7 +4,10 @@ import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
 const SESSION_GAP_MS = 60 * 60 * 1000;
 
 /** After a stored `page_viewed`, patch or create `visitor` (1h idle = new session, increments visitCount / tier). */
-export async function upsertVisitorOnPageView(visitorHash: string | undefined): Promise<void> {
+export async function upsertVisitorOnPageView(
+  visitorHash: string | undefined,
+  location?: { country?: string; city?: string }
+): Promise<void> {
   if (!visitorHash) return;
 
   const now = new Date().toISOString();
@@ -32,6 +35,9 @@ export async function upsertVisitorOnPageView(visitorHash: string | undefined): 
       reportCount: 0,
       suggestionCount: 0,
       contributionScore: 0,
+      ...(location?.country ? { country: location.country } : {}),
+      ...(location?.city ? { city: location.city } : {}),
+      ...(location?.country || location?.city ? { geoUpdatedAt: now } : {}),
       createdAt: now,
       updatedAt: now
     });
@@ -50,6 +56,9 @@ export async function upsertVisitorOnPageView(visitorHash: string | undefined): 
       visitCount: nextCount,
       lastActivityAt: now,
       visitTier: resolveVisitTier(nextCount, contributionScore, isSpammer),
+      ...(location?.country ? { country: location.country } : {}),
+      ...(location?.city ? { city: location.city } : {}),
+      ...(location?.country || location?.city ? { geoUpdatedAt: now } : {}),
       updatedAt: now
     })
     .commit();

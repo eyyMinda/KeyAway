@@ -75,6 +75,23 @@ export const visitor = defineType({
       type: "datetime"
     },
     {
+      name: "country",
+      title: "Country",
+      type: "string",
+      description: "Latest resolved visitor country from IP geolocation"
+    },
+    {
+      name: "city",
+      title: "City",
+      type: "string",
+      description: "Latest resolved visitor city from IP geolocation"
+    },
+    {
+      name: "geoUpdatedAt",
+      title: "Geo updated at",
+      type: "datetime"
+    },
+    {
       name: "createdAt",
       title: "Created at",
       type: "datetime",

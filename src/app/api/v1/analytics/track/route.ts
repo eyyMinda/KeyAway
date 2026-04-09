@@ -7,15 +7,13 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
-import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 
 const ANALYTICS_EVENTS = new Set([
   "copy_cdkey",
   "download_click",
   "social_click",
-  "page_viewed",
-  "interaction"
+  "page_viewed"
 ]);
 const REPORT_EVENTS = new Set(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
@@ -29,11 +27,6 @@ export async function POST(req: NextRequest) {
       return Errors.validation("Invalid event");
     }
 
-    if (body.event === "interaction") {
-      const id = typeof body.meta?.interaction === "string" ? body.meta.interaction.trim() : "";
-      if (!id) return Errors.validation("interaction id required in meta.interaction");
-    }
-
     const host = req.headers.get("host") || "";
     if (host.startsWith("localhost") || host.includes("127.0.0.1")) {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
@@ -42,12 +35,10 @@ export async function POST(req: NextRequest) {
     const ua = req.headers.get("user-agent") || undefined;
     const ref = req.headers.get("referer") || undefined;
     const ip = getClientIp(req);
-    const location = await getLocationFromIP(ip, "KeyAway Analytics");
 
     let programSlug = body.meta?.programSlug as string | undefined;
-    const keyData = getKeyData(body.meta?.key);
+    const keyData = body.meta?.key ? getKeyData(body.meta.key) : undefined;
     const social = body.meta?.social as string | undefined;
-    const interaction = body.meta?.interaction as string | undefined;
     const path = body.meta?.path as string | undefined;
     const referrer = body.meta?.referrer as string | undefined;
     const utmSource = body.meta?.utm_source as string | undefined;
@@ -57,15 +48,39 @@ export async function POST(req: NextRequest) {
     const isReportEvent = REPORT_EVENTS.has(body.event);
     const slugWasProvided = Boolean(programSlug?.trim());
 
-    if (!isReportEvent && programSlug) {
+    if (body.event === "page_viewed" && programSlug) {
       const ok = await isProgramSlugPublished(programSlug);
       if (!ok) programSlug = undefined;
     }
 
     const ipHash = hashIp(ip);
+    const visitor = ipHash
+      ? await client.fetch<{ _id?: string; isSpammer?: boolean; country?: string; city?: string } | null>(
+          `*[_type == "visitor" && visitorHash == $h][0]{ _id, isSpammer, country, city }`,
+          { h: ipHash }
+        )
+      : null;
+
+    let location: { country?: string; city?: string } | undefined =
+      visitor?.country || visitor?.city ? { country: visitor.country, city: visitor.city } : undefined;
+
+    if (!location) {
+      location = await getLocationFromIP(ip, "KeyAway Analytics");
+      if (visitor?._id && (location?.country || location?.city)) {
+        await client
+          .patch(visitor._id)
+          .set({
+            ...(location.country ? { country: location.country } : {}),
+            ...(location.city ? { city: location.city } : {}),
+            geoUpdatedAt: new Date().toISOString()
+          })
+          .commit();
+      }
+    }
+
     if (
       isReportEvent &&
-      (await isVisitorSpammerByHash(ipHash)) &&
+      visitor?.isSpammer === true &&
       body.event !== "report_key_working"
     ) {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
@@ -95,7 +110,6 @@ export async function POST(req: NextRequest) {
       eventData.keyNormalized = keyData.normalized;
     }
     if (social) eventData.social = social;
-    if (interaction?.trim()) eventData.interaction = interaction.trim();
     if (path) eventData.path = path;
     if (referrer) eventData.referrer = referrer;
     if (utmSource) eventData.utm_source = utmSource;
@@ -108,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     if (body.event === "page_viewed") {
       try {
-        await upsertVisitorOnPageView(ipHash);
+        await upsertVisitorOnPageView(ipHash, location);
       } catch (e) {
         console.error("[track] visitor upsert", e);
       }
