@@ -8,6 +8,7 @@ import { FacebookGroupButton } from "@/src/components/social";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { FaEnvelope } from "react-icons/fa";
 import { useEffect } from "react";
+import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 
 interface MobileMenuProps {
   headerLinks?: SanityLink[];
@@ -17,6 +18,7 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }: MobileMenuProps) {
+  const toInteractionToken = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
   const pathname = usePathname();
 
   // Prevent body scroll when menu is open
@@ -76,7 +78,13 @@ export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }:
                       className={`block px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer ${
                         isActive ? "text-white bg-gray-800" : "text-gray-300"
                       }`}
-                      onClick={() => onClose()}>
+                      onClick={() => {
+                        void trackInteraction({
+                          interactionId: `mobile_nav_${toInteractionToken(link.title || "link")}`,
+                          sectionId: "header"
+                        });
+                        onClose();
+                      }}>
                       {link.title}
                     </Link>
                   );
@@ -88,7 +96,11 @@ export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }:
               <div
                 className="flex items-center gap-3 w-full px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
                 onClick={onClose}>
-                <ContactModalTrigger tab="contact" className="flex items-center gap-3 w-full">
+                <ContactModalTrigger
+                  tab="contact"
+                  interactionId="mobile_contact"
+                  sectionId="header"
+                  className="flex items-center gap-3 w-full">
                   <FaEnvelope className="w-4 h-4" />
                   <span>Contact Us</span>
                 </ContactModalTrigger>
