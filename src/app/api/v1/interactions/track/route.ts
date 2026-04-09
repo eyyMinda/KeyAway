@@ -3,6 +3,7 @@ import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { normalizePath, sanitizeTrackingToken } from "@/src/lib/api/inputNormalize";
+import { ALLOWED_INTERACTION_IDS, ALLOWED_SECTION_IDS } from "@/src/lib/analytics/interactionCatalog";
 import { TrackInteractionBody } from "@/src/types";
 
 function hourBucket(date = new Date()): string {
@@ -31,6 +32,12 @@ export async function POST(req: NextRequest) {
     if (!interactionId) return Errors.validation("interactionId required");
     if (!sectionId) return Errors.validation("sectionId required");
     if (interactionId.length > 120 || sectionId.length > 80) return Errors.validation("interaction payload too long");
+    if (!ALLOWED_INTERACTION_IDS.has(interactionId as never)) {
+      return Errors.validation("unknown interactionId");
+    }
+    if (!ALLOWED_SECTION_IDS.has(sectionId as never)) {
+      return Errors.validation("unknown sectionId");
+    }
 
     const host = req.headers.get("host") || "";
     if (host.startsWith("localhost") || host.includes("127.0.0.1")) {

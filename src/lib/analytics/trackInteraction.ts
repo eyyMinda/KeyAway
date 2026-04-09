@@ -1,6 +1,11 @@
 import { TrackInteractionBody } from "@/src/types";
+import { InteractionId, SectionId } from "@/src/lib/analytics/interactionCatalog";
 
-type TrackInteractionInput = Omit<TrackInteractionBody, "pagePath"> & { pagePath?: string };
+type TrackInteractionInput = Omit<TrackInteractionBody, "pagePath" | "interactionId" | "sectionId"> & {
+  interactionId: InteractionId;
+  sectionId: SectionId;
+  pagePath?: string;
+};
 
 function resolvePath(path?: string): string {
   const raw = path?.trim() || (typeof window !== "undefined" ? window.location.pathname : "/");

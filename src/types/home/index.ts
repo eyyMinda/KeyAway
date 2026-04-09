@@ -1,4 +1,5 @@
 import { Program } from "@/src/types/program";
+import { SectionId } from "@/src/lib/analytics/interactionCatalog";
 
 export interface ProgramWithStats extends Program {
   viewCount: number;
@@ -19,7 +20,7 @@ export interface ProgramCardProps {
     mostDownloaded?: boolean;
   };
   showStats?: boolean;
-  sectionId?: string;
+  sectionId?: SectionId;
 }
 
 export interface PopularProgramsSectionProps {
