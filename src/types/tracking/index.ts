@@ -7,7 +7,6 @@ export type AnalyticsEvent =
   | "download_click"
   | "social_click"
   | "page_viewed"
-  | "interaction"
   | "facebook_group_click";
 
 export type KeyReportEvent = "report_key_working" | "report_key_expired" | "report_key_limit_reached";
@@ -22,8 +21,6 @@ export interface AnalyticsEventData {
   visitTier?: string;
   visitorIsSpammer?: boolean;
   social?: string;
-  /** Present when `event` is `interaction` (UI / component engagement). */
-  interaction?: string;
   path?: string;
   referrer?: string;
   country?: string;
@@ -65,7 +62,6 @@ export interface TrackEventMeta {
   key?: unknown; // CDKey type
   path?: string;
   social?: string;
-  interaction?: string;
   copyMethod?: "button_click" | "keyboard_or_context_menu";
   referrer?: string;
   utm_source?: string;
@@ -131,4 +127,24 @@ export interface EventAggregation {
   byPath: Map<string, number>;
   uniquePaths: Set<string>;
   uniquePrograms: Set<string>;
+}
+
+export interface TrackInteractionBody {
+  interactionId: string;
+  sectionId: string;
+  pagePath?: string;
+  programSlug?: string;
+}
+
+export interface InteractionEventBucketData {
+  _id: string;
+  bucketKey: string;
+  bucketDateHour: string;
+  pagePath: string;
+  sectionId: string;
+  interactionId: string;
+  programSlug?: string;
+  count: number;
+  lastSeenAt: string;
+  createdAt: string;
 }

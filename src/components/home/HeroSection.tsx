@@ -7,6 +7,8 @@ import HeroLaptopImage from "./HeroLaptopImage";
 import { SocialData } from "@/src/types";
 import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
+import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 interface HeroSectionProps {
   socialData?: SocialData;
@@ -68,6 +70,8 @@ export default function HeroSection({ socialData, visitorHint }: HeroSectionProp
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
               <ContactModalTrigger
                 tab="suggest"
+                interactionId={INTERACTION_IDS.heroSuggestCdKey}
+                sectionId={SECTIONS.home.hero}
                 className="inline-flex items-center justify-center px-6 py-3 sm:px-6 bg-linear-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-bold rounded-xl transition-all duration-200 transform hover:scale-[1.03] shadow-2xl text-sm sm:text-base cursor-pointer ring-2 ring-accent-400/50 hover:ring-accent-400/70">
                 <FaKey className="mr-2 sm:mr-3 text-base sm:text-lg" />
                 <span className="whitespace-nowrap">Suggest a CD Key</span>
@@ -75,6 +79,10 @@ export default function HeroSection({ socialData, visitorHint }: HeroSectionProp
 
               <button
                 onClick={() => {
+                  void trackInteraction({
+                    interactionId: INTERACTION_IDS.heroHowItWorks,
+                    sectionId: SECTIONS.home.hero
+                  });
                   document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" });
                 }}
                 className="inline-flex items-center justify-center px-4 py-3 sm:px-6 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base cursor-pointer">

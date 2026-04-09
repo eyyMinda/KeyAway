@@ -13,6 +13,8 @@ import {
   FaUser
 } from "react-icons/fa";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
+import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 export type VisitorTierHintVariant = "pill" | "feature";
 
@@ -82,7 +84,14 @@ export default function VisitorTierHint({ hint, variant = "pill" }: VisitorTierH
   }, [open]);
 
   const togglePopover = () => {
-    setOpen(!open);
+    const next = !open;
+    setOpen(next);
+    if (next) {
+      void trackInteraction({
+        interactionId: INTERACTION_IDS.heroVisitorHintOpen,
+        sectionId: SECTIONS.home.hero
+      });
+    }
   };
 
   const statsRow = (

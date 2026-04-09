@@ -12,6 +12,8 @@ import { IdealImageClient } from "@/src/components/general/IdealImageClient";
 import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types";
 import { Notification } from "@/src/types/notifications";
 import { usePathname } from "next/navigation";
+import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 interface HeaderProps {
   storeData: StoreDetails;
@@ -82,6 +84,12 @@ export default function Header({ storeData, logoData, notifications, socialData 
                   <Link
                     key={i}
                     href={href || "/"}
+                    onClick={() =>
+                      void trackInteraction({
+                        interactionId: INTERACTION_IDS.headerNavLink,
+                        sectionId: SECTIONS.global.header
+                      })
+                    }
                     className={`hover:text-primary-500 transition-colors ${isActive ? "text-white font-medium" : "text-gray-300"}`}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noreferrer" : undefined}>
@@ -94,6 +102,8 @@ export default function Header({ storeData, logoData, notifications, socialData 
           {/* Contact Button */}
           <ContactModalTrigger
             tab="contact"
+            interactionId={INTERACTION_IDS.headerContact}
+            sectionId={SECTIONS.global.header}
             className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-4 h-4" />
@@ -111,6 +121,8 @@ export default function Header({ storeData, logoData, notifications, socialData 
         <div className="md:hidden flex items-center gap-2">
           <ContactModalTrigger
             tab="contact"
+            interactionId={INTERACTION_IDS.headerContactMobile}
+            sectionId={SECTIONS.global.header}
             className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-5 h-5" />

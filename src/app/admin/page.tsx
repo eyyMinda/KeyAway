@@ -30,6 +30,13 @@ export default function AdminHomePage() {
           color="purple"
         />
         <DashboardCard
+          href="/admin/interactions"
+          title="Interactions"
+          subtitle="Track lightweight interaction buckets"
+          icon="🖱️"
+          color="blue"
+        />
+        <DashboardCard
           href="/admin/key-reports"
           title="Key Reports"
           subtitle="Manage all CD key reports (working, expired, limit reached)"

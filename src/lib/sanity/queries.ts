@@ -64,12 +64,12 @@ export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) 
 
 /* ------------ Analytics ------------ */
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
-      _id, event, programSlug, social, interaction, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+      _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
 
 /* ------------ Analytics with Custom Date Range ------------ */
 export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && createdAt >= $since && createdAt <= $until]{
-      _id, event, programSlug, notFound, social, interaction, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
+      _id, event, programSlug, notFound, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
       "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier,
       "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer
     } | order(createdAt desc)`;
@@ -82,7 +82,7 @@ export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
 /* ------------ Bundled Events (overlaps range, events filtered in-doc) ------------ */
 export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
   _id,
-  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, interaction, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier, "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer }
+  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier, "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer }
 }`;
 
 /* ------------ Key Reports ------------ */

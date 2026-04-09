@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HiChartBar, HiViewGrid } from "react-icons/hi";
-import { MdRateReview, MdEventNote } from "react-icons/md";
+import { MdRateReview, MdEventNote, MdTouchApp } from "react-icons/md";
 import { FaKey, FaEnvelopeOpenText } from "react-icons/fa";
 import { useKeyReportAlerts, KeyReportAlertsDesktop, KeyReportAlertsMobile } from "./KeyReportAlerts";
 
@@ -28,6 +28,7 @@ export default function AdminHeader() {
 
   const navLinks: Array<{ href: string; label: string; icon: typeof FaKey; countKey?: "suggestions" | "messages" }> = [
     { href: "/admin/analytics", label: "Analytics", icon: HiChartBar },
+    { href: "/admin/interactions", label: "Interactions", icon: MdTouchApp },
     { href: "/admin/programs", label: "Programs", icon: HiViewGrid },
     { href: "/admin/events", label: "Events", icon: MdEventNote },
     { href: "/admin/key-reports", label: "Key Reports", icon: MdRateReview },
