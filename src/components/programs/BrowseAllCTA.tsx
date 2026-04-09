@@ -3,18 +3,19 @@
 import Link from "next/link";
 import { FaArrowRight } from "react-icons/fa";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS, SectionId } from "@/src/lib/analytics/interactionCatalog";
 
 interface BrowseAllCTAProps {
-  sectionId?: string;
+  sectionId?: SectionId;
 }
 
-export default function BrowseAllCTA({ sectionId = "programs_page" }: BrowseAllCTAProps) {
+export default function BrowseAllCTA({ sectionId = SECTIONS.browse.allProgramsGrid }: BrowseAllCTAProps) {
   return (
     <Link
       href="/programs"
       onClick={() =>
         void trackInteraction({
-          interactionId: "programs_browse_all",
+          interactionId: INTERACTION_IDS.programsBrowseAll,
           sectionId
         })
       }

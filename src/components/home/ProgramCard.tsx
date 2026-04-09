@@ -3,8 +3,15 @@ import { IdealImage } from "@/src/components/general/IdealImage";
 import { FaEye, FaDownload, FaKey, FaChevronRight } from "react-icons/fa";
 import { ProgramCardProps } from "@/src/types/home";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
-export default function ProgramCard({ program, stats, badges, showStats = true, sectionId = "popular_programs" }: ProgramCardProps) {
+export default function ProgramCard({
+  program,
+  stats,
+  badges,
+  showStats = true,
+  sectionId = SECTIONS.home.popularPrograms
+}: ProgramCardProps) {
   return (
     <div className="group bg-white rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-primary-400 animate-fade-in flex flex-col transform hover:-translate-y-2 relative before:absolute before:inset-0 before:bg-linear-to-br before:from-primary-50/30 before:to-transparent before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-300">
       {/* Image Container */}
@@ -14,7 +21,7 @@ export default function ProgramCard({ program, stats, badges, showStats = true, 
         className="relative overflow-hidden"
         onClick={() =>
           void trackInteraction({
-            interactionId: "program_grid_view_keys_image",
+              interactionId: INTERACTION_IDS.programGridViewKeysImage,
             sectionId,
             programSlug: program.slug.current
           })
@@ -98,7 +105,7 @@ export default function ProgramCard({ program, stats, badges, showStats = true, 
           href={`/program/${program.slug.current}`}
           onClick={() =>
             void trackInteraction({
-              interactionId: "program_grid_view_keys_button",
+              interactionId: INTERACTION_IDS.programGridViewKeysButton,
               sectionId,
               programSlug: program.slug.current
             })

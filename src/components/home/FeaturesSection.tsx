@@ -2,6 +2,7 @@
 
 import { FaUsers, FaChartLine, FaShieldAlt, FaClock, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import { ContactModalTrigger } from "@/src/components/contact";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 export default function FeaturesSection() {
   const features = [
@@ -172,8 +173,8 @@ export default function FeaturesSection() {
               </p>
               <ContactModalTrigger
                 tab="suggest"
-                interactionId="features_suggest_cd_key"
-                sectionId="features"
+                interactionId={INTERACTION_IDS.featuresSuggestCdKey}
+                sectionId={SECTIONS.home.features}
                 className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl text-sm sm:text-base">
                 <FaCheckCircle className="mr-2 text-sm sm:text-base" />
                 Suggest a CD Key

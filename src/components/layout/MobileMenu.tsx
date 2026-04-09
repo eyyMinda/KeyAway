@@ -9,6 +9,7 @@ import { ContactModalTrigger } from "@/src/components/contact";
 import { FaEnvelope } from "react-icons/fa";
 import { useEffect } from "react";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 interface MobileMenuProps {
   headerLinks?: SanityLink[];
@@ -18,7 +19,6 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }: MobileMenuProps) {
-  const toInteractionToken = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
   const pathname = usePathname();
 
   // Prevent body scroll when menu is open
@@ -80,8 +80,8 @@ export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }:
                       }`}
                       onClick={() => {
                         void trackInteraction({
-                          interactionId: `mobile_nav_${toInteractionToken(link.title || "link")}`,
-                          sectionId: "header"
+                          interactionId: INTERACTION_IDS.mobileNavLink,
+                          sectionId: SECTIONS.global.header
                         });
                         onClose();
                       }}>
@@ -98,8 +98,8 @@ export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }:
                 onClick={onClose}>
                 <ContactModalTrigger
                   tab="contact"
-                  interactionId="mobile_contact"
-                  sectionId="header"
+                  interactionId={INTERACTION_IDS.mobileContact}
+                  sectionId={SECTIONS.global.header}
                   className="flex items-center gap-3 w-full">
                   <FaEnvelope className="w-4 h-4" />
                   <span>Contact Us</span>

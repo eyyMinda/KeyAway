@@ -5,6 +5,7 @@ import { FaStar, FaCheckCircle, FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 interface FeaturedProgramSectionProps {
   program: {
@@ -114,8 +115,8 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
                     href={`/program/${program.slug.current}`}
                     onClick={() =>
                       void trackInteraction({
-                        interactionId: "featured_program_view_keys",
-                        sectionId: "featured_program",
+                        interactionId: INTERACTION_IDS.featuredProgramViewKeys,
+                        sectionId: SECTIONS.home.featuredProgram,
                         programSlug: program.slug.current
                       })
                     }

@@ -2,14 +2,15 @@
 
 import { ReactNode } from "react";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { InteractionId, SectionId } from "@/src/lib/analytics/interactionCatalog";
 
 interface ContactModalTriggerProps {
   tab: "contact" | "suggest";
   children: ReactNode;
   className?: string;
   asChild?: boolean;
-  interactionId?: string;
-  sectionId?: string;
+  interactionId?: InteractionId;
+  sectionId?: SectionId;
   pagePath?: string;
   programSlug?: string;
 }

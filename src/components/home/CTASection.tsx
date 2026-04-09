@@ -5,6 +5,7 @@ import { FaGithub, FaHeart, FaCarrot, FaKey, FaArrowRight } from "react-icons/fa
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 const supportOptions = [
   {
@@ -69,8 +70,8 @@ export default function CTASection() {
                 href="/programs"
                 onClick={() =>
                   void trackInteraction({
-                    interactionId: "cta_browse_all_programs",
-                    sectionId: "cta"
+                    interactionId: INTERACTION_IDS.ctaBrowseAllPrograms,
+                    sectionId: SECTIONS.home.cta
                   })
                 }
                 className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
@@ -153,8 +154,8 @@ export default function CTASection() {
               <div className="mt-8 text-center">
                 <ContactModalTrigger
                   tab="suggest"
-                  interactionId="cta_suggest_cd_key"
-                  sectionId="cta"
+                  interactionId={INTERACTION_IDS.ctaSuggestCdKey}
+                  sectionId={SECTIONS.home.cta}
                   className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
                   <FaKey className="mr-2" />
                   Suggest a CD Key Now

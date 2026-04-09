@@ -13,6 +13,7 @@ import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types";
 import { Notification } from "@/src/types/notifications";
 import { usePathname } from "next/navigation";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
+import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 interface HeaderProps {
   storeData: StoreDetails;
@@ -22,7 +23,6 @@ interface HeaderProps {
 }
 
 export default function Header({ storeData, logoData, notifications, socialData }: HeaderProps) {
-  const toInteractionToken = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
   const pathname = usePathname();
   const header = storeData?.header;
   let isLogo = false;
@@ -86,8 +86,8 @@ export default function Header({ storeData, logoData, notifications, socialData 
                     href={href || "/"}
                     onClick={() =>
                       void trackInteraction({
-                        interactionId: `header_nav_${toInteractionToken(link.title || "link")}`,
-                        sectionId: "header"
+                        interactionId: INTERACTION_IDS.headerNavLink,
+                        sectionId: SECTIONS.global.header
                       })
                     }
                     className={`hover:text-primary-500 transition-colors ${isActive ? "text-white font-medium" : "text-gray-300"}`}
@@ -102,8 +102,8 @@ export default function Header({ storeData, logoData, notifications, socialData 
           {/* Contact Button */}
           <ContactModalTrigger
             tab="contact"
-            interactionId="header_contact"
-            sectionId="header"
+            interactionId={INTERACTION_IDS.headerContact}
+            sectionId={SECTIONS.global.header}
             className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-4 h-4" />
@@ -121,8 +121,8 @@ export default function Header({ storeData, logoData, notifications, socialData 
         <div className="md:hidden flex items-center gap-2">
           <ContactModalTrigger
             tab="contact"
-            interactionId="header_contact_mobile"
-            sectionId="header"
+            interactionId={INTERACTION_IDS.headerContactMobile}
+            sectionId={SECTIONS.global.header}
             className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-5 h-5" />
