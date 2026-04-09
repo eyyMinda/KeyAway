@@ -17,6 +17,7 @@ import { program } from "./program";
 import { cdKey } from "./cdKey";
 import { featuredProgramSettings } from "./featuredProgramSettings";
 import { visitor } from "./visitor";
+import { interactionEventBucket } from "./interactionEventBucket";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -34,6 +35,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     program,
     cdKey,
     featuredProgramSettings,
-    visitor
+    visitor,
+    interactionEventBucket
   ]
 };
