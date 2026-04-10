@@ -165,7 +165,7 @@ export function generateProgramPageJsonLd(
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.5",
-      ratingCount: workingKeys,
+      ratingCount: workingKeys || 1,
       bestRating: "5",
       worstRating: "1"
     },
