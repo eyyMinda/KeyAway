@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last updated: October 12, 2025**
+**Last updated: April 20, 2026**
 
 KeyAway ([keyaway.app](https://www.keyaway.app)) is the service described in this policy. Learn how we handle your personal data, comments, and contributions while keeping the site transparent.
 
@@ -34,6 +34,8 @@ We may use basic analytics or cookies to understand site usage. No personal data
 ## 4. Third-Party Services
 
 Comments and donations are handled by trusted third-party services (e.g., GitHub Discussions, PayPal, or similar). Please refer to their respective privacy policies for details.
+
+When you follow links to **software vendors** (including official download links, upgrade offers, or promotional banners), you leave KeyAway. Those sites may use cookies, analytics, and payment processing under their own privacy policies. Some links may be affiliate links; KeyAway does not sell products on this site—any purchase happens on the vendor's site. See the **Affiliate disclosure and outbound links** section in our [Terms of Service](https://www.keyaway.app/terms) for how affiliate relationships work.
 
 ---
 
