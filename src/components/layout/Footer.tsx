@@ -149,7 +149,7 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                   🥕 Carrot Juice
                 </Link>
                 <Link
-                  href="https://github.com/eyyMinda/keyaway"
+                  href="https://github.com/eyyMinda/KeyAway"
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => {
