@@ -1,0 +1,17 @@
+# KeyAway
+
+> Free CD keys and giveaways for PC utility and optimization software.
+
+KeyAway (https://www.keyaway.app) is a website that lists verified promotional CD keys for popular Windows programs. Visitors browse programs, copy keys, and read activation instructions. Content is managed in Sanity CMS; an admin dashboard handles analytics and key health.
+
+## Main entry points
+
+- https://www.keyaway.app/ — Home, featured and popular programs
+- https://www.keyaway.app/programs — Full program listing
+- https://www.keyaway.app/program/{slug} — Program detail, keys, instructions, related programs
+- https://www.keyaway.app/privacy — Privacy policy
+- https://www.keyaway.app/terms — Terms of use
+
+## Optional
+
+- https://www.keyaway.app/sitemap.xml — URL sitemap for crawlers
