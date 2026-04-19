@@ -8,12 +8,15 @@ interface IdealImageProps {
   image?: SanityAsset;
   alt?: string;
   className?: string;
+  /** When true: preload, eager load, and `fetchPriority="high"`. */
+  priority?: boolean;
 }
 
 export const IdealImage = ({
   image,
   alt = "An image without an alt, whoops",
-  className
+  className,
+  priority = false
 }: IdealImageProps): ReactElement | null => {
   if (!image) return null;
   return (
@@ -28,6 +31,8 @@ export const IdealImage = ({
         (max-width: 768px) 100vw,
         (max-width: 1200px) 50vw,
         40vw"
+      priority={priority}
+      {...(priority ? { fetchPriority: "high" as const } : {})}
       {...(className ? { className } : {})}
     />
   );

@@ -33,6 +33,7 @@ function ProgramInformationVisual({ program, variant }: { program: Program; vari
             image={program.image}
             alt={program.title}
             className={mobile ? "absolute inset-0 h-full w-full object-cover" : "w-full h-auto object-cover"}
+            priority
           />
         ) : (
           <div
