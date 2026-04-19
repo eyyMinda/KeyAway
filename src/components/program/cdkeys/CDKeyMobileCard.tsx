@@ -32,7 +32,7 @@ export default function CDKeyMobileCard({
       }`}>
       {/* Header with Key */}
       <div className="mb-4">
-        <code className="block text-base font-mono text-white bg-neutral-600/60 px-4 py-3 rounded-xl whitespace-nowrap overflow-x-auto font-semibold border border-neutral-500/30">
+        <code className="block text-base font-mono text-neutral-900 bg-neutral-100 px-4 py-3 rounded-xl whitespace-nowrap overflow-x-auto font-semibold border border-neutral-200/80">
           {cdKey.key}
         </code>
       </div>
