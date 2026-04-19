@@ -3,6 +3,7 @@ import { client } from "@/src/sanity/lib/client";
 import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
@@ -16,6 +17,11 @@ const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key
 export async function POST(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
+
+  const ua = req.headers.get("user-agent") || undefined;
+  if (isLikelyBotUserAgent(ua)) {
+    return NextResponse.json({ data: { skipped: true }, meta: {} });
+  }
 
   try {
     const body = await req.json().catch(() => ({}));
@@ -83,7 +89,6 @@ export async function POST(req: NextRequest) {
       return Errors.validation("programSlug and key (or meta.key) required");
     }
 
-    const ua = req.headers.get("user-agent") || undefined;
     const ref = req.headers.get("referer") || undefined;
     const path = meta?.path as string | undefined;
     const location = await getLocationFromIP(ip, "KeyAway");

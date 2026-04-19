@@ -5,6 +5,7 @@ import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { normalizePath, sanitizeTrackingToken } from "@/src/lib/api/inputNormalize";
 import { ALLOWED_INTERACTION_IDS, ALLOWED_SECTION_IDS } from "@/src/lib/analytics/interactionCatalog";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
+import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
 import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
 import { TrackInteractionBody } from "@/src/types";
 
@@ -43,6 +44,11 @@ export async function POST(req: NextRequest) {
 
     const host = req.headers.get("host") || "";
     if (host.startsWith("localhost") || host.includes("127.0.0.1")) {
+      return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
+    }
+
+    const ua = req.headers.get("user-agent") || undefined;
+    if (isLikelyBotUserAgent(ua)) {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
     }
 

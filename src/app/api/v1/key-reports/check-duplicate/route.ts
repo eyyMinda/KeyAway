@@ -4,12 +4,18 @@ import { duplicateKeyReportQuery } from "@/src/lib/sanity/queries";
 import { hashCDKey } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
 import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
 
 /** POST /api/v1/key-reports/check-duplicate - Check for existing report by same visitor/program/key */
 export async function POST(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
+
+  const ua = req.headers.get("user-agent") || undefined;
+  if (isLikelyBotUserAgent(ua)) {
+    return NextResponse.json({ data: { isDuplicate: false, skipped: true }, meta: {} });
+  }
 
   try {
     const body = await req.json().catch(() => ({}));
