@@ -32,6 +32,7 @@ export default function HeroLaptopImage({
     alt: "Laptop with software icons—browse verified programs and CD keys on KeyAway" as const,
     sizes,
     priority,
+    fetchPriority: "high" as const,
     quality: 75 as const
   };
 
