@@ -10,7 +10,7 @@ export default function TermsContent() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4">Terms of Service</h1>
-            <p className="text-lg text-neutral-300 mb-2">Last updated: October 12, 2025</p>
+            <p className="text-lg text-neutral-300 mb-2">Last updated: April 20, 2026</p>
             <p className="text-neutral-400">
               KeyAway is the service operated at{" "}
               <a href="https://www.keyaway.app" className="text-primary-400 hover:text-primary-300 underline">
@@ -68,6 +68,45 @@ export default function TermsContent() {
               <span className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
                 3
               </span>
+              Affiliate disclosure and outbound links
+            </h2>
+            <div className="space-y-4">
+              <p className="text-neutral-300 leading-relaxed">
+                KeyAway does <strong className="text-white">not</strong> sell software, licenses, or subscriptions on
+                this website. There is no checkout on keyaway.app—you cannot complete a purchase here.
+              </p>
+              <p className="text-neutral-300 leading-relaxed">
+                Some outbound links (for example official <strong className="text-primary-400">download</strong> links,
+                upgrade or Pro-license offers, or promotional banners) may be{" "}
+                <strong className="text-white">affiliate links</strong>
+                {
+                  " arranged with software vendors or their partners. If you visit a vendor's site through such a link and make a purchase "
+                }
+                <em>on that vendor&apos;s site</em>
+                {", KeyAway may earn a small commission from the vendor at "}
+                <strong className="text-white">no extra cost to you</strong>
+                {". Prices and checkout are always controlled by the vendor, not KeyAway."}
+              </p>
+              <p className="text-neutral-300 leading-relaxed">
+                These arrangements help support the operation of the site and keep giveaway listings and content free.
+                Browsing KeyAway and copying publicly listed giveaway keys does not require a purchase.
+              </p>
+              <div className="bg-primary-900/20 border border-primary-700/30 rounded-xl p-4">
+                <p className="text-neutral-200 text-sm leading-relaxed">
+                  <strong className="text-primary-300">Third-party sites:</strong>
+                  {
+                    " When you leave KeyAway, the vendor's terms, privacy policy, and payment processing apply. We do not control those sites."
+                  }
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
+              <span className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                4
+              </span>
               User Contributions &amp; Key Suggestions
             </h2>
             <div className="space-y-4">
@@ -104,7 +143,7 @@ export default function TermsContent() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
               <span className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
-                4
+                5
               </span>
               Validity of Keys
             </h2>
@@ -117,7 +156,7 @@ export default function TermsContent() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
               <span className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
-                5
+                6
               </span>
               Donations
             </h2>
@@ -130,7 +169,7 @@ export default function TermsContent() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
               <span className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
-                6
+                7
               </span>
               Limitation of Liability
             </h2>
@@ -143,7 +182,7 @@ export default function TermsContent() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
               <span className="bg-primary-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
-                7
+                8
               </span>
               Contact &amp; Questions
             </h2>

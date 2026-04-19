@@ -10,7 +10,7 @@ export default function PrivacyContent() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
-            <p className="text-lg text-neutral-300 mb-2">Last updated: October 12, 2025</p>
+            <p className="text-lg text-neutral-300 mb-2">Last updated: April 20, 2026</p>
             <p className="text-neutral-400">
               KeyAway (keyaway.app) is the service described in this policy. Learn how we handle your personal data,
               comments, and contributions while keeping the site transparent.
@@ -86,10 +86,24 @@ export default function PrivacyContent() {
               </span>
               Third-Party Services
             </h2>
-            <p className="text-neutral-300 leading-relaxed">
-              Comments and donations are handled by trusted third-party services (e.g., GitHub Discussions, PayPal, or
-              similar). Please refer to their respective privacy policies for details.
-            </p>
+            <div className="space-y-4">
+              <p className="text-neutral-300 leading-relaxed">
+                Comments and donations are handled by trusted third-party services (e.g., GitHub Discussions, PayPal, or
+                similar). Please refer to their respective privacy policies for details.
+              </p>
+              <p className="text-neutral-300 leading-relaxed">
+                When you follow links to <strong className="text-primary-400">software vendors</strong>
+                {
+                  " (including official download links, upgrade offers, or promotional banners), you leave KeyAway. Those sites may use cookies, analytics, and payment processing under their own privacy policies. Some links may be affiliate links; KeyAway does not sell products on this site—any purchase happens on the vendor's site. See the "
+                }
+                <strong className="text-white">Affiliate disclosure and outbound links</strong>
+                {" section in our "}
+                <a href="/terms" className="text-primary-400 hover:text-primary-300 underline">
+                  Terms of Service
+                </a>
+                {" for how affiliate relationships work."}
+              </p>
+            </div>
           </section>
 
           <section>
