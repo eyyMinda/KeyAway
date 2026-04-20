@@ -64,6 +64,7 @@ export interface Program {
 export interface CDKeyTableProps {
   cdKeys: CDKey[];
   slug: string;
+  program: Program;
   /** Program name for table heading and intro copy. */
   programTitle: string;
   /** When true (visitor marked spammer), only “Working” reports are allowed; negative statuses are disabled in UI and API. */
