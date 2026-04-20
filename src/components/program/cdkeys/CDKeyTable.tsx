@@ -9,10 +9,12 @@ import KeyStatusTooltip from "@/src/components/program/KeyStatusTooltip";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import { getExpiringKeysMessage, sortCdKeysByScore, sortCdKeysByColumn } from "@/src/lib/program/cdKeyUtils";
 import { useKeyReportData } from "@/src/hooks/useKeyReportData";
+import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
 
 export default function CDKeyTable({
   cdKeys,
   slug,
+  program,
   programTitle,
   isSpammerVisitor = false,
   vendorReleaseForIntro,
@@ -79,7 +81,7 @@ export default function CDKeyTable({
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold leading-tight mb-1.5 sm:mb-2">
-                  <span className="text-white">{programTitle + " " + vendorReleaseForIntro}</span>
+                  <span className="text-white">{formatProgramDisplayTitle(program)}</span>
                   <span className="text-gray-500 font-normal mx-1 sm:mx-1.5" aria-hidden>
                     —
                   </span>

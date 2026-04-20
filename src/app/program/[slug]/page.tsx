@@ -85,6 +85,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
           <CDKeyTable
             cdKeys={sortedCdKeys}
             slug={slug}
+            program={program}
             programTitle={program.title}
             isSpammerVisitor={isSpammer}
             vendorReleaseForIntro={vendorReleaseForIntro}
