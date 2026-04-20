@@ -62,14 +62,14 @@ export default function ProgramCard({
         </div>
 
         {/* Key Count Badge */}
-        {program.cdKeys?.length && (
+        {program.cdKeys?.length ? (
           <div className="absolute top-2 sm:top-3 lg:top-4 right-2 sm:right-3 lg:right-4">
             <div className="bg-white/95 backdrop-blur-sm text-gray-800 px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1 shadow-lg border border-gray-200">
               <FaKey className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-600" />
               <span>{program.cdKeys.length}</span>
             </div>
           </div>
-        )}
+        ) : null}
       </Link>
 
       {/* Content */}
