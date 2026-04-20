@@ -6,6 +6,13 @@ import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramsPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
+import {
+  ProgramsHero,
+  ContributeSection,
+  WhyUseSection
+} from "@/src/components/programs";
+import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
+import { FacebookGroupButton } from "@/src/components/social";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 import type { SocialData } from "@/src/types";
 
@@ -16,7 +23,6 @@ export async function generateMetadata() {
 }
 
 export default async function ProgramsPage() {
-  // Fetch all programs with stats for client-side filtering
   const [rawPrograms, bundleCounts, totalCount, socialLinks, featuredProgram] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: ["programs"] } }),
     getBundleCountsByProgram(),
@@ -31,15 +37,26 @@ export default async function ProgramsPage() {
     socialLinks: socialLinks || []
   };
 
-  // Generate JSON-LD for programs page
+  const totalKeys = programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0);
   const jsonLd = generateProgramsPageJsonLd(programs, totalCount);
 
   return (
     <>
       <JsonLd data={jsonLd} />
       <main className="min-h-screen bg-gray-50">
-        {/* Programs Grid with Filtering */}
-        <ProgramsPageClient programs={programs} featuredProgram={featuredProgram} socialData={socialData} />
+        <ProgramsHero totalCount={totalCount} totalKeys={totalKeys} />
+
+        <section className="py-8 bg-linear-to-b from-gray-50 to-gray-100">
+          <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+            <FacebookGroupButton socialData={socialData} variant="outline" className="text-base" />
+          </div>
+        </section>
+
+        <ProgramsPageClient programs={programs} />
+
+        <ContributeSection />
+        <FeaturedProgramSection program={featuredProgram} />
+        <WhyUseSection />
       </main>
     </>
   );

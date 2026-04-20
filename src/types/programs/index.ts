@@ -1,11 +1,9 @@
-import type { SocialData } from "@/src/types";
 import { ProgramWithStats } from "@/src/types/home";
 
 export type { ProgramWithStats };
 
 export interface ProgramsPageClientProps {
   programs: ProgramWithStats[];
-  socialData?: SocialData;
 }
 
 export type FilterType = "all" | "hasKeys" | "noKeys";
