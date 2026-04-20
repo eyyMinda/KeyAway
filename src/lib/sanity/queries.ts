@@ -47,12 +47,38 @@ export const allProgramsQuery = `
 `;
 export const adminProgramsQuery = `
 *[_type == "program"]{
-  _id, title, slug, description, featuredDescription, image, showcaseGif, downloadLink, cdKeys[]
+  _id,
+  title,
+  slug,
+  _updatedAt,
+  description,
+  featuredDescription,
+  latestOfficialVersion,
+  seo,
+  aboutSections,
+  faq,
+  image,
+  showcaseGif,
+  downloadLink,
+  cdKeys[]
 }
 `;
 export const programBySlugQuery = `
 *[_type == "program" && slug.current == $slug][0]{
-  _id, title, description, featuredDescription, image, showcaseGif, downloadLink, cdKeys[]
+  _id,
+  title,
+  slug,
+  _updatedAt,
+  description,
+  featuredDescription,
+  latestOfficialVersion,
+  seo,
+  aboutSections,
+  faq,
+  image,
+  showcaseGif,
+  downloadLink,
+  cdKeys[]
 }
 `;
 
