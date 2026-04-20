@@ -72,7 +72,7 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
               <div className="space-y-4 sm:space-y-5">
                 {/* Title */}
                 <div>
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3">{program.title}</h3>
+                  <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3">{program.title}</h3>
                   <div className="text-sm sm:text-base text-gray-300 leading-relaxed space-y-3">
                     <p>{description}</p>
                     <p>
