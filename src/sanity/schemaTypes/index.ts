@@ -13,6 +13,7 @@ import { footer } from "./footer";
 import { link } from "./link";
 import { socialLink } from "./socialLink";
 
+import { aboutPoint, aboutSection } from "./aboutSection";
 import { program } from "./program";
 import { cdKey } from "./cdKey";
 import { featuredProgramSettings } from "./featuredProgramSettings";
@@ -32,6 +33,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     header,
     footer,
     socialLink,
+    aboutPoint,
+    aboutSection,
     program,
     cdKey,
     featuredProgramSettings,
