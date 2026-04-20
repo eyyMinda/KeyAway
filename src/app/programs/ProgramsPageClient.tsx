@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ProgramsFilter, ProgramsGrid, ContributeSection, WhyUseSection } from "@/src/components/programs";
-import JoinCommunitySection from "@/src/components/programs/JoinCommunitySection";
+import {
+  ProgramsFilter,
+  ProgramsGrid,
+  ContributeSection,
+  WhyUseSection,
+  ProgramsHero
+} from "@/src/components/programs";
 import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
 import Pagination from "@/src/components/ui/Pagination";
 import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
 import { sortPrograms, filterProgramsByKeys, searchPrograms } from "@/src/lib/program/programUtils";
 import { Program } from "@/src/types";
+import { FacebookGroupButton } from "@/src/components/social";
 
 interface ExtendedProgramsPageClientProps extends ProgramsPageClientProps {
   featuredProgram:
@@ -20,12 +26,12 @@ interface ExtendedProgramsPageClientProps extends ProgramsPageClientProps {
     | null;
 }
 
-export default function ProgramsPageClient({ programs, featuredProgram }: ExtendedProgramsPageClientProps) {
+export default function ProgramsPageClient({ programs, featuredProgram, socialData }: ExtendedProgramsPageClientProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
   const [sortBy, setSortBy] = useState<SortType>("popular");
   const [currentPage, setCurrentPage] = useState(1);
-  const programsPerPage = 12;
+  const programsPerPage = 16;
 
   // Filter and sort programs
   const filteredAndSortedPrograms = useMemo(() => {
@@ -63,6 +69,18 @@ export default function ProgramsPageClient({ programs, featuredProgram }: Extend
 
   return (
     <>
+      {/* Hero Section */}
+      <ProgramsHero
+        totalCount={programs.length}
+        totalKeys={programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0)}
+      />
+
+      {/* Facebook Group Button */}
+      <section className="py-8 bg-linear-to-b from-gray-50 to-gray-100">
+        <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <FacebookGroupButton socialData={socialData} variant="outline" className="text-base" />
+        </div>
+      </section>
       <div id="programs-grid" className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
         {/* Filters and Search */}
         <ProgramsFilter
@@ -95,7 +113,7 @@ export default function ProgramsPageClient({ programs, featuredProgram }: Extend
             currentPage={currentPage}
             totalPages={totalPages}
             totalItems={filteredAndSortedPrograms.length}
-            itemsPerPage={12} // This should match programsPerPage in ProgramsPageClient
+            itemsPerPage={programsPerPage}
             onPageChange={setCurrentPage}
             variant="detailed"
             showInfo={false}
@@ -106,9 +124,8 @@ export default function ProgramsPageClient({ programs, featuredProgram }: Extend
 
       {/* Additional Sections */}
       <ContributeSection />
-      <WhyUseSection />
       <FeaturedProgramSection program={featuredProgram} />
-      <JoinCommunitySection />
+      <WhyUseSection />
     </>
   );
 }
