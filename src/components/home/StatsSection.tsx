@@ -91,7 +91,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
         {/* Additional Info */}
         <div className="mt-10 sm:mt-12 lg:mt-16 text-center">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-            <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Join Our Growing Community</h3>
+            <h3 className="text-2xl font-bold mb-3 sm:mb-4">Join Our Growing Community</h3>
             <p className="text-blue-100 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6 px-2">
               Every day, our community helps maintain the quality of our key database by reporting working, expired, or
               limit-reached keys. Your participation makes this platform better for everyone.
