@@ -80,7 +80,7 @@ export default function CDKeyTable({
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold leading-tight mb-1.5 sm:mb-2">
+                <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight mb-1.5 sm:mb-2">
                   <span className="text-white">{formatProgramDisplayTitle(program)}</span>
                   <span className="text-gray-500 font-normal mx-1 sm:mx-1.5" aria-hidden>
                     —

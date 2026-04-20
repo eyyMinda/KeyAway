@@ -15,9 +15,11 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
   const hasImage = hasAsset(image);
 
   const content = (
-    <div className={hasImage ? "text-center lg:text-left" : "mx-auto max-w-3xl text-center"}>
-      {sectionTitle ? <h3 className="text-lg sm:text-xl font-bold text-white mb-3">{sectionTitle}</h3> : null}
-      <p className="text-sm sm:text-base text-gray-300 leading-relaxed whitespace-pre-wrap">{description}</p>
+    <div className="mx-auto max-w-3xl text-start">
+      {sectionTitle ? (
+        <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3">{sectionTitle}</h3>
+      ) : null}
+      <p className="text-sm sm:text-base text-gray-300 leading-snug whitespace-pre-wrap">{description}</p>
       {points && points.length > 0 ? (
         <ul
           className={`mt-4 space-y-2.5 text-sm sm:text-base text-gray-300 ${
@@ -26,15 +28,15 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
           {points.map((p, i) => (
             <li key={`${p.text}-${i}`} className="flex gap-3 items-start">
               {hasAsset(p.icon) ? (
-                <span className="relative mt-0.5 h-8 w-8 shrink-0 overflow-hidden rounded-md bg-white/5 ring-1 ring-white/10">
+                <span className="relative mt-0.5 h-7 w-7 shrink-0 overflow-hidden">
                   <Image
                     src={urlFor(p.icon as SanityImageSource)
                       .width(64)
                       .height(64)
                       .url()}
                     alt=""
-                    width={32}
-                    height={32}
+                    width={28}
+                    height={28}
                     className="h-full w-full object-contain p-0.5"
                   />
                 </span>
