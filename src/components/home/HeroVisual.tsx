@@ -1,11 +1,12 @@
 "use client";
 
 import { FaKey, FaDownload, FaShieldAlt, FaCheckCircle } from "react-icons/fa";
+import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 /** Interactive hero collage (CSS + icons). Not mounted on the homepage — homepage uses static WebP for LCP. Kept for reuse or A/B. */
 export default function HeroVisual() {
   const handleScrollToPrograms = () => {
-    document.querySelector("#popular-programs")?.scrollIntoView({ behavior: "smooth" });
+    scrollToSectionWithHeaderOffset("#popular-programs");
   };
 
   return (

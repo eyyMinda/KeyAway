@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import heroAsset from "@/public/images/Hero_laptop_software_icons.webp";
+import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 const HERO_ALT = "Laptop with software icons—browse verified programs and CD keys on KeyAway" as const;
 
@@ -17,7 +18,7 @@ export default function HeroLaptopImage({
   priority?: boolean;
 }) {
   const scrollToPrograms = () => {
-    document.querySelector("#popular-programs")?.scrollIntoView({ behavior: "smooth" });
+    scrollToSectionWithHeaderOffset("#popular-programs");
   };
 
   const shellClass =

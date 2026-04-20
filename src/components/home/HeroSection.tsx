@@ -9,6 +9,7 @@ import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
+import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 interface HeroSectionProps {
   socialData?: SocialData;
@@ -83,7 +84,7 @@ export default function HeroSection({ socialData, visitorHint }: HeroSectionProp
                     interactionId: INTERACTION_IDS.heroHowItWorks,
                     sectionId: SECTIONS.home.hero
                   });
-                  document.querySelector("#how-it-works")?.scrollIntoView({ behavior: "smooth" });
+                  scrollToSectionWithHeaderOffset("#how-it-works");
                 }}
                 className="inline-flex items-center justify-center px-4 py-3 sm:px-6 border-2 border-gray-600 hover:border-gray-500 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base cursor-pointer">
                 <span className="whitespace-nowrap">How It Works</span>
