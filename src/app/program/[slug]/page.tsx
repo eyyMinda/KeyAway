@@ -2,12 +2,20 @@
 import { CDKey, SocialData } from "@/src/types";
 import { notFound } from "next/navigation";
 import ProgramInformation from "@/src/components/program/ProgramInformation";
+import ProgramAboutSection from "@/src/components/program/ProgramAboutSection";
+import ProgramFaqSection from "@/src/components/program/ProgramFaqSection";
 import CDKeyTable from "@/src/components/program/cdkeys/CDKeyTable";
 import ContributeBanner from "@/src/components/program/ContributeBanner";
 import ActivationInstructions from "@/src/components/program/ActivationInstructions";
 import RelatedPrograms from "@/src/components/program/RelatedPrograms";
 import CommentsSection from "@/src/components/program/comments/CommentsSection";
 import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
+import {
+  formatVersionSummaryLine,
+  getCdKeyTableIntroVendorRelease,
+  getCdKeyTableIntroVersionConfirmation,
+  getHighestKeyVersion
+} from "@/src/lib/program/versionSummary";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
 import { popularProgramsQuery, storeDetailsQuery, socialLinksQuery } from "@/src/lib/sanity/queries";
@@ -39,6 +47,10 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
 
     const totalKeys = sortedCdKeys.length;
     const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
+    const highestKeyVersion = getHighestKeyVersion(sortedCdKeys);
+    const vendorReleaseForIntro = getCdKeyTableIntroVendorRelease(program, highestKeyVersion);
+    const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
+    const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
     const [allPrograms, storeData, socialLinks] = await Promise.all([
       client.fetch(popularProgramsQuery),
@@ -70,9 +82,19 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             socialData={socialData}
             visitorHint={visitorHint}
           />
-          <CDKeyTable cdKeys={sortedCdKeys} slug={slug} isSpammerVisitor={isSpammer} />
+          <CDKeyTable
+            cdKeys={sortedCdKeys}
+            slug={slug}
+            programTitle={program.title}
+            isSpammerVisitor={isSpammer}
+            vendorReleaseForIntro={vendorReleaseForIntro}
+            introVersionConfirmation={introVersionConfirmation}
+            versionSummaryLine={versionSummaryLine}
+          />
           <ContributeBanner />
-          <ActivationInstructions />
+          <ProgramAboutSection program={program} />
+          <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
+          <ProgramFaqSection programTitle={program.title} items={program.faq ?? []} />
           <RelatedPrograms programs={relatedPrograms} />
           <CommentsSection />
         </main>
