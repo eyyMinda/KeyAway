@@ -1,6 +1,7 @@
 "use client";
 
 import { FaChevronDown } from "react-icons/fa";
+import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 interface ProgramsHeroProps {
   totalCount: number;
@@ -9,8 +10,7 @@ interface ProgramsHeroProps {
 
 export default function ProgramsHero({ totalCount, totalKeys }: ProgramsHeroProps) {
   const handleScrollToGrid = () => {
-    const gridSection = document.getElementById("programs-grid");
-    gridSection?.scrollIntoView({ behavior: "smooth", block: "start" });
+    scrollToSectionWithHeaderOffset("#programs-grid");
   };
 
   return (
@@ -45,15 +45,15 @@ export default function ProgramsHero({ totalCount, totalKeys }: ProgramsHeroProp
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 max-w-2xl mx-auto mb-6 sm:mb-8">
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary-400 mb-1">{totalCount}</div>
+              <div className="text-2xl lg:text-3xl font-bold text-primary-400 mb-1">{totalCount}</div>
               <div className="text-xs sm:text-sm text-gray-400 leading-tight">Programs</div>
             </div>
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-400 mb-1">{totalKeys}</div>
+              <div className="text-2xl lg:text-3xl font-bold text-green-400 mb-1">{totalKeys}</div>
               <div className="text-xs sm:text-sm text-gray-400 leading-tight">Active Keys</div>
             </div>
             <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
-              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-400 mb-1">24/7</div>
+              <div className="text-2xl lg:text-3xl font-bold text-blue-400 mb-1">24/7</div>
               <div className="text-xs sm:text-sm text-gray-400 leading-tight">Updated</div>
             </div>
           </div>

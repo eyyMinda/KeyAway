@@ -23,7 +23,7 @@ export default function CDKeyItem({
       <td className="px-6 py-4 text-nowrap">
         <code
           className={`px-3 py-1 rounded-lg text-sm font-mono select-text ${
-            isDisabled ? "bg-neutral-600 text-neutral-400" : "bg-neutral-600 text-neutral-200"
+            isDisabled ? "bg-neutral-100/80 text-neutral-700" : "bg-neutral-100 text-black"
           }`}>
           {cdKey.key}
         </code>

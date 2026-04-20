@@ -36,7 +36,7 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
   return (
     <footer className="bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 text-white mt-auto">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
             <Link href="/" className="inline-block">
@@ -149,7 +149,7 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
                   🥕 Carrot Juice
                 </Link>
                 <Link
-                  href="https://github.com/eyyMinda/keyaway"
+                  href="https://github.com/eyyMinda/KeyAway"
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => {

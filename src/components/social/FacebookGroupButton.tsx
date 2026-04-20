@@ -68,7 +68,7 @@ export function FacebookGroupButton({
 
   if (taglinePlacement === "inside") {
     return (
-      <div className={`flex flex-col text-start ${className}`}>
+      <div className={`flex flex-col items-center text-start ${className}`}>
         <Link
           href={facebookUrl}
           target="_blank"
@@ -95,7 +95,7 @@ export function FacebookGroupButton({
   }
 
   return (
-    <div className={`flex flex-col text-center ${className}`}>
+    <div className={`flex flex-col items-center text-center ${className}`}>
       <Link
         href={facebookUrl}
         target="_blank"

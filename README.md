@@ -94,8 +94,8 @@ Short notes on what each part does and why.
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/yourusername/keyaway.git
-cd keyaway
+git clone https://github.com/eyyMinda/KeyAway.git
+cd KeyAway
 npm install
 ```
 

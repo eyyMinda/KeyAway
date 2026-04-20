@@ -12,7 +12,7 @@ export default function ProgramComments() {
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Comments Temporarily Unavailable</h3>
         <p className="text-gray-600 mb-4">Due to security policies, comments are temporarily unavailable.</p>
         <a
-          href="https://github.com/eyyMinda/keyaway/discussions"
+          href="https://github.com/eyyMinda/KeyAway/discussions"
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => {
@@ -30,7 +30,7 @@ export default function ProgramComments() {
 
   return (
     <Giscus
-      repo="eyyMinda/keyaway"
+      repo="eyyMinda/KeyAway"
       repoId="R_kgDOPrUr6Q"
       category="Announcements"
       categoryId="DIC_kwDOPrUr6c4CvFkJ"

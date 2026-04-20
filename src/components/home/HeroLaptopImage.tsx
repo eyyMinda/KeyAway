@@ -1,13 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import heroAsset from "@/public/images/Hero_laptop_software_icons.webp";
+import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
-/** Source asset: `public/images/Hero_laptop_software_icons.webp` (1536×1024). */
-const HERO_IMAGE = {
-  src: "/images/Hero_laptop_software_icons.webp",
-  width: 1536,
-  height: 1024
-} as const;
+const HERO_ALT = "Laptop with software icons—browse verified programs and CD keys on KeyAway" as const;
 
 export type HeroLaptopImageVariant = "mobile" | "desktop";
 
@@ -21,17 +18,20 @@ export default function HeroLaptopImage({
   priority?: boolean;
 }) {
   const scrollToPrograms = () => {
-    document.querySelector("#popular-programs")?.scrollIntoView({ behavior: "smooth" });
+    scrollToSectionWithHeaderOffset("#popular-programs");
   };
 
   const shellClass =
     "group relative w-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400";
 
+  /** Local file: static import gives dimensions + `blurDataURL` for `placeholder="blur"` (Next + sharp at build). */
   const sharedImageProps = {
-    src: HERO_IMAGE.src,
-    alt: "Laptop with software icons—browse verified programs and CD keys on KeyAway" as const,
+    src: heroAsset,
+    alt: HERO_ALT,
     sizes,
+    placeholder: "blur" as const,
     priority,
+    ...(priority ? { fetchPriority: "high" as const } : {}),
     quality: 75 as const
   };
 
@@ -59,8 +59,8 @@ export default function HeroLaptopImage({
       ) : (
         <Image
           {...sharedImageProps}
-          width={HERO_IMAGE.width}
-          height={HERO_IMAGE.height}
+          width={heroAsset.width}
+          height={heroAsset.height}
           className="h-auto w-full rounded-3xl object-cover shadow-2xl ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-[1.02]"
         />
       )}

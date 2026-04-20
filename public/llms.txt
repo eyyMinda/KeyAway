@@ -1,0 +1,65 @@
+# KeyAway
+
+> KeyAway.app is a public website that aggregates **free promotional CD keys** (giveaway / trial-style license codes) for **Windows PC utility and optimization software**. It does not distribute cracks or pirated software; keys are presented as **community-reported and CMS-managed** promotional material. Visitors copy keys from program pages; operators maintain listings in a headless CMS and a password-protected admin area.
+
+## Contact / operator
+
+- **Operator:** eyyMinda
+- **Support email:** [support@keyaway.app](mailto:support@keyaway.app)
+
+## What visitors can do
+
+- Browse a **home** page with featured and popular programs.
+- Open **program detail pages** (`/program/{slug}`) with: program description, download link to the official vendor when configured, a **table of CD keys** with status (e.g. active, expired, limit reached), **activation guidance**, related programs, and **Giscus** (GitHub Discussions–based) comments.
+- **Report key status** (working / expired / limit reached) to help keep listings accurate; reports are tied to a hashed visitor identifier, not named accounts.
+- Use **contact / suggest** flows to send messages or suggest new keys or programs (rate-limited APIs).
+
+## What operators / admins can do (authenticated)
+
+- **Sanity Studio** is embedded at `/studio` (content management). Programs, keys, store copy, social links, and related content are edited there.
+- **`/admin`** (OAuth sign-in, allowlisted access) provides dashboards for **analytics**, **raw events**, **interactions**, **programs**, **key reports**, **key suggestions**, **messages**, and **featured program** settings—not available to anonymous visitors.
+
+## Data, privacy, and tracking (high level)
+
+- Analytics and reports use **hashed IPs** and salts; there is no traditional “login” for visitors.
+- Public policies: **Privacy** and **Terms** describe handling of data, comments, and contributions.
+- **Affiliate links:** KeyAway does not operate a store. Outbound links to vendors (downloads, Pro upgrades, promotions) may be affiliate links; purchases occur on third-party sites under their policies—see **Terms** for disclosure.
+- Bot and duplicate-request handling reduces noise in metrics; localhost traffic is typically skipped for tracking in development.
+
+## Automation and freshness
+
+- **Expired keys** can be updated based on validity dates (cron and/or rate-limited checks when loading program data).
+- **Event bundling** (scheduled jobs) rolls up high-volume tracking into aggregated documents to control CMS volume.
+- **Webhooks** can trigger cache revalidation when Sanity content changes so the public site stays in sync with the CMS.
+
+## API surface (public, versioned)
+
+Base path: `https://www.keyaway.app/api/v1/`
+
+- **POST** `/analytics/track` — page views, copy/download/social events, key-status reports (rate-limited, deduplicated).
+- **POST** `/interactions/track` — section/interaction tallies for UX analytics.
+- **POST** `/key-reports` and `/key-reports/check-duplicate` — visitor key status reports.
+- **POST** `/key-suggestions`, `/contact` — user submissions.
+- Cron and webhook routes exist for maintenance and revalidation; they are not general-purpose public APIs for third-party integrations.
+
+## Technology stack (for technical readers)
+
+- **Frontend:** Next.js (App Router), React, Tailwind CSS.
+- **Content:** Sanity (headless CMS); embedded Studio.
+- **Auth:** Auth.js (NextAuth) for admin OAuth (e.g. GitHub).
+- **Hosting:** Commonly Vercel-compatible (SSR, optional analytics/speed insights).
+
+## Main URLs
+
+- https://www.keyaway.app/ — Home
+- https://www.keyaway.app/programs — All programs
+- https://www.keyaway.app/program/{slug} — Program detail (replace `{slug}` with the program slug)
+- https://www.keyaway.app/privacy — Privacy policy
+- https://www.keyaway.app/terms — Terms of use
+- https://www.keyaway.app/studio — Sanity Studio (admin)
+- https://www.keyaway.app/robots.txt — Crawl hints
+- https://www.keyaway.app/sitemap.xml — URL sitemap
+
+## Repository
+
+Open-source codebase: https://github.com/eyyMinda/KeyAway

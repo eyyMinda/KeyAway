@@ -26,7 +26,7 @@ const supportOptions = [
     description: "Show your support by starring our repository",
     buttonText: "Star on GitHub",
     buttonIcon: "⭐",
-    href: "https://github.com/eyyMinda/keyaway",
+    href: "https://github.com/eyyMinda/KeyAway",
     bgColor: "bg-gray-700",
     iconColor: "text-gray-300",
     buttonColor: "bg-gray-600 hover:bg-gray-500",
@@ -79,7 +79,7 @@ export default function CTASection() {
                 <FaArrowRight className="ml-2 text-sm" />
               </Link>
               <Link
-                href="https://github.com/eyyMinda/keyaway"
+                href="https://github.com/eyyMinda/KeyAway"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {

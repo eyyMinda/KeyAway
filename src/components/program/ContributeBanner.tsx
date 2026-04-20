@@ -8,7 +8,7 @@ export default function ContributeBanner() {
     <section className="py-6 sm:py-10 lg:py-12 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-linear-to-r from-primary-600/20 to-blue-600/20 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-primary-500/30 p-5 sm:p-6 lg:p-8 xl:p-12">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 items-center">
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
             {/* Suggest Keys Section */}
             <div className="text-center lg:text-left">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-primary-500/20 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 lg:mb-6">
@@ -30,7 +30,7 @@ export default function ContributeBanner() {
             </div>
 
             {/* Report Keys Section */}
-            <div className="text-center lg:text-left lg:border-l lg:border-white/10 lg:pl-8 pt-6 lg:pt-0 border-t lg:border-t-0 border-white/10">
+            <div className="text-center lg:text-left md:border-l lg:border-white/10 lg:pl-8 pt-6 lg:pt-0 border-t md:border-t-0 border-white/10">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-amber-500/20 rounded-xl sm:rounded-2xl mb-3 sm:mb-4 lg:mb-6">
                 <FaExclamationCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-amber-400" />
               </div>

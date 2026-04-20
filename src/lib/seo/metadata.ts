@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { CDKey } from "@/src/types";
 import { urlFor } from "@/src/sanity/lib/image";
 import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
+import { formatProgramSeoName, getHighestKeyVersion } from "@/src/lib/program/versionSummary";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
 import { storeDetailsQuery } from "@/src/lib/sanity/queries";
@@ -21,13 +22,13 @@ const defaultData = {
   store: "KeyAway",
   title: (storeTitle: string) => `${storeTitle} - Free CD Keys for Premium Software`,
   description:
-    "Get free CD keys for popular software like IOBIT, Malware Fighter, and more. Download premium programs with working activation keys from our giveaway collection.",
+    "Get free CD keys for popular software like IOBIT, iTop and more. Download premium programs with working activation keys from our giveaway collection.",
   url: "https://www.keyaway.app",
   image: "https://www.keyaway.app/images/KeyAway_Card.png",
-  programTitle: (programTitle: string, storeTitle: string) =>
-    `${programTitle} Premium Software Free CD Keys | ${storeTitle}`,
+  programTitle: (displayName: string, storeTitle: string) =>
+    `${displayName}: free CD keys & giveaway activation | ${storeTitle}`,
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
-    `Download ${programTitle} for free! Get ${workingKeys} working CD keys out of ${totalKeys} total. Premium software activation keys from our giveaway collection.`,
+    `Free ${programTitle} giveaway CD keys for Windows. ${workingKeys} working keys out of ${totalKeys} — copy a license and activate in-app. Official download recommended.`,
   programUrl: (slug: string) => `${defaultData.url}/program/${slug}`,
   privacyTitle: (storeTitle: string) => `Privacy Policy | ${storeTitle}`,
   privacyDescription: (storeTitle: string) =>
@@ -90,8 +91,12 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
     const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
     const totalKeys = sortedCdKeys.length;
 
-    const title = defaultData.programTitle(program.title, storeTitle);
-    const description = defaultData.programDescription(program.title, workingKeys, totalKeys);
+    const highestKeyVersion = getHighestKeyVersion(sortedCdKeys);
+    const displayName = formatProgramSeoName(program, highestKeyVersion);
+
+    const title = program.seo?.metaTitle?.trim() || defaultData.programTitle(displayName, storeTitle);
+    const description =
+      program.seo?.metaDescription?.trim() || defaultData.programDescription(program.title, workingKeys, totalKeys);
     const url = defaultData.programUrl(slug);
 
     return {

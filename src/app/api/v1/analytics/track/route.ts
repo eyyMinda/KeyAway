@@ -7,6 +7,7 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { normalizePath } from "@/src/lib/api/inputNormalize";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
+import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
@@ -19,7 +20,40 @@ const ANALYTICS_EVENTS = new Set([
 ]);
 const REPORT_EVENTS = new Set(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
-const SHORT_DEDUPE_ANALYTICS_EVENTS = new Set<string>(["copy_cdkey", "download_click", "social_click"]);
+function buildAnalyticsEventDedupeKey(
+  event: string,
+  body: TrackRequestBody,
+  ipHash: string
+): string {
+  const pathNorm = normalizePath(typeof body.meta?.path === "string" ? body.meta.path : "/");
+  const slugPart =
+    typeof body.meta?.programSlug === "string" && body.meta.programSlug.trim()
+      ? body.meta.programSlug.trim()
+      : "-";
+
+  if (event === "copy_cdkey" || event === "download_click" || event === "social_click") {
+    const socialPart =
+      typeof body.meta?.social === "string" && body.meta.social.trim() ? body.meta.social.trim() : "-";
+    let keyPart = "-";
+    if (event === "copy_cdkey" && body.meta?.key) {
+      const kd = getKeyData(body.meta.key);
+      if (kd?.hash) keyPart = kd.hash;
+    }
+    return `analytics|${event}|${ipHash}|${pathNorm}|${slugPart}|${socialPart}|${keyPart}`;
+  }
+
+  if (event === "page_viewed") {
+    const nf = body.meta?.notFound === true ? "1" : "0";
+    return `analytics|page_viewed|${ipHash}|${pathNorm}|${slugPart}|${nf}`;
+  }
+
+  let keyPart = "-";
+  if (body.meta?.key) {
+    const kd = getKeyData(body.meta.key);
+    if (kd?.hash) keyPart = kd.hash;
+  }
+  return `analytics|${event}|${ipHash}|${pathNorm}|${slugPart}|${keyPart}`;
+}
 
 export async function POST(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
@@ -36,29 +70,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
     }
 
+    const ua = req.headers.get("user-agent") || undefined;
+    if (isLikelyBotUserAgent(ua)) {
+      return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
+    }
+
     const ip = getClientIp(req);
     const ipHashEarly = hashIp(ip) ?? "unknown";
 
-    if (SHORT_DEDUPE_ANALYTICS_EVENTS.has(body.event)) {
-      const pathNorm = normalizePath(typeof body.meta?.path === "string" ? body.meta.path : "/");
-      const slugPart =
-        typeof body.meta?.programSlug === "string" && body.meta.programSlug.trim()
-          ? body.meta.programSlug.trim()
-          : "-";
-      const socialPart =
-        typeof body.meta?.social === "string" && body.meta.social.trim() ? body.meta.social.trim() : "-";
-      let keyPart = "-";
-      if (body.event === "copy_cdkey" && body.meta?.key) {
-        const kd = getKeyData(body.meta.key);
-        if (kd?.hash) keyPart = kd.hash;
-      }
-      const dedupeKey = `analytics|${body.event}|${ipHashEarly}|${pathNorm}|${slugPart}|${socialPart}|${keyPart}`;
-      if (isRecentDuplicateRequest(dedupeKey)) {
-        return NextResponse.json({ data: { accepted: true, deduped: true }, meta: {} });
-      }
+    if (isRecentDuplicateRequest(buildAnalyticsEventDedupeKey(body.event, body, ipHashEarly))) {
+      return NextResponse.json({ data: { accepted: true, deduped: true }, meta: {} });
     }
-
-    const ua = req.headers.get("user-agent") || undefined;
     const ref = req.headers.get("referer") || undefined;
 
     let programSlug = body.meta?.programSlug as string | undefined;

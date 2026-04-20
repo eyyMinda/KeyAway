@@ -21,7 +21,7 @@ export default function ProgramCard({
         className="relative overflow-hidden"
         onClick={() =>
           void trackInteraction({
-              interactionId: INTERACTION_IDS.programGridViewKeysImage,
+            interactionId: INTERACTION_IDS.programGridViewKeysImage,
             sectionId,
             programSlug: program.slug.current
           })

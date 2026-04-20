@@ -15,12 +15,45 @@ export interface CDKey {
   createdAt?: string;
 }
 
+export interface ProgramFaqItem {
+  question: string;
+  answer: string;
+}
+
+/** Sanity image field shape (asset ref for urlFor). */
+export type SanityImageField = { asset?: { _ref?: string; url?: string } };
+
+export interface ProgramAboutPoint {
+  text: string;
+  icon?: SanityImageField;
+}
+
+export interface ProgramAboutSectionBlock {
+  sectionTitle?: string;
+  description: string;
+  image?: SanityImageField;
+  /** Desktop: image on the right when true (default: image left). */
+  invertDesktop?: boolean;
+  /** Mobile: image below content when true (default: image above). */
+  invertMobile?: boolean;
+  points?: ProgramAboutPoint[];
+}
+
 export interface Program {
   _id: string;
   title: string;
   slug: { current: string };
   description: string;
   featuredDescription?: string;
+  /** Vendor-reported current version (e.g. from product page). */
+  latestOfficialVersion?: string;
+  seo?: {
+    metaTitle?: string;
+    metaDescription?: string;
+  };
+  /** Optional about blocks (max 4 in CMS). */
+  aboutSections?: ProgramAboutSectionBlock[];
+  faq?: ProgramFaqItem[];
   image?: { asset: { url?: string; _ref?: string } };
   showcaseGif?: { asset: { url?: string; _ref?: string } };
   downloadLink?: string;
@@ -31,8 +64,16 @@ export interface Program {
 export interface CDKeyTableProps {
   cdKeys: CDKey[];
   slug: string;
+  /** Program name for table heading and intro copy. */
+  programTitle: string;
   /** When true (visitor marked spammer), only “Working” reports are allowed; negative statuses are disabled in UI and API. */
   isSpammerVisitor?: boolean;
+  /** `latestOfficialVersion` when safe to show in the intro (not duplicated in supplemental). */
+  vendorReleaseForIntro?: string | null;
+  /** Short confirmation when listed keys match the vendor release. */
+  introVersionConfirmation?: string | null;
+  /** Mismatch or keys-only nuance (muted). */
+  versionSummaryLine?: string | null;
 }
 
 export interface ReportData {

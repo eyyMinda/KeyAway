@@ -1,5 +1,5 @@
-/** Drop repeat POSTs within this window (double-clicks, duplicate taps). In-memory per process. */
-export const SHORT_REQUEST_DEDUPE_WINDOW_MS = 1500;
+/** Drop repeat POSTs within this window (double-clicks, duplicate taps, refresh spam). In-memory per process. */
+export const SHORT_REQUEST_DEDUPE_WINDOW_MS = 2000;
 
 const lastAcceptedAt = new Map<string, number>();
 const PRUNE_AT = 10_000;
