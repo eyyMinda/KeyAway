@@ -1,5 +1,6 @@
 import { Program } from "@/src/types";
 import { urlFor } from "@/src/sanity/lib/image";
+import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
 
 // Base URL for the site
 const BASE_URL = "https://www.keyaway.app";
@@ -99,16 +100,20 @@ export function generateProgramsPageJsonLd(programs: Program[], totalCount: numb
   };
 }
 
-// JSON-LD for Individual Program Page - SoftwareApplication schema
+// JSON-LD for Individual Program Page - SoftwareApplication schema (+ optional FAQPage)
 export function generateProgramPageJsonLd(
   program: Program,
   workingKeys: number,
-  totalKeys: number,
+  _totalKeys: number,
   storeData: { title: string }
 ) {
   // Extract brand from title (e.g., "IOBIT Malware Fighter" -> "IOBIT")
   const brandMatch = program.title.match(/^([A-Za-z]+)/);
   const brand = brandMatch ? brandMatch[1] : "Unknown";
+
+  const pageUrl = `${BASE_URL}/program/${program.slug.current}`;
+  const appDescription = buildSoftwareApplicationDescription(program);
+  const softwareVersion = getSoftwareVersionForSchema(program, program.cdKeys);
 
   // Create offers for each working CD key
   const offers = program.cdKeys
@@ -126,15 +131,13 @@ export function generateProgramPageJsonLd(
       validThrough: cdKey.validUntil
     }));
 
-  const jsonLd: JsonLdData = {
-    "@context": "https://schema.org",
+  const softwareApp: JsonLdData = {
     "@type": "SoftwareApplication",
     name: program.title,
-    description: program.description,
-    url: `${BASE_URL}/program/${program.slug.current}`,
+    description: appDescription,
+    url: pageUrl,
     applicationCategory: "SoftwareApplication",
     operatingSystem: "Windows",
-    softwareVersion: "Latest",
     datePublished: program._updatedAt || new Date().toISOString(),
     dateModified: program._updatedAt || new Date().toISOString(),
     author: {
@@ -188,15 +191,19 @@ export function generateProgramPageJsonLd(
           "@type": "ListItem",
           position: 3,
           name: program.title,
-          item: `${BASE_URL}/program/${program.slug.current}`
+          item: pageUrl
         }
       ]
     }
   };
 
+  if (softwareVersion) {
+    softwareApp.softwareVersion = softwareVersion;
+  }
+
   // Add image if available
   if (program.image) {
-    jsonLd.image = {
+    softwareApp.image = {
       "@type": "ImageObject",
       url: urlFor(program.image).width(800).height(600).url(),
       name: program.title,
@@ -207,10 +214,33 @@ export function generateProgramPageJsonLd(
 
   // Add download link if available
   if (program.downloadLink) {
-    jsonLd.downloadUrl = program.downloadLink;
+    softwareApp.downloadUrl = program.downloadLink;
   }
 
-  return jsonLd;
+  const faq = program.faq?.filter(f => f.question?.trim() && f.answer?.trim()) ?? [];
+  if (faq.length >= 2) {
+    const faqPage: JsonLdData = {
+      "@type": "FAQPage",
+      url: `${pageUrl}#faq`,
+      mainEntity: faq.map(f => ({
+        "@type": "Question",
+        name: f.question.trim(),
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: f.answer.trim()
+        }
+      }))
+    };
+    return {
+      "@context": "https://schema.org",
+      "@graph": [softwareApp, faqPage]
+    };
+  }
+
+  return {
+    "@context": "https://schema.org",
+    ...softwareApp
+  };
 }
 
 // Utility function to safely stringify JSON-LD
