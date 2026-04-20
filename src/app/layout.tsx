@@ -70,8 +70,8 @@ export default async function RootLayout({
   const logoData: LogoData = {
     src: urlFor(currentLogo).url(),
     alt: storeData?.title,
-    width: getImageDimensions(currentLogo).width,
-    height: getImageDimensions(currentLogo).height,
+    width: 200, // || getImageDimensions(currentLogo).width,
+    height: 100, // || getImageDimensions(currentLogo).height,
     blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url()
   };
 
