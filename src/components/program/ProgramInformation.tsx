@@ -5,7 +5,7 @@ import { FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { Program, SocialData } from "@/src/types";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
-import { FacebookGroupButton, FacebookGroupHeroPromo } from "@/src/components/social";
+import { FacebookGroupHeroPromo } from "@/src/components/social";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 import { getTrustpilotReviewUrl, hasFacebookSocialLink } from "@/src/lib/social/socialUtils";
 import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
@@ -61,7 +61,7 @@ export default function ProgramInformation({
   const showTrustpilotFacebookRow = Boolean(trustpilotUrl) || hasFacebookSocialLink(socialData);
   return (
     <section className="bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 py-6 sm:py-10">
-      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl lg:max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
           {/* Desktop: program image (left column) */}
           <div className="hidden lg:order-1 lg:flex flex-col gap-4">
@@ -79,11 +79,11 @@ export default function ProgramInformation({
               ) : null}
 
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 leading-tight lg:max-w-[540px] mx-auto lg:mx-0">
-                  {program.title} <span className="text-gradient-pro">Free CD Keys</span>
+                <h1 className="text-3xl lg:text-4xl font-bold text-gradient-pro mb-3 leading-tight lg:max-w-[540px] mx-auto lg:mx-0">
+                  {program.title + " " + program.latestOfficialVersion}
                 </h1>
                 <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
-                  Download premium software for free and activate one of the working CD keys
+                  Free giveaway CD keys for {program.title} — copy a working key and activate in the Windows app.
                 </p>
                 <div className="w-full flex flex-col gap-4 pt-3 lg:hidden">
                   <ProgramInformationVisual program={program} variant="mobile" />
@@ -92,7 +92,9 @@ export default function ProgramInformation({
               </div>
 
               {program.description && (
-                <p className="text-sm sm:text-base text-gray-400 leading-relaxed">{program.description}</p>
+                <p className="text-sm sm:text-base text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  {program.description}
+                </p>
               )}
 
               {/* Download Link and Facebook Group Button */}
@@ -108,7 +110,7 @@ export default function ProgramInformation({
                         path: window.location.pathname
                       });
                     }}
-                    className="inline-flex items-center bg-linear-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-5 py-3 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800 shadow-lg text-sm sm:text-base">
+                    className="inline-flex items-center bg-linear-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-5 py-4 rounded-xl sm:rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-neutral-800 shadow-lg text-sm sm:text-base">
                     <FaDownload size={18} className="mr-2 sm:mr-3" />
                     Download Program
                   </Link>
