@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { Program, SocialData } from "@/src/types";
+import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { FacebookGroupHeroPromo } from "@/src/components/social";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
@@ -80,7 +81,7 @@ export default function ProgramInformation({
 
               <div>
                 <h1 className="text-3xl lg:text-4xl font-bold text-gradient-pro mb-3 leading-tight lg:max-w-[540px] mx-auto lg:mx-0">
-                  {program.title + " " + program.latestOfficialVersion}
+                  {formatProgramDisplayTitle(program)}
                 </h1>
                 <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
                   Free giveaway CD keys for {program.title} — copy a working key and activate in the Windows app.
