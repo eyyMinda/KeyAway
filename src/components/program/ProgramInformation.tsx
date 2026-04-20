@@ -63,9 +63,9 @@ export default function ProgramInformation({
   return (
     <section className="bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 py-6 sm:py-10">
       <div className="max-w-3xl lg:max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 relative">
           {/* Desktop: program image (left column) */}
-          <div className="hidden lg:order-1 lg:flex flex-col gap-4">
+          <div className="hidden lg:order-1 lg:flex flex-col gap-4 sticky top-20 h-fit">
             <ProgramInformationVisual program={program} variant="desktop" />
             <FacebookGroupHeroPromo socialData={socialData} />
           </div>
