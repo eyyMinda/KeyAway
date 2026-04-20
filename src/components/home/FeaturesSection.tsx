@@ -102,7 +102,7 @@ export default function FeaturesSection() {
         {/* Key Reporting System */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-5 sm:p-6 lg:p-8 xl:p-12">
           <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+            <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
               Community Key Reporting System
             </h3>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-2">
@@ -166,7 +166,7 @@ export default function FeaturesSection() {
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-primary-100 rounded-full mb-3 sm:mb-4">
                 <FaUsers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600" />
               </div>
-              <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">Got Free CD Keys to Share?</h4>
+              <h4 className="text-2xl font-bold text-gray-900 mb-3">Got Free CD Keys to Share?</h4>
               <p className="text-sm sm:text-base text-gray-700 mb-5 sm:mb-6 leading-relaxed px-2">
                 Help grow our community database! If you have working CD keys for any software (not just IObit), share
                 them with us. Together we can build the largest free software key repository.
