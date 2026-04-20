@@ -74,7 +74,9 @@ export default function InteractionsPage() {
         return;
       }
       const { since, until } = getDateRange(selectedPeriod, customDateRange);
-      const res = await fetch(`/api/v1/admin/interactions?since=${encodeURIComponent(since)}&until=${encodeURIComponent(until)}`);
+      const res = await fetch(
+        `/api/v1/admin/interactions?since=${encodeURIComponent(since)}&until=${encodeURIComponent(until)}`
+      );
       const json = (await res.json()) as InteractionsApiResponse;
       if (!res.ok) throw new Error("Failed to fetch interactions");
       setRows(json.data.rows || []);
@@ -95,14 +97,8 @@ export default function InteractionsPage() {
     fetchData();
   }, [fetchData]);
 
-  const sectionOptions = useMemo(
-    () => Array.from(new Set(rows.map(r => r.sectionId).filter(Boolean))).sort(),
-    [rows]
-  );
-  const pathOptions = useMemo(
-    () => Array.from(new Set(rows.map(r => r.pagePath).filter(Boolean))).sort(),
-    [rows]
-  );
+  const sectionOptions = useMemo(() => Array.from(new Set(rows.map(r => r.sectionId).filter(Boolean))).sort(), [rows]);
+  const pathOptions = useMemo(() => Array.from(new Set(rows.map(r => r.pagePath).filter(Boolean))).sort(), [rows]);
   const interactionOptions = useMemo(
     () => Array.from(new Set(rows.map(r => r.interactionId).filter(Boolean))).sort(),
     [rows]
@@ -124,7 +120,8 @@ export default function InteractionsPage() {
       const bv = (b as unknown as Record<string, unknown>)[sortColumn];
       let cmp = 0;
       if (sortColumn === "count") cmp = (Number(av) || 0) - (Number(bv) || 0);
-      else if (sortColumn === "lastSeenAt") cmp = new Date(String(av || "")).getTime() - new Date(String(bv || "")).getTime();
+      else if (sortColumn === "lastSeenAt")
+        cmp = new Date(String(av || "")).getTime() - new Date(String(bv || "")).getTime();
       else cmp = String(av || "").localeCompare(String(bv || ""));
       return sortDirection === "asc" ? cmp : -cmp;
     });
@@ -155,7 +152,9 @@ export default function InteractionsPage() {
       </div>
 
       {loading ? (
-        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500">Loading interactions...</div>
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500">
+          Loading interactions...
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -176,7 +175,7 @@ export default function InteractionsPage() {
                     setSelectedSection(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full rounded-lg border border-gray-300 p-2 text-sm">
+                  className="w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900">
                   <option value="all">All</option>
                   {sectionOptions.map(o => (
                     <option key={o} value={o}>
@@ -193,7 +192,7 @@ export default function InteractionsPage() {
                     setSelectedPath(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full rounded-lg border border-gray-300 p-2 text-sm">
+                  className="w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900">
                   <option value="all">All</option>
                   {pathOptions.map(o => (
                     <option key={o} value={o}>
@@ -210,7 +209,7 @@ export default function InteractionsPage() {
                     setSelectedInteraction(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full rounded-lg border border-gray-300 p-2 text-sm">
+                  className="w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-900">
                   <option value="all">All</option>
                   {interactionOptions.map(o => (
                     <option key={o} value={o}>
@@ -229,7 +228,7 @@ export default function InteractionsPage() {
                   setSelectedInteraction("all");
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${adminChrome.filterPillIdle}`}>
+                className={`px-4 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors ${adminChrome.filterPillIdle}`}>
                 Reset Filters
               </button>
             </div>
@@ -238,7 +237,9 @@ export default function InteractionsPage() {
           <div className="mt-6 bg-white rounded-xl shadow-soft border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Interaction Buckets</h3>
-              <p className="text-sm text-gray-500 mt-1">Showing {pagedRows.length} of {sortedRows.length} filtered rows</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Showing {pagedRows.length} of {sortedRows.length} filtered rows
+              </p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
