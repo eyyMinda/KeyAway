@@ -97,7 +97,7 @@ export default function Pagination({
           <button
             key={page}
             onClick={() => onPageChange(page)}
-            className={`px-3 py-2 rounded-lg border transition-colors ${
+            className={`px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
               page === currentPage
                 ? "bg-primary-600 text-white border-primary-600"
                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
