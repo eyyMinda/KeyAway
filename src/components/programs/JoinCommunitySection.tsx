@@ -10,7 +10,7 @@ export default function JoinCommunitySection() {
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center bg-linear-to-r from-primary-50 to-accent-50 rounded-2xl sm:rounded-3xl p-8 sm:p-10 lg:p-12 border border-primary-100">
           <FaLightbulb className="w-12 h-12 sm:w-16 sm:h-16 text-primary-600 mx-auto mb-4 sm:mb-6" />
-          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Join Our Community</h3>
+          <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Join Our Community</h3>
           <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
             Browse programs, grab working keys, report status updates, and suggest new keys. It&apos;s a community
             effort—and you&apos;re part of it!
