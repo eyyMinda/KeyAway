@@ -1,13 +1,13 @@
 // Layout and UI related types
 import { SanityAsset } from "@sanity/image-url";
 
-/** Site-wide SEO templates on `storeDetails` (placeholders: `[title]`, `[totalPrograms]`, `[totalProgramsRounded]`). */
+/** Site-wide SEO templates on `storeDetails` (placeholder: `[title]` = store title or default name). */
 export interface StoreSeo {
   siteUrl?: string;
   sharingImage?: SanityAsset;
   homeMetaTitle?: string;
   homeMetaDescription?: string;
-  /** Each entry supports the same `[title]` / program count placeholders as meta text. */
+  /** Each entry may include `[title]` (store name). */
   homeMetaKeywords?: string[];
   programsMetaTitle?: string;
   programsMetaDescription?: string;
@@ -30,8 +30,6 @@ export interface StoreDetails {
   /** Embedded on `storeDetails` (no separate `socialLink` documents). */
   socialLinks?: SocialLink[];
   seo?: StoreSeo;
-  /** From GROQ `count(*[_type == "program"])` when using `storeDetailsQuery`. */
-  programCount?: number;
 }
 
 export interface HeaderContent {

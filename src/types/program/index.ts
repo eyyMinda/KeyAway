@@ -58,6 +58,7 @@ export interface Program {
   seo?: {
     metaTitle?: string;
     metaDescription?: string;
+    metaKeywords?: string[];
   };
   /** Optional about blocks (max 4 in CMS). */
   aboutSections?: ProgramAboutSectionBlock[];

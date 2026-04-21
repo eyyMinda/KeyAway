@@ -1,4 +1,5 @@
 import { defineField, defineType } from "sanity";
+import { validateStoreSiteUrl } from "@/src/sanity/validators/storeSiteUrl";
 
 export const storeDetails = defineType({
   name: "storeDetails",
@@ -31,13 +32,15 @@ export const storeDetails = defineType({
       type: "object",
       options: { collapsible: true, collapsed: true },
       description:
-        "Templates support placeholders: [title] (store title or default), [totalPrograms] (exact count), [totalProgramsRounded] (count rounded up to the next multiple of 10, e.g. 17 → 20).",
+        "Optional overrides for search and social defaults. Use [title] anywhere you want the store name (from Store Title above, or KeyAway if that is empty). Leave a field empty to keep the built-in default for that field.",
       fields: [
         defineField({
           name: "siteUrl",
           title: "Site / canonical base URL",
           type: "url",
-          description: "Used for canonical URLs and Open Graph. Leave empty to use https://www.keyaway.app."
+          description:
+            "Your live site origin, normally https://www.keyaway.app. Used for canonical URLs and JSON-LD. Leave empty to use that default.",
+          validation: Rule => Rule.custom(value => validateStoreSiteUrl(value))
         }),
         defineField({
           name: "sharingImage",
@@ -62,7 +65,7 @@ export const storeDetails = defineType({
           title: "Home meta keywords",
           type: "array",
           of: [{ type: "string" }],
-          description: "Optional. Same placeholders as title/description on each line."
+          description: "Optional. Each line can include [title]."
         }),
         defineField({
           name: "programsMetaTitle",

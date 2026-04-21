@@ -109,6 +109,13 @@ export const program = defineType({
           description: "Optional. Shown under the title in search results.",
           validation: Rule =>
             Rule.max(MAX_META_DESC).warning(`Prefer ${MAX_META_DESC} characters or fewer for Google snippets.`)
+        }),
+        defineField({
+          name: "metaKeywords",
+          title: "Meta keywords",
+          type: "array",
+          of: [{ type: "string" }],
+          description: "Optional. Each row can use [title] for the store name from Store Details."
         })
       ]
     }),
