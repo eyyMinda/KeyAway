@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+
 /** Optional bullet with optional icon image */
 export const aboutPoint = defineType({
   name: "aboutPoint",
@@ -9,8 +11,12 @@ export const aboutPoint = defineType({
     defineField({
       name: "text",
       title: "Text",
-      type: "string",
-      validation: Rule => Rule.required()
+      type: "array",
+      of: [{ type: "block" }],
+      validation: Rule =>
+        Rule.custom((value: unknown) =>
+          portableTextHasContent(value) ? true : "Point text is required"
+        )
     }),
     defineField({
       name: "icon",
@@ -24,7 +30,9 @@ export const aboutPoint = defineType({
     select: { t: "text", media: "icon" },
     prepare(selection) {
       const { t, media } = selection;
-      return { title: (typeof t === "string" && t.trim()) || "Point", media };
+      const plain = portableTextToPlainText(t);
+      const title = plain ? (plain.length > 60 ? `${plain.slice(0, 60)}…` : plain) : "Point";
+      return { title, media };
     }
   }
 });
@@ -44,10 +52,13 @@ export const aboutSection = defineType({
     defineField({
       name: "description",
       title: "Description",
-      type: "text",
-      rows: 6,
+      type: "array",
+      of: [{ type: "block" }],
       description: "Required. Main copy for this block.",
-      validation: Rule => Rule.required()
+      validation: Rule =>
+        Rule.custom((value: unknown) =>
+          portableTextHasContent(value) ? true : "Description is required"
+        )
     }),
     defineField({
       name: "image",
@@ -82,10 +93,10 @@ export const aboutSection = defineType({
     select: { title: "sectionTitle", desc: "description", media: "image" },
     prepare(selection) {
       const { title, desc, media } = selection;
-      const d = typeof desc === "string" ? desc : "";
+      const d = portableTextToPlainText(desc);
       return {
         title: (typeof title === "string" && title.trim()) || "About block",
-        subtitle: d ? `${d.trim().slice(0, 72)}${d.trim().length > 72 ? "…" : ""}` : "",
+        subtitle: d ? `${d.slice(0, 72)}${d.length > 72 ? "…" : ""}` : "",
         media
       };
     }

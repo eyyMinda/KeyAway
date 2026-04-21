@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     if (!description)
       return Errors.validation("description cannot be empty", [{ field: "description", message: "Required" }]);
 
-    const featuredDescription = typeof b.featuredDescription === "string" ? b.featuredDescription.trim() : undefined;
+    const featuredCopy = typeof b.featuredCopy === "string" ? b.featuredCopy.trim() : "";
 
     const downloadLinkRaw = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
     if (downloadLinkRaw && !URL_REGEX.test(downloadLinkRaw)) {
@@ -81,10 +81,10 @@ export async function POST(req: NextRequest) {
     }
 
     const featured: {
-      featuredDescription?: string;
+      description?: ReturnType<typeof plainTextToPortableText>;
       showcaseGif?: NonNullable<ReturnType<typeof buildImageReference>>;
     } = {};
-    if (featuredDescription) featured.featuredDescription = featuredDescription;
+    if (featuredCopy) featured.description = plainTextToPortableText(featuredCopy);
     const showcaseRef = buildImageReference(showcaseGifAssetId);
     if (showcaseRef) featured.showcaseGif = showcaseRef;
 

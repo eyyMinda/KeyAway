@@ -23,7 +23,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
-  const [featuredDescription, setFeaturedDescription] = useState("");
+  const [featuredCopy, setFeaturedCopy] = useState("");
   const [downloadLink, setDownloadLink] = useState("");
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
   const [showcaseGifAssetId, setShowcaseGifAssetId] = useState<string | null>(null);
@@ -44,10 +44,10 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setTitle(program.title);
       setSlug(program.slug?.current ?? "");
       setDescription(portableTextToPlainText(program.description));
-      setFeaturedDescription(
-        typeof program.featured?.featuredDescription === "string"
-          ? program.featured.featuredDescription.trim()
-          : portableTextToPlainText(program.featured?.featuredDescription)
+      setFeaturedCopy(
+        typeof program.featured?.description === "string"
+          ? program.featured.description.trim()
+          : portableTextToPlainText(program.featured?.description)
       );
       setDownloadLink(program.downloadLink ?? "");
       setImageAssetId(program.image?.asset?._ref ?? null);
@@ -59,7 +59,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setTitle("");
       setSlug("");
       setDescription("");
-      setFeaturedDescription("");
+      setFeaturedCopy("");
       setDownloadLink("");
       setImageAssetId(null);
       setShowcaseGifAssetId(null);
@@ -122,9 +122,9 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
         slug: slugValidation.normalized,
         description: description.trim(),
         ...(program?._id
-          ? { featuredDescription: featuredDescription.trim() }
-          : featuredDescription.trim()
-            ? { featuredDescription: featuredDescription.trim() }
+          ? { featuredCopy: featuredCopy.trim() }
+          : featuredCopy.trim()
+            ? { featuredCopy: featuredCopy.trim() }
             : {}),
         downloadLink: downloadLink.trim() || undefined,
         ...(program?._id ? { imageAssetId: imageAssetId ?? null } : imageAssetId ? { imageAssetId } : {}),
@@ -291,14 +291,14 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Featured Description
-              <span className="text-xs text-gray-500 ml-1">(for featured section)</span>
+              Featured copy
+              <span className="text-xs text-gray-500 ml-1">(homepage featured block)</span>
             </label>
             <textarea
-              value={featuredDescription}
-              onChange={e => setFeaturedDescription(e.target.value)}
+              value={featuredCopy}
+              onChange={e => setFeaturedCopy(e.target.value)}
               rows={4}
-              placeholder="Optional description to display when this program is featured"
+              placeholder="Optional copy when this program is featured on the homepage"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               disabled={saveLoading}
             />

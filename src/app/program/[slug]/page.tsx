@@ -18,12 +18,15 @@ import {
 } from "@/src/lib/program/versionSummary";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsQuery, storeDetailsQuery, socialLinksQuery } from "@/src/lib/sanity/queries";
+import { popularProgramsQuery } from "@/src/lib/sanity/queries";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import { headers } from "next/headers";
 import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
+import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
+import type { ProgramFaqItem } from "@/src/types/program";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -51,14 +54,13 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, storeData, socialLinks] = await Promise.all([
+  const [allPrograms, store] = await Promise.all([
     client.fetch(popularProgramsQuery),
-    client.fetch(storeDetailsQuery),
-    client.fetch(socialLinksQuery)
+    getCachedStoreDetailsDocument()
   ]);
 
   const socialData: SocialData = {
-    socialLinks: socialLinks || []
+    socialLinks: store?.socialLinks ?? []
   };
 
   const hdrs = await headers();
@@ -67,7 +69,12 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
     .slice(0, 5);
 
-  const storeInfo = storeData?.[0] || { title: "KeyAway" };
+  const faqItems =
+    program.faq?.filter(
+      (f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)
+    ) ?? [];
+
+  const storeInfo = store || { title: "KeyAway" };
   const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
 
   return (
@@ -94,7 +101,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
         <ContributeBanner />
         <ProgramAboutSection program={program} />
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
-        <ProgramFaqSection programTitle={program.title} items={program.faq ?? []} />
+        <ProgramFaqSection programTitle={program.title} items={faqItems} />
         <RelatedPrograms programs={relatedPrograms} />
         <CommentsSection />
       </main>

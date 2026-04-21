@@ -85,7 +85,14 @@ export function buildSoftwareApplicationDescription(program: Program): string {
   const seo = program.seo?.metaDescription?.trim();
   if (seo) return seo;
   const aboutBlob = program.aboutSections
-    ?.map(s => s.description?.trim())
+    ?.map(s => {
+      const desc = portableTextToPlainText(s.description);
+      const points = s.points
+        ?.map(p => portableTextToPlainText(p.text))
+        .filter(Boolean)
+        .join("\n");
+      return [desc, points].filter(Boolean).join("\n");
+    })
     .filter(Boolean)
     .join("\n\n");
   const base = portableTextToPlainText(program.description);

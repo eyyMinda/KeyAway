@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { IdealImage } from "@/src/components/general/IdealImage";
+import RichText from "@/src/components/portableText/RichText";
 import { urlFor } from "@/src/sanity/lib/image";
 import type { ProgramAboutSectionBlock } from "@/src/types";
 import type { SanityImageSource } from "@sanity/image-url";
@@ -19,14 +20,16 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
       {sectionTitle ? (
         <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3">{sectionTitle}</h3>
       ) : null}
-      <p className="text-sm sm:text-base text-gray-300 leading-snug whitespace-pre-wrap">{description}</p>
+      <div className="text-sm sm:text-base text-gray-300 leading-snug [&_a]:text-primary-300 [&_p]:my-2 [&_p]:leading-relaxed">
+        <RichText value={description} className="[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal" />
+      </div>
       {points && points.length > 0 ? (
         <ul
           className={`mt-4 space-y-2.5 text-sm sm:text-base text-gray-300 ${
             hasImage ? "text-left" : "inline-block text-left mx-auto max-w-lg"
           }`}>
           {points.map((p, i) => (
-            <li key={`${p.text}-${i}`} className="flex gap-3 items-start">
+            <li key={`about-point-${i}`} className="flex gap-3 items-start">
               {hasAsset(p.icon) ? (
                 <span className="relative mt-0.5 h-7 w-7 shrink-0 overflow-hidden">
                   <Image
@@ -43,7 +46,9 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
               ) : (
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-400" aria-hidden />
               )}
-              <span className="leading-relaxed">{p.text}</span>
+              <div className="min-w-0 flex-1 text-sm sm:text-base text-gray-300 [&_a]:text-primary-300 [&_p]:my-1 [&_p]:leading-relaxed">
+                <RichText value={p.text} />
+              </div>
             </li>
           ))}
         </ul>

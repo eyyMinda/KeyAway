@@ -4,25 +4,31 @@ export const storeDetailsQuery = `*[_type=="storeDetails"]{
   description,
   logo,
   logoLight,
-  header->{
+  seo{
+    siteUrl,
+    sharingImage,
+    homeMetaTitle,
+    homeMetaDescription,
+    homeMetaKeywords,
+    programsMetaTitle,
+    programsMetaDescription,
+    programsMetaKeywords,
+    privacyMetaTitle,
+    privacyMetaDescription,
+    privacyMetaKeywords,
+    termsMetaTitle,
+    termsMetaDescription,
+    termsMetaKeywords
+  },
+  header{
     isLogo,
     headerLinks
   },
-  footer->{
+  footer{
     isLogo,
     footerLinks
-  }
-}`;
-
-/* ------------ Header ------------ */
-export const headerQuery = `*[_type=="header"]{
-  islogo,
-  headerLinks
-}`;
-/* ------------ Footer ------------ */
-export const footerQuery = `*[_type=="footer"]{
-  islogo,
-  footerLinks
+  },
+  socialLinks[]{ platform, url }
 }`;
 
 /* Header and Footer Links */
@@ -42,7 +48,7 @@ export const footerLinksQuery = `*[_type=="footerLink"] | order(_createdAt asc) 
 /* ------------ Programs ------------ */
 export const featuredBlockProjection = `
 featured{
-  featuredDescription,
+  description,
   showcaseGif
 }`;
 
@@ -87,12 +93,6 @@ export const programBySlugQuery = `
   cdKeys[]
 }
 `;
-
-/* ------------ Social ------------ */
-export const socialLinksQuery = `*[_type=="socialLink"] | order(_createdAt asc) {
-  platform,
-  url
-}`;
 
 /* ------------ Analytics ------------ */
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{

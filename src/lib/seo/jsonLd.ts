@@ -1,38 +1,47 @@
 import { Program } from "@/src/types";
-import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { urlFor } from "@/src/sanity/lib/image";
 import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
 import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
+import type { StoreSeo } from "@/src/types/layout";
 
-// Base URL for the site
+// Base URL when CMS site URL is unset
 const BASE_URL = "https://www.keyaway.app";
 
 // Type for JSON-LD data
 type JsonLdData = Record<string, unknown>;
 
 // JSON-LD for Homepage - WebSite schema
-export function generateHomePageJsonLd(storeData: { title: string; description: string }) {
+export function generateHomePageJsonLd(storeData: {
+  title: string;
+  /** Primary description for schema.org (typically resolved home meta description). */
+  description: string;
+  /** Canonical site origin from `storeDetails.seo.siteUrl` or default. */
+  siteUrl?: string;
+}) {
+  const base = (storeData.siteUrl || BASE_URL).replace(/\/$/, "");
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: storeData.title || "KeyAway",
     description: storeData.description || "Free CD Keys for Premium Software",
-    url: BASE_URL,
+    url: base,
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${BASE_URL}/programs?search={search_term_string}`
+        urlTemplate: `${base}/programs?search={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
     publisher: {
       "@type": "Organization",
       name: storeData.title || "KeyAway",
-      url: BASE_URL,
+      url: base,
       logo: {
         "@type": "ImageObject",
-        url: `${BASE_URL}/images/KeyAway_Logo.png`,
+        url: `${base}/images/KeyAway_Logo.png`,
         width: 400,
         height: 400
       }
@@ -41,18 +50,19 @@ export function generateHomePageJsonLd(storeData: { title: string; description: 
       "@type": "ItemList",
       name: "Free Software Programs",
       description: "Collection of premium software programs with free CD keys",
-      url: `${BASE_URL}/programs`
+      url: `${base}/programs`
     }
   };
 }
 
 // JSON-LD for Programs Page - CollectionPage schema
-export function generateProgramsPageJsonLd(programs: Program[], totalCount: number) {
+export function generateProgramsPageJsonLd(programs: Program[], totalCount: number, siteBaseUrl?: string) {
+  const base = (siteBaseUrl || BASE_URL).replace(/\/$/, "");
   const programItems = programs.slice(0, 20).map(program => ({
     "@type": "SoftwareApplication",
     name: program.title,
     description: portableTextToPlainText(program.description),
-    url: `${BASE_URL}/program/${program.slug.current}`,
+    url: `${base}/program/${program.slug.current}`,
     image: program.image ? urlFor(program.image).width(400).height(400).url() : undefined,
     applicationCategory: "SoftwareApplication",
     operatingSystem: "Windows",
@@ -70,7 +80,7 @@ export function generateProgramsPageJsonLd(programs: Program[], totalCount: numb
     "@type": "CollectionPage",
     name: "All Software Programs",
     description: `Browse our complete collection of ${totalCount} software programs with verified CD keys`,
-    url: `${BASE_URL}/programs`,
+    url: `${base}/programs`,
     mainEntity: {
       "@type": "ItemList",
       name: "Software Programs Collection",
@@ -89,13 +99,13 @@ export function generateProgramsPageJsonLd(programs: Program[], totalCount: numb
           "@type": "ListItem",
           position: 1,
           name: "Home",
-          item: BASE_URL
+          item: base
         },
         {
           "@type": "ListItem",
           position: 2,
           name: "Programs",
-          item: `${BASE_URL}/programs`
+          item: `${base}/programs`
         }
       ]
     }
@@ -107,13 +117,14 @@ export function generateProgramPageJsonLd(
   program: Program,
   workingKeys: number,
   _totalKeys: number,
-  storeData: { title: string }
+  storeData: { title: string; seo?: StoreSeo }
 ) {
+  const base = resolveSiteBaseUrl(storeData.seo).replace(/\/$/, "");
   // Extract brand from title (e.g., "IOBIT Malware Fighter" -> "IOBIT")
   const brandMatch = program.title.match(/^([A-Za-z]+)/);
   const brand = brandMatch ? brandMatch[1] : "Unknown";
 
-  const pageUrl = `${BASE_URL}/program/${program.slug.current}`;
+  const pageUrl = `${base}/program/${program.slug.current}`;
   const appDescription = buildSoftwareApplicationDescription(program);
   const softwareVersion = getSoftwareVersionForSchema(program, program.cdKeys);
 
@@ -149,10 +160,10 @@ export function generateProgramPageJsonLd(
     publisher: {
       "@type": "Organization",
       name: storeData.title || "KeyAway",
-      url: BASE_URL,
+      url: base,
       logo: {
         "@type": "ImageObject",
-        url: `${BASE_URL}/images/KeyAway_Logo.png`,
+        url: `${base}/images/KeyAway_Logo.png`,
         width: 400,
         height: 400
       }
@@ -181,13 +192,13 @@ export function generateProgramPageJsonLd(
           "@type": "ListItem",
           position: 1,
           name: "Home",
-          item: BASE_URL
+          item: base
         },
         {
           "@type": "ListItem",
           position: 2,
           name: "Programs",
-          item: `${BASE_URL}/programs`
+          item: `${base}/programs`
         },
         {
           "@type": "ListItem",
@@ -219,7 +230,8 @@ export function generateProgramPageJsonLd(
     softwareApp.downloadUrl = program.downloadLink;
   }
 
-  const faq = program.faq?.filter(f => f.question?.trim() && f.answer?.trim()) ?? [];
+  const faq =
+    program.faq?.filter(f => f.question?.trim() && portableTextHasContent(f.answer)) ?? [];
   if (faq.length >= 2) {
     const faqPage: JsonLdData = {
       "@type": "FAQPage",
@@ -229,7 +241,7 @@ export function generateProgramPageJsonLd(
         name: f.question.trim(),
         acceptedAnswer: {
           "@type": "Answer",
-          text: f.answer.trim()
+          text: portableTextToPlainText(f.answer)
         }
       }))
     };

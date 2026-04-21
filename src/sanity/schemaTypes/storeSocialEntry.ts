@@ -1,9 +1,10 @@
 import { defineField, defineType } from "sanity";
 
-export const socialLink = defineType({
-  name: "socialLink",
-  title: "Social Link",
-  type: "document",
+/** Embedded social row on `storeDetails` (replaces standalone `socialLink` documents). */
+export const storeSocialEntry = defineType({
+  name: "storeSocialEntry",
+  title: "Social link",
+  type: "object",
   fields: [
     defineField({
       name: "platform",

@@ -1,9 +1,11 @@
 import { client } from "@/src/sanity/lib/client";
-import { programsWithStatsQuery, programsCountQuery, socialLinksQuery } from "@lib/sanity/queries";
+import { programsWithStatsQuery, programsCountQuery } from "@lib/sanity/queries";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramsPageJsonLd } from "@/src/lib/seo/jsonLd";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
 import {
@@ -19,26 +21,26 @@ import type { SocialData } from "@/src/types";
 export const revalidate = 60;
 
 export async function generateMetadata() {
-  return generateProgramsPageMetadata();
+  return await generateProgramsPageMetadata();
 }
 
 export default async function ProgramsPage() {
-  const [rawPrograms, bundleCounts, totalCount, socialLinks, featuredProgram] = await Promise.all([
+  const [rawPrograms, bundleCounts, totalCount, storeRow, featuredProgram] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: ["programs"] } }),
     getBundleCountsByProgram(),
     client.fetch(programsCountQuery, {}, { next: { tags: ["programs"] } }),
-    client.fetch(socialLinksQuery),
+    getCachedStoreDetailsDocument(),
     getFeaturedProgram()
   ]);
 
   const programs = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts) as ProgramWithStats[];
 
   const socialData: SocialData = {
-    socialLinks: socialLinks || []
+    socialLinks: storeRow?.socialLinks ?? []
   };
 
   const totalKeys = programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0);
-  const jsonLd = generateProgramsPageJsonLd(programs, totalCount);
+  const jsonLd = generateProgramsPageJsonLd(programs, totalCount, resolveSiteBaseUrl(storeRow?.seo));
 
   return (
     <>

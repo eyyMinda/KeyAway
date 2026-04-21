@@ -1,6 +1,25 @@
 // Layout and UI related types
 import { SanityAsset } from "@sanity/image-url";
 
+/** Site-wide SEO templates on `storeDetails` (placeholder: `[title]` = store title or default name). */
+export interface StoreSeo {
+  siteUrl?: string;
+  sharingImage?: SanityAsset;
+  homeMetaTitle?: string;
+  homeMetaDescription?: string;
+  /** Each entry may include `[title]` (store name). */
+  homeMetaKeywords?: string[];
+  programsMetaTitle?: string;
+  programsMetaDescription?: string;
+  programsMetaKeywords?: string[];
+  privacyMetaTitle?: string;
+  privacyMetaDescription?: string;
+  privacyMetaKeywords?: string[];
+  termsMetaTitle?: string;
+  termsMetaDescription?: string;
+  termsMetaKeywords?: string[];
+}
+
 export interface StoreDetails {
   title: string;
   description: string;
@@ -8,6 +27,9 @@ export interface StoreDetails {
   logoLight: SanityAsset;
   header: HeaderContent;
   footer: FooterContent;
+  /** Embedded on `storeDetails` (no separate `socialLink` documents). */
+  socialLinks?: SocialLink[];
+  seo?: StoreSeo;
 }
 
 export interface HeaderContent {

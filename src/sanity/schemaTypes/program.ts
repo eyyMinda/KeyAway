@@ -1,10 +1,47 @@
 import { defineField, defineType } from "sanity";
 
-import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { CdKeysArrayInput } from "../inputs/CdKeysArrayInput";
 
 const MAX_META_TITLE = 70;
 const MAX_META_DESC = 160;
+
+export const faqItem = defineType({
+  name: "faqItem",
+  title: "FAQ item",
+  type: "object",
+  fields: [
+    defineField({
+      name: "question",
+      title: "Question",
+      type: "string",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "answer",
+      title: "Answer",
+      type: "array",
+      of: [{ type: "block" }],
+      validation: Rule =>
+        Rule.custom((value: unknown) =>
+          portableTextHasContent(value) ? true : "Answer is required"
+        )
+    })
+  ],
+  preview: {
+    select: { question: "question", answer: "answer" },
+    prepare(selection) {
+      const { question, answer } = selection;
+      const q = typeof question === "string" ? question.trim() : "";
+      const a = portableTextToPlainText(answer);
+      const subtitle = a ? (a.length > 96 ? `${a.slice(0, 96)}…` : a) : undefined;
+      return {
+        title: q || "FAQ item",
+        subtitle
+      };
+    }
+  }
+});
 
 export const program = defineType({
   name: "program",
@@ -44,7 +81,10 @@ export const program = defineType({
       of: [{ type: "block" }],
       description:
         "Short summary shown on the program page. Unique to this program; mention category and who it is for.",
-      validation: Rule => Rule.required()
+      validation: Rule =>
+        Rule.custom((value: unknown) =>
+          portableTextHasContent(value) ? true : "Description is required"
+        )
     }),
     defineField({
       name: "seo",
@@ -69,6 +109,13 @@ export const program = defineType({
           description: "Optional. Shown under the title in search results.",
           validation: Rule =>
             Rule.max(MAX_META_DESC).warning(`Prefer ${MAX_META_DESC} characters or fewer for Google snippets.`)
+        }),
+        defineField({
+          name: "metaKeywords",
+          title: "Meta keywords",
+          type: "array",
+          of: [{ type: "string" }],
+          description: "Optional. Each row can use [title] for the store name from Store Details."
         })
       ]
     }),
@@ -95,39 +142,7 @@ export const program = defineType({
       type: "array",
       description:
         "Optional Q&A for this program only. Use at least 2 entries or leave empty (structured data requires 2+).",
-      of: [
-        {
-          type: "object",
-          name: "faqItem",
-          fields: [
-            defineField({
-              name: "question",
-              title: "Question",
-              type: "string",
-              validation: Rule => Rule.required()
-            }),
-            defineField({
-              name: "answer",
-              title: "Answer",
-              type: "text",
-              rows: 4,
-              validation: Rule => Rule.required()
-            })
-          ],
-          preview: {
-            select: { question: "question", answer: "answer" },
-            prepare(selection) {
-              const { question, answer } = selection;
-              const q = typeof question === "string" ? question.trim() : "";
-              const a = typeof answer === "string" ? answer.trim().replace(/\s+/g, " ") : "";
-              return {
-                title: q || "FAQ item",
-                subtitle: a ? (a.length > 96 ? `${a.slice(0, 96)}…` : a) : undefined
-              };
-            }
-          }
-        }
-      ],
+      of: [{ type: "faqItem" }],
       validation: Rule =>
         Rule.custom((items: unknown[] | undefined) => {
           const n = items?.length ?? 0;
@@ -145,11 +160,12 @@ export const program = defineType({
       description: "Optional: Overrides for featured section for this program (copy + GIF).",
       fields: [
         defineField({
-          name: "featuredDescription",
-          title: "Featured Description",
-          type: "text",
+          name: "description",
+          title: "Featured description",
+          type: "array",
+          of: [{ type: "block" }],
           description:
-            "Optional description when this program is featured on the homepage. If empty, the regular description is used."
+            "Optional copy when this program is featured on the homepage. If empty, the regular description is used."
         }),
         defineField({
           name: "showcaseGif",
@@ -160,12 +176,16 @@ export const program = defineType({
       ],
       preview: {
         select: {
-          featuredDescription: "featuredDescription",
+          desc: "description",
           media: "showcaseGif"
         },
         prepare(selection) {
-          const desc = typeof selection.featuredDescription === "string" ? selection.featuredDescription.trim() : "";
-          const subtitle = desc ? (desc.length > 72 ? `${desc.slice(0, 72)}…` : desc) : "No featured description";
+          const plain = portableTextToPlainText(selection.desc);
+          const subtitle = plain
+            ? plain.length > 72
+              ? `${plain.slice(0, 72)}…`
+              : plain
+            : "No featured description";
           return {
             title: "Featured Section",
             subtitle,
