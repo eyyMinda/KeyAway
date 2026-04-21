@@ -58,6 +58,13 @@ export const storeDetails = defineType({
           rows: 3
         }),
         defineField({
+          name: "homeMetaKeywords",
+          title: "Home meta keywords",
+          type: "array",
+          of: [{ type: "string" }],
+          description: "Optional. Same placeholders as title/description on each line."
+        }),
+        defineField({
           name: "programsMetaTitle",
           title: "Programs listing meta title",
           type: "string",
@@ -68,6 +75,12 @@ export const storeDetails = defineType({
           title: "Programs listing meta description",
           type: "text",
           rows: 3
+        }),
+        defineField({
+          name: "programsMetaKeywords",
+          title: "Programs listing meta keywords",
+          type: "array",
+          of: [{ type: "string" }]
         }),
         defineField({
           name: "privacyMetaTitle",
@@ -81,6 +94,12 @@ export const storeDetails = defineType({
           rows: 3
         }),
         defineField({
+          name: "privacyMetaKeywords",
+          title: "Privacy page meta keywords",
+          type: "array",
+          of: [{ type: "string" }]
+        }),
+        defineField({
           name: "termsMetaTitle",
           title: "Terms page meta title",
           type: "string"
@@ -90,6 +109,12 @@ export const storeDetails = defineType({
           title: "Terms page meta description",
           type: "text",
           rows: 3
+        }),
+        defineField({
+          name: "termsMetaKeywords",
+          title: "Terms page meta keywords",
+          type: "array",
+          of: [{ type: "string" }]
         })
       ]
     }),

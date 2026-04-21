@@ -10,12 +10,16 @@ export const storeDetailsQuery = `*[_type=="storeDetails"]{
     sharingImage,
     homeMetaTitle,
     homeMetaDescription,
+    homeMetaKeywords,
     programsMetaTitle,
     programsMetaDescription,
+    programsMetaKeywords,
     privacyMetaTitle,
     privacyMetaDescription,
+    privacyMetaKeywords,
     termsMetaTitle,
-    termsMetaDescription
+    termsMetaDescription,
+    termsMetaKeywords
   },
   header{
     isLogo,

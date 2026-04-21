@@ -7,12 +7,17 @@ export interface StoreSeo {
   sharingImage?: SanityAsset;
   homeMetaTitle?: string;
   homeMetaDescription?: string;
+  /** Each entry supports the same `[title]` / program count placeholders as meta text. */
+  homeMetaKeywords?: string[];
   programsMetaTitle?: string;
   programsMetaDescription?: string;
+  programsMetaKeywords?: string[];
   privacyMetaTitle?: string;
   privacyMetaDescription?: string;
+  privacyMetaKeywords?: string[];
   termsMetaTitle?: string;
   termsMetaDescription?: string;
+  termsMetaKeywords?: string[];
 }
 
 export interface StoreDetails {

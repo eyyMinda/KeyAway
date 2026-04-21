@@ -43,6 +43,18 @@ function trimmedNonEmpty(s: string): string | null {
   return t.length ? t : null;
 }
 
+/** Interpolates placeholders on each keyword; drops empty entries. */
+export function resolveMetaKeywordList(
+  raw: string[] | undefined | null,
+  vars: Record<string, string>
+): string[] | undefined {
+  if (raw == null || raw.length === 0) return undefined;
+  const out = raw
+    .map(entry => trimmedNonEmpty(applyStoreSeoTemplate(entry, vars)))
+    .filter((k): k is string => k != null);
+  return out.length ? out : undefined;
+}
+
 export function resolveSiteBaseUrl(seo: StoreDetails["seo"] | undefined): string {
   const raw = seo?.siteUrl?.trim();
   if (!raw) return DEFAULT_SITE_URL;
@@ -88,8 +100,9 @@ export function resolveHomePageSeo(store: StoreDetailsForSeo | null | undefined)
 
   const siteUrl = resolveSiteBaseUrl(s.seo);
   const ogImageUrl = resolveDefaultOgImageUrl(s.seo);
+  const keywords = resolveMetaKeywordList(s.seo?.homeMetaKeywords, vars);
 
-  return { title, description, siteUrl, ogImageUrl, storeTitle };
+  return { title, description, siteUrl, ogImageUrl, storeTitle, keywords };
 }
 
 export function resolveProgramsPageSeo(store: StoreDetailsForSeo | null | undefined) {
@@ -108,8 +121,9 @@ export function resolveProgramsPageSeo(store: StoreDetailsForSeo | null | undefi
   const siteUrl = resolveSiteBaseUrl(s.seo);
   const ogImageUrl = resolveDefaultOgImageUrl(s.seo);
   const pageUrl = `${siteUrl}/programs`;
+  const keywords = resolveMetaKeywordList(s.seo?.programsMetaKeywords, vars);
 
-  return { title, description, siteUrl, ogImageUrl, storeTitle, pageUrl };
+  return { title, description, siteUrl, ogImageUrl, storeTitle, pageUrl, keywords };
 }
 
 export function resolvePrivacyPageSeo(store: StoreDetailsForSeo | null | undefined) {
@@ -127,8 +141,9 @@ export function resolvePrivacyPageSeo(store: StoreDetailsForSeo | null | undefin
 
   const siteUrl = resolveSiteBaseUrl(s.seo);
   const pageUrl = `${siteUrl}/privacy`;
+  const keywords = resolveMetaKeywordList(s.seo?.privacyMetaKeywords, vars);
 
-  return { title, description, pageUrl };
+  return { title, description, pageUrl, keywords };
 }
 
 export function resolveTermsPageSeo(store: StoreDetailsForSeo | null | undefined) {
@@ -146,6 +161,7 @@ export function resolveTermsPageSeo(store: StoreDetailsForSeo | null | undefined
 
   const siteUrl = resolveSiteBaseUrl(s.seo);
   const pageUrl = `${siteUrl}/terms`;
+  const keywords = resolveMetaKeywordList(s.seo?.termsMetaKeywords, vars);
 
-  return { title, description, pageUrl };
+  return { title, description, pageUrl, keywords };
 }

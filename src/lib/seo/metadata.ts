@@ -38,13 +38,24 @@ const defaultData = {
     `Free ${programTitle} giveaway CD keys for Windows. ${workingKeys} working keys out of ${totalKeys} — copy a license and activate in-app. Official download recommended.`
 };
 
+const defaultProgramsKeywords = [
+  "free software",
+  "license keys",
+  "CD keys",
+  "software programs",
+  "premium software free",
+  "all programs",
+  "software collection"
+];
+
 export async function generateHomePageMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
-  const { title, description, siteUrl, ogImageUrl, storeTitle } = resolveHomePageSeo(storeData);
+  const { title, description, siteUrl, ogImageUrl, storeTitle, keywords } = resolveHomePageSeo(storeData);
 
   return {
     title,
     description,
+    ...(keywords ? { keywords } : {}),
     openGraph: {
       title,
       description,
@@ -136,11 +147,12 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
 
 export async function generatePrivacyMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
-  const { title, description, pageUrl: url } = resolvePrivacyPageSeo(storeData);
+  const { title, description, pageUrl: url, keywords } = resolvePrivacyPageSeo(storeData);
 
   return {
     title,
     description,
+    ...(keywords ? { keywords } : {}),
     openGraph: {
       title,
       description,
@@ -160,11 +172,12 @@ export async function generatePrivacyMetadata(): Promise<Metadata> {
 
 export async function generateTermsMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
-  const { title, description, pageUrl: url } = resolveTermsPageSeo(storeData);
+  const { title, description, pageUrl: url, keywords } = resolveTermsPageSeo(storeData);
 
   return {
     title,
     description,
+    ...(keywords ? { keywords } : {}),
     openGraph: {
       title,
       description,
@@ -184,20 +197,13 @@ export async function generateTermsMetadata(): Promise<Metadata> {
 
 export async function generateProgramsPageMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
-  const { title, description, pageUrl: url, ogImageUrl, storeTitle } = resolveProgramsPageSeo(storeData);
+  const { title, description, pageUrl: url, ogImageUrl, storeTitle, keywords } =
+    resolveProgramsPageSeo(storeData);
 
   return {
     title,
     description,
-    keywords: [
-      "free software",
-      "license keys",
-      "CD keys",
-      "software programs",
-      "premium software free",
-      "all programs",
-      "software collection"
-    ],
+    keywords: keywords ?? defaultProgramsKeywords,
     openGraph: {
       title,
       description,
