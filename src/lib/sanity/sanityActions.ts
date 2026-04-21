@@ -43,7 +43,7 @@ export async function updateAllExpiredKeys(): Promise<void> {
         let updatedKey = { ...key };
 
         // Check if key should be expired based on validUntil date
-        if (key.status.toLowerCase() !== "expired" && key.validUntil) {
+        if (key.status !== "expired" && key.validUntil) {
           const validUntil = new Date(key.validUntil);
           if (now > validUntil) {
             hasUpdates = true;
@@ -52,7 +52,7 @@ export async function updateAllExpiredKeys(): Promise<void> {
         }
 
         // Check if "new" key is older than 1 month and convert to "active"
-        if (key.status.toLowerCase() === "new") {
+        if (updatedKey.status === "new") {
           // Check createdAt first, then fall back to validFrom
           const keyDate = key.createdAt || key.validFrom;
           if (keyDate) {
@@ -100,7 +100,7 @@ export async function getProgramWithUpdatedKeys(slug: string) {
       let updatedKey = { ...key };
 
       // Check if key should be expired based on validUntil date
-      if (key.status.toLowerCase() !== "expired" && key.validUntil) {
+      if (key.status !== "expired" && key.validUntil) {
         const validUntil = new Date(key.validUntil);
         if (now > validUntil) {
           hasUpdates = true;
@@ -109,7 +109,7 @@ export async function getProgramWithUpdatedKeys(slug: string) {
       }
 
       // Check if "new" key is older than 1 month and convert to "active"
-      if (key.status.toLowerCase() === "new") {
+      if (updatedKey.status === "new") {
         // Check createdAt first, then fall back to validFrom
         const keyDate = key.createdAt || key.validFrom;
         if (keyDate) {

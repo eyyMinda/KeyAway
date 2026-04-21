@@ -6,30 +6,35 @@ import { IdealImage } from "@/src/components/general/IdealImage";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
+import type { PortableTextBlock } from "@portabletext/types";
+import type { ProgramFeatured } from "@/src/types/program";
+import RichText from "@/src/components/portableText/RichText";
+import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 
 interface FeaturedProgramSectionProps {
   program: {
     _id: string;
     title: string;
     slug: { current: string };
-    description: string;
-    featuredDescription?: string;
+    description: PortableTextBlock[] | string;
+    featured?: ProgramFeatured;
     image?: { asset: { url?: string; _ref?: string } };
     downloadLink?: string;
     totalKeys: number;
     workingKeys: number;
     viewCount: number;
     downloadCount: number;
-    showcaseGif?: { asset: { url?: string; _ref?: string } };
   } | null;
 }
 
 export default function FeaturedProgramSection({ program }: FeaturedProgramSectionProps) {
   if (!program) return null;
 
-  // Use featuredDescription from program if available, otherwise use regular description
-  const description = program.featuredDescription || program.description;
-  const imageSource = program.showcaseGif || program.image;
+  const fd = program.featured?.featuredDescription;
+  const useFeatured =
+    typeof fd === "string" ? fd.trim().length > 0 : portableTextHasContent(fd ?? null);
+  const introBody = useFeatured ? fd : program.description;
+  const imageSource = program.featured?.showcaseGif || program.image;
 
   return (
     <section
@@ -74,7 +79,10 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
                 <div>
                   <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3">{program.title}</h3>
                   <div className="text-sm sm:text-base text-gray-300 leading-relaxed space-y-3">
-                    <p>{description}</p>
+                    <RichText
+                      value={introBody}
+                      className="[&_a]:text-primary-300 [&_blockquote]:border-white/20"
+                    />
                     <p>
                       With {program.workingKeys} verified working CD keys available, you can unlock the full premium
                       features of this professional software at no cost. Our community has verified these keys, ensuring

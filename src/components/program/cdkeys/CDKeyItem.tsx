@@ -3,7 +3,7 @@
 import { CDKeyItemProps } from "@/src/types";
 import CDKeyActions from "@/src/components/program/cdkeys/CDKeyActions";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
-import { getStatusColor } from "@/src/lib/program/cdKeyUtils";
+import { formatValidUntilDisplay, getStatusColor } from "@/src/lib/program/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
 
 export default function CDKeyItem({
@@ -43,7 +43,7 @@ export default function CDKeyItem({
         {cdKey.validFrom?.split("T")[0]}
       </td>
       <td className={`px-6 py-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
-        {cdKey.validUntil?.split("T")[0]}
+        {formatValidUntilDisplay(cdKey.validUntil)}
       </td>
       {!isDisabled && (
         <td className="px-6 py-4 text-center">

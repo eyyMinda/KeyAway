@@ -1,4 +1,5 @@
 import { Program } from "@/src/types";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 
 export interface ProgramWithStats extends Program {
   viewCount: number;
@@ -99,9 +100,10 @@ export function searchPrograms(programs: ProgramWithStats[], searchTerm: string)
   if (!searchTerm.trim()) return programs;
 
   const term = searchTerm.toLowerCase();
-  return programs.filter(
-    program => program.title.toLowerCase().includes(term) || program.description.toLowerCase().includes(term)
-  );
+  return programs.filter(program => {
+    const desc = portableTextToPlainText(program.description).toLowerCase();
+    return program.title.toLowerCase().includes(term) || desc.includes(term);
+  });
 }
 
 /**

@@ -3,7 +3,7 @@
 import { CDKey, ReportData } from "@/src/types";
 import CDKeyActions from "./CDKeyActions";
 import ReportProgressBar from "./ReportProgressBar";
-import { getStatusColor } from "@/src/lib/program/cdKeyUtils";
+import { formatValidUntilDisplay, getStatusColor } from "@/src/lib/program/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
 
 interface CDKeyMobileCardProps {
@@ -59,7 +59,7 @@ export default function CDKeyMobileCard({
           </div>
           <div>
             <span className="text-neutral-500">Valid Until:</span>
-            <div className="text-white font-medium">{cdKey.validUntil?.split("T")[0]}</div>
+            <div className="text-white font-medium">{formatValidUntilDisplay(cdKey.validUntil)}</div>
           </div>
         </div>
       </div>

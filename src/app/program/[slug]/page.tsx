@@ -36,73 +36,68 @@ export async function generateMetadata({ params }: ProgramPageProps) {
 }
 
 export default async function ProgramPage({ params }: ProgramPageProps) {
-  try {
-    const { slug } = await params;
+  const { slug } = await params;
 
-    const program = await getProgramWithUpdatedKeys(slug);
+  const program = await getProgramWithUpdatedKeys(slug);
 
-    if (!program) return notFound();
+  if (!program) return notFound();
 
-    const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
+  const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
 
-    const totalKeys = sortedCdKeys.length;
-    const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
-    const highestKeyVersion = getHighestKeyVersion(sortedCdKeys);
-    const vendorReleaseForIntro = getCdKeyTableIntroVendorRelease(program, highestKeyVersion);
-    const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
-    const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
+  const totalKeys = sortedCdKeys.length;
+  const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
+  const highestKeyVersion = getHighestKeyVersion(sortedCdKeys);
+  const vendorReleaseForIntro = getCdKeyTableIntroVendorRelease(program, highestKeyVersion);
+  const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
+  const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-    const [allPrograms, storeData, socialLinks] = await Promise.all([
-      client.fetch(popularProgramsQuery),
-      client.fetch(storeDetailsQuery),
-      client.fetch(socialLinksQuery)
-    ]);
+  const [allPrograms, storeData, socialLinks] = await Promise.all([
+    client.fetch(popularProgramsQuery),
+    client.fetch(storeDetailsQuery),
+    client.fetch(socialLinksQuery)
+  ]);
 
-    const socialData: SocialData = {
-      socialLinks: socialLinks || []
-    };
+  const socialData: SocialData = {
+    socialLinks: socialLinks || []
+  };
 
-    const hdrs = await headers();
-    const { isSpammer, visitorHint } = await getVisitorContextForPublicPage(hdrs);
-    const relatedPrograms = allPrograms
-      .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
-      .slice(0, 5);
+  const hdrs = await headers();
+  const { isSpammer, visitorHint } = await getVisitorContextForPublicPage(hdrs);
+  const relatedPrograms = allPrograms
+    .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
+    .slice(0, 5);
 
-    const storeInfo = storeData?.[0] || { title: "KeyAway" };
-    const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
+  const storeInfo = storeData?.[0] || { title: "KeyAway" };
+  const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
 
-    return (
-      <>
-        <JsonLd data={jsonLd} />
-        <main className="min-h-screen bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
-          <ProgramInformation
-            program={program}
-            totalKeys={totalKeys}
-            workingKeys={workingKeys}
-            socialData={socialData}
-            visitorHint={visitorHint}
-          />
-          <CDKeyTable
-            cdKeys={sortedCdKeys}
-            slug={slug}
-            program={program}
-            programTitle={program.title}
-            isSpammerVisitor={isSpammer}
-            vendorReleaseForIntro={vendorReleaseForIntro}
-            introVersionConfirmation={introVersionConfirmation}
-            versionSummaryLine={versionSummaryLine}
-          />
-          <ContributeBanner />
-          <ProgramAboutSection program={program} />
-          <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
-          <ProgramFaqSection programTitle={program.title} items={program.faq ?? []} />
-          <RelatedPrograms programs={relatedPrograms} />
-          <CommentsSection />
-        </main>
-      </>
-    );
-  } catch (error) {
-    console.error("Error in ProgramPage:", error);
-    return notFound();
-  }
+  return (
+    <>
+      <JsonLd data={jsonLd} />
+      <main className="min-h-screen bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
+        <ProgramInformation
+          program={program}
+          totalKeys={totalKeys}
+          workingKeys={workingKeys}
+          socialData={socialData}
+          visitorHint={visitorHint}
+        />
+        <CDKeyTable
+          cdKeys={sortedCdKeys}
+          slug={slug}
+          program={program}
+          programTitle={program.title}
+          isSpammerVisitor={isSpammer}
+          vendorReleaseForIntro={vendorReleaseForIntro}
+          introVersionConfirmation={introVersionConfirmation}
+          versionSummaryLine={versionSummaryLine}
+        />
+        <ContributeBanner />
+        <ProgramAboutSection program={program} />
+        <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
+        <ProgramFaqSection programTitle={program.title} items={program.faq ?? []} />
+        <RelatedPrograms programs={relatedPrograms} />
+        <CommentsSection />
+      </main>
+    </>
+  );
 }

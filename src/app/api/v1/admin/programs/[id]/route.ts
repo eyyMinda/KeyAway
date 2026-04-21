@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
+import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
@@ -39,7 +40,14 @@ function parseBody(body: unknown): Record<string, unknown> {
     out.description = typeof b.description === "string" ? b.description.trim() : "";
   }
   if (b.featuredDescription !== undefined) {
-    out.featuredDescription = typeof b.featuredDescription === "string" ? b.featuredDescription.trim() : undefined;
+    if (b.featuredDescription === null) {
+      out.featuredDescription = null;
+    } else if (typeof b.featuredDescription === "string") {
+      const t = b.featuredDescription.trim();
+      out.featuredDescription = t.length ? t : null;
+    } else {
+      out.featuredDescription = null;
+    }
   }
   if (b.downloadLink !== undefined) {
     const v = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
@@ -123,15 +131,32 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const patch = client.patch(id);
     if (updates.title !== undefined) patch.set({ title: updates.title as string });
     if (updates.slug !== undefined) patch.set({ slug: { _type: "slug", current: updates.slug as string } });
-    if (updates.description !== undefined) patch.set({ description: updates.description as string });
-    if (updates.featuredDescription !== undefined)
-      patch.set({ featuredDescription: (updates.featuredDescription as string) ?? null });
+    if (updates.description !== undefined) {
+      patch.set({ description: plainTextToPortableText(updates.description as string) });
+    }
     if (updates.downloadLink !== undefined) patch.set({ downloadLink: (updates.downloadLink as string) ?? null });
     if (updates.imageAssetId !== undefined) {
       patch.set({ image: buildImageReference(updates.imageAssetId as string | null) });
     }
-    if (updates.showcaseGifAssetId !== undefined) {
-      patch.set({ showcaseGif: buildImageReference(updates.showcaseGifAssetId as string | null) });
+    if (updates.featuredDescription !== undefined || updates.showcaseGifAssetId !== undefined) {
+      type FeaturedRow = {
+        featured?: { featuredDescription?: string | null; showcaseGif?: unknown } | null;
+      };
+      const row = await client.fetch<FeaturedRow | null>(
+        `*[_type == "program" && _id == $id][0]{ featured }`,
+        { id }
+      );
+      const prevDesc = row?.featured?.featuredDescription ?? null;
+      const prevGif = row?.featured?.showcaseGif ?? null;
+      const nextFeatured = {
+        featuredDescription:
+          updates.featuredDescription !== undefined ? (updates.featuredDescription as string | null) : prevDesc,
+        showcaseGif:
+          updates.showcaseGifAssetId !== undefined
+            ? buildImageReference(updates.showcaseGifAssetId as string | null)
+            : prevGif
+      };
+      patch.set({ featured: nextFeatured });
     }
 
     const result = await patch.commit();

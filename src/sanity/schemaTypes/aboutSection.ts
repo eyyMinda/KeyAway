@@ -21,9 +21,10 @@ export const aboutPoint = defineType({
     })
   ],
   preview: {
-    select: { t: "text" },
-    prepare({ t }: { t?: string }) {
-      return { title: t || "Point" };
+    select: { t: "text", media: "icon" },
+    prepare(selection) {
+      const { t, media } = selection;
+      return { title: (typeof t === "string" && t.trim()) || "Point", media };
     }
   }
 });
@@ -78,11 +79,14 @@ export const aboutSection = defineType({
     })
   ],
   preview: {
-    select: { title: "sectionTitle", desc: "description" },
-    prepare({ title, desc }: { title?: string; desc?: string }) {
+    select: { title: "sectionTitle", desc: "description", media: "image" },
+    prepare(selection) {
+      const { title, desc, media } = selection;
+      const d = typeof desc === "string" ? desc : "";
       return {
-        title: title || "About block",
-        subtitle: desc?.slice(0, 72) ?? ""
+        title: (typeof title === "string" && title.trim()) || "About block",
+        subtitle: d ? `${d.trim().slice(0, 72)}${d.trim().length > 72 ? "…" : ""}` : "",
+        media
       };
     }
   }

@@ -40,9 +40,17 @@ export const footerLinksQuery = `*[_type=="footerLink"] | order(_createdAt asc) 
 }`;
 
 /* ------------ Programs ------------ */
+export const featuredBlockProjection = `
+featured{
+  featuredDescription,
+  showcaseGif
+}`;
+
 export const allProgramsQuery = `
 *[_type == "program"]{
-  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[]
+  title, slug, description,
+  ${featuredBlockProjection},
+  image, cdKeys[]
 }
 `;
 export const adminProgramsQuery = `
@@ -52,13 +60,12 @@ export const adminProgramsQuery = `
   slug,
   _updatedAt,
   description,
-  featuredDescription,
+  ${featuredBlockProjection},
   latestOfficialVersion,
   seo,
   aboutSections,
   faq,
   image,
-  showcaseGif,
   downloadLink,
   cdKeys[]
 }
@@ -70,13 +77,12 @@ export const programBySlugQuery = `
   slug,
   _updatedAt,
   description,
-  featuredDescription,
+  ${featuredBlockProjection},
   latestOfficialVersion,
   seo,
   aboutSections,
   faq,
   image,
-  showcaseGif,
   downloadLink,
   cdKeys[]
 }
@@ -137,7 +143,9 @@ export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt de
 
 /* ------------ Popular Programs by Page Views ------------ */
 export const popularProgramsByViewsQuery = `*[_type == "program"]{
-  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[],
+  title, slug, description,
+  ${featuredBlockProjection},
+  image, cdKeys[],
   "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
   "hasKeys": count(cdKeys[]) > 0,
@@ -158,7 +166,9 @@ export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekA
 
 /* ------------ Programs with Filtering ------------ */
 export const programsWithStatsQuery = `*[_type == "program"]{
-  title, slug, description, featuredDescription, image, showcaseGif, cdKeys[], _createdAt,
+  title, slug, description,
+  ${featuredBlockProjection},
+  image, cdKeys[], _createdAt,
   "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
   "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
   "hasKeys": count(cdKeys[]) > 0,
@@ -175,9 +185,8 @@ export const featuredProgramSettingsQuery = `*[_type == "featuredProgramSettings
     title,
     slug,
     description,
-    featuredDescription,
+    ${featuredBlockProjection},
     image,
-    showcaseGif,
     cdKeys[]
   },
   rotationSchedule,
@@ -207,9 +216,8 @@ export const programsForAutoSelectionQuery = `*[_type == "program"]{
   title,
   slug,
   description,
-  featuredDescription,
+  ${featuredBlockProjection},
   image,
-  showcaseGif,
   downloadLink,
   cdKeys[],
   "totalKeys": count(cdKeys[]),

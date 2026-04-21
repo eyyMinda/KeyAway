@@ -8,6 +8,7 @@ import DeleteProgramModal from "./DeleteProgramModal";
 import SlugChangeConfirmModal from "./SlugChangeConfirmModal";
 import ImageLibraryModal from "./ImageLibraryModal";
 import ProgramImageField from "./ProgramImageField";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 
 interface ProgramEditModalProps {
   program: Program | null;
@@ -42,11 +43,15 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
     if (program) {
       setTitle(program.title);
       setSlug(program.slug?.current ?? "");
-      setDescription(program.description ?? "");
-      setFeaturedDescription(program.featuredDescription ?? "");
+      setDescription(portableTextToPlainText(program.description));
+      setFeaturedDescription(
+        typeof program.featured?.featuredDescription === "string"
+          ? program.featured.featuredDescription.trim()
+          : portableTextToPlainText(program.featured?.featuredDescription)
+      );
       setDownloadLink(program.downloadLink ?? "");
       setImageAssetId(program.image?.asset?._ref ?? null);
-      setShowcaseGifAssetId(program.showcaseGif?.asset?._ref ?? null);
+      setShowcaseGifAssetId(program.featured?.showcaseGif?.asset?._ref ?? null);
       setDeleteExpanded(false);
       setDeleteConfirm("");
       setDeleteError(null);
@@ -116,7 +121,11 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
         title: title.trim(),
         slug: slugValidation.normalized,
         description: description.trim(),
-        featuredDescription: featuredDescription.trim() || undefined,
+        ...(program?._id
+          ? { featuredDescription: featuredDescription.trim() }
+          : featuredDescription.trim()
+            ? { featuredDescription: featuredDescription.trim() }
+            : {}),
         downloadLink: downloadLink.trim() || undefined,
         ...(program?._id ? { imageAssetId: imageAssetId ?? null } : imageAssetId ? { imageAssetId } : {}),
         ...(program?._id

@@ -1,6 +1,7 @@
 /**
  * @fileoverview Program/CDKey shapes and props for program UI.
  */
+import type { PortableTextBlock } from "@portabletext/types";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 import type { SocialData } from "../layout";
 
@@ -10,8 +11,9 @@ export interface CDKey {
   key: string;
   status: CDKeyStatus;
   version: string;
-  validFrom: string;
-  validUntil: string;
+  validFrom?: string;
+  /** Empty / omitted = lifetime (no fixed expiry). */
+  validUntil?: string;
   createdAt?: string;
 }
 
@@ -39,12 +41,17 @@ export interface ProgramAboutSectionBlock {
   points?: ProgramAboutPoint[];
 }
 
+export interface ProgramFeatured {
+  featuredDescription?: PortableTextBlock[] | string | null;
+  showcaseGif?: SanityImageField;
+}
+
 export interface Program {
   _id: string;
   title: string;
   slug: { current: string };
-  description: string;
-  featuredDescription?: string;
+  description: PortableTextBlock[] | string;
+  featured?: ProgramFeatured;
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;
   seo?: {
@@ -55,7 +62,6 @@ export interface Program {
   aboutSections?: ProgramAboutSectionBlock[];
   faq?: ProgramFaqItem[];
   image?: { asset: { url?: string; _ref?: string } };
-  showcaseGif?: { asset: { url?: string; _ref?: string } };
   downloadLink?: string;
   cdKeys: CDKey[];
   _updatedAt?: string;
