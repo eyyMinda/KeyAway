@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { validateStoreSiteUrl } from "@/src/sanity/validators/storeSiteUrl";
+import { validateOptionalSupportEmail, validateStoreSiteUrl } from "@/src/sanity/validators/store";
 
 export const storeDetails = defineType({
   name: "storeDetails",
@@ -17,13 +17,7 @@ export const storeDetails = defineType({
       type: "string",
       description:
         "Public contact address for help links and the “report error” mailto. Leave empty to use the built-in default (support@keyaway.app).",
-      validation: Rule =>
-        Rule.custom((value: string | undefined) => {
-          const v = typeof value === "string" ? value.trim() : "";
-          if (!v) return true;
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Enter a valid email address";
-          return true;
-        })
+      validation: Rule => Rule.custom(value => validateOptionalSupportEmail(value))
     }),
     defineField({
       name: "description",

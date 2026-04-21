@@ -1,4 +1,6 @@
-/** Sanity `storeDetails.seo.siteUrl` — letters-only labels, length rules for 2- vs 3+-part hostnames. */
+/** Validators for `schemaTypes/store/*` (storeDetails, storeOtherLink, etc.). */
+
+/** `storeDetails.seo.siteUrl` — letters-only labels, length rules for 2- vs 3+-part hostnames. */
 export function validateStoreSiteUrl(value: unknown): true | string {
   if (value == null || value === "") return true;
   const raw = String(value).trim();
@@ -34,5 +36,26 @@ export function validateStoreSiteUrl(value: unknown): true | string {
   const tld = labels[labels.length - 1];
   if (sld.length < 3) return "Domain segment before the last dot must be at least 3 letters";
   if (tld.length < 2) return "Last segment (TLD) must be at least 2 letters";
+  return true;
+}
+
+/** `storeDetails.supportEmail` — optional; when set, basic email shape. */
+export function validateOptionalSupportEmail(value: unknown): true | string {
+  const v = typeof value === "string" ? value.trim() : "";
+  if (!v) return true;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Enter a valid email address";
+  return true;
+}
+
+/** `storeOtherLink.url` — domain checks when kind is buymeacoffee or githubRepository. */
+export function validateStoreOtherLinkUrl(value: unknown, kind: string | undefined): true | string {
+  if (!value || !kind) return true;
+  const v = String(value).toLowerCase();
+  if (kind === "buymeacoffee" && !v.includes("buymeacoffee.com")) {
+    return "URL must contain buymeacoffee.com";
+  }
+  if (kind === "githubRepository" && !v.includes("github.com")) {
+    return "URL must contain github.com";
+  }
   return true;
 }

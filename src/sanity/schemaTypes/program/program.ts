@@ -1,7 +1,12 @@
 import { defineField, defineType } from "sanity";
 
-import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-import { CdKeysArrayInput } from "../inputs/CdKeysArrayInput";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import {
+  validateFaqNotExactlyOne,
+  validatePortableTextRequired,
+  validateProgramCdKeysArray
+} from "@/src/sanity/validators/program";
+import { CdKeysArrayInput } from "../../inputs/CdKeysArrayInput";
 
 const MAX_META_TITLE = 70;
 const MAX_META_DESC = 160;
@@ -22,10 +27,7 @@ export const faqItem = defineType({
       title: "Answer",
       type: "array",
       of: [{ type: "block" }],
-      validation: Rule =>
-        Rule.custom((value: unknown) =>
-          portableTextHasContent(value) ? true : "Answer is required"
-        )
+      validation: Rule => Rule.custom(value => validatePortableTextRequired(value, "Answer is required"))
     })
   ],
   preview: {
@@ -81,10 +83,7 @@ export const program = defineType({
       of: [{ type: "block" }],
       description:
         "Short summary shown on the program page. Unique to this program; mention category and who it is for.",
-      validation: Rule =>
-        Rule.custom((value: unknown) =>
-          portableTextHasContent(value) ? true : "Description is required"
-        )
+      validation: Rule => Rule.custom(value => validatePortableTextRequired(value, "Description is required"))
     }),
     defineField({
       name: "seo",
@@ -143,14 +142,7 @@ export const program = defineType({
       description:
         "Optional Q&A for this program only. Use at least 2 entries or leave empty (structured data requires 2+).",
       of: [{ type: "faqItem" }],
-      validation: Rule =>
-        Rule.custom((items: unknown[] | undefined) => {
-          const n = items?.length ?? 0;
-          if (n === 1) {
-            return "Add a second FAQ entry or remove FAQ items entirely (FAQ rich results need at least 2 questions).";
-          }
-          return true;
-        })
+      validation: Rule => Rule.custom(items => validateFaqNotExactlyOne(items))
     }),
     defineField({
       name: "featured",
@@ -200,32 +192,7 @@ export const program = defineType({
       type: "array",
       of: [{ type: "cdKey" }],
       components: { input: CdKeysArrayInput },
-      validation: Rule =>
-        Rule.custom((keys: { key?: string; status?: string }[] | undefined) => {
-          if (!keys || keys.length === 0) return true;
-          const allowed = new Set(["new", "active", "expired", "limit"]);
-          for (let i = 0; i < keys.length; i++) {
-            const k = keys[i];
-            const label = `Key #${i + 1}`;
-            if (typeof k?.key !== "string" || !k.key.trim()) {
-              return `${label}: key text is required.`;
-            }
-            if (typeof k?.status !== "string" || !k.status.trim()) {
-              return `${label}: status is required (New / Active / Expired / Limit).`;
-            }
-            if (!allowed.has(k.status.trim().toLowerCase())) {
-              return `${label}: status must be one of new, active, expired, limit.`;
-            }
-          }
-          const normalized = keys
-            .map(k => (typeof k?.key === "string" ? k.key.trim().toUpperCase().replace(/\s+/g, "") : ""))
-            .filter(Boolean);
-          const unique = new Set(normalized);
-          if (unique.size < normalized.length) {
-            return "Duplicate CD keys are not allowed within the same program.";
-          }
-          return true;
-        })
+      validation: Rule => Rule.custom(keys => validateProgramCdKeysArray(keys))
     })
   ],
   preview: {

@@ -1,24 +1,25 @@
 import { type SchemaTypeDefinition } from "sanity";
 
-import { trackingEvent } from "./trackingEvent";
-import { bundledTrackingEvent } from "./bundledTrackingEvent";
-import { trackingEventBundle } from "./trackingEventBundle";
-import { keyReport } from "./keyReport";
-import { cronRun } from "./cronRun";
-import contactMessage from "./contactMessage";
-import keySuggestion from "./keySuggestion";
+import { trackingEvent } from "./analytics/trackingEvent";
+import { bundledTrackingEvent } from "./analytics/bundledTrackingEvent";
+import { trackingEventBundle } from "./analytics/trackingEventBundle";
+import { keyReport } from "./analytics/keyReport";
+import { visitor } from "./analytics/visitor";
+import { interactionEventBucket } from "./analytics/interactionEventBucket";
 
-import { storeDetails } from "./storeDetails";
-import { storeOtherLink } from "./storeOtherLink";
-import { storeSocialEntry } from "./storeSocialEntry";
-import { link } from "./link";
+import { cronRun } from "./system/cronRun";
+import contactMessage from "./contact/contactMessage";
+import keySuggestion from "./contact/keySuggestion";
 
-import { aboutPoint, aboutSection } from "./aboutSection";
-import { faqItem, program } from "./program";
-import { cdKey } from "./cdKey";
-import { featuredProgramSettings } from "./featuredProgramSettings";
-import { visitor } from "./visitor";
-import { interactionEventBucket } from "./interactionEventBucket";
+import { storeDetails } from "./store/storeDetails";
+import { storeOtherLink } from "./store/storeOtherLink";
+import { storeSocialEntry } from "./store/storeSocialEntry";
+import { link } from "./store/link";
+
+import { aboutPoint, aboutSection } from "./program/aboutSection";
+import { faqItem, program } from "./program/program";
+import { cdKey } from "./program/cdKey";
+import { featuredProgramSettings } from "./program/featuredProgramSettings";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [

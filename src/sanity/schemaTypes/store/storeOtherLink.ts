@@ -1,4 +1,5 @@
 import { defineField, defineType } from "sanity";
+import { validateStoreOtherLinkUrl } from "@/src/sanity/validators/store";
 
 export const storeOtherLink = defineType({
   name: "storeOtherLink",
@@ -26,18 +27,9 @@ export const storeOtherLink = defineType({
       validation: Rule =>
         Rule.required()
           .uri({ scheme: ["http", "https"] })
-          .custom((value, context) => {
-            const kind = (context.parent as { kind?: string } | undefined)?.kind;
-            if (!value || !kind) return true;
-            const v = String(value).toLowerCase();
-            if (kind === "buymeacoffee" && !v.includes("buymeacoffee.com")) {
-              return "URL must contain buymeacoffee.com";
-            }
-            if (kind === "githubRepository" && !v.includes("github.com")) {
-              return "URL must contain github.com";
-            }
-            return true;
-          })
+          .custom((value, context) =>
+            validateStoreOtherLinkUrl(value, (context.parent as { kind?: string } | undefined)?.kind)
+          )
     })
   ],
   preview: {
