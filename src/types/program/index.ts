@@ -10,8 +10,9 @@ export interface CDKey {
   key: string;
   status: CDKeyStatus;
   version: string;
-  validFrom: string;
-  validUntil: string;
+  validFrom?: string;
+  /** Empty / omitted = lifetime (no fixed expiry). */
+  validUntil?: string;
   createdAt?: string;
 }
 
@@ -39,12 +40,19 @@ export interface ProgramAboutSectionBlock {
   points?: ProgramAboutPoint[];
 }
 
+/** Homepage featured block (Sanity `program.featured`). */
+export interface ProgramFeatured {
+  featuredDescription?: string | null;
+  showcaseGif?: SanityImageField;
+}
+
 export interface Program {
   _id: string;
   title: string;
   slug: { current: string };
   description: string;
-  featuredDescription?: string;
+  /** Homepage featured copy + GIF (nested in CMS like `seo`). */
+  featured?: ProgramFeatured;
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;
   seo?: {
@@ -55,7 +63,6 @@ export interface Program {
   aboutSections?: ProgramAboutSectionBlock[];
   faq?: ProgramFaqItem[];
   image?: { asset: { url?: string; _ref?: string } };
-  showcaseGif?: { asset: { url?: string; _ref?: string } };
   downloadLink?: string;
   cdKeys: CDKey[];
   _updatedAt?: string;
