@@ -31,6 +31,7 @@ export function useKeyReportData(programSlug: string, currentCdKeys?: Array<{ ke
         // Initialize with current keys
         if (currentCdKeys) {
           for (const cdKey of currentCdKeys) {
+            if (!cdKey?.key?.trim()) continue;
             const keyHash = await hashCDKeyClient(cdKey.key);
             keyReportData.set(keyHash, { working: 0, expired: 0, limit_reached: 0 });
           }
