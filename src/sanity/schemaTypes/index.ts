@@ -1,6 +1,7 @@
 import { type SchemaTypeDefinition } from "sanity";
 
 import { trackingEvent } from "./trackingEvent";
+import { bundledTrackingEvent } from "./bundledTrackingEvent";
 import { trackingEventBundle } from "./trackingEventBundle";
 import { keyReport } from "./keyReport";
 import { cronRun } from "./cronRun";
@@ -22,6 +23,7 @@ import { interactionEventBucket } from "./interactionEventBucket";
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     trackingEvent,
+    bundledTrackingEvent,
     trackingEventBundle,
     keyReport,
     cronRun,
