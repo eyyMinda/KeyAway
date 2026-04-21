@@ -145,9 +145,23 @@ export const program = defineType({
       type: "array",
       of: [{ type: "cdKey" }],
       validation: Rule =>
-        Rule.custom((keys: { key?: string }[] | undefined) => {
+        Rule.custom((keys: { key?: string; status?: string }[] | undefined) => {
           if (!keys || keys.length === 0) return true;
-          const normalized = (keys ?? [])
+          const allowed = new Set(["new", "active", "expired", "limit"]);
+          for (let i = 0; i < keys.length; i++) {
+            const k = keys[i];
+            const label = `Key #${i + 1}`;
+            if (typeof k?.key !== "string" || !k.key.trim()) {
+              return `${label}: key text is required.`;
+            }
+            if (typeof k?.status !== "string" || !k.status.trim()) {
+              return `${label}: status is required (New / Active / Expired / Limit).`;
+            }
+            if (!allowed.has(k.status.trim().toLowerCase())) {
+              return `${label}: status must be one of new, active, expired, limit.`;
+            }
+          }
+          const normalized = keys
             .map(k => (typeof k?.key === "string" ? k.key.trim().toUpperCase().replace(/\s+/g, "") : ""))
             .filter(Boolean);
           const unique = new Set(normalized);
