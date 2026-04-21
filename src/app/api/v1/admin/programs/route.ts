@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
+import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
@@ -91,7 +92,7 @@ export async function POST(req: NextRequest) {
       _type: "program",
       title,
       slug: { _type: "slug", current: slug },
-      description,
+      description: plainTextToPortableText(description),
       ...(Object.keys(featured).length > 0 ? { featured } : {}),
       ...(downloadLink && { downloadLink }),
       ...(buildImageReference(imageAssetId) && { image: buildImageReference(imageAssetId) }),

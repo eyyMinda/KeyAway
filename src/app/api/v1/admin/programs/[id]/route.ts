@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
+import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
@@ -130,7 +131,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const patch = client.patch(id);
     if (updates.title !== undefined) patch.set({ title: updates.title as string });
     if (updates.slug !== undefined) patch.set({ slug: { _type: "slug", current: updates.slug as string } });
-    if (updates.description !== undefined) patch.set({ description: updates.description as string });
+    if (updates.description !== undefined) {
+      patch.set({ description: plainTextToPortableText(updates.description as string) });
+    }
     if (updates.downloadLink !== undefined) patch.set({ downloadLink: (updates.downloadLink as string) ?? null });
     if (updates.imageAssetId !== undefined) {
       patch.set({ image: buildImageReference(updates.imageAssetId as string | null) });
