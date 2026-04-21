@@ -39,14 +39,14 @@ function parseBody(body: unknown): Record<string, unknown> {
   if (b.description !== undefined) {
     out.description = typeof b.description === "string" ? b.description.trim() : "";
   }
-  if (b.featuredDescription !== undefined) {
-    if (b.featuredDescription === null) {
-      out.featuredDescription = null;
-    } else if (typeof b.featuredDescription === "string") {
-      const t = b.featuredDescription.trim();
-      out.featuredDescription = t.length ? t : null;
+  if (b.featuredCopy !== undefined) {
+    if (b.featuredCopy === null) {
+      out.featuredCopy = null;
+    } else if (typeof b.featuredCopy === "string") {
+      const t = b.featuredCopy.trim();
+      out.featuredCopy = t.length ? t : null;
     } else {
-      out.featuredDescription = null;
+      out.featuredCopy = null;
     }
   }
   if (b.downloadLink !== undefined) {
@@ -112,7 +112,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const keys = Object.keys(updates);
     if (keys.length === 0) {
       return Errors.validation(
-        "No valid fields to update (allowed: title, slug, description, featuredDescription, downloadLink, imageAssetId, showcaseGifAssetId)"
+        "No valid fields to update (allowed: title, slug, description, featuredCopy, downloadLink, imageAssetId, showcaseGifAssetId)"
       );
     }
 
@@ -138,19 +138,30 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (updates.imageAssetId !== undefined) {
       patch.set({ image: buildImageReference(updates.imageAssetId as string | null) });
     }
-    if (updates.featuredDescription !== undefined || updates.showcaseGifAssetId !== undefined) {
+    if (updates.featuredCopy !== undefined || updates.showcaseGifAssetId !== undefined) {
       type FeaturedRow = {
-        featured?: { featuredDescription?: string | null; showcaseGif?: unknown } | null;
+        featured?: { description?: unknown; showcaseGif?: unknown } | null;
       };
       const row = await client.fetch<FeaturedRow | null>(
         `*[_type == "program" && _id == $id][0]{ featured }`,
         { id }
       );
-      const prevDesc = row?.featured?.featuredDescription ?? null;
+      const rawDesc = row?.featured?.description;
+      const prevDesc =
+        typeof rawDesc === "string"
+          ? plainTextToPortableText(rawDesc)
+          : Array.isArray(rawDesc)
+            ? rawDesc
+            : [];
       const prevGif = row?.featured?.showcaseGif ?? null;
+      const nextDescription =
+        updates.featuredCopy !== undefined
+          ? updates.featuredCopy === null || (typeof updates.featuredCopy === "string" && !updates.featuredCopy.trim())
+            ? []
+            : plainTextToPortableText(updates.featuredCopy as string)
+          : prevDesc;
       const nextFeatured = {
-        featuredDescription:
-          updates.featuredDescription !== undefined ? (updates.featuredDescription as string | null) : prevDesc,
+        description: nextDescription,
         showcaseGif:
           updates.showcaseGifAssetId !== undefined
             ? buildImageReference(updates.showcaseGifAssetId as string | null)
