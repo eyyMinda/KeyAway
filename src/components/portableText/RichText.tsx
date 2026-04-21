@@ -13,10 +13,10 @@ function valueToBlocks(value: unknown): PortableTextBlock[] | null {
     return [
       {
         _type: "block",
-        _key: "legacy-str",
+        _key: "str",
         style: "normal",
         markDefs: [],
-        children: [{ _type: "span", _key: "legacy-span", text: t, marks: [] }]
+        children: [{ _type: "span", _key: "str-span", text: t, marks: [] }]
       } as PortableTextBlock
     ];
   }

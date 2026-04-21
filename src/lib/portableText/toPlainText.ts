@@ -5,10 +5,7 @@ function normalizeWhitespace(s: string): string {
   return s.replace(/\s+/g, " ").trim();
 }
 
-/**
- * Portable Text array / single block → plain string (previews, SEO, JSON-LD, search, excerpts).
- * Pass-through for legacy plain `string` fields until migrated.
- */
+/** Portable Text array / single block / plain string → plain string. */
 export function portableTextToPlainText(value: unknown): string {
   if (value == null) return "";
   if (typeof value === "string") return normalizeWhitespace(value);
