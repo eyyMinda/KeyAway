@@ -71,7 +71,7 @@ export default function FeaturesSection() {
   };
 
   return (
-    <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+    <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-gray-100">
       <div className="max-w-360 mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">

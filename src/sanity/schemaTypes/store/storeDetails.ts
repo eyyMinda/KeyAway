@@ -1,5 +1,5 @@
 import { defineField, defineType } from "sanity";
-import { validateStoreSiteUrl } from "@/src/sanity/validators/storeSiteUrl";
+import { validateOptionalSupportEmail, validateStoreSiteUrl } from "@/src/sanity/validators/store";
 
 export const storeDetails = defineType({
   name: "storeDetails",
@@ -12,9 +12,18 @@ export const storeDetails = defineType({
       type: "string"
     }),
     defineField({
+      name: "supportEmail",
+      title: "Support email",
+      type: "string",
+      description:
+        "Public contact address for help links and the “report error” mailto. Leave empty to use the built-in default (support@keyaway.app).",
+      validation: Rule => Rule.custom(value => validateOptionalSupportEmail(value))
+    }),
+    defineField({
       name: "description",
       title: "Store Description",
-      type: "text"
+      type: "array",
+      of: [{ type: "block" }]
     }),
     defineField({
       name: "logo",
@@ -165,6 +174,14 @@ export const storeDetails = defineType({
       type: "array",
       of: [{ type: "storeSocialEntry" }],
       description: "Social profiles shown in the header menu and footer."
+    }),
+    defineField({
+      name: "otherLinks",
+      title: "Other links",
+      type: "array",
+      of: [{ type: "storeOtherLink" }],
+      description:
+        "Support and repo URLs. Use the matching type for Buy Me a Coffee and GitHub (Studio checks the domain on those). “Other” is only shown as generic links in the UI."
     })
   ]
 });

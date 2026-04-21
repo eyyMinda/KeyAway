@@ -1,4 +1,6 @@
+import type { PortableTextBlock } from "@portabletext/types";
 import type { SanityImageSource } from "@sanity/image-url";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { urlFor } from "@/src/sanity/lib/image";
 import type { StoreDetails } from "@/src/types/layout";
 
@@ -8,7 +10,7 @@ export const DEFAULT_OG_IMAGE_URL = "https://www.keyaway.app/images/KeyAway_Card
 
 export type StoreDetailsForSeo = Partial<StoreDetails> & {
   title?: string;
-  description?: string;
+  description?: PortableTextBlock[] | string;
 };
 
 export function buildStoreSeoVariableMap(store: StoreDetailsForSeo): Record<string, string> {
@@ -70,7 +72,7 @@ function homeTitleFallback(storeTitle: string): string {
 
 function homeDescriptionFallback(store: StoreDetailsForSeo): string {
   return (
-    trimmedNonEmpty(store.description ?? "") ??
+    trimmedNonEmpty(portableTextToPlainText(store.description ?? "")) ??
     "Get free CD keys for popular software like IOBIT, iTop and more. Download premium programs with working activation keys from our giveaway collection."
   );
 }

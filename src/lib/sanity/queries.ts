@@ -1,6 +1,7 @@
 /* ------------ Store ------------ */
 export const storeDetailsQuery = `*[_type=="storeDetails"]{
   title,
+  supportEmail,
   description,
   logo,
   logoLight,
@@ -28,21 +29,8 @@ export const storeDetailsQuery = `*[_type=="storeDetails"]{
     isLogo,
     footerLinks
   },
-  socialLinks[]{ platform, url }
-}`;
-
-/* Header and Footer Links */
-export const headerLinksQuery = `*[_type=="headerLink"] | order(_createdAt asc) {
-  title,
-  slug,
-  external,
-  url
-}`;
-export const footerLinksQuery = `*[_type=="footerLink"] | order(_createdAt asc) {
-  title,
-  slug,
-  external,
-  url
+  socialLinks[]{ platform, url },
+  otherLinks[]{ kind, url }
 }`;
 
 /* ------------ Programs ------------ */

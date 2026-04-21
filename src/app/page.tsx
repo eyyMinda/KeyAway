@@ -65,7 +65,7 @@ export default async function HomePage() {
         <PopularProgramsSection programs={popularPrograms} />
         <FeaturesSection />
         <StatsSection stats={stats} />
-        <CTASection />
+        <CTASection otherLinks={store?.otherLinks ?? []} />
       </main>
     </>
   );

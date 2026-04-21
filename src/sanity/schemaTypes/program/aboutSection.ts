@@ -1,6 +1,7 @@
 import { defineField, defineType } from "sanity";
 
-import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import { validatePortableTextRequired } from "@/src/sanity/validators/program";
 
 /** Optional bullet with optional icon image */
 export const aboutPoint = defineType({
@@ -13,10 +14,7 @@ export const aboutPoint = defineType({
       title: "Text",
       type: "array",
       of: [{ type: "block" }],
-      validation: Rule =>
-        Rule.custom((value: unknown) =>
-          portableTextHasContent(value) ? true : "Point text is required"
-        )
+      validation: Rule => Rule.custom(value => validatePortableTextRequired(value, "Point text is required"))
     }),
     defineField({
       name: "icon",
@@ -55,10 +53,7 @@ export const aboutSection = defineType({
       type: "array",
       of: [{ type: "block" }],
       description: "Required. Main copy for this block.",
-      validation: Rule =>
-        Rule.custom((value: unknown) =>
-          portableTextHasContent(value) ? true : "Description is required"
-        )
+      validation: Rule => Rule.custom(value => validatePortableTextRequired(value, "Description is required"))
     }),
     defineField({
       name: "image",

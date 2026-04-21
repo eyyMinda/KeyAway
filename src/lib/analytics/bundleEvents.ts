@@ -1,4 +1,5 @@
 /** @fileoverview Cron/migration: moves old `trackingEvent` docs into `trackingEventBundle`, deletes sources, optional retention window. */
+import { randomUUID } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
 
@@ -9,14 +10,11 @@ const MAX_ITERATIONS = 10;
 const EVENT_FIELDS =
   "event, programSlug, notFound, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
 
-function toBundleEvent(doc: Record<string, unknown> & { _id?: string }, index: number) {
-  const id = doc._id ?? `evt-${index}`;
-  const key =
-    String(id)
-      .replace(/[\s.$]/g, "_")
-      .slice(0, 255) || `evt-${index}`;
+/** Each array row needs a unique `_key`; deriving only from `_id` can collide after truncation or duplicate appends. */
+function toBundleEvent(doc: Record<string, unknown> & { _id?: string }) {
   return {
-    _key: key,
+    _type: "bundledTrackingEvent",
+    _key: randomUUID(),
     event: doc.event,
     programSlug: doc.programSlug,
     notFound: doc.notFound,
@@ -67,7 +65,7 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       );
       if (!toAdd.length) break;
 
-      const newEvents = toAdd.map((d, i) => toBundleEvent(d, i));
+      const newEvents = toAdd.map(d => toBundleEvent(d));
       const lastEvent = toAdd[toAdd.length - 1];
       const newTimeRangeEnd = (lastEvent.createdAt as string) ?? incomplete.timeRangeEnd;
       const newEventCount = incomplete.eventCount + toAdd.length;
@@ -97,7 +95,7 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       );
       if (!batch.length) break;
 
-      const events = batch.map((d, i) => toBundleEvent(d, i));
+      const events = batch.map(d => toBundleEvent(d));
       const timeRangeStart = (events[0].createdAt as string) ?? cutoff;
       const timeRangeEnd = (events[events.length - 1].createdAt as string) ?? cutoff;
       after = timeRangeEnd;

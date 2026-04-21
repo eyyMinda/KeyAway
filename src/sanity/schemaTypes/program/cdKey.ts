@@ -1,6 +1,7 @@
 import { defineField, defineType } from "sanity";
 
 import { formatValidUntilDisplay } from "@/src/lib/program/cdKeyUtils";
+import { validateCdKeyStatusValue, validateOptionalValidUntilDatetime } from "@/src/sanity/validators/program";
 import type { CDKeyStatus } from "@/src/types/program";
 
 const STATUS_LIST: { title: string; value: CDKeyStatus }[] = [
@@ -27,12 +28,7 @@ export const cdKey = defineType({
       type: "string",
       options: { list: STATUS_LIST, layout: "radio" },
       initialValue: "new",
-      validation: Rule =>
-        Rule.required().custom((value: unknown) => {
-          if (typeof value !== "string") return "Status is required";
-          if (!STATUS_LIST.some(s => s.value === value)) return "Pick a valid status";
-          return true;
-        })
+      validation: Rule => Rule.required().custom(value => validateCdKeyStatusValue(value))
     }),
     defineField({
       name: "version",
@@ -49,13 +45,7 @@ export const cdKey = defineType({
       title: "Valid Until",
       type: "datetime",
       description: "Leave empty for a lifetime key (no fixed expiry).",
-      validation: Rule =>
-        Rule.custom(value => {
-          if (value && typeof value === "string" && isNaN(new Date(value).getTime())) {
-            return "Invalid date format";
-          }
-          return true;
-        })
+      validation: Rule => Rule.custom(value => validateOptionalValidUntilDatetime(value))
     }),
     defineField({
       name: "createdAt",

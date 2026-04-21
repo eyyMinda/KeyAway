@@ -55,7 +55,7 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
         <div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl border border-white/10 p-4 sm:p-6 lg:p-8">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
             {/* Left Side - Image/Showcase */}
-            <div className="relative order-2 lg:order-1">
+            <div className="relative">
               {imageSource ? (
                 <div className="relative w-full h-80 sm:h-96 lg:h-[500px]">
                   <IdealImage
@@ -72,16 +72,13 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
             </div>
 
             {/* Right Side - Content */}
-            <div className="order-1 lg:order-2 flex flex-col justify-center">
+            <div className="flex flex-col justify-center">
               <div className="space-y-4 sm:space-y-5">
                 {/* Title */}
                 <div>
                   <h3 className="text-2xl lg:text-3xl font-bold text-white mb-2 sm:mb-3">{program.title}</h3>
                   <div className="text-sm sm:text-base text-gray-300 leading-relaxed space-y-3">
-                    <RichText
-                      value={introBody}
-                      className="[&_a]:text-primary-300 [&_blockquote]:border-white/20"
-                    />
+                    <RichText value={introBody} className="[&_a]:text-primary-300 [&_blockquote]:border-white/20" />
                     <p>
                       With {program.workingKeys} verified working CD keys available, you can unlock the full premium
                       features of this professional software at no cost. Our community has verified these keys, ensuring

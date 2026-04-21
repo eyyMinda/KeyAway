@@ -42,10 +42,10 @@ const heroFeatures = [
 
 export default function HeroSection({ socialData, visitorHint }: HeroSectionProps) {
   return (
-    <section className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-28">
+    <section className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white pt-12 sm:pt-16 lg:pt-20 xl:pt-28 pb-16 lg:pb-20">
       <div className="absolute inset-0 bg-linear-to-br from-gray-900 via-gray-800 to-gray-900"></div>
       <div className="relative max-w-360 mx-auto px-4 sm:px-6">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start relative">
           {/* Content */}
           <div className="space-y-4 sm:space-y-6">
             <div className="space-y-4">
@@ -129,7 +129,7 @@ export default function HeroSection({ socialData, visitorHint }: HeroSectionProp
           </div>
 
           {/* Right Side - Visual and Facebook Promo */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 sticky top-24">
             <div className="relative order-2 hidden w-full lg:order-1 lg:block">
               <HeroLaptopImage variant="desktop" sizes="(max-width: 1023px) 32px, (max-width: 1536px) 50vw, 720px" />
             </div>

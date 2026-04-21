@@ -5,7 +5,7 @@
 ## Contact / operator
 
 - **Operator:** eyyMinda
-- **Support email:** [support@keyaway.app](mailto:support@keyaway.app)
+- **Support email:** Configured in Sanity **Store Details → Support email**; if unset, the site falls back to [support@keyaway.app](mailto:support@keyaway.app).
 
 ## What visitors can do
 

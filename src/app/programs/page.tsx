@@ -8,11 +8,7 @@ import { generateProgramsPageJsonLd } from "@/src/lib/seo/jsonLd";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
-import {
-  ProgramsHero,
-  ContributeSection,
-  WhyUseSection
-} from "@/src/components/programs";
+import { ProgramsHero, ContributeSection, WhyUseSection } from "@/src/components/programs";
 import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
 import { FacebookGroupButton } from "@/src/components/social";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
@@ -45,7 +41,7 @@ export default async function ProgramsPage() {
   return (
     <>
       <JsonLd data={jsonLd} />
-      <main className="min-h-screen bg-gray-50">
+      <main className="min-h-screen bg-gray-100">
         <ProgramsHero totalCount={totalCount} totalKeys={totalKeys} />
 
         <section className="py-8 bg-linear-to-b from-gray-50 to-gray-100">

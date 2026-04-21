@@ -1,9 +1,30 @@
 import { defineField, defineType } from "sanity";
+import {
+  analyticsEventPreviewSubtitle,
+  analyticsEventPreviewTitle
+} from "@/src/sanity/lib/analyticsEventPreviewLabels";
 
 export const trackingEvent = defineType({
   name: "trackingEvent",
   title: "Analytics Event",
   type: "document",
+  preview: {
+    select: {
+      event: "event",
+      path: "path",
+      programSlug: "programSlug",
+      country: "country",
+      city: "city",
+      ipHash: "ipHash"
+    },
+    prepare({ event, path, programSlug, country, city, ipHash }) {
+      return {
+        title: analyticsEventPreviewTitle(event, path, programSlug),
+        subtitle: analyticsEventPreviewSubtitle(country, city, ipHash),
+        media: false
+      };
+    }
+  },
   fields: [
     defineField({
       name: "event",
