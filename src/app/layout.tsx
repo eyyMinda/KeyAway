@@ -4,8 +4,7 @@ import "./globals.css";
 
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { client } from "@/src/sanity/lib/client";
-import { storeDetailsQuery } from "@lib/sanity/queries";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
@@ -35,18 +34,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return generateHomePageMetadata();
 }
 
-async function getStoreData() {
-  return (
-    (await client.fetch(storeDetailsQuery))[0] || {
-      title: "KeyAway",
-      description: "Free Giveaway CD Keys",
-      header: { isLogo: false, headerLinks: [] },
-      footer: { isLogo: false, footerLinks: [] },
-      socialLinks: []
-    }
-  );
-}
-
 export default async function RootLayout({
   children
 }: Readonly<{
@@ -62,7 +49,7 @@ export default async function RootLayout({
 
   const [session, storeData, notifications] = await Promise.all([
     auth(),
-    getStoreData(),
+    getCachedStoreDetailsDocument(),
     getRecentNotifications()
   ]);
 

@@ -18,7 +18,8 @@ import {
 } from "@/src/lib/program/versionSummary";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsQuery, storeDetailsQuery } from "@/src/lib/sanity/queries";
+import { popularProgramsQuery } from "@/src/lib/sanity/queries";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
@@ -53,13 +54,13 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, storeData] = await Promise.all([
+  const [allPrograms, store] = await Promise.all([
     client.fetch(popularProgramsQuery),
-    client.fetch(storeDetailsQuery)
+    getCachedStoreDetailsDocument()
   ]);
 
   const socialData: SocialData = {
-    socialLinks: storeData?.[0]?.socialLinks ?? []
+    socialLinks: store?.socialLinks ?? []
   };
 
   const hdrs = await headers();
@@ -73,7 +74,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       (f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)
     ) ?? [];
 
-  const storeInfo = storeData?.[0] || { title: "KeyAway" };
+  const storeInfo = store || { title: "KeyAway" };
   const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
 
   return (

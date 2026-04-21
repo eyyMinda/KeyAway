@@ -1,5 +1,6 @@
 import { client } from "@/src/sanity/lib/client";
-import { programsWithStatsQuery, programsCountQuery, storeDetailsQuery } from "@lib/sanity/queries";
+import { programsWithStatsQuery, programsCountQuery } from "@lib/sanity/queries";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
@@ -24,22 +25,21 @@ export async function generateMetadata() {
 }
 
 export default async function ProgramsPage() {
-  const [rawPrograms, bundleCounts, totalCount, storeRows, featuredProgram] = await Promise.all([
+  const [rawPrograms, bundleCounts, totalCount, storeRow, featuredProgram] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: ["programs"] } }),
     getBundleCountsByProgram(),
     client.fetch(programsCountQuery, {}, { next: { tags: ["programs"] } }),
-    client.fetch(storeDetailsQuery, {}, { next: { tags: ["programs"] } }),
+    getCachedStoreDetailsDocument(),
     getFeaturedProgram()
   ]);
 
   const programs = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts) as ProgramWithStats[];
 
   const socialData: SocialData = {
-    socialLinks: storeRows?.[0]?.socialLinks ?? []
+    socialLinks: storeRow?.socialLinks ?? []
   };
 
   const totalKeys = programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0);
-  const storeRow = storeRows?.[0];
   const jsonLd = generateProgramsPageJsonLd(programs, totalCount, resolveSiteBaseUrl(storeRow?.seo));
 
   return (
