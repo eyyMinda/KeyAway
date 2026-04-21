@@ -5,6 +5,7 @@ import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { generateHomePageJsonLd } from "@/src/lib/seo/jsonLd";
+import { resolveHomePageSeo } from "@/src/lib/seo/storeSeoResolve";
 import JsonLd from "@/src/components/JsonLd";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 import HeroSection from "@/src/components/home/HeroSection";
@@ -48,9 +49,12 @@ export default async function HomePage() {
   const hdrs = await headers();
   const { visitorHint } = await getVisitorContextForPublicPage(hdrs);
 
-  // Generate JSON-LD for homepage
-  const storeInfo = store || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
-  const jsonLd = generateHomePageJsonLd(storeInfo);
+  const homeSeo = resolveHomePageSeo(store);
+  const jsonLd = generateHomePageJsonLd({
+    title: store?.title?.trim() || homeSeo.storeTitle,
+    description: homeSeo.description,
+    siteUrl: homeSeo.siteUrl
+  });
 
   return (
     <>

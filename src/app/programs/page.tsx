@@ -4,6 +4,7 @@ import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramsPageJsonLd } from "@/src/lib/seo/jsonLd";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
 import {
@@ -19,7 +20,7 @@ import type { SocialData } from "@/src/types";
 export const revalidate = 60;
 
 export async function generateMetadata() {
-  return generateProgramsPageMetadata();
+  return await generateProgramsPageMetadata();
 }
 
 export default async function ProgramsPage() {
@@ -38,7 +39,8 @@ export default async function ProgramsPage() {
   };
 
   const totalKeys = programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0);
-  const jsonLd = generateProgramsPageJsonLd(programs, totalCount);
+  const storeRow = storeRows?.[0];
+  const jsonLd = generateProgramsPageJsonLd(programs, totalCount, resolveSiteBaseUrl(storeRow?.seo));
 
   return (
     <>

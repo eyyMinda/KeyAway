@@ -6,46 +6,41 @@ import { formatProgramSeoName, getHighestKeyVersion } from "@/src/lib/program/ve
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
 import { storeDetailsQuery } from "@/src/lib/sanity/queries";
+import {
+  DEFAULT_STORE_NAME,
+  resolveHomePageSeo,
+  resolvePrivacyPageSeo,
+  resolveProgramsPageSeo,
+  resolveSiteBaseUrl,
+  resolveTermsPageSeo
+} from "@/src/lib/seo/storeSeoResolve";
 
 async function getStoreData() {
   return (
     (await client.fetch(storeDetailsQuery))[0] || {
-      title: "KeyAway",
+      title: DEFAULT_STORE_NAME,
       description: "Free Giveaway CD Keys",
       header: { isLogo: false, headerLinks: [] },
       footer: { isLogo: false, footerLinks: [] },
-      socialLinks: []
+      socialLinks: [],
+      programCount: 0
     }
   );
 }
 
 const defaultData = {
-  store: "KeyAway",
-  title: (storeTitle: string) => `${storeTitle} - Free CD Keys for Premium Software`,
+  store: DEFAULT_STORE_NAME,
   description:
     "Get free CD keys for popular software like IOBIT, iTop and more. Download premium programs with working activation keys from our giveaway collection.",
-  url: "https://www.keyaway.app",
-  image: "https://www.keyaway.app/images/KeyAway_Card.png",
   programTitle: (displayName: string, storeTitle: string) =>
     `${displayName}: free CD keys & giveaway activation | ${storeTitle}`,
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
-    `Free ${programTitle} giveaway CD keys for Windows. ${workingKeys} working keys out of ${totalKeys} — copy a license and activate in-app. Official download recommended.`,
-  programUrl: (slug: string) => `${defaultData.url}/program/${slug}`,
-  privacyTitle: (storeTitle: string) => `Privacy Policy | ${storeTitle}`,
-  privacyDescription: (storeTitle: string) =>
-    `Learn how ${storeTitle} handles your personal data, comments, and contributions while keeping the site transparent.`,
-  termsTitle: (storeTitle: string) => `Terms of Service | ${storeTitle}`,
-  termsDescription: (storeTitle: string) =>
-    `Read the terms of service for using ${storeTitle}, a platform for sharing publicly available giveaway CD keys.`
+    `Free ${programTitle} giveaway CD keys for Windows. ${workingKeys} working keys out of ${totalKeys} — copy a license and activate in-app. Official download recommended.`
 };
 
 export async function generateHomePageMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
-  const storeTitle = storeData?.title || defaultData.store;
-
-  const title = defaultData.title(storeTitle);
-  const description = storeData?.description || defaultData.description;
-  const url = defaultData.url;
+  const { title, description, siteUrl, ogImageUrl, storeTitle } = resolveHomePageSeo(storeData);
 
   return {
     title,
@@ -54,10 +49,10 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
       title,
       description,
       type: "website",
-      url,
+      url: siteUrl,
       images: [
         {
-          url: defaultData.image,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: storeTitle
@@ -68,10 +63,10 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [defaultData.image]
+      images: [ogImageUrl]
     },
     alternates: {
-      canonical: url
+      canonical: siteUrl
     }
   };
 }
@@ -98,7 +93,8 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
     const title = program.seo?.metaTitle?.trim() || defaultData.programTitle(displayName, storeTitle);
     const description =
       program.seo?.metaDescription?.trim() || defaultData.programDescription(program.title, workingKeys, totalKeys);
-    const url = defaultData.programUrl(slug);
+    const baseUrl = resolveSiteBaseUrl(storeData?.seo);
+    const url = `${baseUrl}/program/${slug}`;
 
     return {
       title,
@@ -132,7 +128,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
   } catch (error) {
     console.error("Error generating metadata:", error);
     return {
-      title: defaultData.title(defaultData.store),
+      title: `${DEFAULT_STORE_NAME} - Free CD Keys for Premium Software`,
       description: defaultData.description
     };
   }
@@ -140,11 +136,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
 
 export async function generatePrivacyMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
-  const storeTitle = storeData?.title || defaultData.store;
-
-  const title = defaultData.privacyTitle(storeTitle);
-  const description = defaultData.privacyDescription(storeTitle);
-  const url = `${defaultData.url}/privacy`;
+  const { title, description, pageUrl: url } = resolvePrivacyPageSeo(storeData);
 
   return {
     title,
@@ -168,11 +160,7 @@ export async function generatePrivacyMetadata(): Promise<Metadata> {
 
 export async function generateTermsMetadata(): Promise<Metadata> {
   const storeData = await getStoreData();
-  const storeTitle = storeData?.title || defaultData.store;
-
-  const title = defaultData.termsTitle(storeTitle);
-  const description = defaultData.termsDescription(storeTitle);
-  const url = `${defaultData.url}/terms`;
+  const { title, description, pageUrl: url } = resolveTermsPageSeo(storeData);
 
   return {
     title,
@@ -194,19 +182,9 @@ export async function generateTermsMetadata(): Promise<Metadata> {
   };
 }
 
-export function generateProgramsPageMetadata() {
-  const storeTitle = "KeyAway";
-
-  const defaultProgramsData = {
-    title: (title: string) => `All Programs - ${title}`,
-    description: (title: string) =>
-      `Browse all software programs with free CD keys on ${title}. Find premium software for free with verified, working activation keys.`,
-    url: `${defaultData.url}/programs`
-  };
-
-  const title = defaultProgramsData.title(storeTitle);
-  const description = defaultProgramsData.description(storeTitle);
-  const url = defaultProgramsData.url;
+export async function generateProgramsPageMetadata(): Promise<Metadata> {
+  const storeData = await getStoreData();
+  const { title, description, pageUrl: url, ogImageUrl, storeTitle } = resolveProgramsPageSeo(storeData);
 
   return {
     title,
@@ -228,7 +206,7 @@ export function generateProgramsPageMetadata() {
       type: "website",
       images: [
         {
-          url: defaultData.image,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: `${storeTitle} - All Programs`
@@ -239,10 +217,10 @@ export function generateProgramsPageMetadata() {
       card: "summary_large_image",
       title,
       description,
-      images: [defaultData.image]
+      images: [ogImageUrl]
     },
     alternates: {
-      canonical: defaultProgramsData.url
+      canonical: url
     }
   };
 }
