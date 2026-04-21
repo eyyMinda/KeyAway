@@ -37,7 +37,6 @@ function KeyReportsPageContent() {
         const programsData: Program[] = await client.fetch(allProgramsQuery);
         setPrograms(programsData);
 
-        // TODO: remove legacy — optional rolling window instead of full history (`since` was 30d; now epoch).
         const since = "1970-01-01T00:00:00.000Z";
         const events = await client.fetch(keyReportsQuery, { since });
 
