@@ -8,6 +8,8 @@ export interface StoreDetails {
   logoLight: SanityAsset;
   header: HeaderContent;
   footer: FooterContent;
+  /** Embedded on `storeDetails` (no separate `socialLink` documents). */
+  socialLinks?: SocialLink[];
 }
 
 export interface HeaderContent {

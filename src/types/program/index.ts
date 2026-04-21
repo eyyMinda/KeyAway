@@ -19,20 +19,20 @@ export interface CDKey {
 
 export interface ProgramFaqItem {
   question: string;
-  answer: string;
+  answer: PortableTextBlock[] | string;
 }
 
 /** Sanity image field shape (asset ref for urlFor). */
 export type SanityImageField = { asset?: { _ref?: string; url?: string } };
 
 export interface ProgramAboutPoint {
-  text: string;
+  text: PortableTextBlock[] | string;
   icon?: SanityImageField;
 }
 
 export interface ProgramAboutSectionBlock {
   sectionTitle?: string;
-  description: string;
+  description: PortableTextBlock[] | string;
   image?: SanityImageField;
   /** Desktop: image on the right when true (default: image left). */
   invertDesktop?: boolean;
@@ -42,7 +42,8 @@ export interface ProgramAboutSectionBlock {
 }
 
 export interface ProgramFeatured {
-  featuredDescription?: PortableTextBlock[] | string | null;
+  /** Featured homepage copy; optional portable text. */
+  description?: PortableTextBlock[] | string | null;
   showcaseGif?: SanityImageField;
 }
 
