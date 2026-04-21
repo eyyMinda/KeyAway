@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { Program } from "@/src/types";
+import { portableTextExcerpt, portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 
 interface RelatedProgramsProps {
   programs: Program[];
@@ -105,11 +106,11 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
                         <h3 className="text-base sm:text-lg font-semibold text-white mb-2 group-hover:text-primary-400 transition-colors duration-200 line-clamp-1">
                           {program.title}
                         </h3>
-                        {program.description && (
+                        {portableTextHasContent(program.description) ? (
                           <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 mb-3 sm:mb-4 leading-tight">
-                            {program.description}
+                            {portableTextExcerpt(program.description, 180)}
                           </p>
-                        )}
+                        ) : null}
 
                         {/* Stats */}
                         <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">

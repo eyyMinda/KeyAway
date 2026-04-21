@@ -1,5 +1,6 @@
 import semver from "semver";
 import type { CDKey, Program } from "@/src/types";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 
 /** Working keys only: semver-coerced max of `version` (invalid strings skipped). */
 export function getHighestKeyVersion(cdKeys: CDKey[]): string | null {
@@ -87,7 +88,7 @@ export function buildSoftwareApplicationDescription(program: Program): string {
     ?.map(s => s.description?.trim())
     .filter(Boolean)
     .join("\n\n");
-  const base = program.description?.trim() ?? "";
+  const base = portableTextToPlainText(program.description);
   if (aboutBlob && base) {
     const combined = `${base}\n\n${aboutBlob}`;
     return combined.length > 320 ? `${combined.slice(0, 317)}…` : combined;

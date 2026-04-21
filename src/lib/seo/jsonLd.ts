@@ -1,4 +1,5 @@
 import { Program } from "@/src/types";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { urlFor } from "@/src/sanity/lib/image";
 import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
 import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
@@ -50,7 +51,7 @@ export function generateProgramsPageJsonLd(programs: Program[], totalCount: numb
   const programItems = programs.slice(0, 20).map(program => ({
     "@type": "SoftwareApplication",
     name: program.title,
-    description: program.description,
+    description: portableTextToPlainText(program.description),
     url: `${BASE_URL}/program/${program.slug.current}`,
     image: program.image ? urlFor(program.image).width(400).height(400).url() : undefined,
     applicationCategory: "SoftwareApplication",

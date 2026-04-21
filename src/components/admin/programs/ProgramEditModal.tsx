@@ -8,6 +8,7 @@ import DeleteProgramModal from "./DeleteProgramModal";
 import SlugChangeConfirmModal from "./SlugChangeConfirmModal";
 import ImageLibraryModal from "./ImageLibraryModal";
 import ProgramImageField from "./ProgramImageField";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 
 interface ProgramEditModalProps {
   program: Program | null;
@@ -42,8 +43,12 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
     if (program) {
       setTitle(program.title);
       setSlug(program.slug?.current ?? "");
-      setDescription(program.description ?? "");
-      setFeaturedDescription(program.featured?.featuredDescription?.trim() ?? "");
+      setDescription(portableTextToPlainText(program.description));
+      setFeaturedDescription(
+        typeof program.featured?.featuredDescription === "string"
+          ? program.featured.featuredDescription.trim()
+          : portableTextToPlainText(program.featured?.featuredDescription)
+      );
       setDownloadLink(program.downloadLink ?? "");
       setImageAssetId(program.image?.asset?._ref ?? null);
       setShowcaseGifAssetId(program.featured?.showcaseGif?.asset?._ref ?? null);

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { FaWrench } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import ProgramEditModal from "@/src/components/admin/programs/ProgramEditModal";
+import { portableTextExcerpt } from "@/src/lib/portableText/toPlainText";
 import FeaturedProgramSettings from "@/src/components/admin/programs/FeaturedProgramSettings";
 import { getWorkingKeysCount } from "@/src/lib/admin/adminHelpers";
 
@@ -111,7 +112,7 @@ export default function ProgramsPage() {
         {filteredPrograms.map(program => (
           <div
             key={program._id ?? program.slug.current}
-            className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
+            className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden flex flex-col">
             {/* Program Image */}
             <div className="h-48 bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
               {program.image ? (
@@ -122,12 +123,12 @@ export default function ProgramsPage() {
             </div>
 
             {/* Program Content */}
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">{program.title}</h3>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{program.description}</p>
+            <div className="py-4 sm:py-5 lg:py-6 px-4 sm:px-5 flex flex-col grow bg-linear-to-b from-white to-gray-50/50">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{program.title}</h3>
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{portableTextExcerpt(program.description, 200)}</p>
 
               {/* Program Stats */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 mt-auto">
                 <div className="text-sm text-gray-500">
                   <span className="font-medium">{program.cdKeys?.length || 0}</span> CD Keys
                 </div>

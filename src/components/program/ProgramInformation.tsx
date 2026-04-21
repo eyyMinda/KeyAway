@@ -11,6 +11,8 @@ import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReview
 import { getTrustpilotReviewUrl, hasFacebookSocialLink } from "@/src/lib/social/socialUtils";
 import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
+import RichText from "@/src/components/portableText/RichText";
+import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 
 interface ProgramInformationProps {
   program: Program;
@@ -92,11 +94,12 @@ export default function ProgramInformation({
                 </div>
               </div>
 
-              {program.description && (
-                <p className="text-sm sm:text-base text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {program.description}
-                </p>
-              )}
+              {portableTextHasContent(program.description) ? (
+                <RichText
+                  value={program.description}
+                  className="text-sm sm:text-base text-gray-300 [&_p]:leading-relaxed [&_li]:text-gray-300"
+                />
+              ) : null}
 
               {/* Download Link and Facebook Group Button */}
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center sm:justify-evenly items-center">
