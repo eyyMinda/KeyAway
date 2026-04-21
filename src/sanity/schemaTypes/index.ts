@@ -8,6 +8,7 @@ import contactMessage from "./contactMessage";
 import keySuggestion from "./keySuggestion";
 
 import { storeDetails } from "./storeDetails";
+import { storeOtherLink } from "./storeOtherLink";
 import { storeSocialEntry } from "./storeSocialEntry";
 import { link } from "./link";
 
@@ -28,6 +29,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     keySuggestion,
     link,
     storeSocialEntry,
+    storeOtherLink,
     storeDetails,
     aboutPoint,
     aboutSection,
