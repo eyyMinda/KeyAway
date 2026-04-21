@@ -1,5 +1,7 @@
 // Layout and UI related types
+import type { PortableTextBlock } from "@portabletext/types";
 import { SanityAsset } from "@sanity/image-url";
+import type { Notification } from "@/src/types/notifications";
 
 /** Site-wide SEO templates on `storeDetails` (placeholder: `[title]` = store title or default name). */
 export interface StoreSeo {
@@ -22,13 +24,15 @@ export interface StoreSeo {
 
 export interface StoreDetails {
   title: string;
-  description: string;
+  /** Public contact; empty in CMS → `DEFAULT_SUPPORT_EMAIL`. */
+  supportEmail?: string;
+  description?: PortableTextBlock[] | string;
   logo: SanityAsset;
   logoLight: SanityAsset;
   header: HeaderContent;
   footer: FooterContent;
-  /** Embedded on `storeDetails` (no separate `socialLink` documents). */
   socialLinks?: SocialLink[];
+  otherLinks?: StoreOtherLink[];
   seo?: StoreSeo;
 }
 
@@ -54,6 +58,14 @@ export interface SocialLink {
   url: string;
 }
 
+/** `storeDetails.otherLinks[].kind` — matches Sanity `storeOtherLink`. */
+export type StoreOtherLinkKind = "buymeacoffee" | "githubRepository" | "other";
+
+export interface StoreOtherLink {
+  kind: StoreOtherLinkKind;
+  url: string;
+}
+
 export interface SocialData {
   socialLinks: SocialLink[];
 }
@@ -68,12 +80,12 @@ export interface LogoData {
 
 // Component props
 export interface HeaderProps {
-  storeData: StoreDetails;
   logoData: LogoData;
+  notifications: Notification[];
+  socialData?: SocialData;
 }
 
 export interface FooterProps {
-  storeData: StoreDetails;
   logoData: LogoData;
   socialData: SocialData;
 }
