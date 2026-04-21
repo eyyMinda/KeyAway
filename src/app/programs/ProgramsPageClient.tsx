@@ -44,7 +44,7 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
   };
 
   return (
-    <div id="programs-grid" className="max-w-360 mx-auto bg-gray-100 px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+    <div id="programs-grid" className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
       <ProgramsFilter
         searchTerm={searchTerm}
         filter={filter}
