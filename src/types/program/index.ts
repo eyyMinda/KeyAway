@@ -40,7 +40,6 @@ export interface ProgramAboutSectionBlock {
   points?: ProgramAboutPoint[];
 }
 
-/** Homepage featured block (Sanity `program.featured`). */
 export interface ProgramFeatured {
   featuredDescription?: string | null;
   showcaseGif?: SanityImageField;
@@ -51,7 +50,6 @@ export interface Program {
   title: string;
   slug: { current: string };
   description: string;
-  /** Homepage featured copy + GIF (nested in CMS like `seo`). */
   featured?: ProgramFeatured;
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;

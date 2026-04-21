@@ -138,15 +138,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (updates.featuredDescription !== undefined || updates.showcaseGifAssetId !== undefined) {
       type FeaturedRow = {
         featured?: { featuredDescription?: string | null; showcaseGif?: unknown } | null;
-        featuredDescription?: string | null;
-        showcaseGif?: unknown;
       };
       const row = await client.fetch<FeaturedRow | null>(
-        `*[_type == "program" && _id == $id][0]{ featured, featuredDescription, showcaseGif }`,
+        `*[_type == "program" && _id == $id][0]{ featured }`,
         { id }
       );
-      const prevDesc = row?.featured?.featuredDescription ?? row?.featuredDescription ?? null;
-      const prevGif = row?.featured?.showcaseGif ?? row?.showcaseGif ?? null;
+      const prevDesc = row?.featured?.featuredDescription ?? null;
+      const prevGif = row?.featured?.showcaseGif ?? null;
       const nextFeatured = {
         featuredDescription:
           updates.featuredDescription !== undefined ? (updates.featuredDescription as string | null) : prevDesc,

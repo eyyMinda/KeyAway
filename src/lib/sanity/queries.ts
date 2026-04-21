@@ -40,11 +40,10 @@ export const footerLinksQuery = `*[_type=="footerLink"] | order(_createdAt asc) 
 }`;
 
 /* ------------ Programs ------------ */
-/** Nested `featured` plus legacy top-level `featuredDescription` / `showcaseGif` until migrated. */
 export const featuredBlockProjection = `
-"featured": {
-  "featuredDescription": coalesce(featured.featuredDescription, featuredDescription),
-  "showcaseGif": coalesce(featured.showcaseGif, showcaseGif)
+featured{
+  featuredDescription,
+  showcaseGif
 }`;
 
 export const allProgramsQuery = `
