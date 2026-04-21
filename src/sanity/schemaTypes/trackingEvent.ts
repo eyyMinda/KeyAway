@@ -1,11 +1,11 @@
-import { defineType } from "sanity";
+import { defineField, defineType } from "sanity";
 
 export const trackingEvent = defineType({
   name: "trackingEvent",
   title: "Analytics Event",
   type: "document",
   fields: [
-    {
+    defineField({
       name: "event",
       title: "Event Name",
       type: "string",
@@ -18,62 +18,77 @@ export const trackingEvent = defineType({
         ]
       },
       validation: Rule => Rule.required()
-    },
-    {
+    }),
+    defineField({
       name: "notFound",
       title: "Not found page view",
       type: "boolean",
       description: "True for 404 / invalid program URL on a page_viewed event (no program slug stored)."
-    },
-    { name: "programSlug", title: "Program Slug", type: "string" },
-    { name: "keyHash", title: "Key Hash", type: "string", description: "SHA-256 hash of the CD key for privacy" },
-    { name: "keyIdentifier", title: "Key Identifier", type: "string", description: "Short identifier like ABC***XYZ" },
-    { name: "keyNormalized", title: "Key Normalized", type: "string", description: "Normalized key for matching" },
-    { name: "social", title: "Social Name", type: "string" },
-    { name: "path", title: "Path", type: "string" },
-    { name: "referrer", title: "Referrer", type: "url" },
-    { name: "userAgent", title: "User Agent", type: "string" },
-    {
+    }),
+    defineField({ name: "programSlug", title: "Program Slug", type: "string" }),
+    defineField({
+      name: "keyHash",
+      title: "Key Hash",
+      type: "string",
+      description: "SHA-256 hash of the CD key for privacy"
+    }),
+    defineField({
+      name: "keyIdentifier",
+      title: "Key Identifier",
+      type: "string",
+      description: "Short identifier like ABC***XYZ"
+    }),
+    defineField({
+      name: "keyNormalized",
+      title: "Key Normalized",
+      type: "string",
+      description: "Normalized key for matching"
+    }),
+    defineField({ name: "social", title: "Social Name", type: "string" }),
+    defineField({ name: "path", title: "Path", type: "string" }),
+    defineField({ name: "referrer", title: "Referrer", type: "url" }),
+    defineField({ name: "userAgent", title: "User Agent", type: "string" }),
+    defineField({
       name: "country",
       title: "Country",
       type: "string",
       description: "User's country based on IP geolocation"
-    },
-    {
+    }),
+    defineField({
       name: "city",
       title: "City",
       type: "string",
       description: "User's city based on IP geolocation"
-    },
-    {
+    }),
+    defineField({
       name: "utm_source",
       title: "UTM Source",
       type: "string",
       description: "UTM source parameter from URL"
-    },
-    {
+    }),
+    defineField({
       name: "utm_medium",
       title: "UTM Medium",
       type: "string",
       description: "UTM medium parameter from URL"
-    },
-    {
+    }),
+    defineField({
       name: "utm_campaign",
       title: "UTM Campaign",
       type: "string",
       description: "UTM campaign parameter from URL"
-    },
-    {
+    }),
+    defineField({
       name: "ipHash",
       title: "Visitor Hash",
       type: "string",
       description: "Hashed IP + salt. Used for deduping without storing raw IP."
-    },
-    {
+    }),
+    defineField({
       name: "createdAt",
       title: "Created At",
       type: "datetime",
       initialValue: () => new Date().toISOString()
-    }
+    })
   ]
 });

@@ -1,19 +1,59 @@
-import { defineType } from "sanity";
+import { defineField, defineType } from "sanity";
 
 export const interactionEventBucket = defineType({
   name: "interactionEventBucket",
   title: "Interaction Event Bucket",
   type: "document",
   fields: [
-    { name: "bucketKey", title: "Bucket Key", type: "string", validation: Rule => Rule.required() },
-    { name: "bucketDateHour", title: "Bucket Date Hour", type: "string", validation: Rule => Rule.required() },
-    { name: "pagePath", title: "Page Path", type: "string", validation: Rule => Rule.required() },
-    { name: "sectionId", title: "Section Id", type: "string", validation: Rule => Rule.required() },
-    { name: "interactionId", title: "Interaction Id", type: "string", validation: Rule => Rule.required() },
-    { name: "programSlug", title: "Program Slug", type: "string" },
-    { name: "count", title: "Count", type: "number", validation: Rule => Rule.required().min(0) },
-    { name: "lastSeenAt", title: "Last Seen At", type: "datetime", validation: Rule => Rule.required() },
-    { name: "createdAt", title: "Created At", type: "datetime", validation: Rule => Rule.required() }
+    defineField({
+      name: "bucketKey",
+      title: "Bucket Key",
+      type: "string",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "bucketDateHour",
+      title: "Bucket Date Hour",
+      type: "string",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "pagePath",
+      title: "Page Path",
+      type: "string",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "sectionId",
+      title: "Section Id",
+      type: "string",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "interactionId",
+      title: "Interaction Id",
+      type: "string",
+      validation: Rule => Rule.required()
+    }),
+    defineField({ name: "programSlug", title: "Program Slug", type: "string" }),
+    defineField({
+      name: "count",
+      title: "Count",
+      type: "number",
+      validation: Rule => Rule.required().min(0)
+    }),
+    defineField({
+      name: "lastSeenAt",
+      title: "Last Seen At",
+      type: "datetime",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "createdAt",
+      title: "Created At",
+      type: "datetime",
+      validation: Rule => Rule.required()
+    })
   ],
   preview: {
     select: {

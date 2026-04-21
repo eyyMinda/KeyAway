@@ -1,11 +1,11 @@
-import { defineType } from "sanity";
+import { defineField, defineType } from "sanity";
 
 export const socialLink = defineType({
   name: "socialLink",
   title: "Social Link",
   type: "document",
   fields: [
-    {
+    defineField({
       name: "platform",
       title: "Platform",
       type: "string",
@@ -23,8 +23,8 @@ export const socialLink = defineType({
         layout: "dropdown"
       },
       validation: Rule => Rule.required()
-    },
-    {
+    }),
+    defineField({
       name: "url",
       title: "URL",
       type: "url",
@@ -32,7 +32,7 @@ export const socialLink = defineType({
         Rule.required().uri({
           scheme: ["http", "https", "mailto"]
         })
-    }
+    })
   ],
   preview: {
     select: {
