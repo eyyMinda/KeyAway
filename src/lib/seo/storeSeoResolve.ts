@@ -9,23 +9,11 @@ export const DEFAULT_OG_IMAGE_URL = "https://www.keyaway.app/images/KeyAway_Card
 export type StoreDetailsForSeo = Partial<StoreDetails> & {
   title?: string;
   description?: string;
-  programCount?: number;
 };
-
-/** Rounds up to the next multiple of 10 for marketing copy (e.g. 17 → 20, 1 → 10). */
-export function roundProgramCountMarketing(count: number): number {
-  if (!Number.isFinite(count) || count <= 0) return 0;
-  return Math.ceil(count / 10) * 10;
-}
 
 export function buildStoreSeoVariableMap(store: StoreDetailsForSeo): Record<string, string> {
   const title = store.title?.trim() || DEFAULT_STORE_NAME;
-  const total = store.programCount ?? 0;
-  return {
-    title,
-    totalPrograms: String(total),
-    totalProgramsRounded: String(roundProgramCountMarketing(total))
-  };
+  return { title };
 }
 
 export function applyStoreSeoTemplate(

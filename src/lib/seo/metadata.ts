@@ -4,29 +4,17 @@ import { urlFor } from "@/src/sanity/lib/image";
 import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
 import { formatProgramSeoName, getHighestKeyVersion } from "@/src/lib/program/versionSummary";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
-import { client } from "@/src/sanity/lib/client";
-import { storeDetailsQuery } from "@/src/lib/sanity/queries";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import {
   DEFAULT_STORE_NAME,
+  buildStoreSeoVariableMap,
   resolveHomePageSeo,
+  resolveMetaKeywordList,
   resolvePrivacyPageSeo,
   resolveProgramsPageSeo,
   resolveSiteBaseUrl,
   resolveTermsPageSeo
 } from "@/src/lib/seo/storeSeoResolve";
-
-async function getStoreData() {
-  return (
-    (await client.fetch(storeDetailsQuery))[0] || {
-      title: DEFAULT_STORE_NAME,
-      description: "Free Giveaway CD Keys",
-      header: { isLogo: false, headerLinks: [] },
-      footer: { isLogo: false, footerLinks: [] },
-      socialLinks: [],
-      programCount: 0
-    }
-  );
-}
 
 const defaultData = {
   store: DEFAULT_STORE_NAME,
@@ -49,7 +37,7 @@ const defaultProgramsKeywords = [
 ];
 
 export async function generateHomePageMetadata(): Promise<Metadata> {
-  const storeData = await getStoreData();
+  const storeData = await getCachedStoreDetailsDocument();
   const { title, description, siteUrl, ogImageUrl, storeTitle, keywords } = resolveHomePageSeo(storeData);
 
   return {
@@ -84,7 +72,10 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
 
 export async function generateProgramMetadata(slug: string): Promise<Metadata> {
   try {
-    const [program, storeData] = await Promise.all([getProgramWithUpdatedKeys(slug), getStoreData()]);
+    const [program, storeData] = await Promise.all([
+      getProgramWithUpdatedKeys(slug),
+      getCachedStoreDetailsDocument()
+    ]);
     const storeTitle = storeData?.title || defaultData.store;
 
     if (!program) {
@@ -106,10 +97,12 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
       program.seo?.metaDescription?.trim() || defaultData.programDescription(program.title, workingKeys, totalKeys);
     const baseUrl = resolveSiteBaseUrl(storeData?.seo);
     const url = `${baseUrl}/program/${slug}`;
+    const programKeywords = resolveMetaKeywordList(program.seo?.metaKeywords, buildStoreSeoVariableMap(storeData));
 
     return {
       title,
       description,
+      ...(programKeywords ? { keywords: programKeywords } : {}),
       openGraph: {
         title,
         description,
@@ -146,7 +139,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
 }
 
 export async function generatePrivacyMetadata(): Promise<Metadata> {
-  const storeData = await getStoreData();
+  const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url, keywords } = resolvePrivacyPageSeo(storeData);
 
   return {
@@ -171,7 +164,7 @@ export async function generatePrivacyMetadata(): Promise<Metadata> {
 }
 
 export async function generateTermsMetadata(): Promise<Metadata> {
-  const storeData = await getStoreData();
+  const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url, keywords } = resolveTermsPageSeo(storeData);
 
   return {
@@ -196,7 +189,7 @@ export async function generateTermsMetadata(): Promise<Metadata> {
 }
 
 export async function generateProgramsPageMetadata(): Promise<Metadata> {
-  const storeData = await getStoreData();
+  const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url, ogImageUrl, storeTitle, keywords } =
     resolveProgramsPageSeo(storeData);
 
