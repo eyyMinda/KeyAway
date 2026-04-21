@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 
+import { formatValidUntilDisplay } from "@/src/lib/program/cdKeyUtils";
 import type { CDKeyStatus } from "@/src/types/program";
 
 const STATUS_LIST: { title: string; value: CDKeyStatus }[] = [
@@ -47,6 +48,7 @@ export const cdKey = defineType({
       name: "validUntil",
       title: "Valid Until",
       type: "datetime",
+      description: "Leave empty for a lifetime key (no fixed expiry).",
       validation: Rule =>
         Rule.custom(value => {
           if (value && typeof value === "string" && isNaN(new Date(value).getTime())) {
@@ -65,11 +67,24 @@ export const cdKey = defineType({
     })
   ],
   preview: {
-    select: { key: "key", status: "status", version: "version" },
-    prepare({ key, status, version }: { key?: string; status?: string; version?: string }) {
+    select: {
+      key: "key",
+      status: "status",
+      version: "version",
+      validUntil: "validUntil",
+      createdAt: "createdAt"
+    },
+    prepare(selection) {
+      const { key, status, version, validUntil, createdAt } = selection;
+      const k = typeof key === "string" ? key : "";
+      const expiry = formatValidUntilDisplay(typeof validUntil === "string" ? validUntil : undefined);
+      const created =
+        createdAt != null && typeof createdAt === "string" && createdAt.trim()
+          ? `created ${createdAt.trim().split("T")[0]}`
+          : null;
       return {
-        title: key ? `${key.slice(0, 12)}${key.length > 12 ? "…" : ""}` : "CD key",
-        subtitle: [status, version].filter(Boolean).join(" · ") || "No status"
+        title: k ? `${k.slice(0, 12)}${k.length > 12 ? "…" : ""}` : "CD key",
+        subtitle: [status, version, `until ${expiry}`, created].filter(Boolean).join(" · ") || "No status"
       };
     }
   }
