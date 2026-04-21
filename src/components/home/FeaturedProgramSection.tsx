@@ -6,6 +6,7 @@ import { IdealImage } from "@/src/components/general/IdealImage";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
+import type { ProgramFeatured } from "@/src/types/program";
 
 interface FeaturedProgramSectionProps {
   program: {
@@ -13,23 +14,21 @@ interface FeaturedProgramSectionProps {
     title: string;
     slug: { current: string };
     description: string;
-    featuredDescription?: string;
+    featured?: ProgramFeatured;
     image?: { asset: { url?: string; _ref?: string } };
     downloadLink?: string;
     totalKeys: number;
     workingKeys: number;
     viewCount: number;
     downloadCount: number;
-    showcaseGif?: { asset: { url?: string; _ref?: string } };
   } | null;
 }
 
 export default function FeaturedProgramSection({ program }: FeaturedProgramSectionProps) {
   if (!program) return null;
 
-  // Use featuredDescription from program if available, otherwise use regular description
-  const description = program.featuredDescription || program.description;
-  const imageSource = program.showcaseGif || program.image;
+  const description = program.featured?.featuredDescription?.trim() || program.description;
+  const imageSource = program.featured?.showcaseGif || program.image;
 
   return (
     <section

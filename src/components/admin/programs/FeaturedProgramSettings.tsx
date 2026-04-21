@@ -7,7 +7,7 @@ import { client } from "@/src/sanity/lib/client";
 import { featuredProgramSettingsQuery } from "@/src/lib/sanity/queries";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { getWorkingKeysCount } from "@/src/lib/admin/adminHelpers";
-import type { Program } from "@/src/types/program";
+import type { Program, ProgramFeatured } from "@/src/types/program";
 
 interface FeaturedProgramSettingsData {
   _id?: string;
@@ -16,9 +16,8 @@ interface FeaturedProgramSettingsData {
     title: string;
     slug: { current: string };
     description?: string;
-    featuredDescription?: string;
+    featured?: ProgramFeatured;
     image?: { asset: { _ref: string } };
-    showcaseGif?: { asset: { _ref: string } };
     cdKeys?: Array<{ status: string }>;
   };
   rotationSchedule?: "weekly" | "biweekly" | "monthly";

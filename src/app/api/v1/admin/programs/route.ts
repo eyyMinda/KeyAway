@@ -79,15 +79,22 @@ export async function POST(req: NextRequest) {
       ]);
     }
 
+    const featured: {
+      featuredDescription?: string;
+      showcaseGif?: NonNullable<ReturnType<typeof buildImageReference>>;
+    } = {};
+    if (featuredDescription) featured.featuredDescription = featuredDescription;
+    const showcaseRef = buildImageReference(showcaseGifAssetId);
+    if (showcaseRef) featured.showcaseGif = showcaseRef;
+
     const doc = await client.create({
       _type: "program",
       title,
       slug: { _type: "slug", current: slug },
       description,
-      ...(featuredDescription && { featuredDescription }),
+      ...(Object.keys(featured).length > 0 ? { featured } : {}),
       ...(downloadLink && { downloadLink }),
       ...(buildImageReference(imageAssetId) && { image: buildImageReference(imageAssetId) }),
-      ...(buildImageReference(showcaseGifAssetId) && { showcaseGif: buildImageReference(showcaseGifAssetId) }),
       cdKeys: []
     });
 

@@ -43,10 +43,10 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setTitle(program.title);
       setSlug(program.slug?.current ?? "");
       setDescription(program.description ?? "");
-      setFeaturedDescription(program.featuredDescription ?? "");
+      setFeaturedDescription(program.featured?.featuredDescription?.trim() ?? "");
       setDownloadLink(program.downloadLink ?? "");
       setImageAssetId(program.image?.asset?._ref ?? null);
-      setShowcaseGifAssetId(program.showcaseGif?.asset?._ref ?? null);
+      setShowcaseGifAssetId(program.featured?.showcaseGif?.asset?._ref ?? null);
       setDeleteExpanded(false);
       setDeleteConfirm("");
       setDeleteError(null);
@@ -116,7 +116,11 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
         title: title.trim(),
         slug: slugValidation.normalized,
         description: description.trim(),
-        featuredDescription: featuredDescription.trim() || undefined,
+        ...(program?._id
+          ? { featuredDescription: featuredDescription.trim() }
+          : featuredDescription.trim()
+            ? { featuredDescription: featuredDescription.trim() }
+            : {}),
         downloadLink: downloadLink.trim() || undefined,
         ...(program?._id ? { imageAssetId: imageAssetId ?? null } : imageAssetId ? { imageAssetId } : {}),
         ...(program?._id
