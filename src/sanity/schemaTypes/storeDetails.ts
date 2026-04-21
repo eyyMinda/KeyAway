@@ -28,14 +28,47 @@ export const storeDetails = defineType({
     defineField({
       name: "header",
       title: "Header",
-      type: "reference",
-      to: [{ type: "header" }]
+      type: "object",
+      fields: [
+        defineField({
+          name: "isLogo",
+          title: "Show Logo?",
+          type: "boolean",
+          initialValue: true
+        }),
+        defineField({
+          name: "headerLinks",
+          title: "Header Links",
+          type: "array",
+          of: [{ type: "link" }]
+        })
+      ]
     }),
     defineField({
       name: "footer",
       title: "Footer",
-      type: "reference",
-      to: [{ type: "footer" }]
+      type: "object",
+      fields: [
+        defineField({
+          name: "isLogo",
+          title: "Show Logo?",
+          type: "boolean",
+          initialValue: true
+        }),
+        defineField({
+          name: "footerLinks",
+          title: "Footer Links",
+          type: "array",
+          of: [{ type: "link" }]
+        })
+      ]
+    }),
+    defineField({
+      name: "socialLinks",
+      title: "Social links",
+      type: "array",
+      of: [{ type: "storeSocialEntry" }],
+      description: "Social profiles shown in the header menu and footer."
     })
   ]
 });

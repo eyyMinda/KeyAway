@@ -8,13 +8,11 @@ import contactMessage from "./contactMessage";
 import keySuggestion from "./keySuggestion";
 
 import { storeDetails } from "./storeDetails";
-import { header } from "./header";
-import { footer } from "./footer";
+import { storeSocialEntry } from "./storeSocialEntry";
 import { link } from "./link";
-import { socialLink } from "./socialLink";
 
 import { aboutPoint, aboutSection } from "./aboutSection";
-import { program } from "./program";
+import { faqItem, program } from "./program";
 import { cdKey } from "./cdKey";
 import { featuredProgramSettings } from "./featuredProgramSettings";
 import { visitor } from "./visitor";
@@ -29,12 +27,11 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     contactMessage,
     keySuggestion,
     link,
+    storeSocialEntry,
     storeDetails,
-    header,
-    footer,
-    socialLink,
     aboutPoint,
     aboutSection,
+    faqItem,
     program,
     cdKey,
     featuredProgramSettings,
