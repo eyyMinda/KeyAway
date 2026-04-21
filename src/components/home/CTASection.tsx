@@ -6,33 +6,7 @@ import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
-
-const supportOptions = [
-  {
-    icon: FaCarrot,
-    title: "Buy Carrot Juice",
-    description: "Support us with a refreshing donation",
-    buttonText: "Buy Carrot Juice",
-    buttonIcon: "🥕",
-    href: "https://www.buymeacoffee.com/eyyMinda",
-    bgColor: "bg-orange-500/20",
-    iconColor: "text-orange-400",
-    buttonColor: "bg-orange-500 hover:bg-orange-600",
-    trackEvent: "buymeacoffee"
-  },
-  {
-    icon: FaGithub,
-    title: "Star on GitHub",
-    description: "Show your support by starring our repository",
-    buttonText: "Star on GitHub",
-    buttonIcon: "⭐",
-    href: "https://github.com/eyyMinda/KeyAway",
-    bgColor: "bg-gray-700",
-    iconColor: "text-gray-300",
-    buttonColor: "bg-gray-600 hover:bg-gray-500",
-    trackEvent: "github keyaway"
-  }
-];
+import { StoreOtherLink } from "@/src/types";
 
 const helpWays = [
   {
@@ -52,7 +26,40 @@ const helpWays = [
   }
 ];
 
-export default function CTASection() {
+export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[] }) {
+  const buyMeACoffeeUrl = otherLinks.find(link => link.kind === "buymeacoffee")?.url ?? "";
+  const githubRepoUrl = otherLinks.find(link => link.kind === "githubRepository")?.url ?? "";
+
+  const supportOptions =
+    buyMeACoffeeUrl && githubRepoUrl
+      ? [
+          {
+            icon: FaCarrot,
+            title: "Buy Carrot Juice",
+            description: "Support us with a refreshing donation",
+            buttonText: "Buy Carrot Juice",
+            buttonIcon: "🥕",
+            href: buyMeACoffeeUrl,
+            bgColor: "bg-orange-500/20",
+            iconColor: "text-orange-400",
+            buttonColor: "bg-orange-500 hover:bg-orange-600",
+            trackEvent: "buymeacoffee"
+          },
+          {
+            icon: FaGithub,
+            title: "Star on GitHub",
+            description: "Show your support by starring our repository",
+            buttonText: "Star on GitHub",
+            buttonIcon: "⭐",
+            href: githubRepoUrl,
+            bgColor: "bg-gray-700",
+            iconColor: "text-gray-300",
+            buttonColor: "bg-gray-600 hover:bg-gray-500",
+            trackEvent: "github keyaway"
+          }
+        ]
+      : [];
+
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-gray-900 text-white">
       <div className="max-w-360 mx-auto px-4 sm:px-6">
@@ -79,7 +86,7 @@ export default function CTASection() {
                 <FaArrowRight className="ml-2 text-sm" />
               </Link>
               <Link
-                href="https://github.com/eyyMinda/KeyAway"
+                href={githubRepoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
