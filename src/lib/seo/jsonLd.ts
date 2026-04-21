@@ -1,5 +1,6 @@
 import { Program } from "@/src/types";
 import { urlFor } from "@/src/sanity/lib/image";
+import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
 import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
 
 // Base URL for the site
@@ -121,14 +122,14 @@ export function generateProgramPageJsonLd(
     .slice(0, 10) // Limit to first 10 working keys for performance
     .map(cdKey => ({
       "@type": "Offer",
-      sku: `key-${cdKey.key.slice(-8)}`, // Use last 8 chars as SKU
+      sku: `key-${cdKey.key.slice(-8)}`,
       price: "0",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
       description: `Free CD Key for ${program.title}`,
       itemCondition: "https://schema.org/NewCondition",
-      validFrom: cdKey.validFrom,
-      validThrough: cdKey.validUntil
+      ...(cdKey.validFrom ? { validFrom: cdKey.validFrom } : {}),
+      ...(cdKeyHasExpiry(cdKey.validUntil) ? { validThrough: cdKey.validUntil } : {})
     }));
 
   const softwareApp: JsonLdData = {

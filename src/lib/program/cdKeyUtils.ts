@@ -64,6 +64,21 @@ export function getStatusTextFromCDKeyStatus(status: CDKeyStatus): string {
   return CDKEY_STATUS_DISPLAY_TEXT[status];
 }
 
+/** True when `validUntil` is a real expiry (empty / missing = no expiry in CMS). */
+export function cdKeyHasExpiry(validUntil?: string | null): boolean {
+  if (validUntil == null || typeof validUntil !== "string") return false;
+  const t = validUntil.trim();
+  if (!t) return false;
+  const d = new Date(t);
+  return !Number.isNaN(d.getTime());
+}
+
+/** `YYYY-MM-DD` from ISO `validUntil`, or `Lifetime` when unset. */
+export function formatValidUntilDisplay(validUntil?: string | null): string {
+  if (!cdKeyHasExpiry(validUntil)) return "Lifetime";
+  return String(validUntil).split("T")[0] ?? "Lifetime";
+}
+
 // Check if a key is expiring soon (existing function from cdKeyUtils.ts)
 /**
  * Checks if a CD key is expiring within 30 days
@@ -71,13 +86,13 @@ export function getStatusTextFromCDKeyStatus(status: CDKeyStatus): string {
  * @returns true if the key expires within 30 days (but not yet expired)
  */
 export function isKeyExpiringSoon(key: { validUntil?: string }): boolean {
-  if (!key.validUntil) return false;
+  if (!cdKeyHasExpiry(key.validUntil)) return false;
 
-  const validUntil = new Date(key.validUntil);
+  const validUntil = new Date(key.validUntil as string);
   const now = new Date();
   const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-  return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+  return Number.isFinite(daysUntilExpiry) && daysUntilExpiry <= 30 && daysUntilExpiry > 0;
 }
 
 /**
@@ -85,31 +100,38 @@ export function isKeyExpiringSoon(key: { validUntil?: string }): boolean {
  * @param cdKeys - Array of CD keys to check
  * @returns A message describing how soon keys are expiring, or null if no expiring keys
  */
-export function getExpiringKeysMessage(cdKeys: Array<{ validUntil?: string }>): string | null {
+export function getExpiringKeysMessage(cdKeys: Array<{ validUntil?: string }> | null | undefined): string | null {
+  if (!Array.isArray(cdKeys) || cdKeys.length === 0) return null;
+  // No expiry dates (e.g. all lifetime keys) → nothing is "expiring soon"
+  if (!cdKeys.some(k => cdKeyHasExpiry(k.validUntil))) return null;
+
   const expiringKeys = cdKeys.filter(isKeyExpiringSoon);
   if (expiringKeys.length === 0) return null;
 
-  // Find the soonest expiring key
   const now = new Date();
   let minDays = Infinity;
 
-  expiringKeys.forEach(key => {
-    if (key.validUntil) {
-      const validUntil = new Date(key.validUntil);
-      const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysUntilExpiry < minDays) minDays = daysUntilExpiry;
+  for (const key of expiringKeys) {
+    if (!cdKeyHasExpiry(key.validUntil)) continue;
+    const validUntil = new Date(key.validUntil as string);
+    const daysUntilExpiry = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (Number.isFinite(daysUntilExpiry) && daysUntilExpiry > 0 && daysUntilExpiry < minDays) {
+      minDays = daysUntilExpiry;
     }
-  });
+  }
+
+  if (!Number.isFinite(minDays) || minDays === Infinity || minDays <= 0) return null;
 
   if (minDays === 1) {
     return "Some keys expire in 24 hours. Activate them now before they expire!";
-  } else if (minDays <= 3) {
-    return `Some keys expire in ${minDays} days. Activate them soon before they expire!`;
-  } else if (minDays <= 7) {
-    return "Some keys expire within a week. Activate them before they expire!";
-  } else {
-    return `Some keys expire within a month (${minDays} days). Activate them before they expire!`;
   }
+  if (minDays <= 3) {
+    return `Some keys expire in ${minDays} days. Activate them soon before they expire!`;
+  }
+  if (minDays <= 7) {
+    return "Some keys expire within a week. Activate them before they expire!";
+  }
+  return `Some keys expire within a month (${minDays} days). Activate them before they expire!`;
 }
 
 // Get status color classes (existing function from cdKeyUtils.ts)
