@@ -14,7 +14,8 @@ export const storeDetails = defineType({
     defineField({
       name: "description",
       title: "Store Description",
-      type: "text"
+      type: "array",
+      of: [{ type: "block" }]
     }),
     defineField({
       name: "logo",
