@@ -6,18 +6,13 @@ import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import type { StoreSeo } from "@/src/types/layout";
 
-// Base URL when CMS site URL is unset
 const BASE_URL = "https://www.keyaway.app";
 
-// Type for JSON-LD data
 type JsonLdData = Record<string, unknown>;
 
-// JSON-LD for Homepage - WebSite schema
 export function generateHomePageJsonLd(storeData: {
   title: string;
-  /** Primary description for schema.org (typically resolved home meta description). */
   description: string;
-  /** Canonical site origin from `storeDetails.seo.siteUrl` or default. */
   siteUrl?: string;
 }) {
   const base = (storeData.siteUrl || BASE_URL).replace(/\/$/, "");
