@@ -1,6 +1,9 @@
 "use client";
 
-import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types";
+import { SanityLink } from "@/src/types";
+import type { FooterProps } from "@/src/types/layout";
+import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import Link from "next/link";
 import { useState } from "react";
 import { IdealImageClient } from "../general/IdealImageClient";
@@ -12,13 +15,8 @@ import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
 
-interface FooterProps {
-  storeData: StoreDetails;
-  logoData: LogoData;
-  socialData: SocialData;
-}
-
-export default function Footer({ storeData, logoData, socialData }: FooterProps) {
+export default function Footer({ logoData, socialData }: FooterProps) {
+  const storeData = useStoreDetails();
   const pathname = usePathname();
   const trustpilotUrl = getTrustpilotReviewUrl(socialData);
   const footer = storeData?.footer;
@@ -32,6 +30,11 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
 
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const currentYear = new Date().getFullYear();
+
+  const ol = storeData?.otherLinks;
+  const buyMeACoffeeUrl = ol?.find(e => e.kind === "buymeacoffee" && e.url?.trim())?.url?.trim() ?? null;
+  const githubRepoUrl = ol?.find(e => e.kind === "githubRepository" && e.url?.trim())?.url?.trim() ?? null;
+  const hasSupportLinks = Boolean(buyMeACoffeeUrl || githubRepoUrl);
 
   return (
     <footer className="bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 text-white mt-auto">
@@ -47,7 +50,8 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
               )}
             </Link>
             <p className="text-gray-300 max-w-md mb-2">
-              {storeData.description || "Free Giveaway CD Keys for your favorite games and software."}
+              {portableTextToPlainText(storeData.description) ||
+                "Free Giveaway CD Keys for your favorite games and software."}
             </p>
             <Socials socialLinks={socialData?.socialLinks || []} path={pathname} />
 
@@ -132,37 +136,45 @@ export default function Footer({ storeData, logoData, socialData }: FooterProps)
               </ContactModalTrigger>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-700">
-              <p className="text-xs text-gray-400 mb-3">Support the Project</p>
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href="https://www.buymeacoffee.com/eyyMinda"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => {
-                    trackEvent("social_click", {
-                      social: "buymeacoffee",
-                      path: window.location.pathname
-                    });
-                  }}
-                  className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
-                  🥕 Carrot Juice
-                </Link>
-                <Link
-                  href="https://github.com/eyyMinda/KeyAway"
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => {
-                    trackEvent("social_click", {
-                      social: "github keyaway",
-                      path: window.location.pathname
-                    });
-                  }}
-                  className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
-                  ⭐ GitHub
-                </Link>
+            {hasSupportLinks ? (
+              <div className="mt-6 pt-6 border-t border-gray-700">
+                <p className="text-xs text-gray-400 mb-3">Support the Project</p>
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {buyMeACoffeeUrl ? (
+                      <Link
+                        href={buyMeACoffeeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() => {
+                          trackEvent("social_click", {
+                            social: "buymeacoffee",
+                            path: window.location.pathname
+                          });
+                        }}
+                        className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                        🥕 Carrot Juice
+                      </Link>
+                    ) : null}
+                    {githubRepoUrl ? (
+                      <Link
+                        href={githubRepoUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() => {
+                          trackEvent("social_click", {
+                            social: "github keyaway",
+                            path: window.location.pathname
+                          });
+                        }}
+                        className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                        ⭐ GitHub
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
         </div>
 

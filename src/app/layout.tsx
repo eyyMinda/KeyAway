@@ -10,6 +10,7 @@ import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
 import { auth } from "@/auth";
 import { SessionProvider } from "@components/providers/SessionProvider";
+import { StoreDetailsProvider } from "@components/providers/StoreDetailsProvider";
 import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
@@ -17,7 +18,6 @@ import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { getRecentNotifications } from "@/src/lib/notifications/notificationUtils.server";
 import { headers } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"]
@@ -93,12 +93,14 @@ export default async function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SessionProvider session={session}>
-          <PageViewTracker />
-          <div className="mainContent flex flex-col min-h-screen">
-            <Header storeData={storeData} logoData={logoData} notifications={notifications} socialData={socialData} />
-            {children}
-            <Footer storeData={storeData} logoData={logoData} socialData={socialData} />
-          </div>
+          <StoreDetailsProvider value={storeData}>
+            <PageViewTracker />
+            <div className="mainContent flex flex-col min-h-screen">
+              <Header logoData={logoData} notifications={notifications} socialData={socialData} />
+              {children}
+              <Footer logoData={logoData} socialData={socialData} />
+            </div>
+          </StoreDetailsProvider>
           <Analytics />
           <SpeedInsights />
         </SessionProvider>

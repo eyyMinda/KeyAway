@@ -9,20 +9,15 @@ import AdminNavIcons from "@components/layout/AdminNavIcons";
 import AnnouncementNotifications from "@components/layout/AnnouncementNotifications";
 import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { IdealImageClient } from "@/src/components/general/IdealImageClient";
-import { StoreDetails, SanityLink, LogoData, SocialData } from "@/src/types";
-import { Notification } from "@/src/types/notifications";
+import { SanityLink } from "@/src/types";
+import type { HeaderProps } from "@/src/types/layout";
+import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
 import { usePathname } from "next/navigation";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
-interface HeaderProps {
-  storeData: StoreDetails;
-  logoData: LogoData;
-  notifications: Notification[];
-  socialData?: SocialData;
-}
-
-export default function Header({ storeData, logoData, notifications, socialData }: HeaderProps) {
+export default function Header({ logoData, notifications, socialData }: HeaderProps) {
+  const storeData = useStoreDetails();
   const pathname = usePathname();
   const header = storeData?.header;
   let isLogo = false;
