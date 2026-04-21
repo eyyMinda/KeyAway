@@ -1,5 +1,7 @@
 import { defineField, defineType } from "sanity";
 
+import { CdKeysArrayInput } from "../inputs/CdKeysArrayInput";
+
 const MAX_META_TITLE = 70;
 const MAX_META_DESC = 160;
 
@@ -22,6 +24,19 @@ export const program = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: "latestOfficialVersion",
+      title: "Latest official version",
+      type: "string",
+      description:
+        "Current product version from the vendor site (e.g. 18.5). Used for honest copy and SEO; CD keys keep their own version fields."
+    }),
+    defineField({
+      name: "downloadLink",
+      title: "Download Link",
+      type: "url",
+      description: "External link for users to download the program"
+    }),
+    defineField({
       name: "description",
       title: "Description",
       type: "text",
@@ -30,24 +45,11 @@ export const program = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: "featuredDescription",
-      title: "Featured Description",
-      type: "text",
-      description:
-        "Optional description to display when this program is featured. Should include what the program does, its capabilities. If empty, the regular description will be used."
-    }),
-    defineField({
-      name: "latestOfficialVersion",
-      title: "Latest official version",
-      type: "string",
-      description:
-        "Current product version from the vendor site (e.g. 18.5). Used for honest copy and SEO; CD keys keep their own version fields."
-    }),
-    defineField({
       name: "seo",
       title: "SEO",
       type: "object",
       options: { collapsible: true, collapsed: true },
+      description: "Optional search metadata overrides for this program (title/description shown in search results).",
       fields: [
         defineField({
           name: "metaTitle",
@@ -67,6 +69,14 @@ export const program = defineType({
             Rule.max(MAX_META_DESC).warning(`Prefer ${MAX_META_DESC} characters or fewer for Google snippets.`)
         })
       ]
+    }),
+    defineField({
+      name: "image",
+      title: "Image",
+      type: "image",
+      options: {
+        hotspot: true
+      }
     }),
     defineField({
       name: "aboutSections",
@@ -103,9 +113,15 @@ export const program = defineType({
             })
           ],
           preview: {
-            select: { title: "question" },
-            prepare({ title }: { title?: string }) {
-              return { title: title || "FAQ item" };
+            select: { question: "question", answer: "answer" },
+            prepare(selection) {
+              const { question, answer } = selection;
+              const q = typeof question === "string" ? question.trim() : "";
+              const a = typeof answer === "string" ? answer.trim().replace(/\s+/g, " ") : "";
+              return {
+                title: q || "FAQ item",
+                subtitle: a ? (a.length > 96 ? `${a.slice(0, 96)}…` : a) : undefined
+              };
             }
           }
         }
@@ -120,30 +136,48 @@ export const program = defineType({
         })
     }),
     defineField({
-      name: "image",
-      title: "Image",
-      type: "image",
-      options: {
-        hotspot: true
+      name: "featured",
+      title: "Featured Section",
+      type: "object",
+      options: { collapsible: true, collapsed: true },
+      description: "Optional: Overrides for featured section for this program (copy + GIF).",
+      fields: [
+        defineField({
+          name: "featuredDescription",
+          title: "Featured Description",
+          type: "text",
+          description:
+            "Optional description when this program is featured on the homepage. If empty, the regular description is used."
+        }),
+        defineField({
+          name: "showcaseGif",
+          title: "Showcase GIF",
+          type: "image",
+          description: "Optional GIF demonstrating the program (shown when featured)."
+        })
+      ],
+      preview: {
+        select: {
+          featuredDescription: "featuredDescription",
+          media: "showcaseGif"
+        },
+        prepare(selection) {
+          const desc = typeof selection.featuredDescription === "string" ? selection.featuredDescription.trim() : "";
+          const subtitle = desc ? (desc.length > 72 ? `${desc.slice(0, 72)}…` : desc) : "No featured description";
+          return {
+            title: "Featured Section",
+            subtitle,
+            media: selection.media
+          };
+        }
       }
-    }),
-    defineField({
-      name: "showcaseGif",
-      title: "Showcase GIF",
-      type: "image",
-      description: "Optional GIF demonstrating the program in action (used when featured)"
-    }),
-    defineField({
-      name: "downloadLink",
-      title: "Download Link",
-      type: "url",
-      description: "External link for users to download the program"
     }),
     defineField({
       name: "cdKeys",
       title: "CD Keys",
       type: "array",
       of: [{ type: "cdKey" }],
+      components: { input: CdKeysArrayInput },
       validation: Rule =>
         Rule.custom((keys: { key?: string; status?: string }[] | undefined) => {
           if (!keys || keys.length === 0) return true;
@@ -175,9 +209,24 @@ export const program = defineType({
   preview: {
     select: {
       title: "title",
-      subtitle: "description",
+      description: "description",
       latestOfficialVersion: "latestOfficialVersion",
-      media: "image"
+      media: "image",
+      cdKeys: "cdKeys"
+    },
+    prepare(selection) {
+      const { title, description, latestOfficialVersion, media, cdKeys } = selection;
+      const n = Array.isArray(cdKeys) ? cdKeys.length : 0;
+      const keyLine = `${n} CD key${n === 1 ? "" : "s"}`;
+      const versionPart = latestOfficialVersion?.trim() ? `v${latestOfficialVersion.trim()}` : null;
+      const descTrimmed = description?.trim() ?? "";
+      const descPart = descTrimmed ? descTrimmed.slice(0, 72) + (descTrimmed.length > 72 ? "…" : "") : null;
+      const subtitle = [keyLine, versionPart, descPart].filter(Boolean).join(" · ");
+      return {
+        title: title || "Program",
+        subtitle: subtitle || keyLine,
+        media
+      };
     }
   }
 });
