@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { CdKeysArrayInput } from "../inputs/CdKeysArrayInput";
 
 const MAX_META_TITLE = 70;
@@ -39,7 +40,8 @@ export const program = defineType({
     defineField({
       name: "description",
       title: "Description",
-      type: "text",
+      type: "array",
+      of: [{ type: "block" }],
       description:
         "Short summary shown on the program page. Unique to this program; mention category and who it is for.",
       validation: Rule => Rule.required()
@@ -218,9 +220,12 @@ export const program = defineType({
       const { title, description, latestOfficialVersion, media, cdKeys } = selection;
       const n = Array.isArray(cdKeys) ? cdKeys.length : 0;
       const keyLine = `${n} CD key${n === 1 ? "" : "s"}`;
-      const versionPart = latestOfficialVersion?.trim() ? `v${latestOfficialVersion.trim()}` : null;
-      const descTrimmed = description?.trim() ?? "";
-      const descPart = descTrimmed ? descTrimmed.slice(0, 72) + (descTrimmed.length > 72 ? "…" : "") : null;
+      const versionPart =
+        typeof latestOfficialVersion === "string" && latestOfficialVersion.trim()
+          ? `v${latestOfficialVersion.trim()}`
+          : null;
+      const descPlain = portableTextToPlainText(description);
+      const descPart = descPlain ? (descPlain.length > 72 ? `${descPlain.slice(0, 72)}…` : descPlain) : null;
       const subtitle = [keyLine, versionPart, descPart].filter(Boolean).join(" · ");
       return {
         title: title || "Program",

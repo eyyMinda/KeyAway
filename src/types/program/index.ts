@@ -1,6 +1,7 @@
 /**
  * @fileoverview Program/CDKey shapes and props for program UI.
  */
+import type { PortableTextBlock } from "@portabletext/types";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 import type { SocialData } from "../layout";
 
@@ -41,7 +42,7 @@ export interface ProgramAboutSectionBlock {
 }
 
 export interface ProgramFeatured {
-  featuredDescription?: string | null;
+  featuredDescription?: PortableTextBlock[] | string | null;
   showcaseGif?: SanityImageField;
 }
 
@@ -49,7 +50,7 @@ export interface Program {
   _id: string;
   title: string;
   slug: { current: string };
-  description: string;
+  description: PortableTextBlock[] | string;
   featured?: ProgramFeatured;
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;
