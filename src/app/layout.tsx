@@ -5,7 +5,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { client } from "@/src/sanity/lib/client";
-import { storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
+import { storeDetailsQuery } from "@lib/sanity/queries";
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
@@ -41,7 +41,8 @@ async function getStoreData() {
       title: "KeyAway",
       description: "Free Giveaway CD Keys",
       header: { isLogo: false, headerLinks: [] },
-      footer: { isLogo: false, footerLinks: [] }
+      footer: { isLogo: false, footerLinks: [] },
+      socialLinks: []
     }
   );
 }
@@ -59,10 +60,9 @@ export default async function RootLayout({
     noStore();
   }
 
-  const [session, storeData, socialLinks, notifications] = await Promise.all([
+  const [session, storeData, notifications] = await Promise.all([
     auth(),
     getStoreData(),
-    client.fetch(socialLinksQuery),
     getRecentNotifications()
   ]);
 
@@ -76,7 +76,7 @@ export default async function RootLayout({
   };
 
   const socialData: SocialData = {
-    socialLinks: socialLinks || []
+    socialLinks: storeData?.socialLinks ?? []
   };
 
   return (

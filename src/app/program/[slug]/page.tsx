@@ -18,12 +18,14 @@ import {
 } from "@/src/lib/program/versionSummary";
 import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsQuery, storeDetailsQuery, socialLinksQuery } from "@/src/lib/sanity/queries";
+import { popularProgramsQuery, storeDetailsQuery } from "@/src/lib/sanity/queries";
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import { headers } from "next/headers";
 import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
+import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
+import type { ProgramFaqItem } from "@/src/types/program";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -51,14 +53,13 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, storeData, socialLinks] = await Promise.all([
+  const [allPrograms, storeData] = await Promise.all([
     client.fetch(popularProgramsQuery),
-    client.fetch(storeDetailsQuery),
-    client.fetch(socialLinksQuery)
+    client.fetch(storeDetailsQuery)
   ]);
 
   const socialData: SocialData = {
-    socialLinks: socialLinks || []
+    socialLinks: storeData?.[0]?.socialLinks ?? []
   };
 
   const hdrs = await headers();
@@ -66,6 +67,11 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const relatedPrograms = allPrograms
     .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
     .slice(0, 5);
+
+  const faqItems =
+    program.faq?.filter(
+      (f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)
+    ) ?? [];
 
   const storeInfo = storeData?.[0] || { title: "KeyAway" };
   const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
@@ -94,7 +100,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
         <ContributeBanner />
         <ProgramAboutSection program={program} />
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
-        <ProgramFaqSection programTitle={program.title} items={program.faq ?? []} />
+        <ProgramFaqSection programTitle={program.title} items={faqItems} />
         <RelatedPrograms programs={relatedPrograms} />
         <CommentsSection />
       </main>

@@ -2,8 +2,10 @@
 
 import { useId, useState } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import type { PortableTextBlock } from "@portabletext/types";
+import RichText from "@/src/components/portableText/RichText";
 
-type Props = { question: string; answer: string };
+type Props = { question: string; answer: PortableTextBlock[] | string };
 
 /** Controlled accordion so grid-template-rows can animate every toggle (native details often skips repeat animations). */
 export default function FaqAccordionItem({ question, answer }: Props) {
@@ -39,7 +41,9 @@ export default function FaqAccordionItem({ question, answer }: Props) {
         }`}>
         <div className="min-h-0">
           <div className="border-t border-white/10 px-4 pb-4 pt-0 sm:px-5 sm:pb-5">
-            <p className="pt-3 text-sm sm:text-base text-gray-300 leading-relaxed whitespace-pre-wrap">{answer}</p>
+            <div className="pt-3 text-sm sm:text-base text-gray-300 leading-relaxed [&_a]:text-primary-300 [&_p]:my-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-5">
+              <RichText value={answer} />
+            </div>
           </div>
         </div>
       </div>

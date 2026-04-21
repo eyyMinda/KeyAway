@@ -1,5 +1,5 @@
 import { Program } from "@/src/types";
-import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { urlFor } from "@/src/sanity/lib/image";
 import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
 import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
@@ -219,7 +219,8 @@ export function generateProgramPageJsonLd(
     softwareApp.downloadUrl = program.downloadLink;
   }
 
-  const faq = program.faq?.filter(f => f.question?.trim() && f.answer?.trim()) ?? [];
+  const faq =
+    program.faq?.filter(f => f.question?.trim() && portableTextHasContent(f.answer)) ?? [];
   if (faq.length >= 2) {
     const faqPage: JsonLdData = {
       "@type": "FAQPage",
@@ -229,7 +230,7 @@ export function generateProgramPageJsonLd(
         name: f.question.trim(),
         acceptedAnswer: {
           "@type": "Answer",
-          text: f.answer.trim()
+          text: portableTextToPlainText(f.answer)
         }
       }))
     };

@@ -13,7 +13,8 @@ async function getStoreData() {
       title: "KeyAway",
       description: "Free Giveaway CD Keys",
       header: { isLogo: false, headerLinks: [] },
-      footer: { isLogo: false, footerLinks: [] }
+      footer: { isLogo: false, footerLinks: [] },
+      socialLinks: []
     }
   );
 }

@@ -1,5 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
-import { programsWithStatsQuery, programsCountQuery, socialLinksQuery } from "@lib/sanity/queries";
+import { programsWithStatsQuery, programsCountQuery, storeDetailsQuery } from "@lib/sanity/queries";
 import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
@@ -23,18 +23,18 @@ export async function generateMetadata() {
 }
 
 export default async function ProgramsPage() {
-  const [rawPrograms, bundleCounts, totalCount, socialLinks, featuredProgram] = await Promise.all([
+  const [rawPrograms, bundleCounts, totalCount, storeRows, featuredProgram] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: ["programs"] } }),
     getBundleCountsByProgram(),
     client.fetch(programsCountQuery, {}, { next: { tags: ["programs"] } }),
-    client.fetch(socialLinksQuery),
+    client.fetch(storeDetailsQuery, {}, { next: { tags: ["programs"] } }),
     getFeaturedProgram()
   ]);
 
   const programs = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts) as ProgramWithStats[];
 
   const socialData: SocialData = {
-    socialLinks: socialLinks || []
+    socialLinks: storeRows?.[0]?.socialLinks ?? []
   };
 
   const totalKeys = programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0);

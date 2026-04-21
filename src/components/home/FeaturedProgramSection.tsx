@@ -30,9 +30,8 @@ interface FeaturedProgramSectionProps {
 export default function FeaturedProgramSection({ program }: FeaturedProgramSectionProps) {
   if (!program) return null;
 
-  const fd = program.featured?.featuredDescription;
-  const useFeatured =
-    typeof fd === "string" ? fd.trim().length > 0 : portableTextHasContent(fd ?? null);
+  const fd = program.featured?.description;
+  const useFeatured = portableTextHasContent(fd ?? null);
   const introBody = useFeatured ? fd : program.description;
   const imageSource = program.featured?.showcaseGif || program.image;
 

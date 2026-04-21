@@ -1,9 +1,10 @@
 import AboutSectionBlock from "@/src/components/program/AboutSectionBlock";
 import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
+import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import type { Program } from "@/src/types";
 
 export default function ProgramAboutSection({ program }: { program: Program }) {
-  const blocks = program.aboutSections?.filter(s => s.description?.trim());
+  const blocks = program.aboutSections?.filter(s => portableTextHasContent(s.description));
   if (!blocks?.length) return null;
 
   return (

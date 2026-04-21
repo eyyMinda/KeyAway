@@ -1,6 +1,6 @@
 /** @fileoverview Homepage: parallel Sanity fetch, bundle merge for popular programs, visitor hint, JSON-LD. */
 import { client } from "@/src/sanity/lib/client";
-import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery, socialLinksQuery } from "@lib/sanity/queries";
+import { popularProgramsByViewsQuery, siteStatsQuery, storeDetailsQuery } from "@lib/sanity/queries";
 import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
@@ -28,12 +28,11 @@ export default async function HomePage() {
   weekAgo.setDate(weekAgo.getDate() - 7);
   const weekAgoISO = weekAgo.toISOString();
 
-  const [rawPopularPrograms, bundleCounts, stats, storeData, socialLinks, featuredProgram] = await Promise.all([
+  const [rawPopularPrograms, bundleCounts, stats, storeData, featuredProgram] = await Promise.all([
     client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
     getBundleCountsByProgram(),
     client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } }),
     client.fetch(storeDetailsQuery, {}, { next: { tags: ["homepage"] } }),
-    client.fetch(socialLinksQuery),
     getFeaturedProgram()
   ]);
 
@@ -41,15 +40,16 @@ export default async function HomePage() {
     .sort((a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0))
     .slice(0, 6) as ProgramWithStats[];
 
+  const store = storeData?.[0];
   const socialData: SocialData = {
-    socialLinks: socialLinks || []
+    socialLinks: store?.socialLinks ?? []
   };
 
   const hdrs = await headers();
   const { visitorHint } = await getVisitorContextForPublicPage(hdrs);
 
   // Generate JSON-LD for homepage
-  const storeInfo = storeData?.[0] || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
+  const storeInfo = store || { title: "KeyAway", description: "Free CD Keys for Premium Software" };
   const jsonLd = generateHomePageJsonLd(storeInfo);
 
   return (
