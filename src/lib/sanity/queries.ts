@@ -4,6 +4,19 @@ export const storeDetailsQuery = `*[_type=="storeDetails"]{
   description,
   logo,
   logoLight,
+  "programCount": count(*[_type == "program"]),
+  seo{
+    siteUrl,
+    sharingImage,
+    homeMetaTitle,
+    homeMetaDescription,
+    programsMetaTitle,
+    programsMetaDescription,
+    privacyMetaTitle,
+    privacyMetaDescription,
+    termsMetaTitle,
+    termsMetaDescription
+  },
   header{
     isLogo,
     headerLinks

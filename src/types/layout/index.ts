@@ -1,6 +1,20 @@
 // Layout and UI related types
 import { SanityAsset } from "@sanity/image-url";
 
+/** Site-wide SEO templates on `storeDetails` (placeholders: `[title]`, `[totalPrograms]`, `[totalProgramsRounded]`). */
+export interface StoreSeo {
+  siteUrl?: string;
+  sharingImage?: SanityAsset;
+  homeMetaTitle?: string;
+  homeMetaDescription?: string;
+  programsMetaTitle?: string;
+  programsMetaDescription?: string;
+  privacyMetaTitle?: string;
+  privacyMetaDescription?: string;
+  termsMetaTitle?: string;
+  termsMetaDescription?: string;
+}
+
 export interface StoreDetails {
   title: string;
   description: string;
@@ -10,6 +24,9 @@ export interface StoreDetails {
   footer: FooterContent;
   /** Embedded on `storeDetails` (no separate `socialLink` documents). */
   socialLinks?: SocialLink[];
+  seo?: StoreSeo;
+  /** From GROQ `count(*[_type == "program"])` when using `storeDetailsQuery`. */
+  programCount?: number;
 }
 
 export interface HeaderContent {
