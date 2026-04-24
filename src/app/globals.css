@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Sticky header (~max-h-20 + padding); used by `scrollIntoView` + in-page hash links via scroll-padding. */
+@layer base {
+  html {
+    scroll-padding-top: 72px;
+  }
+}
+
 /* Canonical palette + semantics: `src/theme/colorSchema.ts`. Keep :root hex aligned when changing scales. */
 
 :root {
