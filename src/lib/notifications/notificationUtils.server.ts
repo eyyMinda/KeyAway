@@ -1,5 +1,21 @@
+import type { SanityImageSource } from "@sanity/image-url";
 import { client } from "@/src/sanity/lib/client";
+import { urlFor } from "@/src/sanity/lib/image";
 import { Notification } from "@/src/types/notifications";
+
+function programImageUrl(image: unknown): string | undefined {
+  if (!image || typeof image !== "object") return undefined;
+  const img = image as Record<string, unknown>;
+  const asset = img.asset;
+  if (!asset || typeof asset !== "object") return undefined;
+  const ref = (asset as Record<string, unknown>)._ref;
+  if (typeof ref !== "string" || !ref.length) return undefined;
+  try {
+    return urlFor(image as SanityImageSource).width(80).height(80).fit("max").auto("format").quality(75).url();
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Get recent notifications (new programs and newly added CD keys within the last calendar month)
@@ -17,7 +33,8 @@ export async function getRecentNotifications(): Promise<Notification[]> {
         _updatedAt: string;
         title: string;
         slug: { current: string };
-        cdKeys: Array<{ _key: string; key: string; status: string; createdAt?: string; validFrom: string }>;
+        image?: unknown;
+        cdKeys: Array<{ status: string; createdAt?: string; validFrom: string }>;
       }>
     >(
       `*[_type == "program"] | order(_createdAt desc) {
@@ -26,7 +43,8 @@ export async function getRecentNotifications(): Promise<Notification[]> {
         _updatedAt,
         title,
         slug,
-        cdKeys[]
+        image,
+        "cdKeys": cdKeys[]{ status, createdAt, validFrom }
       }`,
       {},
       { next: { tags: ["notifications", "programs"] } }
@@ -46,7 +64,8 @@ export async function getRecentNotifications(): Promise<Notification[]> {
           programSlug: program.slug.current,
           programTitle: program.title,
           message: "New program added",
-          createdAt: program._createdAt
+          createdAt: program._createdAt,
+          imageUrl: programImageUrl(program.image)
         });
         // Don't continue - still check for new keys even if program is new
       }
@@ -81,7 +100,8 @@ export async function getRecentNotifications(): Promise<Notification[]> {
             message: `${newlyAddedKeys.length} new ${newlyAddedKeys.length === 1 ? "key" : "keys"} added`,
             createdAt: mostRecentKeyDate,
             keysCount: newlyAddedKeys.length,
-            keyStatus: keyStatus
+            keyStatus: keyStatus,
+            imageUrl: programImageUrl(program.image)
           });
         }
       }
