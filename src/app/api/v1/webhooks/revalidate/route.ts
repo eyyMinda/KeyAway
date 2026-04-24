@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
 
     revalidateTag("homepage", "max");
     revalidateTag("notifications", "max");
+    revalidateTag("featured-program", "max");
+    revalidateTag("bundle-counts", "max");
 
     if (body?._type === "program" && body?.slug?.current) {
       revalidateTag(`program-${body.slug.current}`, "max");
