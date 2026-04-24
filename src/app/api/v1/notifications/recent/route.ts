@@ -5,7 +5,7 @@ import { getRecentNotifications } from "@/src/lib/notifications/notificationUtil
 /** Cache key segment bumps invalidate old entries when notification payload shape changes (e.g. `imageUrl`). */
 const getRecentNotificationsCached = unstable_cache(
   async () => getRecentNotifications(),
-  ["api-recent-notifications", "imageUrl-1"],
+  ["api-recent-notifications", "slim-notification-payload-1"],
   { revalidate: 1800, tags: ["notifications", "programs"] }
 );
 

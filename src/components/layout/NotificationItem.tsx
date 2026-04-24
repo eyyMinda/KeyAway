@@ -35,9 +35,10 @@ function IconBadge({ isNewProgram, isFresh }: { isNewProgram: boolean; isFresh: 
 }
 
 export default function NotificationItem({ notification, onClose }: NotificationItemProps) {
-  const isNewProgram = notification.type === "new_program";
+  const isNewProgram = notification.type === "new_program" || notification.type === "new_program_with_keys";
   const [imageFailed, setImageFailed] = useState(false);
   const showImage = Boolean(notification.imageUrl) && !imageFailed;
+  const message = notification.message?.trim() ?? "";
 
   const now = new Date();
   const createdAt = new Date(notification.createdAt);
@@ -76,31 +77,23 @@ export default function NotificationItem({ notification, onClose }: Notification
         )}
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                isNewProgram
-                  ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                  : "bg-green-500/20 text-green-300 border border-green-500/30"
-              } ${isFresh ? "animate-pulse" : ""}`}>
-              {isNewProgram ? "NEW" : "UPDATED"}
-            </span>
-            <span className={`text-xs ${isFresh ? "text-gray-400" : "text-gray-500"}`}>
-              {new Date(notification.createdAt).toLocaleDateString("en-US", {
+          <p className="text-sm font-semibold text-white group-hover:text-primary-400 transition-colors truncate">
+            {notification.programTitle}
+          </p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-gray-400">
+            {isNewProgram && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                NEW
+              </span>
+            )}
+            {message ? <span>{message}</span> : null}
+            <span className={isFresh ? "text-gray-400" : "text-gray-500"}>
+              {createdAt.toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric"
               })}
             </span>
-            {!isNewProgram && notification.keyStatus == "new" && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                {notification.keyStatus}
-              </span>
-            )}
           </div>
-          <p className="text-sm font-semibold text-white group-hover:text-primary-400 transition-colors truncate">
-            {notification.programTitle}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5">{notification.message}</p>
         </div>
 
         <div className="shrink-0 text-gray-600 group-hover:text-white transition-colors">
