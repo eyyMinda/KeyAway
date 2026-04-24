@@ -36,7 +36,9 @@ function ProgramInformationVisual({ program, variant }: { program: Program; vari
             image={program.image}
             alt={program.title}
             className={mobile ? "absolute inset-0 h-full w-full object-cover" : "w-full h-auto object-cover"}
-            priority
+            {...(mobile && { priority: true })}
+            widthHint={960}
+            sizes="(max-width: 1024px) 100vw, 50vw"
           />
         ) : (
           <div

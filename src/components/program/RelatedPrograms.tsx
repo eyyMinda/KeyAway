@@ -115,7 +115,7 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
                         {/* Stats */}
                         <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
                           <span>CD Keys Available</span>
-                          <span className="text-primary-400 font-medium">{program.cdKeys?.length || 0}</span>
+                          <span className="text-primary-400 font-medium">{program.keyCount ?? program.cdKeys?.length ?? 0}</span>
                         </div>
                       </div>
                     </div>
