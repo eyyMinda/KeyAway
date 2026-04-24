@@ -53,17 +53,17 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
 
         {/* Main Content */}
         <div className="bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl border border-white/10 p-4 sm:p-6 lg:p-8">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8">
+          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 relative">
             {/* Left Side - Image/Showcase */}
-            <div className="relative">
+            <div className="lg:h-fit lg:sticky lg:top-24">
               {imageSource ? (
-                <div className="relative w-full h-80 sm:h-96 lg:h-[500px]">
-                  <IdealImage
-                    image={imageSource}
-                    alt={program.title}
-                    className="w-full h-full object-contain rounded-lg"
-                  />
-                </div>
+                <IdealImage
+                  image={imageSource}
+                  alt={program.title}
+                  widthHint={960}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-contain rounded-lg"
+                />
               ) : (
                 <div className="w-full h-80 sm:h-96 lg:h-[500px] bg-linear-to-br from-primary-500/20 to-accent-500/20 rounded-lg flex items-center justify-center border border-white/10">
                   <div className="text-neutral-500 text-6xl">💻</div>

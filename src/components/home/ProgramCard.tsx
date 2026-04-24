@@ -32,6 +32,8 @@ export default function ProgramCard({
             image={program.image}
             alt={program.title}
             className="w-full h-36 sm:h-40 lg:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            widthHint={520}
           />
         ) : (
           <div className="w-full h-36 sm:h-40 lg:h-48 bg-linear-to-br from-primary-50 to-accent-50 flex items-center justify-center">
@@ -63,11 +65,11 @@ export default function ProgramCard({
         </div>
 
         {/* Key Count Badge */}
-        {program.cdKeys?.length ? (
+        {(program.keyCount ?? program.cdKeys?.length ?? 0) > 0 ? (
           <div className="absolute top-2 sm:top-3 lg:top-4 right-2 sm:right-3 lg:right-4">
             <div className="bg-white/95 backdrop-blur-sm text-gray-800 px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1 shadow-lg border border-gray-200">
               <FaKey className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-600" />
-              <span>{program.cdKeys.length}</span>
+              <span>{program.keyCount ?? program.cdKeys?.length ?? 0}</span>
             </div>
           </div>
         ) : null}
@@ -79,7 +81,11 @@ export default function ProgramCard({
           {program.title}
         </h2>
 
-        {portableTextHasContent(program.description) ? (
+        {program.descriptionPlain ? (
+          <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-3 sm:line-clamp-4 leading-relaxed">
+            {program.descriptionPlain}
+          </p>
+        ) : portableTextHasContent(program.description) ? (
           <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-3 sm:line-clamp-4 leading-relaxed">
             {portableTextToPlainText(program.description)}
           </p>
