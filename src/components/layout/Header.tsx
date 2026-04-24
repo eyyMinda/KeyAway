@@ -11,14 +11,46 @@ import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { IdealImageClient } from "@/src/components/general/IdealImageClient";
 import { SanityLink } from "@/src/types";
 import type { HeaderProps } from "@/src/types/layout";
+import type { Notification } from "@/src/types/notifications";
 import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
 import { usePathname } from "next/navigation";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
+import {
+  readNotificationsFromClientCache,
+  writeNotificationsToClientCache
+} from "@/src/lib/notifications/notificationsClientCache";
 
-export default function Header({ logoData, notifications, socialData }: HeaderProps) {
+export default function Header({ logoData, notifications: notificationsProp, socialData }: HeaderProps) {
   const storeData = useStoreDetails();
   const pathname = usePathname();
+  const [notifications, setNotifications] = useState<Notification[]>(notificationsProp ?? []);
+
+  useEffect(() => {
+    if (notificationsProp !== undefined) {
+      setNotifications(notificationsProp);
+      return;
+    }
+    const cached = readNotificationsFromClientCache();
+    if (cached) {
+      setNotifications(cached);
+      return;
+    }
+    let cancelled = false;
+    void fetch("/api/v1/notifications/recent")
+      .then(r => r.json())
+      .then((body: { data?: { notifications?: Notification[] } }) => {
+        const list = body?.data?.notifications ?? [];
+        if (!cancelled) {
+          setNotifications(list);
+          writeNotificationsToClientCache(list);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [notificationsProp]);
   const header = storeData?.header;
   let isLogo = false;
   let headerLinks: SanityLink[] = [];
