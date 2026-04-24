@@ -13,6 +13,8 @@ export default function ProgramCard({
   showStats = true,
   sectionId = SECTIONS.home.popularPrograms
 }: ProgramCardProps) {
+  const viewKeysLabel = `View keys for ${program.title}`;
+
   return (
     <div className="group bg-white rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-primary-400 animate-fade-in flex flex-col transform hover:-translate-y-2 relative before:absolute before:inset-0 before:bg-linear-to-br before:from-primary-50/30 before:to-transparent before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-300">
       {/* Image Container */}
@@ -112,6 +114,8 @@ export default function ProgramCard({
         {/* Action Button */}
         <Link
           href={`/program/${program.slug.current}`}
+          aria-label={viewKeysLabel}
+          title={viewKeysLabel}
           onClick={() =>
             void trackInteraction({
               interactionId: INTERACTION_IDS.programGridViewKeysButton,
