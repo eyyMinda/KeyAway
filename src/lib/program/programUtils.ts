@@ -1,13 +1,6 @@
-import { Program } from "@/src/types";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-
-export interface ProgramWithStats extends Program {
-  viewCount: number;
-  downloadCount: number;
-  hasKeys: boolean;
-  popularityScore: number;
-  _createdAt: string;
-}
+import type { ProgramWithStats } from "@/src/types/home";
+import type { FilterType, SortType } from "@/src/types/programs";
 
 /**
  * Calculate popularity score for a program
@@ -53,7 +46,39 @@ export function sortByName(programs: ProgramWithStats[]): ProgramWithStats[] {
   return [...programs].sort((a, b) => a.title.localeCompare(b.title));
 }
 
-export type SortType = "popular" | "views" | "downloads" | "latest" | "name";
+export function sortByNameDesc(programs: ProgramWithStats[]): ProgramWithStats[] {
+  return [...programs].sort((a, b) => b.title.localeCompare(a.title));
+}
+
+export function sortByOldest(programs: ProgramWithStats[]): ProgramWithStats[] {
+  return [...programs].sort((a, b) => new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime());
+}
+
+export function normalizeSortType(value?: string): SortType {
+  switch (value) {
+    case "views":
+    case "downloads":
+    case "latest":
+    case "oldest":
+    case "name":
+    case "nameDesc":
+    case "popular":
+      return value;
+    default:
+      return "popular";
+  }
+}
+
+export function normalizeFilterType(value?: string): FilterType {
+  switch (value) {
+    case "hasKeys":
+    case "noKeys":
+    case "all":
+      return value;
+    default:
+      return "all";
+  }
+}
 
 /**
  * Sort programs based on the specified sort type
@@ -70,6 +95,10 @@ export function sortPrograms(programs: ProgramWithStats[], sortType: SortType): 
       return sortByLatest(programs);
     case "name":
       return sortByName(programs);
+    case "nameDesc":
+      return sortByNameDesc(programs);
+    case "oldest":
+      return sortByOldest(programs);
     default:
       return programs;
   }
@@ -80,7 +109,7 @@ export function sortPrograms(programs: ProgramWithStats[], sortType: SortType): 
  */
 export function filterProgramsByKeys(
   programs: ProgramWithStats[],
-  filter: "all" | "hasKeys" | "noKeys"
+  filter: FilterType
 ): ProgramWithStats[] {
   switch (filter) {
     case "hasKeys":
