@@ -2,15 +2,10 @@
 
 import { ReactElement } from "react";
 import Image from "next/image";
+import type { IdealImageClientProps } from "@/src/types/general";
 
-interface IdealImageProps {
-  alt?: string;
-  className?: string;
-  src?: string;
-  width?: number;
-  height?: number;
-  blurDataURL?: string;
-}
+const DEFAULT_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw";
+const DEFAULT_QUALITY = 70;
 
 export const IdealImageClient = ({
   src = "",
@@ -18,8 +13,14 @@ export const IdealImageClient = ({
   height = 0,
   blurDataURL = "",
   alt = "An image without an alt, whoops",
-  className
-}: IdealImageProps): ReactElement | null => {
+  className,
+  widthHint: _widthHintOmit,
+  sizes = DEFAULT_SIZES,
+  quality = DEFAULT_QUALITY,
+  priority = false
+}: IdealImageClientProps): ReactElement | null => {
+  if (!src || !width || !height) return null;
+
   return (
     <Image
       src={src}
@@ -28,10 +29,10 @@ export const IdealImageClient = ({
       height={height}
       placeholder="blur"
       blurDataURL={blurDataURL}
-      sizes="
-        (max-width: 768px) 100vw,
-        (max-width: 1200px) 50vw,
-        40vw"
+      sizes={sizes}
+      quality={quality}
+      priority={priority}
+      {...(priority ? { fetchPriority: "high" as const } : {})}
       {...(className ? { className } : {})}
     />
   );
