@@ -66,6 +66,12 @@ export interface Program {
   image?: { asset: { url?: string; _ref?: string } };
   downloadLink?: string;
   cdKeys: CDKey[];
+  keyCount?: number;
+  hasKeys?: boolean;
+  descriptionPlain?: string;
+  viewCount?: number;
+  downloadCount?: number;
+  popularityScore?: number;
   _updatedAt?: string;
 }
 

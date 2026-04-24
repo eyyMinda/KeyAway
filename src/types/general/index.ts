@@ -22,6 +22,11 @@ export interface IdealImageClientProps {
   width?: number;
   height?: number;
   blurDataURL?: string;
+  /** Ignored when `src` is already optimized server-side; kept for `LogoData` spread parity. */
+  widthHint?: number;
+  sizes?: string;
+  quality?: number;
+  priority?: boolean;
 }
 
 // Common utility types

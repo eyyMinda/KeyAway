@@ -10,4 +10,6 @@ export interface Notification {
   updatedAt?: string;
   keysCount?: number;
   keyStatus?: "new" | "active";
+  /** 40×40-ish CDN URL from CMS `image`; omit when missing. */
+  imageUrl?: string;
 }

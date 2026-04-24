@@ -4,10 +4,16 @@ export type { ProgramWithStats };
 
 export interface ProgramsPageClientProps {
   programs: ProgramWithStats[];
+  searchTerm: string;
+  filter: FilterType;
+  sortBy: SortType;
+  currentPage: number;
+  totalPrograms: number;
+  programsPerPage: number;
 }
 
 export type FilterType = "all" | "hasKeys" | "noKeys";
-export type SortType = "popular" | "views" | "downloads" | "latest" | "name";
+export type SortType = "popular" | "views" | "downloads" | "latest" | "oldest" | "name" | "nameDesc";
 
 export interface ProgramsFilterProps {
   searchTerm: string;
