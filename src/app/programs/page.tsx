@@ -1,7 +1,7 @@
 import { client } from "@/src/sanity/lib/client";
-import { programsWithStatsQuery, programsCountQuery } from "@lib/sanity/queries";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
+import { programsListingProjection } from "@/src/lib/sanity/queries";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramsPageJsonLd } from "@/src/lib/seo/jsonLd";
@@ -13,29 +13,56 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import { FacebookGroupButton } from "@/src/components/social";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 import type { SocialData } from "@/src/types";
+import type { FilterType, SortType } from "@/src/types/programs";
+import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import { normalizeFilterType, normalizeSortType, sortPrograms } from "@/src/lib/program/programUtils";
 
 export const revalidate = 60;
+const PROGRAMS_PER_PAGE = 16;
 
 export async function generateMetadata() {
   return await generateProgramsPageMetadata();
 }
 
-export default async function ProgramsPage() {
-  const [rawPrograms, bundleCounts, totalCount, storeRow, featuredProgram] = await Promise.all([
-    client.fetch(programsWithStatsQuery, {}, { next: { tags: ["programs"] } }),
+export default async function ProgramsPage({
+  searchParams
+}: {
+  searchParams: Promise<{ search?: string; filter?: FilterType; sort?: SortType; page?: string }>;
+}) {
+  const params = await searchParams;
+  const searchTerm = (params.search || "").trim();
+  const filter: FilterType = normalizeFilterType(params.filter);
+  const sortBy: SortType = normalizeSortType(params.sort);
+  const page = Math.max(1, Number.parseInt(params.page || "1", 10) || 1);
+  const start = (page - 1) * PROGRAMS_PER_PAGE;
+  const end = start + PROGRAMS_PER_PAGE;
+  const filterQuery = filter === "hasKeys" ? "count(cdKeys[]) > 0" : filter === "noKeys" ? "count(cdKeys[]) == 0" : "true";
+  const searchFilter = searchTerm ? " && (title match $search || string::lower(pt::text(description)) match $search)" : "";
+  const listQuery = `*[_type == "program" && ${filterQuery}${searchFilter}] {${programsListingProjection}}`;
+  const queryParams = searchTerm ? { search: `*${searchTerm.toLowerCase()}*` } : {};
+
+  const [rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
+    client.fetch(listQuery, queryParams, { next: { tags: ["programs"] } }),
     getBundleCountsByProgram(),
-    client.fetch(programsCountQuery, {}, { next: { tags: ["programs"] } }),
     getCachedStoreDetailsDocument(),
     getFeaturedProgram()
   ]);
 
-  const programs = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts) as ProgramWithStats[];
+  const mergedPrograms = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts);
+
+  const sortedPrograms = sortPrograms(mergedPrograms, sortBy);
+
+  const totalCount = sortedPrograms.length;
+  const programs = sortedPrograms.slice(start, end).map(program => ({
+    ...program,
+    descriptionPlain: portableTextToPlainText(program.description)
+  })) as ProgramWithStats[];
 
   const socialData: SocialData = {
     socialLinks: storeRow?.socialLinks ?? []
   };
 
-  const totalKeys = programs.reduce((sum, p) => sum + (p.cdKeys?.length || 0), 0);
+  const totalKeys = programs.reduce((sum, p) => sum + (p.keyCount || p.cdKeys?.length || 0), 0);
   const jsonLd = generateProgramsPageJsonLd(programs, totalCount, resolveSiteBaseUrl(storeRow?.seo));
 
   return (
@@ -50,7 +77,15 @@ export default async function ProgramsPage() {
           </div>
         </section>
 
-        <ProgramsPageClient programs={programs} />
+        <ProgramsPageClient
+          programs={programs}
+          searchTerm={searchTerm}
+          filter={filter}
+          sortBy={sortBy}
+          currentPage={page}
+          totalPrograms={totalCount}
+          programsPerPage={PROGRAMS_PER_PAGE}
+        />
 
         <ContributeSection />
         <FeaturedProgramSection program={featuredProgram} />

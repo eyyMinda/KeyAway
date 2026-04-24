@@ -42,8 +42,10 @@ export default function ProgramsFilter({
               <option value="popular">Most Popular</option>
               <option value="views">Most Viewed</option>
               <option value="downloads">Most Downloaded</option>
-              <option value="latest">Latest Added</option>
+              <option value="latest">Recently Added</option>
+              <option value="oldest">Oldest Added</option>
               <option value="name">Name A-Z</option>
+              <option value="nameDesc">Name Z-A</option>
             </select>
           </div>
         </div>
