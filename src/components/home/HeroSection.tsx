@@ -119,7 +119,7 @@ export default function HeroSection({ socialData, visitorHint }: HeroSectionProp
                       <IconComponent className={`w-5 h-5 ${feature.iconColor}`} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white text-sm">{feature.title}</h3>
+                      <p className="m-0 font-semibold text-white text-sm">{feature.title}</p>
                       <p className="text-xs text-gray-400">{feature.description}</p>
                     </div>
                   </div>
