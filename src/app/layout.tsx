@@ -15,7 +15,6 @@ import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
-import { getRecentNotifications } from "@/src/lib/notifications/notificationUtils.server";
 import { headers } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
 const geistSans = Geist({
@@ -42,25 +41,38 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || headersList.get("referer") || "";
   const isAdminOrStudio = pathname.includes("/admin") || pathname.includes("/studio");
+  const needsSession = isAdminOrStudio;
 
   if (isAdminOrStudio) {
     noStore();
   }
 
-  const [session, storeData, notifications] = await Promise.all([
-    auth(),
-    getCachedStoreDetailsDocument(),
-    getRecentNotifications()
+  const [session, storeData] = await Promise.all([
+    needsSession ? auth() : Promise.resolve(null),
+    getCachedStoreDetailsDocument()
   ]);
 
   const currentLogo = storeData?.logoLight;
-  const logoData: LogoData = {
-    src: urlFor(currentLogo).url(),
-    alt: storeData?.title,
-    width: 200, // || getImageDimensions(currentLogo).width,
-    height: 100, // || getImageDimensions(currentLogo).height,
-    blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url()
-  };
+  const LOGO_WIDTH_HINT = 400;
+  const logoDims = currentLogo ? getImageDimensions(currentLogo) : { width: 200, height: 100 };
+  const logoData: LogoData = currentLogo
+    ? {
+        src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).quality(78).auto("format").url(),
+        alt: storeData?.title ?? "KeyAway",
+        width: logoDims.width,
+        height: logoDims.height,
+        blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url(),
+        widthHint: LOGO_WIDTH_HINT,
+        sizes: "(max-width: 640px) 42vw, 200px",
+        quality: 78
+      }
+    : {
+        src: "",
+        alt: storeData?.title ?? "KeyAway",
+        width: logoDims.width,
+        height: logoDims.height,
+        blurDataURL: ""
+      };
 
   const socialData: SocialData = {
     socialLinks: storeData?.socialLinks ?? []
@@ -96,7 +108,7 @@ export default async function RootLayout({
           <StoreDetailsProvider value={storeData}>
             <PageViewTracker />
             <div className="mainContent flex flex-col min-h-screen">
-              <Header logoData={logoData} notifications={notifications} socialData={socialData} />
+              <Header logoData={logoData} socialData={socialData} />
               {children}
               <Footer logoData={logoData} socialData={socialData} />
             </div>
