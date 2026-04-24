@@ -124,16 +124,8 @@ export async function getProgramWithUpdatedKeys(slug: string) {
       return updatedKey;
     });
 
-    // Update in Sanity if there were changes (non-blocking - don't fail if update fails)
-    if (hasUpdates && program._id) {
-      try {
-        await client.patch(program._id).set({ cdKeys: updatedKeys }).commit();
-        console.log(`Updated keys for program: ${program.title}`);
-      } catch (updateError) {
-        console.error("Failed to update keys in Sanity (non-critical):", updateError);
-        // Continue anyway - return the program with updated keys even if Sanity update failed
-      }
-    }
+    // Intentionally avoid write-on-read in route requests.
+    // Persisted key status updates should be handled by background jobs.
     program.slug = { current: slug };
 
     // Return the updated program
@@ -159,24 +151,10 @@ async function getProgramStats(
   const totalKeys = sortedCdKeys.length;
   const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
 
-  const [singularCounts, counts] = await Promise.all([
-    Promise.all([
-      client.fetch(
-        `count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == $slug && (notFound != true)])`,
-        { slug: program.slug.current },
-        { next: { tags: ["featured-program"] } }
-      ),
-      client.fetch(
-        `count(*[_type == "trackingEvent" && event == "download_click" && programSlug == $slug])`,
-        { slug: program.slug.current },
-        { next: { tags: ["featured-program"] } }
-      )
-    ]),
-    bundleCounts ?? getBundleCountsByProgram()
-  ]);
+  const counts = bundleCounts ?? (await getBundleCountsByProgram());
 
   const { viewCount, downloadCount } = mergeSingleProgramStats(
-    { viewCount: singularCounts[0] || 0, downloadCount: singularCounts[1] || 0 },
+    { viewCount: program.viewCount ?? 0, downloadCount: program.downloadCount ?? 0 },
     program.slug?.current,
     counts
   );
@@ -243,15 +221,13 @@ export async function getFeaturedProgram(): Promise<
         bundleCounts
       );
       for (const p of programs) {
-        const program = await getProgramWithUpdatedKeys(p.slug.current);
-        if (!program) continue;
-        const workingKeys = (program.cdKeys || []).filter(
+        const workingKeys = ((p as Program).cdKeys || []).filter(
           (cd: CDKey) => cd.status === "active" || cd.status === "new"
         ).length;
         if (workingKeys > 0) {
           return {
-            ...program,
-            totalKeys: program.cdKeys?.length || 0,
+            ...(p as Program),
+            totalKeys: (p as Program).cdKeys?.length || 0,
             workingKeys,
             viewCount: p.viewCount || 0,
             downloadCount: p.downloadCount || 0
@@ -286,12 +262,11 @@ export async function getFeaturedProgram(): Promise<
             viewCount?: number;
             downloadCount?: number;
             popularityScore?: number;
+            cdKeys?: CDKey[];
           }) => {
-            const program = await getProgramWithUpdatedKeys(p.slug.current);
-            if (!program) return null;
-            const sortedCdKeys = program.cdKeys || [];
+            const sortedCdKeys = p.cdKeys || [];
             return {
-              program,
+              program: p as Program,
               totalKeys: sortedCdKeys.length,
               workingKeys: sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length,
               viewCount: p.viewCount || 0,
