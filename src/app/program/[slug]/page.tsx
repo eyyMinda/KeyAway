@@ -26,10 +26,22 @@ import JsonLd from "@/src/components/JsonLd";
 import { headers } from "next/headers";
 import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
-import type { ProgramFaqItem } from "@/src/types/program";
+import type { Program, ProgramFaqItem } from "@/src/types/program";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const slugs = await client.fetch<Array<{ slug?: { current?: string } }>>(
+    `*[_type == "program"] | order(coalesce(popularityScore, 0) desc) [0...25]{ slug }`,
+    {},
+    { next: { tags: ["programs"] } }
+  );
+  return (slugs ?? [])
+    .map(item => item.slug?.current)
+    .filter((value): value is string => Boolean(value))
+    .map(slug => ({ slug }));
 }
 
 // Generate dynamic metadata for each program page
@@ -65,9 +77,10 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
 
   const hdrs = await headers();
   const { isSpammer, visitorHint } = await getVisitorContextForPublicPage(hdrs);
-  const relatedPrograms = allPrograms
-    .filter((p: { slug: { current: string } }) => p.slug.current !== slug)
-    .slice(0, 5);
+  const relatedPrograms = (allPrograms as Program[])
+    .filter(p => p.slug.current !== slug)
+    .slice(0, 5)
+    .map(p => ({ ...p, cdKeys: p.cdKeys ?? [] }));
 
   const faqItems =
     program.faq?.filter(
