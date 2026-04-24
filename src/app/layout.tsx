@@ -58,7 +58,7 @@ export default async function RootLayout({
   const logoDims = currentLogo ? getImageDimensions(currentLogo) : { width: 200, height: 100 };
   const logoData: LogoData = {
     src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).quality(70).auto("format").url(),
-    alt: `${storeData?.title ?? "KeyAway"} Logo`,
+    alt: `${storeData?.title ?? "KeyAway"} logo`,
     width: logoDims.width,
     height: logoDims.height,
     blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url(),
