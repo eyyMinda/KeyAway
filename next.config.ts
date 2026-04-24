@@ -22,7 +22,9 @@ const imageProviders: RemotePattern[] = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
-    remotePatterns: imageProviders
+    remotePatterns: imageProviders,
+    /** Allow `quality` values used by `IdealImage` / `IdealImageClient` / logo `urlFor` + `<Image>`. */
+    qualities: [60, 70, 75, 78, 85, 100]
   },
   async headers() {
     return [
