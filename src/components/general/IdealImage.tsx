@@ -8,6 +8,9 @@ interface IdealImageProps {
   image?: SanityAsset;
   alt?: string;
   className?: string;
+  sizes?: string;
+  widthHint?: number;
+  quality?: number;
   /** When true: preload, eager load, and `fetchPriority="high"`. */
   priority?: boolean;
 }
@@ -16,21 +19,24 @@ export const IdealImage = ({
   image,
   alt = "An image without an alt, whoops",
   className,
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw",
+  widthHint = 640,
+  quality = 70,
   priority = false
 }: IdealImageProps): ReactElement | null => {
   if (!image) return null;
+  const src = urlFor(image).width(widthHint).quality(quality).auto("format").url();
+  const blurDataURL = urlFor(image).width(24).height(24).blur(10).url();
+
   return (
     <Image
-      src={urlFor(image).url()}
+      src={src}
       alt={alt}
       width={getImageDimensions(image).width}
       height={getImageDimensions(image).height}
       placeholder="blur"
-      blurDataURL={urlFor(image).width(24).height(24).blur(10).url()}
-      sizes="
-        (max-width: 768px) 100vw,
-        (max-width: 1200px) 50vw,
-        40vw"
+      blurDataURL={blurDataURL}
+      sizes={sizes}
       priority={priority}
       {...(priority ? { fetchPriority: "high" as const } : {})}
       {...(className ? { className } : {})}

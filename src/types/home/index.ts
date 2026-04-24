@@ -6,6 +6,7 @@ export interface ProgramWithStats extends Program {
   downloadCount: number;
   hasKeys: boolean;
   popularityScore: number;
+  keyCount?: number;
   _createdAt: string;
 }
 

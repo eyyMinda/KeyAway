@@ -1,7 +1,4 @@
-"use client";
-
 import { FaChevronDown } from "react-icons/fa";
-import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 interface ProgramsHeroProps {
   totalCount: number;
@@ -9,10 +6,6 @@ interface ProgramsHeroProps {
 }
 
 export default function ProgramsHero({ totalCount, totalKeys }: ProgramsHeroProps) {
-  const handleScrollToGrid = () => {
-    scrollToSectionWithHeaderOffset("#programs-grid");
-  };
-
   return (
     <section
       id="programs-hero"
@@ -77,12 +70,12 @@ export default function ProgramsHero({ totalCount, totalKeys }: ProgramsHeroProp
       </div>
 
       {/* Scroll indicator */}
-      <button
-        onClick={handleScrollToGrid}
+      <a
+        href="#programs-grid"
         className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce hidden lg:flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/20 transition-all duration-300 cursor-pointer group"
         aria-label="Scroll to programs">
         <FaChevronDown className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-      </button>
+      </a>
     </section>
   );
 }

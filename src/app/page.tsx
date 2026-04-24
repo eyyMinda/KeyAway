@@ -16,8 +16,6 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
 import { SocialData } from "@/src/types";
-import { headers } from "next/headers";
-import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
 
 export const revalidate = 60;
 
@@ -42,12 +40,14 @@ export default async function HomePage() {
     .sort((a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0))
     .slice(0, 6) as ProgramWithStats[];
 
+  const normalizedPopularPrograms = popularPrograms.map(program => ({
+    ...program,
+    descriptionPlain: typeof program.description === "string" ? program.description : undefined
+  }));
+
   const socialData: SocialData = {
     socialLinks: store?.socialLinks ?? []
   };
-
-  const hdrs = await headers();
-  const { visitorHint } = await getVisitorContextForPublicPage(hdrs);
 
   const homeSeo = resolveHomePageSeo(store);
   const jsonLd = generateHomePageJsonLd({
@@ -60,9 +60,9 @@ export default async function HomePage() {
     <>
       <JsonLd data={jsonLd} />
       <main>
-        <HeroSection socialData={socialData} visitorHint={visitorHint} />
+        <HeroSection socialData={socialData} />
         <FeaturedProgramSection program={featuredProgram} />
-        <PopularProgramsSection programs={popularPrograms} />
+        <PopularProgramsSection programs={normalizedPopularPrograms} />
         <FeaturesSection />
         <StatsSection stats={stats} />
         <CTASection otherLinks={store?.otherLinks ?? []} />

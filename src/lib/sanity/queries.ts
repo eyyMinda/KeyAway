@@ -40,6 +40,31 @@ featured{
   showcaseGif
 }`;
 
+/* ------------ Programs listing projection (shared: stats + list fields) ------------ */
+export const programsListingProjection = `
+  title,
+  slug,
+  description,
+  image,
+  _createdAt,
+  "keyCount": count(cdKeys[]),
+  "hasKeys": count(cdKeys[]) > 0,
+  "viewCount": coalesce(viewCount, count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)])),
+  "downloadCount": coalesce(downloadCount, count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])),
+  "popularityScore": coalesce(popularityScore, (coalesce(viewCount, count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)])) + coalesce(downloadCount, count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])) * 3))
+`;
+
+/** Related / card rows: no tracking aggregates, no cdKeys[]. */
+export const relatedProgramsCardProjection = `
+  title,
+  slug,
+  description,
+  image,
+  _createdAt,
+  "keyCount": count(cdKeys[]),
+  "hasKeys": count(cdKeys[]) > 0
+`;
+
 export const allProgramsQuery = `
 *[_type == "program"]{
   title, slug, description,
@@ -124,22 +149,11 @@ export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHas
       _id, eventType, programSlug, keyHash, keyIdentifier, createdAt
     } | order(createdAt desc) [0]`;
 
-/* ------------ Popular Programs ------------ */
-export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt desc) [0...6]{
-  title, slug, description, image, cdKeys[]
-}`;
+/* ------------ Popular Programs (related / light cards — no per-program stats) ------------ */
+export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt desc) [0...6]{ ${relatedProgramsCardProjection} }`;
 
-/* ------------ Popular Programs by Page Views ------------ */
-export const popularProgramsByViewsQuery = `*[_type == "program"]{
-  title, slug, description,
-  ${featuredBlockProjection},
-  image, cdKeys[],
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
-  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
-  "hasKeys": count(cdKeys[]) > 0,
-  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3,
-  _createdAt
-} | order(popularityScore desc) [0...6]`;
+/* ------------ Popular Programs by Page Views (same listing + featured shape as programsWithStatsQuery) ------------ */
+export const popularProgramsByViewsQuery = `*[_type == "program"]{ ${programsListingProjection}, ${featuredBlockProjection} } | order(popularityScore desc) [0...6]`;
 
 /* ------------ Statistics ------------ */
 export const siteStatsQuery = `{
@@ -154,13 +168,8 @@ export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekA
 
 /* ------------ Programs with Filtering ------------ */
 export const programsWithStatsQuery = `*[_type == "program"]{
-  title, slug, description,
-  ${featuredBlockProjection},
-  image, cdKeys[], _createdAt,
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
-  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
-  "hasKeys": count(cdKeys[]) > 0,
-  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
+  ${programsListingProjection},
+  ${featuredBlockProjection}
 }`;
 
 /* ------------ Programs Count Query ------------ */
@@ -194,8 +203,8 @@ export const featuredProgramQuery = `*[_type == "program" && slug.current == $sl
   cdKeys[],
   "totalKeys": count(cdKeys[]),
   "workingKeys": count(cdKeys[status == "active" || status == "new"]),
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
-  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])
+  "viewCount": coalesce(viewCount, 0),
+  "downloadCount": coalesce(downloadCount, 0)
 }`;
 
 /* ------------ Programs for Auto-Selection (highest working keys) ------------ */
@@ -210,7 +219,7 @@ export const programsForAutoSelectionQuery = `*[_type == "program"]{
   cdKeys[],
   "totalKeys": count(cdKeys[]),
   "workingKeys": count(cdKeys[status == "active" || status == "new"]),
-  "viewCount": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]),
-  "downloadCount": count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]),
-  "popularityScore": count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)]) + count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current]) * 3
+  "viewCount": coalesce(viewCount, 0),
+  "downloadCount": coalesce(downloadCount, 0),
+  "popularityScore": coalesce(popularityScore, (coalesce(viewCount, 0) + coalesce(downloadCount, 0) * 3))
 } | order(workingKeys desc, popularityScore desc)`;

@@ -63,7 +63,7 @@ export default function HeroSection({ socialData, visitorHint }: HeroSectionProp
               </p>
 
               <div className="w-full pt-2 lg:hidden">
-                <HeroLaptopImage variant="mobile" sizes="(max-width: 1023px) 100vw, 32px" />
+                <HeroLaptopImage variant="mobile" sizes="(max-width: 1023px) 100vw, 32px" priority />
               </div>
             </div>
 
@@ -131,7 +131,11 @@ export default function HeroSection({ socialData, visitorHint }: HeroSectionProp
           {/* Right Side - Visual and Facebook Promo */}
           <div className="flex flex-col gap-6 sticky top-24">
             <div className="relative order-2 hidden w-full lg:order-1 lg:block">
-              <HeroLaptopImage variant="desktop" sizes="(max-width: 1023px) 32px, (max-width: 1536px) 50vw, 720px" />
+              <HeroLaptopImage
+                variant="desktop"
+                sizes="(max-width: 1023px) 32px, (max-width: 1536px) 50vw, 720px"
+                priority={false}
+              />
             </div>
 
             {/* Facebook Group Promotion - Moved to right side */}

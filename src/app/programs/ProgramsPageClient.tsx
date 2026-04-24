@@ -1,46 +1,62 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useTransition } from "react";
 import { ProgramsFilter, ProgramsGrid } from "@/src/components/programs";
 import Pagination from "@/src/components/ui/Pagination";
 import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
-import { sortPrograms, filterProgramsByKeys, searchPrograms } from "@/src/lib/program/programUtils";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-export default function ProgramsPageClient({ programs }: ProgramsPageClientProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<FilterType>("all");
-  const [sortBy, setSortBy] = useState<SortType>("popular");
-  const [currentPage, setCurrentPage] = useState(1);
-  const programsPerPage = 16;
-
-  const filteredAndSortedPrograms = useMemo(() => {
-    let filtered = searchPrograms(programs, searchTerm);
-    filtered = filterProgramsByKeys(filtered, filter);
-    filtered = sortPrograms(filtered, sortBy);
-    return filtered;
-  }, [programs, searchTerm, filter, sortBy]);
+export default function ProgramsPageClient({
+  programs,
+  searchTerm,
+  filter,
+  sortBy,
+  currentPage,
+  totalPrograms,
+  programsPerPage
+}: ProgramsPageClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
   const maxViews = Math.max(...programs.map(p => p.viewCount), 0);
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
+  const totalPages = Math.max(1, Math.ceil(totalPrograms / programsPerPage));
+  const startIndex = totalPrograms === 0 ? 0 : (currentPage - 1) * programsPerPage + 1;
+  const endIndex = Math.min(currentPage * programsPerPage, totalPrograms);
 
-  const totalPages = Math.ceil(filteredAndSortedPrograms.length / programsPerPage);
-  const startIndex = (currentPage - 1) * programsPerPage;
-  const endIndex = startIndex + programsPerPage;
-  const paginatedPrograms = filteredAndSortedPrograms.slice(startIndex, endIndex);
+  const updateQuery = (updates: Partial<{ search: string; filter: FilterType; sort: SortType; page: number }>) => {
+    const next = new URLSearchParams(searchParams.toString());
+    const nextSearch = updates.search ?? searchTerm;
+    const nextFilter = updates.filter ?? filter;
+    const nextSort = updates.sort ?? sortBy;
+    const nextPage = updates.page ?? currentPage;
+
+    if (nextSearch) next.set("search", nextSearch);
+    else next.delete("search");
+    if (nextFilter !== "all") next.set("filter", nextFilter);
+    else next.delete("filter");
+    if (nextSort !== "popular") next.set("sort", nextSort);
+    else next.delete("sort");
+    if (nextPage > 1) next.set("page", String(nextPage));
+    else next.delete("page");
+
+    startTransition(() => {
+      router.push(`${pathname}?${next.toString()}`, { scroll: false });
+    });
+  };
 
   const handleFilterChange = (newFilter: FilterType) => {
-    setFilter(newFilter);
-    setCurrentPage(1);
+    updateQuery({ filter: newFilter, page: 1 });
   };
 
   const handleSortChange = (newSort: SortType) => {
-    setSortBy(newSort);
-    setCurrentPage(1);
+    updateQuery({ sort: newSort, page: 1 });
   };
 
   const handleSearchChange = (newSearch: string) => {
-    setSearchTerm(newSearch);
-    setCurrentPage(1);
+    updateQuery({ search: newSearch, page: 1 });
   };
 
   return (
@@ -55,28 +71,27 @@ export default function ProgramsPageClient({ programs }: ProgramsPageClientProps
       />
 
       <div className="mb-4 sm:mb-6">
-        {filteredAndSortedPrograms.length === 0 ? (
+        {totalPrograms === 0 ? (
           <p className="text-sm sm:text-base text-gray-600">No results</p>
         ) : (
           <p className="text-sm sm:text-base text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, filteredAndSortedPrograms.length)} of{" "}
-            {filteredAndSortedPrograms.length} programs
+            Showing {startIndex}-{endIndex} of {totalPrograms} programs
           </p>
         )}
       </div>
 
-      <ProgramsGrid programs={paginatedPrograms} maxViews={maxViews} maxDownloads={maxDownloads} />
+      <ProgramsGrid programs={programs} maxViews={maxViews} maxDownloads={maxDownloads} />
 
-      {filteredAndSortedPrograms.length > 0 && (
+      {totalPrograms > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={filteredAndSortedPrograms.length}
+          totalItems={totalPrograms}
           itemsPerPage={programsPerPage}
-          onPageChange={setCurrentPage}
+          onPageChange={page => updateQuery({ page })}
           variant="detailed"
           showInfo={false}
-          className="mt-8 sm:mt-10 lg:mt-12"
+          className={`mt-8 sm:mt-10 lg:mt-12 ${isPending ? "opacity-70" : ""}`}
         />
       )}
     </div>

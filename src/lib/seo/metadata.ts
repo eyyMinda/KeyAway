@@ -1,9 +1,6 @@
 import { Metadata } from "next";
-import { CDKey } from "@/src/types";
 import { urlFor } from "@/src/sanity/lib/image";
-import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
-import { formatProgramSeoName, getHighestKeyVersion } from "@/src/lib/program/versionSummary";
-import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
+import { client } from "@/src/sanity/lib/client";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import {
   DEFAULT_STORE_NAME,
@@ -72,8 +69,16 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
 
 export async function generateProgramMetadata(slug: string): Promise<Metadata> {
   try {
+    const programMetadataQuery = `*[_type == "program" && slug.current == $slug][0]{
+      title,
+      slug,
+      seo,
+      image,
+      "workingKeys": count(cdKeys[status == "active" || status == "new"]),
+      "totalKeys": count(cdKeys[])
+    }`;
     const [program, storeData] = await Promise.all([
-      getProgramWithUpdatedKeys(slug),
+      client.fetch(programMetadataQuery, { slug }, { next: { tags: [`program-${slug}`] } }),
       getCachedStoreDetailsDocument()
     ]);
     const storeTitle = storeData?.title || defaultData.store;
@@ -85,16 +90,10 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
       };
     }
 
-    const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
-    const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
-    const totalKeys = sortedCdKeys.length;
-
-    const highestKeyVersion = getHighestKeyVersion(sortedCdKeys);
-    const displayName = formatProgramSeoName(program, highestKeyVersion);
-
-    const title = program.seo?.metaTitle?.trim() || defaultData.programTitle(displayName, storeTitle);
+    const title = program.seo?.metaTitle?.trim() || defaultData.programTitle(program.title, storeTitle);
     const description =
-      program.seo?.metaDescription?.trim() || defaultData.programDescription(program.title, workingKeys, totalKeys);
+      program.seo?.metaDescription?.trim() ||
+      defaultData.programDescription(program.title, program.workingKeys ?? 0, program.totalKeys ?? 0);
     const baseUrl = resolveSiteBaseUrl(storeData?.seo);
     const url = `${baseUrl}/program/${slug}`;
     const programKeywords = resolveMetaKeywordList(program.seo?.metaKeywords, buildStoreSeoVariableMap(storeData));

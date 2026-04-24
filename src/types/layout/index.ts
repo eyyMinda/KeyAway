@@ -73,15 +73,21 @@ export interface SocialData {
 export interface LogoData {
   src: string;
   alt: string;
+  /** Intrinsic dimensions for layout (aspect ratio); CDN request width uses `widthHint`. */
   width: number;
   height: number;
   blurDataURL: string;
+  /** Passed to `urlFor` width; should match largest slot in `sizes`. */
+  widthHint?: number;
+  sizes?: string;
+  quality?: number;
 }
 
 // Component props
 export interface HeaderProps {
   logoData: LogoData;
-  notifications: Notification[];
+  /** When omitted, Header fetches `/api/v1/notifications/recent` after mount. */
+  notifications?: Notification[];
   socialData?: SocialData;
 }
 
