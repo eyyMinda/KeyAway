@@ -27,18 +27,16 @@ export default function CDKeyMobileCard({
 
   return (
     <div
-      className={`bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 transition-all duration-300 max-w-sm mx-auto ${
+      className={`flex flex-col gap-3 bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 transition-all duration-300 max-w-xs w-full mx-auto ${
         isDisabled ? "opacity-50" : "hover:bg-white/10"
       }`}>
       {/* Header with Key */}
-      <div className="mb-4">
-        <code className="block text-xs sm:text-base font-mono text-neutral-900 bg-neutral-100 px-4 py-3 rounded-xl whitespace-nowrap overflow-x-auto font-semibold border border-neutral-200/80">
-          {cdKey.key}
-        </code>
-      </div>
+      <code className="block text-xs xs:text-sm text-center font-mono text-neutral-900 bg-neutral-100 px-4 py-3 rounded-xl whitespace-nowrap overflow-x-auto font-semibold border border-neutral-200/80">
+        {cdKey.key}
+      </code>
 
       {/* Key Details */}
-      <div className="mb-3 text-xs text-neutral-400">
+      <div className="text-xs text-neutral-400">
         <div className="grid grid-cols-2 gap-3">
           <div>
             <span className="text-neutral-500">Program Version:</span>
@@ -64,10 +62,7 @@ export default function CDKeyMobileCard({
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="mb-4">
-        <ReportProgressBar reportData={reportData} />
-      </div>
+      <ReportProgressBar reportData={reportData} />
 
       {/* Actions */}
       {!isDisabled && (

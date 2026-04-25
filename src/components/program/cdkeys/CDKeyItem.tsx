@@ -20,7 +20,7 @@ export default function CDKeyItem({
 
   return (
     <tr key={index} className={`hover:bg-neutral-700 transition-colors ${isDisabled ? "opacity-50" : ""}`}>
-      <td className="px-6 py-4 text-nowrap">
+      <td className="p-4 text-nowrap">
         <code
           className={`px-3 py-1 rounded-lg text-sm font-mono select-text ${
             isDisabled ? "bg-neutral-100/80 text-neutral-700" : "bg-neutral-100 text-black"
@@ -28,25 +28,25 @@ export default function CDKeyItem({
           {cdKey.key}
         </code>
       </td>
-      <td className="px-6 py-4 text-center">
+      <td className="p-4">
         <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(cdKey.status)}`}>
           {cdKey.status}
         </span>
       </td>
-      <td className="px-6 py-4">
+      <td className="p-4">
         <ReportProgressBar reportData={reportData} />
       </td>
-      <td className={`px-6 py-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
+      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
         {cdKey.version}
       </td>
-      <td className={`px-6 py-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
+      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
         {cdKey.validFrom?.split("T")[0]}
       </td>
-      <td className={`px-6 py-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
+      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
         {formatValidUntilDisplay(cdKey.validUntil)}
       </td>
       {!isDisabled && (
-        <td className="px-6 py-4 text-center">
+        <td className="p-4 text-center">
           <CDKeyActions
             key={cdKey.key}
             cdKey={cdKey}
