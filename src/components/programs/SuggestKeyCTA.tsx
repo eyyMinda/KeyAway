@@ -24,7 +24,7 @@ export default function SuggestKeyCTA({ sectionId = SECTIONS.browse.allProgramsG
       <p className="text-sm text-gray-600 leading-relaxed">
         Don&apos;t see what you&apos;re looking for? Share your CD key and help grow our library!
       </p>
-      <div className="mt-4 text-xs font-semibold text-primary-600 group-hover:text-primary-700 uppercase tracking-wider">
+      <div className="mt-4 text-xs font-semibold text-primary-900 group-hover:text-primary-950 uppercase tracking-wider">
         Click to Contribute
       </div>
     </ContactModalTrigger>

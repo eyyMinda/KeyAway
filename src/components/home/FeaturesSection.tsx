@@ -164,7 +164,7 @@ export default function FeaturesSection() {
           <div className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 border-t border-gray-200 bg-linear-to-br from-primary-50 to-blue-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8">
             <div className="text-center max-w-2xl mx-auto">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-primary-100 rounded-full mb-3 sm:mb-4">
-                <FaUsers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600" />
+                <FaUsers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-800" />
               </div>
               <h4 className="text-2xl font-bold text-gray-900 mb-3">Got Free CD Keys to Share?</h4>
               <p className="text-sm sm:text-base text-gray-700 mb-5 sm:mb-6 leading-relaxed px-2">
@@ -175,7 +175,7 @@ export default function FeaturesSection() {
                 tab="suggest"
                 interactionId={INTERACTION_IDS.featuresSuggestCdKey}
                 sectionId={SECTIONS.home.features}
-                className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl text-sm sm:text-base">
+                className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl text-sm sm:text-base">
                 <FaCheckCircle className="mr-2 text-sm sm:text-base" />
                 Suggest a CD Key
               </ContactModalTrigger>

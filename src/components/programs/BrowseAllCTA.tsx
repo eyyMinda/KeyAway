@@ -29,7 +29,7 @@ export default function BrowseAllCTA({ sectionId = SECTIONS.browse.allProgramsGr
       <p className="text-sm text-gray-600 leading-relaxed">
         Explore our complete library of programs with advanced filters and search.
       </p>
-      <div className="mt-4 text-xs font-semibold text-primary-600 group-hover:text-primary-700 uppercase tracking-wider">
+      <div className="mt-4 text-xs font-semibold text-primary-900 group-hover:text-primary-950 uppercase tracking-wider">
         View All
       </div>
     </Link>

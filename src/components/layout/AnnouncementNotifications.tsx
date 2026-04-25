@@ -87,7 +87,7 @@ export default function AnnouncementNotifications({ notifications, socialData }:
         aria-label="View announcements">
         <FaBell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -97,7 +97,7 @@ export default function AnnouncementNotifications({ notifications, socialData }:
       {showMiniPopup && !isOpen && (
         <div
           onClick={handleMiniPopupClick}
-          className="absolute top-full right-0 mt-2 px-3 py-2 bg-primary-600 text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap z-50"
+          className="absolute top-full right-0 mt-2 px-3 py-2 bg-primary-700 text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap z-50"
           style={{ animation: "fadeIn 0.5s ease-out" }}>
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>

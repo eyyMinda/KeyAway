@@ -152,7 +152,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                             path: window.location.pathname
                           });
                         }}
-                        className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                        className="inline-flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
                         🥕 Carrot Juice
                       </Link>
                     ) : null}
