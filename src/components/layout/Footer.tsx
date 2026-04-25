@@ -161,6 +161,8 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                         href={githubRepoUrl}
                         target="_blank"
                         rel="noreferrer"
+                        aria-label="Open KeyAway source code on GitHub"
+                        title="KeyAway repository on GitHub"
                         onClick={() => {
                           trackEvent("social_click", {
                             social: "github keyaway",
@@ -168,7 +170,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                           });
                         }}
                         className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
-                        ⭐ GitHub
+                        ⭐ KeyAway repo
                       </Link>
                     ) : null}
                   </div>
