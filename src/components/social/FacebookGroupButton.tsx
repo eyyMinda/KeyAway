@@ -74,11 +74,7 @@ export function FacebookGroupButton({
           target="_blank"
           rel="noreferrer"
           onClick={handleClick}
-          className={
-            showTagline
-              ? `w-fit inline-flex flex-col items-start gap-1 px-4 py-2.5 ${linkBase}`
-              : `w-fit inline-flex items-center gap-2 px-4 py-2 ${linkBase}`
-          }>
+          className={`w-fit inline-flex items-center gap-1 px-3 py-2 ${showTagline ? "flex-col" : ""} ${linkBase}`}>
           {showTagline ? (
             <>
               <span className="inline-flex items-center gap-2">{joinRow}</span>

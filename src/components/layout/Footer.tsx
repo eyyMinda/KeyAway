@@ -60,7 +60,8 @@ export default function Footer({ logoData, socialData }: FooterProps) {
               <FacebookGroupButton
                 socialData={socialData}
                 path={pathname}
-                variant="outline"
+                variant="primary"
+                taglinePlacement="inside"
                 className="text-sm items-center"
               />
             </div>

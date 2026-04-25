@@ -135,7 +135,13 @@ export default function AnnouncementNotifications({ notifications, socialData }:
 
             {/* Facebook Group Button */}
             <div className="p-3 border-t border-gray-700">
-              <FacebookGroupButton socialData={socialData} path={pathname} variant="outline" className="text-xs" />
+              <FacebookGroupButton
+                socialData={socialData}
+                path={pathname}
+                variant="outline"
+                taglinePlacement="inside"
+                className="text-xs"
+              />
             </div>
           </div>
 
