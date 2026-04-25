@@ -74,7 +74,7 @@ export default function CDKeyActions({
       <div className="flex justify-center space-x-2">
         <button
           onClick={handleCopyKey}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none cursor-pointer"
+          className="w-full lg:w-fit inline-flex justify-center items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none cursor-pointer"
           disabled={isDisabled}
           title="Copy key to clipboard">
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +91,7 @@ export default function CDKeyActions({
         <button
           type="button"
           onClick={handleReportClick}
-          className="inline-flex items-center px-3 py-1 text-white text-xs font-medium rounded-lg transition-colors duration-200 group relative bg-orange-600 hover:bg-orange-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full lg:w-fit inline-flex justify-center items-center px-3 py-1 text-white text-xs font-medium rounded-lg transition-colors duration-200 group relative bg-orange-600 hover:bg-orange-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isDisabled}
           title="Report the status of this CD key">
           Report
