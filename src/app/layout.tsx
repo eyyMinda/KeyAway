@@ -53,26 +53,19 @@ export default async function RootLayout({
   ]);
 
   const currentLogo = storeData?.logoLight;
-  const LOGO_WIDTH_HINT = 400;
+  /** Match header/footer slot (~104×48 CSS px); keeps `/_next/image` width near 128–256 instead of 384+. */
+  const LOGO_WIDTH_HINT = 256;
   const logoDims = currentLogo ? getImageDimensions(currentLogo) : { width: 200, height: 100 };
-  const logoData: LogoData = currentLogo
-    ? {
-        src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).quality(78).auto("format").url(),
-        alt: storeData?.title ?? "KeyAway",
-        width: logoDims.width,
-        height: logoDims.height,
-        blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url(),
-        widthHint: LOGO_WIDTH_HINT,
-        sizes: "(max-width: 640px) 42vw, 200px",
-        quality: 78
-      }
-    : {
-        src: "",
-        alt: storeData?.title ?? "KeyAway",
-        width: logoDims.width,
-        height: logoDims.height,
-        blurDataURL: ""
-      };
+  const logoData: LogoData = {
+    src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).quality(70).auto("format").url(),
+    alt: `${storeData?.title ?? "KeyAway"} logo`,
+    width: logoDims.width,
+    height: logoDims.height,
+    blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url(),
+    widthHint: LOGO_WIDTH_HINT,
+    sizes: "(max-width: 419px) 30vw, 130px",
+    quality: 70
+  };
 
   const socialData: SocialData = {
     socialLinks: storeData?.socialLinks ?? []
@@ -105,17 +98,17 @@ export default async function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SessionProvider session={session}>
+          <PageViewTracker />
           <StoreDetailsProvider value={storeData}>
-            <PageViewTracker />
             <div className="mainContent flex flex-col min-h-screen">
               <Header logoData={logoData} socialData={socialData} />
               {children}
               <Footer logoData={logoData} socialData={socialData} />
             </div>
           </StoreDetailsProvider>
-          <Analytics />
-          <SpeedInsights />
         </SessionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

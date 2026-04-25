@@ -25,7 +25,7 @@ export default function ReportProgressBar({
     return (
       <div className={`flex flex-col items-center space-y-2 ${className}`}>
         {showPercentage && <span className="text-neutral-500 text-xs font-medium text-center">No reports</span>}
-        <div className="w-24 h-2 bg-neutral-600 rounded-full">
+        <div className="w-full h-2 bg-neutral-600 rounded-full">
           <div className="h-2 rounded-full bg-neutral-500"></div>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default function ReportProgressBar({
         </div>
       )}
 
-      <div className="w-24 bg-neutral-600 rounded-full h-2 overflow-hidden">
+      <div className="w-full bg-neutral-600 rounded-full h-2 overflow-hidden">
         <div className="flex h-full w-full">
           {/* Working (Primary/Green) */}
           {workingPercent > 0 && <div className="bg-success-500 h-full" style={{ width: `${workingPercent}%` }} />}

@@ -41,8 +41,8 @@ export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[
             buttonIcon: "🥕",
             href: buyMeACoffeeUrl,
             bgColor: "bg-orange-500/20",
-            iconColor: "text-orange-400",
-            buttonColor: "bg-orange-500 hover:bg-orange-600",
+            iconColor: "text-orange-300",
+            buttonColor: "bg-orange-700 hover:bg-orange-800",
             trackEvent: "buymeacoffee"
           },
           {
@@ -81,7 +81,7 @@ export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[
                     sectionId: SECTIONS.home.cta
                   })
                 }
-                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
+                className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
                 Browse All Programs
                 <FaArrowRight className="ml-2 text-sm" />
               </Link>
@@ -163,7 +163,7 @@ export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[
                   tab="suggest"
                   interactionId={INTERACTION_IDS.ctaSuggestCdKey}
                   sectionId={SECTIONS.home.cta}
-                  className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg transition-colors">
+                  className="inline-flex items-center justify-center px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg transition-colors">
                   <FaKey className="mr-2" />
                   Suggest a CD Key Now
                 </ContactModalTrigger>

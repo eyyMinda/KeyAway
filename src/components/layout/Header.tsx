@@ -83,10 +83,7 @@ export default function Header({ logoData, notifications: notificationsProp, soc
           title={storeData.title}
           className="flex items-center text-xl font-bold text-gray-300 hover:text-primary-500 transition-colors">
           {isLogo ? (
-            <>
-              <span className="sr-only">{storeData.title}</span>
-              <IdealImageClient {...logoData} className="max-w-3xs max-h-10 xs:max-h-12 w-auto h-auto" />
-            </>
+            <IdealImageClient {...logoData} priority className="max-w-3xs max-h-10 xs:max-h-12 w-auto h-auto" />
           ) : (
             <span className="text-xl font-bold text-gray-300 hover:text-primary-500 transition-colors">
               {storeData.title || "KeyAway"}
@@ -156,9 +153,12 @@ export default function Header({ logoData, notifications: notificationsProp, soc
           </ContactModalTrigger>
           <AnnouncementNotifications notifications={notifications} />
           <button
+            type="button"
             className="focus:outline-none text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isOpen}
             onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <HiX size={24} /> : <HiMenu size={24} />}
+            {isOpen ? <HiX size={24} aria-hidden /> : <HiMenu size={24} aria-hidden />}
           </button>
         </div>
       </div>

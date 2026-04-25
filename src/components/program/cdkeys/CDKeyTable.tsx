@@ -141,7 +141,7 @@ export default function CDKeyTable({
             <>
               {/* Mobile Card Layout */}
               <div className="block lg:hidden px-3 sm:px-4 py-4 sm:py-6">
-                <div className="grid auto-rows-auto grid-flow-dense grid-cols-[repeat(auto-fit,minmax(290px,1fr))] gap-3">
+                <div className="grid auto-rows-auto grid-flow-dense grid-cols-1 xs:grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
                   {sortedKeys.map((cdKey: CDKey, i: number) => (
                     <CDKeyMobileCard
                       key={i}

@@ -8,7 +8,7 @@ import Link from "next/link";
 
 // Available social platforms from Sanity schema
 export const SOCIAL_PLATFORMS = {
-  github: { icon: FaGithub, name: "GitHub" },
+  github: { icon: FaGithub, name: "GitHub profile" },
   linkedin: { icon: FaLinkedin, name: "LinkedIn" },
   instagram: { icon: FaInstagram, name: "Instagram" },
   twitter: { icon: FaXTwitter, name: "X (Twitter)" },

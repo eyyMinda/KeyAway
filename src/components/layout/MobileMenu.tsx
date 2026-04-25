@@ -113,6 +113,7 @@ export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }:
                 socialData={socialData}
                 path={pathname}
                 variant="outline"
+                taglinePlacement="inside"
                 className="text-sm w-full"
               />
             </div>

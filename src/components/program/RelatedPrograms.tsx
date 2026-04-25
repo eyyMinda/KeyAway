@@ -62,16 +62,20 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
           {programs.length > itemsPerView && (
             <>
               <button
+                type="button"
+                aria-label="Previous related programs"
                 onClick={prevSlide}
                 disabled={currentIndex === 0}
                 className="absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-800 disabled:opacity-50 rounded-full flex items-center justify-center text-white transition-all duration-200 disabled:cursor-not-allowed cursor-pointer">
-                <FaChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                <FaChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden />
               </button>
               <button
+                type="button"
+                aria-label="Next related programs"
                 onClick={nextSlide}
                 disabled={currentIndex >= maxIndex}
                 className="absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-800 disabled:opacity-50 rounded-full flex items-center justify-center text-white transition-all duration-200 disabled:cursor-not-allowed cursor-pointer">
-                <FaChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                <FaChevronRight className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden />
               </button>
             </>
           )}
@@ -115,7 +119,9 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
                         {/* Stats */}
                         <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
                           <span>CD Keys Available</span>
-                          <span className="text-primary-400 font-medium">{program.keyCount ?? program.cdKeys?.length ?? 0}</span>
+                          <span className="text-primary-400 font-medium">
+                            {program.keyCount ?? program.cdKeys?.length ?? 0}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -127,15 +133,22 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
 
           {/* Dots Indicator */}
           {programs.length > itemsPerView && (
-            <div className="flex justify-center mt-6 sm:mt-8 space-x-2">
+            <div className="mt-6 flex justify-center sm:mt-8">
               {Array.from({ length: maxIndex + 1 }, (_, index) => (
                 <button
                   key={index}
+                  type="button"
+                  aria-label={`Show related programs slide ${index + 1} of ${maxIndex + 1}`}
+                  aria-current={index === currentIndex ? "true" : undefined}
                   onClick={() => setCurrentIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                    index === currentIndex ? "bg-primary-400 w-8" : "bg-neutral-600 hover:bg-neutral-500"
-                  }`}
-                />
+                  className="inline-flex shrink-0 items-center justify-center rounded-full py-4 px-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900">
+                  <span
+                    className={`block h-3 rounded-full transition-all duration-200 ${
+                      index === currentIndex ? "w-8 bg-primary-400" : "w-3 bg-neutral-600 hover:bg-neutral-500"
+                    }`}
+                    aria-hidden
+                  />
+                </button>
               ))}
             </div>
           )}

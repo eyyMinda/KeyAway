@@ -42,7 +42,7 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
       <div className="max-w-360 mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center space-x-2 bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full text-sm font-semibold mb-3">
+          <div className="inline-flex items-center space-x-2 bg-purple-800 text-white px-4 py-2 rounded-full text-sm font-semibold mb-3">
             <FaStar className="w-4 h-4" />
             <span>Featured Program</span>
           </div>

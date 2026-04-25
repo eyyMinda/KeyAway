@@ -6,17 +6,7 @@ import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 const HERO_ALT = "Laptop with software icons—browse verified programs and CD keys on KeyAway" as const;
 
-export type HeroLaptopImageVariant = "mobile" | "desktop";
-
-export default function HeroLaptopImage({
-  sizes,
-  variant,
-  priority = true
-}: {
-  sizes: string;
-  variant: HeroLaptopImageVariant;
-  priority?: boolean;
-}) {
+export default function HeroLaptopImage({ sizes, priority = true }: { sizes: string; priority?: boolean }) {
   const scrollToPrograms = () => {
     scrollToSectionWithHeaderOffset("#popular-programs");
   };
@@ -24,8 +14,7 @@ export default function HeroLaptopImage({
   const shellClass =
     "group relative w-full cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-400";
 
-  /** Local file: static import gives dimensions + `blurDataURL` for `placeholder="blur"` (Next + sharp at build). */
-  const sharedImageProps = {
+  const imageProps = {
     src: heroAsset,
     alt: HERO_ALT,
     sizes,
@@ -48,22 +37,13 @@ export default function HeroLaptopImage({
         }
       }}
       aria-label="Scroll to programs">
-      {variant === "mobile" ? (
-        <div className="relative aspect-2/1 w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
-          <Image
-            {...sharedImageProps}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          />
-        </div>
-      ) : (
+      <div className="relative aspect-2/1 w-full overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 lg:aspect-3/2 lg:rounded-3xl">
         <Image
-          {...sharedImageProps}
-          width={heroAsset.width}
-          height={heroAsset.height}
-          className="h-auto w-full rounded-3xl object-cover shadow-2xl ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-[1.02]"
+          {...imageProps}
+          fill
+          className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.02]"
         />
-      )}
+      </div>
     </div>
   );
 }

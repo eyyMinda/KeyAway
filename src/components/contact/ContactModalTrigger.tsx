@@ -1,10 +1,10 @@
 "use client";
 
-import { ReactNode } from "react";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { InteractionId, SectionId } from "@/src/lib/analytics/interactionCatalog";
 
-interface ContactModalTriggerProps {
+export type ContactModalTriggerProps = {
   tab: "contact" | "suggest";
   children: ReactNode;
   className?: string;
@@ -13,7 +13,7 @@ interface ContactModalTriggerProps {
   sectionId?: SectionId;
   pagePath?: string;
   programSlug?: string;
-}
+} & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "type">;
 
 export default function ContactModalTrigger({
   tab,
@@ -23,7 +23,8 @@ export default function ContactModalTrigger({
   interactionId,
   sectionId,
   pagePath,
-  programSlug
+  programSlug,
+  ...rest
 }: ContactModalTriggerProps) {
   const handleClick = () => {
     if (interactionId && sectionId) {
@@ -37,14 +38,14 @@ export default function ContactModalTrigger({
 
   if (asChild) {
     return (
-      <div onClick={handleClick} className={triggerClassName}>
+      <div onClick={handleClick} className={triggerClassName} role="button" tabIndex={0}>
         {children}
       </div>
     );
   }
 
   return (
-    <button onClick={handleClick} className={triggerClassName} type="button">
+    <button type="button" onClick={handleClick} className={triggerClassName} {...rest}>
       {children}
     </button>
   );

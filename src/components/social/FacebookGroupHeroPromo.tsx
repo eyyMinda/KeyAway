@@ -40,7 +40,7 @@ export function FacebookGroupHeroPromo({ socialData, className = "", path }: Fac
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold text-white">Stay Updated</h3>
+            <p className="text-sm font-semibold text-white">Stay Updated</p>
             <span className="inline-flex shrink-0 animate-bell-ring" aria-hidden>
               <FaBell className="h-3 w-3 text-blue-400" />
             </span>
