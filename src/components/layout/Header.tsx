@@ -153,9 +153,12 @@ export default function Header({ logoData, notifications: notificationsProp, soc
           </ContactModalTrigger>
           <AnnouncementNotifications notifications={notifications} />
           <button
+            type="button"
             className="focus:outline-none text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isOpen}
             onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <HiX size={24} /> : <HiMenu size={24} />}
+            {isOpen ? <HiX size={24} aria-hidden /> : <HiMenu size={24} aria-hidden />}
           </button>
         </div>
       </div>
