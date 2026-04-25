@@ -77,6 +77,7 @@ export default async function RootLayout({
         {/* Verification Metadata */}
         <meta name="google-site-verification" content="jCM2s4y7bLvOzH32pe8QtRIdwbgEOmntka957Z-tXKI" />
         <meta name="facebook-domain-verification" content="r1iisd1vo2n1fuctve43oc853x7k3p" />
+        <meta name="yandex-verification" content="28d6f2a8e0d52c05" /> {/* www. */}
 
         {/* Technology Stack Metadata */}
         <meta name="generator" content="Next.js" />
