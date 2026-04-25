@@ -98,17 +98,17 @@ export default async function RootLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SessionProvider session={session}>
+          <PageViewTracker />
           <StoreDetailsProvider value={storeData}>
-            <PageViewTracker />
             <div className="mainContent flex flex-col min-h-screen">
               <Header logoData={logoData} socialData={socialData} />
               {children}
               <Footer logoData={logoData} socialData={socialData} />
             </div>
           </StoreDetailsProvider>
-          <Analytics />
-          <SpeedInsights />
         </SessionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
