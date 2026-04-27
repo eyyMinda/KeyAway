@@ -29,6 +29,37 @@ const geistMono = Geist_Mono({
 
 export const revalidate = 60;
 
+type HeadMetaTag = {
+  name?: string;
+  property?: string;
+  content: string;
+  condition?: boolean;
+};
+
+const HEAD_METADATA_GROUPS: Record<string, HeadMetaTag[]> = {
+  verification: [
+    { name: "google-site-verification", content: "jCM2s4y7bLvOzH32pe8QtRIdwbgEOmntka957Z-tXKI" },
+    { name: "facebook-domain-verification", content: "r1iisd1vo2n1fuctve43oc853x7k3p" },
+    { name: "yandex-verification", content: "28d6f2a8e0d52c05" }
+  ],
+  technologyStack: [
+    { name: "generator", content: "Next.js" },
+    { name: "powered-by", content: "Next.js" },
+    { name: "cms", content: "Sanity.io" },
+    { name: "hosting", content: "Vercel" },
+    { name: "framework", content: "Next.js" },
+    { name: "platform", content: "Vercel" }
+  ],
+  additionalTechnology: [
+    { name: "build-tool", content: "Next.js" },
+    { name: "deployment-platform", content: "Vercel" },
+    { name: "content-management", content: "Sanity.io" },
+    { name: "database", content: "Sanity.io" },
+    { name: "cdn", content: "Vercel Edge Network" }
+  ],
+  social: [{ property: "fb:app_id", content: process.env.NEXT_PUBLIC_FB_APP_ID ?? "", condition: !!process.env.NEXT_PUBLIC_FB_APP_ID }]
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   return generateHomePageMetadata();
 }
@@ -70,32 +101,22 @@ export default async function RootLayout({
   const socialData: SocialData = {
     socialLinks: storeData?.socialLinks ?? []
   };
+  const renderedHeadMetaTags = Object.entries(HEAD_METADATA_GROUPS).flatMap(([groupName, tags]) =>
+    tags
+      .filter((tag) => tag.condition !== false)
+      .map((tag, index) => (
+        <meta
+          key={`${groupName}-${tag.name ?? tag.property}-${index}`}
+          {...(tag.name ? { name: tag.name } : { property: tag.property })}
+          content={tag.content}
+        />
+      ))
+  );
 
   return (
     <html lang="en">
       <head>
-        {/* Verification Metadata */}
-        <meta name="google-site-verification" content="jCM2s4y7bLvOzH32pe8QtRIdwbgEOmntka957Z-tXKI" />
-        <meta name="facebook-domain-verification" content="r1iisd1vo2n1fuctve43oc853x7k3p" />
-        <meta name="yandex-verification" content="28d6f2a8e0d52c05" /> {/* www. */}
-
-        {/* Technology Stack Metadata */}
-        <meta name="generator" content="Next.js" />
-        <meta name="powered-by" content="Next.js" />
-        <meta name="cms" content="Sanity.io" />
-        <meta name="hosting" content="Vercel" />
-        <meta name="framework" content="Next.js" />
-        <meta name="platform" content="Vercel" />
-
-        {/* Additional Technology Information */}
-        <meta name="build-tool" content="Next.js" />
-        <meta name="deployment-platform" content="Vercel" />
-        <meta name="content-management" content="Sanity.io" />
-        <meta name="database" content="Sanity.io" />
-        <meta name="cdn" content="Vercel Edge Network" />
-
-        {/* Facebook App ID Metadata */}
-        {process.env.NEXT_PUBLIC_FB_APP_ID && <meta property="fb:app_id" content={process.env.NEXT_PUBLIC_FB_APP_ID} />}
+        {renderedHeadMetaTags}
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SessionProvider session={session}>

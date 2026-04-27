@@ -55,6 +55,7 @@ export const IdealImage = ({
       {...shared}
       width={getImageDimensions(image).width}
       height={getImageDimensions(image).height}
+      {...(src.includes(".gif") ? { unoptimized: true } : {})}
     />
   );
 };

@@ -6,6 +6,7 @@ import { buildImageReference } from "@/src/lib/admin/adminHelpers";
 import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { buildSiteUrl, submitIndexNow } from "@/src/lib/seo/indexnow";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
@@ -106,6 +107,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     if (!id) return Errors.badRequest("id is required");
+    const existingProgram = await client.fetch<{ slug?: { current?: string } } | null>(
+      `*[_type == "program" && _id == $id][0]{ slug }`,
+      { id }
+    );
+    if (!existingProgram) return Errors.notFound("Program not found");
+    const oldSlug = existingProgram.slug?.current?.trim() || "";
 
     const body = await req.json().catch(() => ({}));
     const updates = parseBody(body);
@@ -142,17 +149,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       type FeaturedRow = {
         featured?: { description?: unknown; showcaseGif?: unknown } | null;
       };
-      const row = await client.fetch<FeaturedRow | null>(
-        `*[_type == "program" && _id == $id][0]{ featured }`,
-        { id }
-      );
+      const row = await client.fetch<FeaturedRow | null>(`*[_type == "program" && _id == $id][0]{ featured }`, { id });
       const rawDesc = row?.featured?.description;
       const prevDesc =
-        typeof rawDesc === "string"
-          ? plainTextToPortableText(rawDesc)
-          : Array.isArray(rawDesc)
-            ? rawDesc
-            : [];
+        typeof rawDesc === "string" ? plainTextToPortableText(rawDesc) : Array.isArray(rawDesc) ? rawDesc : [];
       const prevGif = row?.featured?.showcaseGif ?? null;
       const nextDescription =
         updates.featuredCopy !== undefined
@@ -172,6 +172,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const result = await patch.commit();
     revalidatePath("/sitemap.xml");
+    const nextSlug = typeof updates.slug === "string" ? updates.slug : oldSlug;
+    const urls = [buildSiteUrl(`/program/${nextSlug}`), buildSiteUrl("/programs"), buildSiteUrl("/")];
+    if (oldSlug && oldSlug !== nextSlug) urls.push(buildSiteUrl(`/program/${oldSlug}`));
+    void submitIndexNow(urls);
     return NextResponse.json({ data: result, meta: {} });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update program";
@@ -195,13 +199,18 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     if (!id) return Errors.badRequest("id is required");
 
-    const existing = await client.fetch<{ _id: string } | null>(`*[_type == "program" && _id == $id][0]{ _id }`, {
-      id
-    });
+    const existing = await client.fetch<{ _id: string; slug?: { current?: string } } | null>(
+      `*[_type == "program" && _id == $id][0]{ _id, slug }`,
+      { id }
+    );
     if (!existing) return Errors.notFound("Program not found");
+    const oldSlug = existing.slug?.current?.trim() || "";
 
     await client.delete(id);
     revalidatePath("/sitemap.xml");
+    const urls = [buildSiteUrl("/programs"), buildSiteUrl("/")];
+    if (oldSlug) urls.push(buildSiteUrl(`/program/${oldSlug}`));
+    void submitIndexNow(urls);
     return new NextResponse(null, { status: 204 });
   } catch (err) {
     console.error("[DELETE /api/v1/admin/programs/[id]]", err);
