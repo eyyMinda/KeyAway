@@ -6,6 +6,7 @@ import { buildImageReference } from "@/src/lib/admin/adminHelpers";
 import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { buildSiteUrl, submitIndexNow } from "@/src/lib/seo/indexnow";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
@@ -100,6 +101,7 @@ export async function POST(req: NextRequest) {
     });
 
     revalidatePath("/sitemap.xml");
+    void submitIndexNow([buildSiteUrl(`/program/${slug}`), buildSiteUrl("/programs"), buildSiteUrl("/")]);
     return NextResponse.json({ data: doc, meta: {} }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/v1/admin/programs]", err);
