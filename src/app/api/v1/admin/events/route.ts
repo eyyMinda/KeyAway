@@ -96,8 +96,8 @@ export async function GET(req: NextRequest) {
       term !== ""
         ? `&& (
           path == $term || programSlug == $term || social == $term || referrer == $term ||
-          country == $term || city == $term || keyHash == $term || keyIdentifier == $term ||
-          keyNormalized == $term || userAgent == $term || utm_source == $term ||
+          country == $term || city == $term || key == $term || activationUrl == $term ||
+          programFlow == $term || userAgent == $term || utm_source == $term ||
           utm_medium == $term || utm_campaign == $term
         )`
         : "";
@@ -106,8 +106,8 @@ export async function GET(req: NextRequest) {
 
     const singular = await client.fetch<Array<Record<string, unknown> & { _id: string; _type: string }>>(
       `*[_type == "trackingEvent" ${singularFilter} ${programFilter} ${pathFilter}]{
-        _id, _type, event, programSlug, social, path, referrer, country, city,
-        keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+        _id, _type, event, programSlug, notFound, social, path, referrer, country, city,
+        key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
       } | order(${sort} ${order})`,
       { term, programSlug: programSlug ?? "", path: path ?? "" }
     );
@@ -242,7 +242,7 @@ export async function PATCH(req: NextRequest) {
     }
     if (filter.search) {
       groqFilterParts.push(
-        `(path == $term || programSlug == $term || social == $term || referrer == $term || country == $term || city == $term || keyHash == $term || keyIdentifier == $term || keyNormalized == $term || userAgent == $term || utm_source == $term || utm_medium == $term || utm_campaign == $term)`
+        `(path == $term || programSlug == $term || social == $term || referrer == $term || country == $term || city == $term || key == $term || activationUrl == $term || programFlow == $term || userAgent == $term || utm_source == $term || utm_medium == $term || utm_campaign == $term)`
       );
       params.term = filter.search;
     }

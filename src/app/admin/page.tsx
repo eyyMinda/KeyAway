@@ -80,6 +80,7 @@ export default function AdminHomePage() {
           <IndexNowSubmitCard />
         </div>
       </div>
+
     </ProtectedAdminLayout>
   );
 }

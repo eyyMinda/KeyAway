@@ -8,7 +8,7 @@ const BUNDLE_SIZE = 1000;
 const MAX_ITERATIONS = 10;
 
 const EVENT_FIELDS =
-  "event, programSlug, notFound, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
+  "event, programSlug, notFound, path, referrer, country, city, social, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
 
 /** Each array row needs a unique `_key`; deriving only from `_id` can collide after truncation or duplicate appends. */
 function toBundleEvent(doc: Record<string, unknown> & { _id?: string }) {
@@ -23,9 +23,9 @@ function toBundleEvent(doc: Record<string, unknown> & { _id?: string }) {
     country: doc.country,
     city: doc.city,
     social: doc.social,
-    keyHash: doc.keyHash,
-    keyIdentifier: doc.keyIdentifier,
-    keyNormalized: doc.keyNormalized,
+    key: doc.key,
+    activationUrl: doc.activationUrl,
+    programFlow: doc.programFlow,
     userAgent: doc.userAgent,
     ipHash: doc.ipHash,
     utm_source: doc.utm_source,
