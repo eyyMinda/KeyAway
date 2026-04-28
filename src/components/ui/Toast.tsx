@@ -73,12 +73,12 @@ export default function Toast({ message, type = "success", duration = 3000, onCl
 
   return (
     <div
-      className={`fixed top-4 right-4 ${getTypeStyles()} text-white px-6 py-3 rounded-lg shadow-xl z-[9999] border-2 transform transition-all duration-300 ${
-        isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+      className={`fixed top-20 md:top-24 left-0 ${getTypeStyles()} text-white px-3 py-2 md:px-6 md:py-3 rounded-r-lg shadow-xl z-9999 border-2 transform transition-all duration-300 ${
+        isVisible ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
       }`}>
       <div className="flex items-center space-x-2">
         {getIcon()}
-        <span className="font-medium">{message}</span>
+        <span className="text-xs md:text-sm font-medium">{message}</span>
       </div>
     </div>
   );
