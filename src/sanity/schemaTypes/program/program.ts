@@ -4,7 +4,7 @@ import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import {
   validateFaqNotExactlyOne,
   validatePortableTextRequired,
-  validateProgramCdKeysArray
+  validateProgramActivationEntries
 } from "@/src/sanity/validators/program";
 import { CdKeysArrayInput } from "../../inputs/CdKeysArrayInput";
 
@@ -61,6 +61,24 @@ export const program = defineType({
       title: "Slug",
       type: "slug",
       options: { source: "title" },
+      validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "programFlow",
+      title: "Activation flow",
+      type: "string",
+      description:
+        "How users get PRO access: classic CD keys, signup-giveaway keys, shared PRO accounts, or links to claim accounts.",
+      options: {
+        list: [
+          { title: "CD keys (default)", value: "cd_key" },
+          { title: "Link-based CD keys (giveaway → private key)", value: "link_based_cdkey" },
+          { title: "PRO account (username + password)", value: "account" },
+          { title: "Links to get PRO account", value: "link_based_account" }
+        ],
+        layout: "radio"
+      },
+      initialValue: "cd_key",
       validation: Rule => Rule.required()
     }),
     defineField({
@@ -188,11 +206,15 @@ export const program = defineType({
     }),
     defineField({
       name: "cdKeys",
-      title: "CD Keys",
+      title: "Activation entries",
+      description: "Keys, accounts, or giveaway links depending on Activation flow above.",
       type: "array",
       of: [{ type: "cdKey" }],
       components: { input: CdKeysArrayInput },
-      validation: Rule => Rule.custom(keys => validateProgramCdKeysArray(keys))
+      validation: Rule =>
+        Rule.custom((keys, context) =>
+          validateProgramActivationEntries(keys, (context.document as { programFlow?: string } | undefined)?.programFlow)
+        )
     })
   ],
   preview: {
@@ -201,12 +223,19 @@ export const program = defineType({
       description: "description",
       latestOfficialVersion: "latestOfficialVersion",
       media: "image",
-      cdKeys: "cdKeys"
+      cdKeys: "cdKeys",
+      programFlow: "programFlow"
     },
     prepare(selection) {
-      const { title, description, latestOfficialVersion, media, cdKeys } = selection;
+      const { title, description, latestOfficialVersion, media, cdKeys, programFlow } = selection;
       const n = Array.isArray(cdKeys) ? cdKeys.length : 0;
-      const keyLine = `${n} CD key${n === 1 ? "" : "s"}`;
+      const flow = typeof programFlow === "string" ? programFlow : "cd_key";
+      const keyLine =
+        flow === "account"
+          ? `${n} account${n === 1 ? "" : "s"}`
+          : flow === "link_based_account"
+            ? `${n} link set${n === 1 ? "" : "s"}`
+            : `${n} key${n === 1 ? "" : "s"}`;
       const versionPart =
         typeof latestOfficialVersion === "string" && latestOfficialVersion.trim()
           ? `v${latestOfficialVersion.trim()}`
