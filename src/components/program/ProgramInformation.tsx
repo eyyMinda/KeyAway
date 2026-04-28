@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
-import { Program, SocialData } from "@/src/types";
+import type { ProgramInformationProps } from "@/src/types/program";
+import type { SocialData } from "@/src/types";
+import type { Program } from "@/src/types/program";
 import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { FacebookGroupHeroPromo } from "@/src/components/social";
@@ -13,14 +15,7 @@ import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 import RichText from "@/src/components/portableText/RichText";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
-
-interface ProgramInformationProps {
-  program: Program;
-  totalKeys: number;
-  workingKeys: number;
-  socialData?: SocialData;
-  visitorHint?: VisitorHintData | null;
-}
+import { useI18n } from "@/src/contexts/i18n";
 
 const PROGRAM_HERO_IMAGE_SIZES = "(max-width: 1023px) 98vw, (max-width: 1450px) 48vw, 680px" as const;
 
@@ -53,7 +48,11 @@ export default function ProgramInformation({
   socialData,
   visitorHint
 }: ProgramInformationProps) {
+  const { t } = useI18n("program");
   const trustpilotUrl = getTrustpilotReviewUrl(socialData);
+  const heroSubtitle = t.hero.subtitle({ programTitle: program.title });
+  const totalLabel = t.stats.totalLabel();
+  const workingLabel = t.stats.workingLabel();
 
   return (
     <section className="bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 py-6 sm:py-10">
@@ -71,9 +70,7 @@ export default function ProgramInformation({
               <h1 className="text-3xl lg:text-4xl font-bold text-gradient-pro mb-3 leading-tight lg:max-w-[540px] mx-auto lg:mx-0">
                 {formatProgramDisplayTitle(program)}
               </h1>
-              <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
-                Free giveaway CD keys for {program.title} — copy a working key and activate in the Windows app.
-              </p>
+              <p className="text-base sm:text-lg text-gray-300 leading-relaxed">{heroSubtitle}</p>
             </div>
           </div>
 
@@ -114,13 +111,13 @@ export default function ProgramInformation({
               {[
                 {
                   value: totalKeys,
-                  label: "Available CD Keys",
+                  label: totalLabel,
                   color: "text-primary-400",
                   hoverColor: "hover:border-primary-400/50"
                 },
                 {
                   value: workingKeys,
-                  label: "Working Keys",
+                  label: workingLabel,
                   color: "text-green-400",
                   hoverColor: "hover:border-green-400/50"
                 }
