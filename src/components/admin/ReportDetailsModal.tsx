@@ -2,13 +2,19 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { ExpiredKeyReport, KeyReportEvent } from "@/src/types";
+import { KeyReport, KeyReportEvent } from "@/src/types";
 import ModalSection from "./ModalSection";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { FiAlertTriangle, FiCheck, FiX } from "react-icons/fi";
 import { client } from "@/src/sanity/lib/client";
 import { effectiveReferrerHref, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
 import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
+import {
+  isAccountFlow,
+  isKeyLikeFlow,
+  isLinkAccountFlow,
+  normalizeProgramFlow
+} from "@/src/lib/program/activationEntry";
 
 const EVENT_OPTIONS: { value: KeyReportEvent; label: string }[] = [
   { value: "report_key_working", label: "Working" },
@@ -16,10 +22,81 @@ const EVENT_OPTIONS: { value: KeyReportEvent; label: string }[] = [
   { value: "report_key_limit_reached", label: "Limit reached" }
 ];
 
+const keyInfoCodeClass =
+  "flex min-w-0 w-full max-w-full items-center text-sm font-mono bg-white text-gray-900 px-4 py-3 rounded-lg border border-blue-200 shadow-sm break-all";
+
+function KeyInformationGrid({
+  report,
+  getStatusColor
+}: {
+  report: KeyReport;
+  getStatusColor: (status: string) => string;
+}) {
+  const flow = normalizeProgramFlow(report.programFlow);
+  const primaryLabel = isAccountFlow(flow)
+    ? "Display label"
+    : isLinkAccountFlow(flow)
+      ? "Links (display)"
+      : "CD key (display)";
+
+  const rawResolvedCd = report.resolvedCdKey?.trim();
+  const showProgramRowCdKey =
+    isKeyLikeFlow(flow) &&
+    !!rawResolvedCd &&
+    rawResolvedCd !== report.key.trim() &&
+    rawResolvedCd !== report.storageKey.trim();
+
+  const username = report.resolvedUsername?.trim();
+  const password = report.resolvedPassword?.trim();
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="min-w-0">
+        <label className="text-sm font-semibold text-blue-700 mb-2 block">{primaryLabel}</label>
+        <code className={keyInfoCodeClass}>{report.key}</code>
+      </div>
+      <div>
+        <label className="text-sm font-semibold text-blue-700 mb-2 block">Status</label>
+        <span
+          className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${getStatusColor(report.status)}`}>
+          {report.status}
+        </span>
+      </div>
+
+      {showProgramRowCdKey ? (
+        <div className="min-w-0 md:col-span-2">
+          <label className="text-sm font-semibold text-blue-700 mb-2 block">CD key (program row)</label>
+          <code className={keyInfoCodeClass}>{rawResolvedCd}</code>
+        </div>
+      ) : null}
+
+      {username ? (
+        <div className="min-w-0">
+          <label className="text-sm font-semibold text-blue-700 mb-2 block">Username (program row)</label>
+          <code className={keyInfoCodeClass}>{username}</code>
+        </div>
+      ) : null}
+      {password ? (
+        <div className="min-w-0">
+          <label className="text-sm font-semibold text-blue-700 mb-2 block">Password (program row)</label>
+          <code className={keyInfoCodeClass}>{password}</code>
+        </div>
+      ) : null}
+
+      <div className="min-w-0 md:col-span-2">
+        <label className="text-sm font-semibold text-blue-700 mb-2 block">Row storage key</label>
+        <code className="block text-xs font-mono text-gray-600 bg-white px-3 py-2 rounded border border-blue-200 break-all">
+          {report.storageKey}
+        </code>
+      </div>
+    </div>
+  );
+}
+
 interface ReportDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  report: ExpiredKeyReport | null;
+  report: KeyReport | null;
 }
 
 export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDetailsModalProps) {
@@ -204,33 +281,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
         <div className="flex-1 p-6 overflow-y-auto">
           {/* Key Information */}
           <ModalSection title="Key Information" color="blue">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="text-sm font-semibold text-blue-700 mb-2 block">CD Key</label>
-                <code className="flex items-center w-max text-sm font-mono bg-white text-gray-900 px-4 py-3 rounded-lg border border-blue-200 shadow-sm">
-                  {report.key}
-                </code>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-blue-700 mb-2 block">Status</label>
-                <span
-                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${getStatusColor(report.status)}`}>
-                  {report.status}
-                </span>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-blue-700 mb-2 block">Key Hash</label>
-                <code className="block text-xs font-mono text-gray-600 bg-white px-3 py-2 rounded border border-blue-200">
-                  {report.keyHash}
-                </code>
-              </div>
-              <div>
-                <label className="text-sm font-semibold text-blue-700 mb-2 block">Key Identifier</label>
-                <code className="block text-xs font-mono text-gray-600 bg-white px-3 py-2 rounded border border-blue-200">
-                  {report.keyIdentifier}
-                </code>
-              </div>
-            </div>
+            <KeyInformationGrid report={report} getStatusColor={getStatusColor} />
           </ModalSection>
 
           {/* Validity Information */}

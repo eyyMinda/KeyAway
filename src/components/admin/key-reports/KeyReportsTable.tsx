@@ -1,19 +1,20 @@
 import React, { useMemo, useState } from "react";
-import { ExpiredKeyReport } from "@/src/types/admin";
+import { KeyReport } from "@/src/types/admin";
 import { CDKeyStatus } from "@/src/types/program";
 import TableHead, { HeaderDef, SortColumn, SortDirection } from "@/src/components/admin/key-reports/TableHead";
 import TableBody from "@/src/components/admin/key-reports/TableBody";
 import Pagination from "@/src/components/ui/Pagination";
 import { formatSlugToTitle } from "@/src/lib/program/programUtils";
+import { useI18n } from "@/src/contexts/i18n";
 
 interface KeyReportsTableProps {
-  reports: ExpiredKeyReport[];
+  reports: KeyReport[];
   pendingChanges: Map<string, { originalStatus: CDKeyStatus; newStatus: CDKeyStatus }>;
   saving: Set<string>;
-  onStatusChange: (report: ExpiredKeyReport, newStatus: CDKeyStatus) => void;
-  onSaveStatusChange: (report: ExpiredKeyReport) => void;
-  onCancelStatusChange: (report: ExpiredKeyReport) => void;
-  onViewDetails: (report: ExpiredKeyReport) => void;
+  onStatusChange: (report: KeyReport, newStatus: CDKeyStatus) => void;
+  onSaveStatusChange: (report: KeyReport) => void;
+  onCancelStatusChange: (report: KeyReport) => void;
+  onViewDetails: (report: KeyReport) => void;
 }
 
 const STATUS_ORDER: Record<CDKeyStatus, number> = {
@@ -32,12 +33,13 @@ export default function KeyReportsTable({
   onCancelStatusChange,
   onViewDetails
 }: KeyReportsTableProps) {
+  const { t } = useI18n("adminKeyReports");
   const [sortColumn, setSortColumn] = useState<SortColumn>("lastReport");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const pageSize = 20;
 
-  const getLatestReportTs = (r: ExpiredKeyReport): number => {
+  const getLatestReportTs = (r: KeyReport): number => {
     if (!r.reports || r.reports.length === 0) return 0;
     let latest = 0;
     for (const item of r.reports) {
@@ -47,7 +49,7 @@ export default function KeyReportsTable({
     return latest;
   };
 
-  const getWorkingRatio = (r: ExpiredKeyReport): number => {
+  const getWorkingRatio = (r: KeyReport): number => {
     const { working, expired, limit_reached } = r.reportData || { working: 0, expired: 0, limit_reached: 0 };
     const total = working + expired + limit_reached;
     if (total === 0) return 0;
@@ -92,7 +94,7 @@ export default function KeyReportsTable({
 
   const tableHead: HeaderDef[] = [
     { key: "program", label: "Program", sortable: true, column: "program", className: "text-left" },
-    { key: "key", label: "Key", sortable: false, className: "text-left" },
+    { key: "key", label: t.columnActivation(), sortable: false, className: "text-left" },
     { key: "status", label: "Status", sortable: true, column: "status", className: "text-left" },
     { key: "reportStatus", label: "Report Status", sortable: true, column: "reportStatus", className: "text-left" },
     { key: "lastReport", label: "Last Report", sortable: true, column: "lastReport", className: "text-left" },

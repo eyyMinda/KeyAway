@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
 import { CDKey, CDKeyStatus, Program } from "@/src/types/program";
-import { ExpiredKeyReport } from "@/src/types/admin";
+import { KeyReport } from "@/src/types/admin";
 import {
   createReportKey,
   findProgramBySlug,
+  findKeyIndexByStorageKey,
   removeFromPendingChanges,
   removeFromSaving,
   addToSaving
@@ -11,7 +12,7 @@ import {
 
 interface UseStatusChangeProps {
   programs: Program[];
-  setReports: React.Dispatch<React.SetStateAction<ExpiredKeyReport[]>>;
+  setReports: React.Dispatch<React.SetStateAction<KeyReport[]>>;
   setPrograms: React.Dispatch<React.SetStateAction<Program[]>>;
 }
 
@@ -21,7 +22,7 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
   >(new Map());
   const [saving, setSaving] = useState<Set<string>>(new Set());
 
-  const handleStatusChange = useCallback((report: ExpiredKeyReport, newStatus: CDKeyStatus) => {
+  const handleStatusChange = useCallback((report: KeyReport, newStatus: CDKeyStatus) => {
     const reportKey = createReportKey(report);
 
     console.log("Status change:", {
@@ -48,7 +49,7 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
   }, []);
 
   const saveStatusChange = useCallback(
-    async (report: ExpiredKeyReport) => {
+    async (report: KeyReport) => {
       const reportKey = createReportKey(report);
       const change = pendingChanges.get(reportKey);
 
@@ -72,15 +73,10 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
           return;
         }
 
-        // Find the specific key by matching the actual key
-        const keyIndex = program.cdKeys?.findIndex((k: CDKey) => k.key === report.key);
+        const keyIndex = findKeyIndexByStorageKey(program, report.storageKey);
 
         if (keyIndex === undefined || keyIndex === -1) {
-          console.error("Key not found in program:", report.key);
-          console.error(
-            "Available keys:",
-            program.cdKeys?.map((k: CDKey) => k.key)
-          );
+          console.error("Activation row not found in program (storageKey):", report.storageKey);
           return;
         }
 
@@ -123,7 +119,9 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
         // Update local reports state
         setReports(prev =>
           prev.map(r =>
-            r.programSlug === report.programSlug && r.key === report.key ? { ...r, status: change.newStatus } : r
+            r.programSlug === report.programSlug && r.storageKey === report.storageKey
+              ? { ...r, status: change.newStatus }
+              : r
           )
         );
 
@@ -158,7 +156,7 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
     [pendingChanges, programs, setReports, setPrograms]
   );
 
-  const cancelStatusChange = useCallback((report: ExpiredKeyReport) => {
+  const cancelStatusChange = useCallback((report: KeyReport) => {
     const reportKey = createReportKey(report);
     setPendingChanges(prev => removeFromPendingChanges(prev, reportKey));
   }, []);

@@ -1,18 +1,19 @@
 import React from "react";
 import { CDKeyStatus } from "@/src/types/program";
-import { ExpiredKeyReport } from "@/src/types/admin";
+import { KeyReport } from "@/src/types/admin";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
 import { formatSlugToTitle } from "@/src/lib/program/programUtils";
+import { createReportKey } from "@/src/lib/admin/adminUtils";
 
 interface TableBodyProps {
-  reports: ExpiredKeyReport[];
+  reports: KeyReport[];
   pendingChanges: Map<string, { originalStatus: CDKeyStatus; newStatus: CDKeyStatus }>;
   saving: Set<string>;
-  onStatusChange: (report: ExpiredKeyReport, newStatus: CDKeyStatus) => void;
-  onSaveStatusChange: (report: ExpiredKeyReport) => void;
-  onCancelStatusChange: (report: ExpiredKeyReport) => void;
-  onViewDetails: (report: ExpiredKeyReport) => void;
-  getLatestReportTs: (r: ExpiredKeyReport) => number;
+  onStatusChange: (report: KeyReport, newStatus: CDKeyStatus) => void;
+  onSaveStatusChange: (report: KeyReport) => void;
+  onCancelStatusChange: (report: KeyReport) => void;
+  onViewDetails: (report: KeyReport) => void;
+  getLatestReportTs: (r: KeyReport) => number;
 }
 
 const STATUS_OPTIONS: Record<CDKeyStatus, string> = {
@@ -35,13 +36,13 @@ export default function TableBody({
   return (
     <tbody className="bg-white divide-y divide-gray-200">
       {reports.map((report, index) => {
-        const reportKey = `${report.programSlug}:${report.key}`;
+        const reportKey = createReportKey(report);
         const hasChanges = pendingChanges.has(reportKey);
         const isSaving = saving.has(reportKey);
         const change = pendingChanges.get(reportKey);
 
         return (
-          <tr key={`${report.programSlug}-${report.key}-${index}`} className="hover:bg-gray-50">
+          <tr key={`${report.programSlug}-${report.storageKey}-${index}`} className="hover:bg-gray-50">
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
               {formatSlugToTitle(report.programSlug)}
             </td>

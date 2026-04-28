@@ -8,21 +8,60 @@ import { keyReportsQuery, allProgramsQuery } from "@/src/lib/sanity/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
 import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";
-import { Program, ExpiredKeyReport } from "@/src/types";
-import { hashCDKey, hashCDKeyClient, normalizeKey } from "@/src/lib/keyHashing";
+import type { CDKey, Program, ProgramFlow } from "@/src/types/program";
+import { KeyReport } from "@/src/types";
+import { getKeyData, normalizeKey } from "@/src/lib/keyHashing";
+import {
+  getActivationEntryDisplayLabel,
+  getActivationEntryIdentityString,
+  isAccountFlow,
+  isKeyLikeFlow,
+  isLinkAccountFlow,
+  normalizeProgramFlow
+} from "@/src/lib/program/activationEntry";
 import { logger } from "@/src/lib/logger";
 import { useStatusChange } from "@/src/hooks/useStatusChange";
+import { I18nProvider } from "@/src/contexts/i18n";
+import adminKeyReportsEn from "@/src/locales/admin/key-reports/en.json";
+
+/** `?key=` filter: row storage is plaintext CD key, lowercase username, or link digest — not CD-key SHA. */
+function keyQueryMatchesRowStorage(
+  flow: ProgramFlow,
+  storageKey: string,
+  displayKey: string | undefined,
+  raw: string
+): boolean {
+  const r = raw.trim();
+  const sk = storageKey.trim();
+  if (!r || !sk) return false;
+  if (sk === r || sk.toLowerCase() === r.toLowerCase()) return true;
+  if (isKeyLikeFlow(flow) && normalizeKey(sk) === normalizeKey(r)) return true;
+  const dk = (displayKey ?? "").trim();
+  if (dk && dk !== "Unknown Key" && dk !== "Unknown") {
+    if (isKeyLikeFlow(flow) && normalizeKey(dk) === normalizeKey(r)) return true;
+    if ((isAccountFlow(flow) || isLinkAccountFlow(flow)) && dk.toLowerCase() === r.toLowerCase()) return true;
+  }
+  return false;
+}
+
+function keyQueryMatchesActivationRow(flow: ProgramFlow, k: CDKey, raw: string): boolean {
+  const kd = getKeyData({ ...(k as CDKey), programFlow: flow }, flow);
+  if (!kd?.hash) return false;
+  const r = raw.trim();
+  if (kd.hash === r || kd.hash.toLowerCase() === r.toLowerCase()) return true;
+  if (isKeyLikeFlow(flow) && normalizeKey(kd.hash) === normalizeKey(r)) return true;
+  return false;
+}
 
 function KeyReportsPageContent() {
   const searchParams = useSearchParams();
-  const [reports, setReports] = useState<ExpiredKeyReport[]>([]);
+  const [reports, setReports] = useState<KeyReport[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState<string>("all");
-  const [selectedReport, setSelectedReport] = useState<ExpiredKeyReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<KeyReport | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasAppliedProgramParam = useRef(false);
-  const [keyFilterHash, setKeyFilterHash] = useState<string | null>(null);
 
   const { pendingChanges, saving, handleStatusChange, saveStatusChange, cancelStatusChange } = useStatusChange({
     programs,
@@ -41,38 +80,63 @@ function KeyReportsPageContent() {
         const events = await client.fetch(keyReportsQuery, { since });
 
         const keyReportEvents = events;
-        const keyReports = new Map<string, ExpiredKeyReport>();
+        const keyReports = new Map<string, KeyReport>();
 
         for (const report of keyReportEvents) {
           const programSlug = (report.programSlug as string) || "unknown";
-          const keyHash = (report.keyHash as string) || "unknown";
-          const keyIdentifier = (report.keyIdentifier as string) || "unknown";
+          const storageKey = String((report as { key?: string }).key ?? "").trim() || "unknown";
+          const storedLabel = String((report as { label?: string }).label ?? "").trim() || "unknown";
           const program = programsData.find(p => p.slug?.current === programSlug);
 
-          let actualKey = null;
+          let actualKey: CDKey | null = null;
+          const flow = normalizeProgramFlow(program?.programFlow);
           if (program?.cdKeys) {
-            actualKey = program.cdKeys.find(k => {
-              const keyHashFromProgram = hashCDKey(k.key);
-              return keyHashFromProgram === keyHash;
-            });
+            actualKey =
+              program.cdKeys.find(
+                k => getKeyData({ ...(k as CDKey), programFlow: flow }, flow)?.hash === storageKey
+              ) ?? null;
 
             if (!actualKey) {
               logger.collapse(
-                `No matching CD key found for keyHash: ${keyHash} in program: ${program?.title}`,
-                "Missing CD Key",
+                `No matching activation row for storage key: ${storageKey} in program: ${program?.title}`,
+                "Missing activation row",
                 "warning"
               );
             }
           }
 
-          const keyForGrouping = actualKey?.key || keyHash;
-          const groupKey = `${programSlug}:${keyForGrouping}`;
+          const groupKey = `${programSlug}:${storageKey}`;
 
           if (!keyReports.has(groupKey)) {
+            const display =
+              actualKey != null
+                ? getActivationEntryDisplayLabel(actualKey, flow)
+                : storedLabel !== "unknown"
+                  ? storedLabel
+                  : "Unknown";
+
+            let resolvedUsername: string | undefined;
+            let resolvedPassword: string | undefined;
+            let resolvedCdKey: string | undefined;
+            if (actualKey) {
+              if (isAccountFlow(flow)) {
+                const u = (actualKey.username ?? "").trim();
+                const p = (actualKey.password ?? "").trim();
+                if (u) resolvedUsername = u;
+                if (p) resolvedPassword = p;
+              } else if (isKeyLikeFlow(flow)) {
+                const k = (actualKey.key ?? "").trim();
+                if (k) resolvedCdKey = k;
+              }
+            }
+
             const newReport = {
-              key: actualKey?.key || "Unknown Key",
-              keyHash: keyHash,
-              keyIdentifier: keyIdentifier,
+              key: display,
+              storageKey,
+              programFlow: flow,
+              ...(resolvedUsername ? { resolvedUsername } : {}),
+              ...(resolvedPassword ? { resolvedPassword } : {}),
+              ...(resolvedCdKey ? { resolvedCdKey } : {}),
               programSlug,
               programTitle: program?.title || "Unknown Program",
               reportCount: 0,
@@ -158,14 +222,7 @@ function KeyReportsPageContent() {
   useEffect(() => {
     const programSlug = searchParams.get("program");
     const keyParam = searchParams.get("key");
-
-    if (keyParam) {
-      hashCDKeyClient(keyParam).then(hash => {
-        setKeyFilterHash(hash);
-      });
-    } else {
-      setKeyFilterHash(null);
-    }
+    const raw = keyParam?.trim() ?? "";
 
     if (programs.length === 0) return;
 
@@ -175,17 +232,28 @@ function KeyReportsPageContent() {
         setSelectedProgram(programSlug);
         hasAppliedProgramParam.current = true;
       }
-    } else if (keyParam) {
-      const norm = normalizeKey(keyParam);
-      const program = programs.find(p => p.cdKeys?.some(k => k.key && normalizeKey(k.key) === norm));
-      if (program?.slug?.current) {
-        setSelectedProgram(program.slug.current);
+      return;
+    }
+
+    if (!raw) return;
+
+    for (const p of programs) {
+      const flow = normalizeProgramFlow(p.programFlow);
+      for (const k of p.cdKeys ?? []) {
+        const id = getActivationEntryIdentityString(k as CDKey, flow);
+        if (id && isKeyLikeFlow(flow) && normalizeKey(id) === normalizeKey(raw)) {
+          setSelectedProgram(p.slug?.current || "all");
+          return;
+        }
+        if (keyQueryMatchesActivationRow(flow, k as CDKey, raw)) {
+          setSelectedProgram(p.slug?.current || "all");
+          return;
+        }
       }
     }
   }, [programs, searchParams]);
 
   const keyParam = searchParams.get("key");
-  const keyParamNorm = keyParam ? normalizeKey(keyParam) : null;
 
   const filteredReports = reports.filter(report => {
     if (selectedProgram !== "all") {
@@ -193,10 +261,9 @@ function KeyReportsPageContent() {
       if (!program || report.programSlug !== program.slug?.current) return false;
     }
     if (keyParam) {
-      const keyMatches =
-        (keyFilterHash && report.keyHash === keyFilterHash) ||
-        (keyParamNorm && report.key !== "Unknown Key" && normalizeKey(report.key) === keyParamNorm);
-      if (!keyMatches) return false;
+      const prog = programs.find(p => p.slug?.current === report.programSlug);
+      const flow = normalizeProgramFlow(prog?.programFlow);
+      if (!keyQueryMatchesRowStorage(flow, report.storageKey, report.key, keyParam)) return false;
     }
     return true;
   });
@@ -281,8 +348,10 @@ const KeyReportsFallback = () => (
 
 export default function KeyReportsPage() {
   return (
-    <Suspense fallback={<KeyReportsFallback />}>
-      <KeyReportsPageContent />
-    </Suspense>
+    <I18nProvider locale="en" messages={{ adminKeyReports: adminKeyReportsEn }}>
+      <Suspense fallback={<KeyReportsFallback />}>
+        <KeyReportsPageContent />
+      </Suspense>
+    </I18nProvider>
   );
 }
