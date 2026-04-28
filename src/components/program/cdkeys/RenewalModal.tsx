@@ -14,18 +14,22 @@ import {
   SPAMMER_REPORT_DISABLED_OPTION_TITLE
 } from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
+import type { CDKey, ProgramFlow } from "@/src/types/program";
 
 interface RenewalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRenew: () => void;
-  cdKey: string;
+  cdKey: CDKey;
+  programFlow: ProgramFlow;
+  /** Human-readable row label for the modal. */
+  activationLabel: string;
   existingReport: {
     _id: string;
     eventType: KeyReportEvent;
     programSlug: string;
-    keyHash: string;
-    keyIdentifier: string;
+    key: string;
+    label?: string;
     createdAt: string;
   };
   slug: string;
@@ -84,6 +88,8 @@ export default function RenewalModal({
   onClose,
   onRenew,
   cdKey,
+  programFlow,
+  activationLabel,
   existingReport,
   slug,
   isSpammerVisitor = false
@@ -101,7 +107,7 @@ export default function RenewalModal({
         reportId: existingReport._id,
         newEventType: EVENT_TYPE_MAP[status],
         programSlug: slug,
-        key: cdKey
+        key: { ...cdKey, programFlow }
       };
 
       const response = await fetch("/api/v1/key-reports", {
@@ -164,13 +170,13 @@ export default function RenewalModal({
         onClick={handleBackdropClick}>
         <div className="bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Renew Key Report</h3>
+            <h3 className="text-lg font-semibold text-white">Renew activation report</h3>
             <ModalCloseButton onClick={onClose} className="p-1 text-neutral-400 hover:text-white" />
           </div>
 
           <div className="mb-4">
             <p className="text-neutral-300 text-sm mb-2">
-              Key: <code className="bg-neutral-700 px-2 py-1 rounded text-xs">{cdKey}</code>
+              Entry: <code className="bg-neutral-700 px-2 py-1 rounded text-xs break-all">{activationLabel}</code>
             </p>
             <div className="bg-neutral-700 rounded-lg p-3 mb-4">
               <p className="text-neutral-300 text-sm">

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { CDKey } from "@/src/types/program";
+import type { CDKey, ProgramFlow } from "@/src/types/program";
+import { getActivationEntryDisplayLabel } from "@/src/lib/program/activationEntry";
 import { DuplicateCheckRequest, DuplicateCheckResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
@@ -29,6 +30,9 @@ interface ReportPopupProps {
   onClose: () => void;
   cdKey: CDKey;
   slug: string;
+  programFlow: ProgramFlow;
+  /** Row storage key aligned with `getRowStorageHash` / key reports map. */
+  rowStorageId: string;
   onReportSubmitted?: () => void;
   /** Negative statuses disabled in UI; API enforces the same. */
   isSpammerVisitor?: boolean;
@@ -81,9 +85,12 @@ export default function ReportPopup({
   onClose,
   cdKey,
   slug,
+  programFlow,
+  rowStorageId,
   onReportSubmitted,
   isSpammerVisitor = false
 }: ReportPopupProps) {
+  const activationLabel = getActivationEntryDisplayLabel(cdKey, programFlow);
   const [notification, setNotification] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
@@ -97,7 +104,8 @@ export default function ReportPopup({
     try {
       const request: DuplicateCheckRequest = {
         programSlug: slug,
-        key: cdKey.key
+        key: { ...cdKey, programFlow },
+        programFlow
       };
 
       const response = await fetch("/api/v1/key-reports/check-duplicate", {
@@ -115,11 +123,11 @@ export default function ReportPopup({
     } finally {
       setIsCheckingDuplicate(false);
     }
-  }, [slug, cdKey.key]);
+  }, [slug, programFlow, cdKey, rowStorageId]);
 
   useEffect(() => {
     if (isOpen) void checkForDuplicate();
-  }, [isOpen, slug, cdKey.key, checkForDuplicate]);
+  }, [isOpen, slug, rowStorageId, checkForDuplicate]);
 
   const handleReport = async (status: CDKeyStatus) => {
     if (isSubmitting) return;
@@ -132,7 +140,7 @@ export default function ReportPopup({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event: EVENT_TYPE_MAP[status],
-          meta: { programSlug: slug, key: cdKey, path: window.location.pathname }
+          meta: { programSlug: slug, key: { ...cdKey, programFlow }, programFlow, path: window.location.pathname }
         })
       });
 
@@ -211,7 +219,9 @@ export default function ReportPopup({
           isOpen={showRenewalModal}
           onClose={() => setShowRenewalModal(false)}
           onRenew={handleRenewalComplete}
-          cdKey={cdKey.key}
+          cdKey={cdKey}
+          programFlow={programFlow}
+          activationLabel={activationLabel}
           existingReport={duplicateReport}
           slug={slug}
           isSpammerVisitor={isSpammerVisitor}
@@ -224,13 +234,13 @@ export default function ReportPopup({
         onClick={handleBackdropClick}>
         <div className="bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Report Key Status</h3>
+            <h3 className="text-lg font-semibold text-white">Report activation status</h3>
             <ModalCloseButton onClick={handleClose} className="p-1 text-neutral-400 hover:text-white" />
           </div>
 
           <div className="mb-4">
             <p className="text-neutral-300 text-sm mb-2">
-              Key: <code className="bg-neutral-700 px-2 py-1 rounded text-xs">{cdKey.key}</code>
+              Entry: <code className="bg-neutral-700 px-2 py-1 rounded text-xs break-all">{activationLabel}</code>
             </p>
 
             {/* Loading state */}
@@ -270,7 +280,7 @@ export default function ReportPopup({
             {/* Normal report interface */}
             {!duplicateReport && !isCheckingDuplicate && (
               <>
-                <p className="text-neutral-400 text-sm">How is this key working for you?</p>
+                <p className="text-neutral-400 text-sm">How is this entry working for you?</p>
                 {isSpammerVisitor && (
                   <p className="text-amber-200/90 text-sm mt-3 leading-relaxed border border-amber-500/25 bg-amber-950/30 rounded-lg px-3 py-2">
                     {SPAMMER_REPORT_RESTRICTION_NOTICE}
