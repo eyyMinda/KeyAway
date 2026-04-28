@@ -1,4 +1,7 @@
+"use client";
+
 import { FaKey, FaDownload, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { useI18n } from "@/src/contexts/i18n";
 
 export type ActivationStepKey = "download" | "activate" | "paste";
 
@@ -8,7 +11,6 @@ export type ActivationStepOverrides = Partial<
 
 interface ActivationInstructionsProps {
   programTitle: string;
-  /** When set (e.g. on program detail), the download-step icon opens this URL. */
   downloadLink?: string;
   stepOverrides?: ActivationStepOverrides;
 }
@@ -21,28 +23,32 @@ export default function ActivationInstructions({
   downloadLink,
   stepOverrides
 }: ActivationInstructionsProps) {
+  const { t: programT, list } = useI18n("program");
+  const { t: commonT } = useI18n("common");
+  const vars = { programTitle };
+
   const defaults: Record<
     ActivationStepKey,
     { icon: typeof FaDownload; title: string; description: string; color: string; bgColor: string }
   > = {
     download: {
       icon: FaDownload,
-      title: "Download the official build",
-      description: `Use the download button above to get ${programTitle} from the developer's official site (recommended for safe activation).`,
+      title: commonT.downloadStepTitle(),
+      description: commonT.downloadStepDescription(vars),
       color: "text-blue-400",
       bgColor: "bg-blue-500/20"
     },
     activate: {
       icon: FaKey,
-      title: "Open activation in the app",
-      description: `Launch ${programTitle} and find “Enter a key”, “Already have a license”, or “Activate” in the menu or settings.`,
+      title: programT.activationInstructions.steps.activate.title(vars),
+      description: programT.activationInstructions.steps.activate.description(vars),
       color: "text-primary-400",
       bgColor: "bg-primary-500/20"
     },
     paste: {
       icon: FaCheckCircle,
-      title: "Paste your free CD key",
-      description: `Copy a working key from the table on this page and paste it into the activation field in ${programTitle}.`,
+      title: programT.activationInstructions.steps.paste.title(vars),
+      description: programT.activationInstructions.steps.paste.description(vars),
       color: "text-green-400",
       bgColor: "bg-green-500/20"
     }
@@ -61,32 +67,24 @@ export default function ActivationInstructions({
 
   const downloadHref = downloadLink?.trim() ?? "";
 
-  const tips = [
-    {
-      icon: FaExclamationTriangle,
-      text: `Download ${programTitle} only from the official vendor or the link on this page — avoid repacked installers.`
-    },
-    {
-      icon: FaExclamationTriangle,
-      text: "If a giveaway CD key fails, try another working key from the list."
-    },
-    {
-      icon: FaExclamationTriangle,
-      text: "Some programs need an internet connection to verify your license during activation."
-    }
-  ];
+  const tipTexts = list("activationInstructions.tips", vars);
+  const tipBlocks = tipTexts.map(text => ({
+    icon: FaExclamationTriangle,
+    text
+  }));
+
+  const pageTitle = programT.activationInstructions.pageTitle(vars);
+  const pageLead = programT.activationInstructions.pageLead(vars);
+  const tipsSectionTitle = commonT.activationTipsSectionTitle();
 
   return (
     <section className="py-8 sm:py-12 lg:py-16 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-6 sm:mb-8 lg:mb-12">
           <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-3 sm:mb-4">
-            How to activate <span className="text-gradient-pro">{programTitle}</span> with a free CD key
+            <span className="text-gradient-pro">{pageTitle}</span>
           </h2>
-          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-300 max-w-3xl mx-auto px-2">
-            Giveaway keys and activation steps for {programTitle} — unlock Pro features with a verified license from our
-            list.
-          </p>
+          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-300 max-w-3xl mx-auto px-2">{pageLead}</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
@@ -118,10 +116,10 @@ export default function ActivationInstructions({
 
         <div className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8">
           <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-white mb-4 sm:mb-6 text-center">
-            Important tips
+            {tipsSectionTitle}
           </h3>
           <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
-            {tips.map((tip, index) => (
+            {tipBlocks.map((tip, index) => (
               <div key={index} className="flex items-start space-x-2 sm:space-x-3">
                 <div className="shrink-0 w-5 h-5 sm:w-6 sm:h-6 bg-yellow-500/20 rounded-full flex items-center justify-center mt-0.5">
                   <tip.icon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400" />

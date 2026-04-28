@@ -12,6 +12,8 @@ import {
   resolveSiteBaseUrl,
   resolveTermsPageSeo
 } from "@/src/lib/seo/storeSeoResolve";
+import { programT } from "@/src/lib/program/programCopy";
+import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 
 const defaultData = {
   store: DEFAULT_STORE_NAME,
@@ -74,6 +76,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
       slug,
       seo,
       image,
+      "programFlow": coalesce(programFlow, "cd_key"),
       "workingKeys": count(cdKeys[status == "active" || status == "new"]),
       "totalKeys": count(cdKeys[])
     }`;
@@ -91,9 +94,14 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
     }
 
     const title = program.seo?.metaTitle?.trim() || defaultData.programTitle(program.title, storeTitle);
+    const flow = normalizeProgramFlow(program.programFlow);
     const description =
       program.seo?.metaDescription?.trim() ||
-      defaultData.programDescription(program.title, program.workingKeys ?? 0, program.totalKeys ?? 0);
+      programT(flow, "seo.descriptionFallback", {
+        programTitle: program.title,
+        workingKeys: program.workingKeys ?? 0,
+        totalKeys: program.totalKeys ?? 0
+      });
     const baseUrl = resolveSiteBaseUrl(storeData?.seo);
     const url = `${baseUrl}/program/${slug}`;
     const programKeywords = resolveMetaKeywordList(program.seo?.metaKeywords, buildStoreSeoVariableMap(storeData));

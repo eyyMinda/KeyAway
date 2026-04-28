@@ -2,15 +2,17 @@ import { useEffect } from "react";
 import { trackCopyEvent } from "@/src/lib/analytics/copyTracking";
 import { UseCopyTrackingProps } from "@/src/types";
 
-export function useCopyTracking({ cdKey, slug }: UseCopyTrackingProps) {
+export function useCopyTracking({ cdKey, slug, programFlow, clipboardMatch }: UseCopyTrackingProps) {
   useEffect(() => {
+    if (!clipboardMatch) return;
+
     const handleCopy = async () => {
-      // Wait for clipboard to be updated
       setTimeout(async () => {
         try {
           const copiedText = await navigator.clipboard.readText();
-          if (copiedText === cdKey.key) {
-            trackCopyEvent(cdKey, slug, "keyboard_or_context_menu");
+          const norm = (s: string) => s.replace(/\r\n/g, "\n").trim();
+          if (norm(copiedText) === norm(clipboardMatch)) {
+            trackCopyEvent(cdKey, slug, "keyboard_or_context_menu", programFlow);
           }
         } catch {
           // Silently handle clipboard access errors
@@ -20,5 +22,5 @@ export function useCopyTracking({ cdKey, slug }: UseCopyTrackingProps) {
 
     document.addEventListener("copy", handleCopy);
     return () => document.removeEventListener("copy", handleCopy);
-  }, [cdKey, slug]);
+  }, [cdKey, slug, programFlow, clipboardMatch]);
 }

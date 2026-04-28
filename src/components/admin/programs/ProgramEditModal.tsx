@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
-import type { Program } from "@/src/types/program";
+import type { Program, ProgramFlow } from "@/src/types/program";
+import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 import { titleToSlug, validateSlug } from "./programSlugUtils";
 import DeleteProgramModal from "./DeleteProgramModal";
 import SlugChangeConfirmModal from "./SlugChangeConfirmModal";
@@ -19,10 +20,17 @@ interface ProgramEditModalProps {
 }
 
 export default function ProgramEditModal({ program, isOpen, onClose, onSaved, onDeleted }: ProgramEditModalProps) {
+  const FLOW_OPTIONS: Array<{ value: ProgramFlow; label: string }> = [
+    { value: "cd_key", label: "CD Key" },
+    { value: "link_based_cdkey", label: "Link-based CD Key" },
+    { value: "account", label: "Account (username/password)" },
+    { value: "link_based_account", label: "Link-based account" }
+  ];
   const modalRef = useRef<HTMLDivElement>(null);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
+  const [programFlow, setProgramFlow] = useState<ProgramFlow>("cd_key");
   const [featuredCopy, setFeaturedCopy] = useState("");
   const [downloadLink, setDownloadLink] = useState("");
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
@@ -44,6 +52,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setTitle(program.title);
       setSlug(program.slug?.current ?? "");
       setDescription(portableTextToPlainText(program.description));
+      setProgramFlow(normalizeProgramFlow(program.programFlow));
       setFeaturedCopy(
         typeof program.featured?.description === "string"
           ? program.featured.description.trim()
@@ -59,6 +68,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setTitle("");
       setSlug("");
       setDescription("");
+      setProgramFlow("cd_key");
       setFeaturedCopy("");
       setDownloadLink("");
       setImageAssetId(null);
@@ -110,7 +120,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
 
   const slugValidation = validateSlug(slug);
   const canSave =
-    title.trim() && slugValidation.normalized && !slugValidation.error && description.trim() && !saveLoading;
+    title.trim() && slugValidation.normalized && !slugValidation.error && description.trim() && !!programFlow && !saveLoading;
 
   const performSave = async () => {
     if (!canSave) return;
@@ -121,6 +131,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
         title: title.trim(),
         slug: slugValidation.normalized,
         description: description.trim(),
+        programFlow,
         ...(program?._id
           ? { featuredCopy: featuredCopy.trim() }
           : featuredCopy.trim()
@@ -228,7 +239,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fadeIn">
+    <div className="fixed inset-0 z-200 flex items-center justify-center p-4 animate-fadeIn">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         ref={modalRef}
@@ -288,6 +299,20 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               disabled={saveLoading}
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Program flow *</label>
+            <select
+              value={programFlow}
+              onChange={e => setProgramFlow(e.target.value as ProgramFlow)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              disabled={saveLoading}>
+              {FLOW_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

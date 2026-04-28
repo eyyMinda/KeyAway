@@ -1,5 +1,7 @@
-import { ExpiredKeyReport } from "@/src/types/admin";
-import { CDKeyStatus, Program } from "@/src/types/program";
+import { KeyReport } from "@/src/types/admin";
+import { CDKey, CDKeyStatus, Program } from "@/src/types/program";
+import { getKeyData } from "@/src/lib/keyHashing";
+import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 
 export const STATUS_OPTIONS: Record<CDKeyStatus, string> = {
   new: "New",
@@ -9,10 +11,10 @@ export const STATUS_OPTIONS: Record<CDKeyStatus, string> = {
 };
 
 /**
- * Creates a report key for tracking changes
+ * Creates a report key for tracking changes (stable per activation row)
  */
-export const createReportKey = (report: ExpiredKeyReport): string => {
-  return `${report.programSlug}:${report.key}`;
+export const createReportKey = (report: KeyReport): string => {
+  return `${report.programSlug}:${report.storageKey}`;
 };
 
 /**
@@ -23,10 +25,16 @@ export const findProgramBySlug = (programs: Program[], programSlug: string): Pro
 };
 
 /**
- * Finds a CD key index in a program's cdKeys array
+ * Finds an activation row index in a program's cdKeys array by storage key (matches keyReport `key`).
  */
-export const findKeyIndex = (program: Program, key: string): number => {
-  return program.cdKeys?.findIndex(k => k.key === key) ?? -1;
+export const findKeyIndexByStorageKey = (program: Program, storageKey: string): number => {
+  const flow = normalizeProgramFlow(program.programFlow);
+  return (
+    program.cdKeys?.findIndex((k: CDKey) => {
+      const kd = getKeyData({ ...k, programFlow: flow }, flow);
+      return kd?.hash === storageKey;
+    }) ?? -1
+  );
 };
 
 /**

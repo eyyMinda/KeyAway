@@ -4,10 +4,11 @@
 
 export type AnalyticsEvent =
   | "copy_cdkey"
+  | "copy_pro_account"
+  | "click_activation_link"
   | "download_click"
   | "social_click"
-  | "page_viewed"
-  | "facebook_group_click";
+  | "page_viewed";
 
 export type KeyReportEvent = "report_key_working" | "report_key_expired" | "report_key_limit_reached";
 
@@ -25,9 +26,10 @@ export interface AnalyticsEventData {
   referrer?: string;
   country?: string;
   city?: string;
-  keyHash?: string;
-  keyIdentifier?: string;
-  keyNormalized?: string;
+  /** Row id or normalized copy payload (see `programFlow` / `activationUrl` when relevant). */
+  key?: string;
+  activationUrl?: string;
+  programFlow?: string;
   userAgent?: string;
   ipHash?: string;
   utm_source?: string;
@@ -40,9 +42,8 @@ export interface KeyReportData {
   _id: string;
   eventType: KeyReportEvent;
   programSlug: string;
-  keyHash: string;
-  keyIdentifier: string;
-  keyNormalized: string;
+  key: string;
+  label?: string;
   path?: string;
   referrer?: string;
   country?: string;
@@ -60,6 +61,10 @@ export interface TrackEventMeta {
   /** When true, stored on `page_viewed` as not-found traffic (no program slug). */
   notFound?: boolean;
   key?: unknown; // CDKey type
+  programFlow?: string;
+  /** For `click_activation_link`: which URL was opened / interacted with. */
+  activationUrl?: string;
+  clickButton?: "left" | "right" | "aux";
   path?: string;
   social?: string;
   copyMethod?: "button_click" | "keyboard_or_context_menu";
@@ -76,7 +81,9 @@ export interface TrackRequestBody {
 
 export interface DuplicateCheckRequest {
   programSlug: string;
-  key: string;
+  /** Raw key string, activation identity string, or `CDKey`-shaped object (use with `programFlow`). */
+  key: string | Record<string, unknown>;
+  programFlow?: string;
 }
 
 export interface DuplicateCheckResponse {
@@ -86,8 +93,8 @@ export interface DuplicateCheckResponse {
     _id: string;
     eventType: KeyReportEvent;
     programSlug: string;
-    keyHash: string;
-    keyIdentifier: string;
+    key: string;
+    label?: string;
     createdAt: string;
   };
   error?: string;
@@ -97,7 +104,7 @@ export interface RenewReportRequest {
   reportId: string;
   newEventType: KeyReportEvent;
   programSlug: string;
-  key: string;
+  key: string | Record<string, unknown>;
 }
 
 export interface RenewReportResponse {
@@ -106,8 +113,8 @@ export interface RenewReportResponse {
     _id: string;
     eventType: KeyReportEvent;
     programSlug: string;
-    keyHash: string;
-    keyIdentifier: string;
+    key: string;
+    label?: string;
     createdAt: string;
   };
   error?: string;

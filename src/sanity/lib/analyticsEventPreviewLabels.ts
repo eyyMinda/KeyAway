@@ -4,7 +4,9 @@ const EVENT_DISPLAY: Record<string, string> = {
   page_viewed: "View",
   download_click: "Download",
   social_click: "Social",
-  copy_cdkey: "Copy"
+  copy_cdkey: "Copy",
+  copy_pro_account: "Copy account",
+  click_activation_link: "Link click"
 };
 
 function slugToTitle(slug: string): string {

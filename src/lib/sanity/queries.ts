@@ -44,6 +44,7 @@ featured{
 export const programsListingProjection = `
   title,
   slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
   description,
   image,
   _createdAt,
@@ -58,6 +59,7 @@ export const programsListingProjection = `
 export const relatedProgramsCardProjection = `
   title,
   slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
   description,
   image,
   _createdAt,
@@ -67,7 +69,9 @@ export const relatedProgramsCardProjection = `
 
 export const allProgramsQuery = `
 *[_type == "program"]{
-  title, slug, description,
+  title, slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
+  description,
   ${featuredBlockProjection},
   image, cdKeys[]
 }
@@ -77,6 +81,7 @@ export const adminProgramsQuery = `
   _id,
   title,
   slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
   _updatedAt,
   description,
   ${featuredBlockProjection},
@@ -94,6 +99,7 @@ export const programBySlugQuery = `
   _id,
   title,
   slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
   _updatedAt,
   description,
   ${featuredBlockProjection},
@@ -109,12 +115,12 @@ export const programBySlugQuery = `
 
 /* ------------ Analytics ------------ */
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
-      _id, event, programSlug, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+      _id, event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
 
 /* ------------ Analytics with Custom Date Range ------------ */
 export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && createdAt >= $since && createdAt <= $until]{
-      _id, event, programSlug, notFound, social, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
+      _id, event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
       "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier,
       "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer
     } | order(createdAt desc)`;
@@ -127,12 +133,14 @@ export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
 /* ------------ Bundled Events (overlaps range, events filtered in-doc) ------------ */
 export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
   _id,
-  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier, "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer }
+  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier, "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer }
 }`;
 
 /* ------------ Key Reports ------------ */
 export const keyReportsQuery = `*[_type=="keyReport" && _createdAt >= $since]{
-      _id, eventType, programSlug, path, referrer, country, city, keyHash, keyIdentifier, keyNormalized, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _createdAt
+      _id, eventType, programSlug, path, referrer, country, city, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _createdAt,
+      key,
+      label
     } | order(_createdAt desc)`;
 
 /* ------------ Cron Runs ------------ */
@@ -145,8 +153,8 @@ export const lastCronRunByJobQuery = `*[_type == "cronRun" && job == $job] | ord
 }`;
 
 /* ------------ Duplicate Key Report Check ------------ */
-export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHash && programSlug == $programSlug && keyHash == $keyHash]{
-      _id, eventType, programSlug, keyHash, keyIdentifier, createdAt
+export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHash && programSlug == $programSlug && key == $key]{
+      _id, eventType, programSlug, key, label, createdAt
     } | order(createdAt desc) [0]`;
 
 /* ------------ Popular Programs (related / light cards — no per-program stats) ------------ */
@@ -181,6 +189,7 @@ export const featuredProgramSettingsQuery = `*[_type == "featuredProgramSettings
     _id,
     title,
     slug,
+    "programFlow": coalesce(programFlow, "cd_key"),
     description,
     ${featuredBlockProjection},
     image,
@@ -197,6 +206,7 @@ export const featuredProgramQuery = `*[_type == "program" && slug.current == $sl
   _id,
   title,
   slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
   description,
   image,
   downloadLink,
@@ -212,6 +222,7 @@ export const programsForAutoSelectionQuery = `*[_type == "program"]{
   _id,
   title,
   slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
   description,
   ${featuredBlockProjection},
   image,

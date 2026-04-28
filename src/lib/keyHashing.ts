@@ -1,77 +1,90 @@
 import crypto from "crypto";
-
-/**
- * Key hashing utilities for CD key privacy and identification
- * Uses SHA-256 with a salt for consistent hashing
- * Works on both client and server side
- */
+import {
+  getActivationEntryIdentityString,
+  isLinkAccountFlow,
+  normalizeProgramFlow
+} from "@/src/lib/program/activationEntry";
+import type { CDKey, ProgramFlow } from "@/src/types/program";
 
 const SALT = process.env.ANALYTICS_SALT || process.env.NEXT_PUBLIC_ANALYTICS_SALT || "keyaway-default-salt";
 
-/**
- * Creates a hash of a CD key for privacy-preserving storage (server-side)
- * @param key - The CD key to hash
- * @returns A consistent hash of the key
- */
-export function hashCDKey(key: string): string {
-  const trimmedKey = key.replace(/\s+/g, "").toUpperCase();
-  return crypto
-    .createHash("sha256")
-    .update(trimmedKey + SALT)
-    .digest("hex")
-    .substring(0, 16);
-}
-
-/**
- * Creates a hash of a CD key for privacy-preserving storage (client-side)
- * Uses Web Crypto API for SHA-256 hashing
- * @param key - The CD key to hash
- * @returns A consistent hash of the key
- */
-export async function hashCDKeyClient(key: string): Promise<string> {
-  const trimmedKey = key.replace(/\s+/g, "").toUpperCase();
-  const input = trimmedKey + SALT;
-
-  // Use Web Crypto API for SHA-256 (same as server-side)
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-
-  return hashHex.substring(0, 16);
-}
-
-/**
- * Creates a short identifier for a CD key (first 3 + last 3 chars)
- * @param key - The CD key
- * @returns Short identifier like "ABC***XYZ"
- */
-export function getKeyIdentifier(key: string): string {
-  const trimmedKey = key.replace(/\s+/g, "").toUpperCase();
-  if (trimmedKey.length <= 6) return "***";
-  return `${trimmedKey.slice(0, 3)}***${trimmedKey.slice(-3)}`;
-}
-
-/**
- * Normalizes a CD key for consistent processing
- * @param key - The CD key to normalize
- * @returns Normalized key (trimmed, uppercase)
- */
 export function normalizeKey(key: string): string {
   return key.replace(/\s+/g, "").toUpperCase();
 }
 
-/** Extract key string from meta (string or { key: string }) and return hash + identifier + normalized. */
-export function getKeyData(key?: unknown): { hash: string; identifier: string; normalized: string } | undefined {
-  let keyString: string | undefined;
-  if (typeof key === "string" && key) keyString = key;
-  else if (key && typeof key === "object" && "key" in key) keyString = (key as { key: string }).key;
-  if (!keyString) return undefined;
+/** Short digest for long link identities (URLs). Not normalized to uppercase. */
+export function hashLinkActivationIdentity(identity: string): string {
+  return crypto.createHash("sha256").update(identity.trim() + SALT).digest("hex").substring(0, 16);
+}
+
+function hashLinkIdentity(identity: string): { hash: string; identifier: string; normalized: string } {
+  const normalized = identity.trim().toLowerCase();
   return {
-    hash: hashCDKey(keyString),
-    identifier: getKeyIdentifier(keyString),
-    normalized: normalizeKey(keyString)
+    hash: hashLinkActivationIdentity(identity),
+    identifier: identity.length > 200 ? `${identity.slice(0, 197)}…` : identity,
+    normalized
   };
+}
+
+/**
+ * Row storage id for key reports / dedupe. Return shape uses field name `hash` as the **storage key**:
+ * - `cd_key` / `link_based_cdkey`: normalized plaintext key.
+ * - `account`: lowercase username.
+ * - `link_based_account`: short digest of URL(s) (`hashLinkActivationIdentity` / per-click URL when `activationUrl` is set).
+ */
+export function getKeyData(
+  key?: unknown,
+  programFlow?: unknown,
+  activationUrl?: unknown
+): { hash: string; identifier: string; normalized: string } | undefined {
+  const flow = normalizeProgramFlow(programFlow);
+  const url = typeof activationUrl === "string" && activationUrl.trim() ? activationUrl.trim().toLowerCase() : "";
+
+  if (typeof key === "string" && key.trim()) {
+    if (isLinkAccountFlow(flow) && url) {
+      return hashLinkIdentity(url);
+    }
+    if (isLinkAccountFlow(flow)) {
+      return hashLinkIdentity(key.trim());
+    }
+    const plain = normalizeKey(key.trim());
+    return { hash: plain, identifier: plain, normalized: plain };
+  }
+
+  if (key && typeof key === "object") {
+    const row = key as CDKey & { programFlow?: string };
+    const flowFromPayload = row.programFlow != null ? normalizeProgramFlow(row.programFlow) : flow;
+
+    if (isLinkAccountFlow(flowFromPayload) && url) {
+      return hashLinkIdentity(url);
+    }
+
+    const identity = getActivationEntryIdentityString(row, flowFromPayload);
+    if (identity) {
+      if (isLinkAccountFlow(flowFromPayload)) {
+        return hashLinkIdentity(identity);
+      }
+      if (flowFromPayload === "account") {
+        const u = (row.username ?? "").trim().toLowerCase();
+        if (!u) return undefined;
+        return { hash: u, identifier: u, normalized: u };
+      }
+      const plain = normalizeKey(identity);
+      return { hash: plain, identifier: plain, normalized: plain };
+    }
+
+    const fallbackKey = typeof row.key === "string" ? row.key.trim() : "";
+    if (fallbackKey) {
+      const plain = normalizeKey(fallbackKey);
+      return { hash: plain, identifier: plain, normalized: plain };
+    }
+  }
+
+  return undefined;
+}
+
+/** Client/server row storage key (matches `getKeyData(...).hash` and keyReport `key`; CD/account = plaintext, links = digest). */
+export function getRowStorageHash(cdKey: CDKey, flow: ProgramFlow): string {
+  const kd = getKeyData({ ...cdKey, programFlow: flow }, flow);
+  return kd?.hash ?? "";
 }

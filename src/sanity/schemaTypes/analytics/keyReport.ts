@@ -25,25 +25,18 @@ export const keyReport = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: "keyHash",
-      title: "Key Hash",
+      name: "key",
+      title: "Row storage key",
       type: "string",
-      description: "SHA-256 hash of the CD key for privacy",
+      description:
+        "Activation row id used on the program page: plain normalized CD key or account username, or short hash for link-based rows.",
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: "keyIdentifier",
-      title: "Key Identifier",
+      name: "label",
+      title: "Label",
       type: "string",
-      description: "Short identifier like ABC***XYZ",
-      validation: Rule => Rule.required()
-    }),
-    defineField({
-      name: "keyNormalized",
-      title: "Key Normalized",
-      type: "string",
-      description: "Normalized key for matching",
-      validation: Rule => Rule.required()
+      description: "Optional display label (e.g. link titles, account label)."
     }),
     defineField({
       name: "path",

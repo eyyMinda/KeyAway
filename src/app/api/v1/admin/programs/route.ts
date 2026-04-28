@@ -7,9 +7,11 @@ import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPorta
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { buildSiteUrl, submitIndexNow } from "@/src/lib/seo/indexnow";
+import type { ProgramFlow } from "@/src/types/program";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
+const PROGRAM_FLOWS: ProgramFlow[] = ["cd_key", "link_based_cdkey", "account", "link_based_account"];
 
 function normalizeSlug(s: string): string {
   return s
@@ -49,6 +51,13 @@ export async function POST(req: NextRequest) {
     const description = typeof b.description === "string" ? b.description.trim() : "";
     if (!description)
       return Errors.validation("description cannot be empty", [{ field: "description", message: "Required" }]);
+
+    const programFlow = typeof b.programFlow === "string" ? b.programFlow.trim() : "";
+    if (!programFlow || !PROGRAM_FLOWS.includes(programFlow as ProgramFlow)) {
+      return Errors.validation("programFlow is required and must be a valid flow", [
+        { field: "programFlow", message: "Invalid value" }
+      ]);
+    }
 
     const featuredCopy = typeof b.featuredCopy === "string" ? b.featuredCopy.trim() : "";
 
@@ -94,6 +103,7 @@ export async function POST(req: NextRequest) {
       title,
       slug: { _type: "slug", current: slug },
       description: plainTextToPortableText(description),
+      programFlow,
       ...(Object.keys(featured).length > 0 ? { featured } : {}),
       ...(downloadLink && { downloadLink }),
       ...(buildImageReference(imageAssetId) && { image: buildImageReference(imageAssetId) }),

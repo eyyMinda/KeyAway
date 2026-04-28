@@ -1,7 +1,7 @@
 "use client";
 
-/** @fileoverview Program CD key grid/table with report counts, sort, mobile cards. */
-import { useState, useEffect, useMemo } from "react";
+/** @fileoverview Program activation table: report counts, sort, mobile cards (flow-aware). */
+import { useState, useMemo, useCallback } from "react";
 import { CDKey, CDKeyTableProps, ReportData } from "@/src/types";
 import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import CDKeyMobileCard from "@/src/components/program/cdkeys/CDKeyMobileCard";
@@ -10,9 +10,12 @@ import SortableTableHead, { SortableColumn, SortDirection } from "@/src/componen
 import { getExpiringKeysMessage, sortCdKeysByScore, sortCdKeysByColumn } from "@/src/lib/program/cdKeyUtils";
 import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
+import { useI18n } from "@/src/contexts/i18n";
+import { isAccountFlow, normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 
 export default function CDKeyTable({
   cdKeys,
+  rowStorageIds,
   slug,
   program,
   programTitle,
@@ -21,62 +24,72 @@ export default function CDKeyTable({
   introVersionConfirmation,
   versionSummaryLine
 }: CDKeyTableProps) {
+  const { t } = useI18n("program");
+  const programFlow = normalizeProgramFlow(program.programFlow);
   const expiringKeysMessage = getExpiringKeysMessage(cdKeys);
-  const { getReportData, loading, refreshReportData } = useKeyReportData(slug, cdKeys);
-  const [reportDataMap, setReportDataMap] = useState<Map<string, ReportData>>(new Map());
+  const { reportData, loading, refreshReportData } = useKeyReportData(slug, rowStorageIds);
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
-  useEffect(() => {
-    const loadReportData = async () => {
-      const dataMap = new Map<string, ReportData>();
-      for (const cdKey of cdKeys) {
-        const reportData = await getReportData(cdKey.key);
-        dataMap.set(cdKey.key, reportData);
-      }
-      setReportDataMap(dataMap);
-    };
+  const idForCdKey = useMemo(() => {
+    const m = new WeakMap<CDKey, string>();
+    cdKeys.forEach((k, i) => {
+      m.set(k, rowStorageIds[i] ?? "");
+    });
+    return m;
+  }, [cdKeys, rowStorageIds]);
 
-    if (!loading) {
-      loadReportData();
-    }
-  }, [cdKeys, getReportData, loading]);
+  const storageKeyOf = useCallback((k: CDKey) => idForCdKey.get(k) ?? "", [idForCdKey]);
+
+  const emptyReport: ReportData = { working: 0, expired: 0, limit_reached: 0 };
 
   const handleReportSubmitted = () => {
     refreshReportData();
   };
 
-  const tableColumns: SortableColumn[] = [
-    { key: "key", label: "Key", sortable: false, className: "text-left" },
-    { key: "status", label: "Status", sortable: true, className: "text-center" },
-    { key: "reports", label: "Reports", sortable: true, className: "text-center" },
-    { key: "version", label: "Version", sortable: true, className: "text-center" },
-    { key: "validFrom", label: "Valid From", sortable: true, className: "text-center" },
-    { key: "validUntil", label: "Valid Until", sortable: true, className: "text-center" },
-    { key: "actions", label: "Actions", sortable: false, className: "text-center" }
-  ];
+  const columnKeyLabel = t.keyTable.columnKey();
+
+  const tableColumns: SortableColumn[] = useMemo(() => {
+    const base: SortableColumn[] = [{ key: "key", label: columnKeyLabel, sortable: false, className: "text-left" }];
+    if (isAccountFlow(programFlow)) {
+      base.push({ key: "password", label: t.keyTable.columnPassword(), sortable: false, className: "text-center" });
+    }
+    base.push(
+      { key: "status", label: "Status", sortable: true, className: "text-center" },
+      { key: "reports", label: "Reports", sortable: true, className: "text-center" },
+      { key: "version", label: "Version", sortable: true, className: "text-center" },
+      { key: "validFrom", label: "Valid From", sortable: true, className: "text-center" },
+      { key: "validUntil", label: "Valid Until", sortable: true, className: "text-center" },
+      { key: "actions", label: "Actions", sortable: false, className: "text-center" }
+    );
+    return base;
+  }, [programFlow, columnKeyLabel, t]);
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
-      // Status defaults to asc (new→active→limit→expired), others default to desc (latest first)
       setSortDirection(column === "status" ? "asc" : "desc");
     }
   };
 
   const sortedKeys = useMemo(() => {
     if (!sortColumn) {
-      return sortCdKeysByScore(cdKeys, reportDataMap);
+      return sortCdKeysByScore(cdKeys, reportData, programFlow, storageKeyOf);
     }
-    return sortCdKeysByColumn(cdKeys, sortColumn, sortDirection, reportDataMap);
-  }, [cdKeys, sortColumn, sortDirection, reportDataMap]);
+    return sortCdKeysByColumn(cdKeys, sortColumn, sortDirection, reportData, programFlow, storageKeyOf);
+  }, [cdKeys, sortColumn, sortDirection, reportData, programFlow, storageKeyOf]);
+
+  const headingSuffix = t.keyTable.headingSuffix();
+  const intro = t.keyTable.intro({ programTitle });
+  const emptyTitle = t.keyTable.empty();
+  const expiringDisclaimer = t.keyTable.expiringDisclaimer();
 
   return (
     <section className="py-6 sm:py-10 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-600">
+        <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-600 overflow-hidden">
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
@@ -85,11 +98,10 @@ export default function CDKeyTable({
                   <span className="text-gray-500 font-normal mx-1 sm:mx-1.5" aria-hidden>
                     —
                   </span>
-                  <span className="text-gradient-pro">free CD keys</span>
+                  <span className="text-gradient-pro">{headingSuffix}</span>
                 </h2>
                 <p className="text-xs sm:text-sm lg:text-base leading-relaxed text-gray-300">
-                  Giveaway CD keys for <span className="text-gray-200">{programTitle}</span>. Pick a working row, copy
-                  the key, and paste it wherever the app asks for your CD key.
+                  {intro}
                   {introVersionConfirmation ? (
                     <>
                       {" "}
@@ -127,10 +139,7 @@ export default function CDKeyTable({
                     <p className="text-amber-300 font-medium text-xs sm:text-sm leading-tight sm:leading-normal">
                       {expiringKeysMessage}
                     </p>
-                    <p className="text-amber-400/70 text-xs sm:text-sm mt-1 leading-tight">
-                      Note: Once expired, the key won&apos;t activate and your software&apos;s pro version will stop
-                      working.
-                    </p>
+                    <p className="text-amber-400/70 text-xs sm:text-sm mt-1 leading-tight">{expiringDisclaimer}</p>
                   </div>
                 </div>
               </div>
@@ -139,23 +148,26 @@ export default function CDKeyTable({
 
           {cdKeys && cdKeys.length > 0 ? (
             <>
-              {/* Mobile Card Layout */}
               <div className="block lg:hidden px-3 sm:px-4 py-4 sm:py-6">
                 <div className="grid auto-rows-auto grid-flow-dense grid-cols-1 xs:grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
-                  {sortedKeys.map((cdKey: CDKey, i: number) => (
-                    <CDKeyMobileCard
-                      key={i}
-                      cdKey={cdKey}
-                      slug={slug}
-                      reportData={reportDataMap.get(cdKey.key) || { working: 0, expired: 0, limit_reached: 0 }}
-                      onReportSubmitted={handleReportSubmitted}
-                      isSpammerVisitor={isSpammerVisitor}
-                    />
-                  ))}
+                  {sortedKeys.map((cdKey: CDKey, i: number) => {
+                    const rowStorageId = storageKeyOf(cdKey);
+                    return (
+                      <CDKeyMobileCard
+                        key={rowStorageId || `m-${i}`}
+                        cdKey={cdKey}
+                        rowStorageId={rowStorageId}
+                        slug={slug}
+                        programFlow={programFlow}
+                        reportData={loading ? emptyReport : (reportData.get(rowStorageId) ?? emptyReport)}
+                        onReportSubmitted={handleReportSubmitted}
+                        isSpammerVisitor={isSpammerVisitor}
+                      />
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Desktop Table Layout */}
               <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full">
                   <SortableTableHead
@@ -166,17 +178,22 @@ export default function CDKeyTable({
                     className="bg-white/5 text-gray-200"
                   />
                   <tbody className="divide-y divide-white/10">
-                    {sortedKeys.map((cdKey: CDKey, i: number) => (
-                      <CDKeyItem
-                        key={i}
-                        cdKey={cdKey}
-                        index={i}
-                        slug={slug}
-                        reportData={reportDataMap.get(cdKey.key) || { working: 0, expired: 0, limit_reached: 0 }}
-                        onReportSubmitted={handleReportSubmitted}
-                        isSpammerVisitor={isSpammerVisitor}
-                      />
-                    ))}
+                    {sortedKeys.map((cdKey: CDKey, i: number) => {
+                      const rowStorageId = storageKeyOf(cdKey);
+                      return (
+                        <CDKeyItem
+                          key={rowStorageId || `d-${i}`}
+                          cdKey={cdKey}
+                          index={i}
+                          rowStorageId={rowStorageId}
+                          slug={slug}
+                          programFlow={programFlow}
+                          reportData={loading ? emptyReport : (reportData.get(rowStorageId) ?? emptyReport)}
+                          onReportSubmitted={handleReportSubmitted}
+                          isSpammerVisitor={isSpammerVisitor}
+                        />
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -184,8 +201,7 @@ export default function CDKeyTable({
           ) : (
             <div className="px-8 py-16 text-center">
               <div className="text-gray-500 text-6xl mb-6">🔑</div>
-              <h3 className="text-xl font-semibold text-gray-300 mb-3">No Keys Available</h3>
-              <p className="text-gray-400 text-lg">There are currently no CD keys available for this program.</p>
+              <h3 className="text-xl font-semibold text-gray-300 mb-3">{emptyTitle}</h3>
             </div>
           )}
         </div>

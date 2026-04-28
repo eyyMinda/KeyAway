@@ -1,0 +1,205 @@
+{
+  "common": {
+    "activationTipsSectionTitle": "Important tips",
+    "downloadStepTitle": "Download the official build",
+    "downloadStepDescription": "Use the download button above to get {programTitle} from the developer's official site (recommended for safe activation)."
+  },
+  "cdkey": {
+    "hero": {
+      "subtitle": "Free giveaway CD keys for {programTitle} — copy a working key and activate in the Windows app."
+    },
+    "stats": {
+      "totalLabel": "Available CD Keys",
+      "workingLabel": "Working Keys"
+    },
+    "keyTable": {
+      "headingSuffix": "free CD keys",
+      "intro": "Giveaway CD keys for {programTitle}. Pick a working row, copy the key, and paste it wherever the app asks for your CD key.",
+      "empty": "No CD keys available",
+      "columnKey": "Key",
+      "columnPassword": "Password",
+      "copyButton": "Copy",
+      "copyTitle": "Copy key to clipboard",
+      "reportTitle": "Report the status of this CD key",
+      "linkHint": "",
+      "expiringDisclaimer": "Note: Once expired, the key won't activate and your software's pro version will stop working."
+    },
+    "activationInstructions": {
+      "pageTitle": "How to activate {programTitle} with a free CD key",
+      "pageLead": "Giveaway keys and activation steps for {programTitle} — unlock Pro features with a verified license from our list.",
+      "sectionTitle": "How to activate",
+      "sectionSubtitle": "Follow these steps to activate {programTitle} with your free CD key.",
+      "steps": {
+        "activate": {
+          "title": "Open activation in the app",
+          "description": "Launch {programTitle} and find “Enter a key”, “Already have a license”, or “Activate” in the menu or settings."
+        },
+        "paste": {
+          "title": "Paste your free CD key",
+          "description": "Copy a working key from the table on this page and paste it into the activation field in {programTitle}."
+        }
+      },
+      "tips": [
+        "Download {programTitle} only from the official vendor or the link on this page — avoid repacked installers.",
+        "If a giveaway CD key fails, try another working key from the list.",
+        "Some programs need an internet connection to verify your license during activation."
+      ]
+    },
+    "seo": {
+      "descriptionFallback": "Free {programTitle} giveaway CD keys for Windows. {workingKeys} working keys out of {totalKeys} — copy a license and activate in-app. Official download recommended."
+    },
+    "jsonld": {
+      "offerDescription": "Free CD Key for {programTitle}",
+      "offerDescriptionGeneric": "Free CD Key for {programTitle}"
+    }
+  },
+  "linkBasedCdkey": {
+    "hero": {
+      "subtitle": "Free giveaway CD keys for {programTitle} — complete the vendor giveaway when needed, then copy your private key and activate in the Windows app."
+    },
+    "stats": {
+      "totalLabel": "Available CD Keys",
+      "workingLabel": "Working Keys"
+    },
+    "keyTable": {
+      "headingSuffix": "free CD keys",
+      "intro": "Giveaway CD keys for {programTitle}. Some keys are issued after a signup on the developer site — use the working rows below, then paste the key in-app.",
+      "empty": "No CD keys available",
+      "columnKey": "Key",
+      "columnPassword": "Password",
+      "copyButton": "Copy",
+      "copyTitle": "Copy key to clipboard",
+      "reportTitle": "Report the status of this CD key",
+      "linkHint": "",
+      "expiringDisclaimer": "Note: Once expired, the key won't activate and your software's pro version will stop working."
+    },
+    "activationInstructions": {
+      "pageTitle": "How to activate {programTitle} after a vendor giveaway",
+      "pageLead": "Some keys are issued after a vendor giveaway — follow the steps below, then paste your private key in-app.",
+      "sectionTitle": "How to activate",
+      "sectionSubtitle": "Follow these steps to activate {programTitle} with your free CD key.",
+      "steps": {
+        "activate": {
+          "title": "Open activation in the app",
+          "description": "Launch {programTitle} and find “Enter a key”, “Already have a license”, or “Activate” in the menu or settings."
+        },
+        "paste": {
+          "title": "Paste your free CD key",
+          "description": "Copy a working key from the table on this page and paste it into the activation field in {programTitle}."
+        }
+      },
+      "tips": [
+        "Download {programTitle} only from the official vendor or the link on this page — avoid repacked installers.",
+        "If a giveaway CD key fails, try another working key from the list.",
+        "Some programs need an internet connection to verify your license during activation."
+      ]
+    },
+    "seo": {
+      "descriptionFallback": "Free {programTitle} giveaway CD keys for Windows. {workingKeys} working keys out of {totalKeys} — copy a license and activate in-app. Official download recommended."
+    },
+    "jsonld": {
+      "offerDescription": "Free CD Key for {programTitle}",
+      "offerDescriptionGeneric": "Free CD Key for {programTitle}"
+    }
+  },
+  "account": {
+    "hero": {
+      "subtitle": "Free PRO account access for {programTitle} — copy the credentials and sign in to unlock the paid tier."
+    },
+    "stats": {
+      "totalLabel": "Shared accounts",
+      "workingLabel": "Working accounts"
+    },
+    "keyTable": {
+      "headingSuffix": "PRO accounts",
+      "intro": "Giveaway PRO accounts for {programTitle}. Copy a working row and sign in with the username and password in the official app or website.",
+      "empty": "No accounts available",
+      "columnKey": "Account",
+      "columnPassword": "Password",
+      "copyUsernameTitle": "Click to copy username",
+      "copyPasswordTitle": "Click to copy password",
+      "copyButton": "Copy",
+      "copyTitle": "Copy username and password",
+      "reportTitle": "Report the status of this account",
+      "linkHint": "",
+      "expiringDisclaimer": "Note: Once expired, this shared login may stop working and PRO features can be revoked."
+    },
+    "activationInstructions": {
+      "pageTitle": "How to unlock PRO for {programTitle}",
+      "pageLead": "Shared giveaway accounts for {programTitle} — sign in with the credentials from our verified list.",
+      "sectionTitle": "How to unlock PRO",
+      "sectionSubtitle": "Follow these steps to use {programTitle} with a shared PRO account.",
+      "steps": {
+        "activate": {
+          "title": "Open sign-in in the app or site",
+          "description": "Launch {programTitle} (or the vendor site) and find “Sign in”, “Log in”, or “Account”."
+        },
+        "paste": {
+          "title": "Sign in with the giveaway credentials",
+          "description": "Copy the username and password from the table on this page and sign in where the vendor asks for your account."
+        }
+      },
+      "tips": [
+        "Download {programTitle} only from the official vendor or the link on this page — avoid repacked installers.",
+        "If an account stops working, try another working row from the list.",
+        "Shared accounts can be revoked by the vendor — prefer an official license for long-term use."
+      ]
+    },
+    "seo": {
+      "descriptionFallback": "Free {programTitle} PRO account giveaway for Windows. {workingKeys} working logins out of {totalKeys} — copy credentials and sign in. Official download recommended."
+    },
+    "jsonld": {
+      "offerDescription": "Free PRO account access for {programTitle}",
+      "offerDescriptionGeneric": "Free PRO account access for {programTitle}"
+    }
+  },
+  "linkBasedAccount": {
+    "hero": {
+      "subtitle": "Official links to get PRO access for {programTitle} — open a giveaway, partner offer, or signup flow, then sign in on the vendor site."
+    },
+    "stats": {
+      "totalLabel": "Giveaway links",
+      "workingLabel": "Active offers"
+    },
+    "keyTable": {
+      "headingSuffix": "PRO access links",
+      "intro": "Curated links for {programTitle} where you can claim PRO or VIP access (partner pages, official giveaways, or signups). Open a working row and follow the vendor instructions.",
+      "empty": "No links available",
+      "columnKey": "Links",
+      "columnPassword": "Password",
+      "copyButton": "Open link",
+      "copyTitle": "Open link in a new tab",
+      "linkHint": "",
+      "reportTitle": "Report whether this offer still works",
+      "expiringDisclaimer": "Note: If an offer expires, open another working row — vendor campaigns change often."
+    },
+    "activationInstructions": {
+      "pageTitle": "How to get PRO access for {programTitle}",
+      "pageLead": "Official links and partner offers for {programTitle} — follow each vendor flow to unlock PRO or VIP.",
+      "sectionTitle": "How to get PRO access",
+      "sectionSubtitle": "Follow these steps to unlock {programTitle} using the official signup or partner offers.",
+      "steps": {
+        "activate": {
+          "title": "Open the official offer",
+          "description": "Use a link from the table on this page — complete any required signup on the developer or partner site."
+        },
+        "paste": {
+          "title": "Sign in after you get access",
+          "description": "Once the vendor confirms your PRO or VIP access, sign in inside {programTitle} with the account you used on their site."
+        }
+      },
+      "tips": [
+        "Only use links from trusted sources — avoid random “free account” pages that ask for unrelated permissions.",
+        "If an offer expires, try another working row from the list.",
+        "Prefer an official paid license if you need guaranteed updates and support."
+      ]
+    },
+    "seo": {
+      "descriptionFallback": "Official links and giveaways for {programTitle} PRO access. {workingKeys} active offers out of {totalKeys} — open a link and follow the vendor flow. Official download recommended."
+    },
+    "jsonld": {
+      "offerDescription": "Free PRO access offer for {programTitle}",
+      "offerDescriptionGeneric": "Free PRO access offer for {programTitle}"
+    }
+  }
+}

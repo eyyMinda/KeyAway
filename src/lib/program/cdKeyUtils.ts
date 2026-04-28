@@ -1,4 +1,6 @@
 import { KeyReportEvent, CDKey } from "@/src/types";
+import type { ProgramFlow } from "@/src/types/program";
+import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 
 // CD Key Status Types
 export type CDKeyStatus = "working" | "expired" | "limit_reached";
@@ -241,11 +243,16 @@ export function calculateKeyScore(
  */
 export function sortCdKeysByScore(
   cdKeys: CDKey[],
-  reportDataMap: Map<string, { working: number; expired: number; limit_reached: number }>
+  reportDataMap: Map<string, { working: number; expired: number; limit_reached: number }>,
+  programFlow: ProgramFlow = "cd_key",
+  storageKeyOf: (cdKey: CDKey) => string = () => ""
 ): CDKey[] {
+  void normalizeProgramFlow(programFlow);
   return [...cdKeys].sort((a, b) => {
-    const reportA = reportDataMap.get(a.key) || { working: 0, expired: 0, limit_reached: 0 };
-    const reportB = reportDataMap.get(b.key) || { working: 0, expired: 0, limit_reached: 0 };
+    const ka = storageKeyOf(a) || `anon:${a.version}:${a.status}`;
+    const kb = storageKeyOf(b) || `anon:${b.version}:${b.status}`;
+    const reportA = reportDataMap.get(ka) || { working: 0, expired: 0, limit_reached: 0 };
+    const reportB = reportDataMap.get(kb) || { working: 0, expired: 0, limit_reached: 0 };
 
     const scoreA = calculateKeyScore(a, reportA);
     const scoreB = calculateKeyScore(b, reportB);
@@ -261,11 +268,14 @@ export function sortCdKeysByColumn(
   cdKeys: CDKey[],
   sortColumn: string,
   sortDirection: "asc" | "desc",
-  reportDataMap: Map<string, { working: number; expired: number; limit_reached: number }>
+  reportDataMap: Map<string, { working: number; expired: number; limit_reached: number }>,
+  programFlow: ProgramFlow = "cd_key",
+  storageKeyOf: (cdKey: CDKey) => string = () => ""
 ): CDKey[] {
+  void normalizeProgramFlow(programFlow);
   return [...cdKeys].sort((a, b) => {
-    let compareA: number;
-    let compareB: number;
+    let compareA: number | string;
+    let compareB: number | string;
 
     switch (sortColumn) {
       case "status":
@@ -285,9 +295,15 @@ export function sortCdKeysByColumn(
         compareA = new Date(a.validUntil || 0).getTime();
         compareB = new Date(b.validUntil || 0).getTime();
         break;
-      case "reports":
-        const reportA = reportDataMap.get(a.key) || { working: 0, expired: 0, limit_reached: 0 };
-        const reportB = reportDataMap.get(b.key) || { working: 0, expired: 0, limit_reached: 0 };
+      case "password":
+        compareA = String((a.password ?? "").trim()).toLowerCase();
+        compareB = String((b.password ?? "").trim()).toLowerCase();
+        break;
+      case "reports": {
+        const ka = storageKeyOf(a) || `anon:${a.version}:${a.status}`;
+        const kb = storageKeyOf(b) || `anon:${b.version}:${b.status}`;
+        const reportA = reportDataMap.get(ka) || { working: 0, expired: 0, limit_reached: 0 };
+        const reportB = reportDataMap.get(kb) || { working: 0, expired: 0, limit_reached: 0 };
         const totalA = reportA.working + reportA.expired + reportA.limit_reached;
         const totalB = reportB.working + reportB.expired + reportB.limit_reached;
         // Sort by positive ratio (working reports / total reports)
@@ -296,6 +312,7 @@ export function sortCdKeysByColumn(
         compareA = ratioA;
         compareB = ratioB;
         break;
+      }
       default:
         return 0;
     }

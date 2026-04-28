@@ -27,6 +27,14 @@ export const analyticsEvent = {
     chartHex: analyticsAccents.copy,
     dotClass: "bg-analytics-copy"
   },
+  copy_pro_account: {
+    chartHex: analyticsAccents.copy,
+    dotClass: "bg-analytics-copy"
+  },
+  click_activation_link: {
+    chartHex: analyticsAccents.copy,
+    dotClass: "bg-analytics-copy"
+  },
   download_click: {
     chartHex: analyticsAccents.download,
     dotClass: "bg-analytics-download"
@@ -60,6 +68,8 @@ export const trackingTagTierBackgroundClass = {
 /** Compact pill row in events tables. */
 export const eventTypePillClass: Record<AnalyticsEventKey, string> = {
   copy_cdkey: `${trackingTagTierBackgroundClass.new} ${trackingTagPillTextClass}`,
+  copy_pro_account: `${trackingTagTierBackgroundClass.new} ${trackingTagPillTextClass}`,
+  click_activation_link: `${trackingTagTierBackgroundClass.new} ${trackingTagPillTextClass}`,
   download_click: `${trackingTagTierBackgroundClass.returning} ${trackingTagPillTextClass}`,
   social_click: `${trackingTagTierBackgroundClass.regular} ${trackingTagPillTextClass}`,
   page_viewed: `${trackingTagTierBackgroundClass.star} ${trackingTagPillTextClass}`,

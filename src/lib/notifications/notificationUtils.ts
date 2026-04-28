@@ -33,6 +33,7 @@ export const ERROR_MESSAGES = {
 // Success Messages
 export const SUCCESS_MESSAGES = {
   KEY_COPIED: "Key copied to clipboard!",
+  COPIED: (value: string) => `Copied ${value} to clipboard!`,
   REPORT_SUBMITTED: "Report submitted successfully!",
   RENEWAL_COMPLETED: "Report renewed successfully!"
 } as const;
@@ -50,8 +51,7 @@ export const SPAMMER_REPORT_RESTRICTION_NOTICE =
   "Because your recent reports were marked as spam, you can no longer report keys as expired or limit reached. You can still report them as working.";
 
 /** `title` on disabled Expired / Limit reached actions (keep short). */
-export const SPAMMER_REPORT_DISABLED_OPTION_TITLE =
-  "Not available — your recent reports were flagged as spam.";
+export const SPAMMER_REPORT_DISABLED_OPTION_TITLE = "Not available — your recent reports were flagged as spam.";
 
 // Get report status message
 export function getReportStatusMessage(status: CDKeyStatus): string {
@@ -69,8 +69,9 @@ export function getErrorMessage(key: keyof typeof ERROR_MESSAGES): string {
 }
 
 // Get success message
-export function getSuccessMessage(key: keyof typeof SUCCESS_MESSAGES): string {
-  return SUCCESS_MESSAGES[key];
+export function getSuccessMessage(key: keyof typeof SUCCESS_MESSAGES, arg?: string): string {
+  const v = SUCCESS_MESSAGES[key];
+  return typeof v === "function" ? v(arg ?? "") : v;
 }
 
 // Get info message

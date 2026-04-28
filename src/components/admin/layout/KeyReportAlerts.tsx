@@ -80,9 +80,9 @@ export function KeyReportAlertsDesktop({ alerts }: KeyReportAlertsDesktopProps) 
           </div>
           <ul className="py-1">
             {alerts.map((item, i) => (
-              <li key={`${item.programSlug}:${item.keyIdentifier}:${i}`} className="px-3 py-2 hover:bg-gray-50">
+              <li key={`${item.programSlug}:${item.label}:${i}`} className="px-3 py-2 hover:bg-gray-50">
                 <p className="text-sm font-medium text-gray-900 truncate">{item.programTitle}</p>
-                <p className="text-xs font-mono text-gray-600 truncate">{item.keyIdentifier}</p>
+                <p className="text-xs font-mono text-gray-600 truncate">{item.label}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
                   {item.negativeCount} negative · {item.ratioLabel}
                   {item.lastReportAt && ` · ${formatRelativeTimeCompact(item.lastReportAt)}`}
@@ -118,10 +118,10 @@ export function KeyReportAlertsMobile({ alerts, onLinkClick }: KeyReportAlertsMo
       <ul className="space-y-2 max-h-48 overflow-y-auto">
         {alerts.map((item, i) => (
           <li
-            key={`${item.programSlug}:${item.keyIdentifier}:${i}`}
+            key={`${item.programSlug}:${item.label}:${i}`}
             className="rounded-md border border-gray-100 p-2 bg-gray-50">
             <p className="text-sm font-medium text-gray-900 truncate">{item.programTitle}</p>
-            <p className="text-xs font-mono text-gray-600 truncate">{item.keyIdentifier}</p>
+            <p className="text-xs font-mono text-gray-600 truncate">{item.label}</p>
             <p className="text-xs text-gray-500 mt-0.5">
               {item.negativeCount} negative · {item.ratioLabel}
               {item.lastReportAt && ` · ${formatRelativeTimeCompact(item.lastReportAt)}`}

@@ -1,4 +1,10 @@
 import { Program } from "@/src/types";
+import { getKeyData } from "@/src/lib/keyHashing";
+import {
+  getActivationEntryIdentityString,
+  normalizeProgramFlow
+} from "@/src/lib/program/activationEntry";
+import { programT } from "@/src/lib/program/programCopy";
 import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { urlFor } from "@/src/sanity/lib/image";
 import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
@@ -122,22 +128,29 @@ export function generateProgramPageJsonLd(
   const pageUrl = `${base}/program/${program.slug.current}`;
   const appDescription = buildSoftwareApplicationDescription(program);
   const softwareVersion = getSoftwareVersionForSchema(program, program.cdKeys);
+  const flow = normalizeProgramFlow(program.programFlow);
+  const offerDesc = programT(flow, "jsonld.offerDescription", { programTitle: program.title });
+  const offerDescGeneric = programT(flow, "jsonld.offerDescriptionGeneric", { programTitle: program.title });
 
-  // Create offers for each working CD key
   const offers = program.cdKeys
     .filter(cdKey => cdKey.status === "active" || cdKey.status === "new")
-    .slice(0, 10) // Limit to first 10 working keys for performance
-    .map(cdKey => ({
-      "@type": "Offer",
-      sku: `key-${cdKey.key.slice(-8)}`,
-      price: "0",
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-      description: `Free CD Key for ${program.title}`,
-      itemCondition: "https://schema.org/NewCondition",
-      ...(cdKey.validFrom ? { validFrom: cdKey.validFrom } : {}),
-      ...(cdKeyHasExpiry(cdKey.validUntil) ? { validThrough: cdKey.validUntil } : {})
-    }));
+    .slice(0, 10)
+    .map((cdKey, idx) => {
+      const identity = getActivationEntryIdentityString(cdKey, flow);
+      const kd = getKeyData({ ...cdKey, programFlow: flow }, flow);
+      const skuTail = kd?.hash?.slice(0, 12) ?? `row-${idx}`;
+      return {
+        "@type": "Offer",
+        sku: `activation-${skuTail}`,
+        price: "0",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        description: identity ? offerDesc : offerDescGeneric,
+        itemCondition: "https://schema.org/NewCondition",
+        ...(cdKey.validFrom ? { validFrom: cdKey.validFrom } : {}),
+        ...(cdKeyHasExpiry(cdKey.validUntil) ? { validThrough: cdKey.validUntil } : {})
+      };
+    });
 
   const softwareApp: JsonLdData = {
     "@type": "SoftwareApplication",
@@ -171,7 +184,7 @@ export function generateProgramPageJsonLd(
             price: "0",
             priceCurrency: "USD",
             availability: "https://schema.org/InStock",
-            description: `Free CD Key for ${program.title}`
+            description: offerDescGeneric
           },
     aggregateRating: {
       "@type": "AggregateRating",

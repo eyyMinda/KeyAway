@@ -14,30 +14,53 @@ import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 
 const ANALYTICS_EVENTS = new Set([
   "copy_cdkey",
+  "copy_pro_account",
+  "click_activation_link",
   "download_click",
   "social_click",
   "page_viewed"
 ]);
 const REPORT_EVENTS = new Set(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
-function buildAnalyticsEventDedupeKey(
-  event: string,
-  body: TrackRequestBody,
-  ipHash: string
-): string {
+function activationUrlFromMeta(meta: TrackRequestBody["meta"]): string | undefined {
+  const u = meta?.activationUrl;
+  if (typeof u !== "string" || !u.trim()) return undefined;
+  return u.trim().toLowerCase();
+}
+
+function buildAnalyticsEventDedupeKey(event: string, body: TrackRequestBody, ipHash: string): string {
   const pathNorm = normalizePath(typeof body.meta?.path === "string" ? body.meta.path : "/");
   const slugPart =
     typeof body.meta?.programSlug === "string" && body.meta.programSlug.trim()
       ? body.meta.programSlug.trim()
       : "-";
+  const activationUrl = activationUrlFromMeta(body.meta);
 
-  if (event === "copy_cdkey" || event === "download_click" || event === "social_click") {
+  if (
+    event === "copy_cdkey" ||
+    event === "copy_pro_account" ||
+    event === "click_activation_link" ||
+    event === "download_click" ||
+    event === "social_click"
+  ) {
     const socialPart =
       typeof body.meta?.social === "string" && body.meta.social.trim() ? body.meta.social.trim() : "-";
     let keyPart = "-";
-    if (event === "copy_cdkey" && body.meta?.key) {
-      const kd = getKeyData(body.meta.key);
-      if (kd?.hash) keyPart = kd.hash;
+    if (
+      (event === "copy_cdkey" || event === "copy_pro_account" || event === "click_activation_link") &&
+      body.meta?.key
+    ) {
+      const kd = getKeyData(
+        body.meta.key,
+        body.meta.programFlow,
+        event === "click_activation_link" ? activationUrl : undefined
+      );
+      if (kd?.hash) {
+        keyPart = kd.hash;
+        if (event === "click_activation_link") {
+          keyPart += `|${activationUrl ?? "-"}`;
+        }
+      }
     }
     return `analytics|${event}|${ipHash}|${pathNorm}|${slugPart}|${socialPart}|${keyPart}`;
   }
@@ -49,7 +72,7 @@ function buildAnalyticsEventDedupeKey(
 
   let keyPart = "-";
   if (body.meta?.key) {
-    const kd = getKeyData(body.meta.key);
+    const kd = getKeyData(body.meta.key, body.meta.programFlow, activationUrl);
     if (kd?.hash) keyPart = kd.hash;
   }
   return `analytics|${event}|${ipHash}|${pathNorm}|${slugPart}|${keyPart}`;
@@ -84,7 +107,14 @@ export async function POST(req: NextRequest) {
     const ref = req.headers.get("referer") || undefined;
 
     let programSlug = body.meta?.programSlug as string | undefined;
-    const keyData = body.meta?.key ? getKeyData(body.meta.key) : undefined;
+    const activationUrl = activationUrlFromMeta(body.meta);
+    const keyData = body.meta?.key
+      ? getKeyData(
+          body.meta.key,
+          body.meta.programFlow,
+          body.event === "click_activation_link" ? activationUrl : undefined
+        )
+      : undefined;
     const social = body.meta?.social as string | undefined;
     const path = body.meta?.path as string | undefined;
     const referrer = body.meta?.referrer as string | undefined;
@@ -125,11 +155,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    if (
-      isReportEvent &&
-      visitor?.isSpammer === true &&
-      body.event !== "report_key_working"
-    ) {
+    if (isReportEvent && visitor?.isSpammer === true && body.event !== "report_key_working") {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
     }
 
@@ -151,10 +177,23 @@ export async function POST(req: NextRequest) {
       eventData.notFound = notFound;
     }
     if (programSlug) eventData.programSlug = programSlug;
+    if (typeof body.meta?.programFlow === "string" && body.meta.programFlow.trim()) {
+      eventData.programFlow = body.meta.programFlow.trim();
+    }
     if (keyData) {
-      eventData.keyHash = keyData.hash;
-      eventData.keyIdentifier = keyData.identifier;
-      eventData.keyNormalized = keyData.normalized;
+      if (isReportEvent) {
+        eventData.key = keyData.hash;
+        eventData.label = keyData.identifier;
+      } else if (body.event === "copy_cdkey" || body.event === "copy_pro_account") {
+        eventData.key = keyData.normalized;
+      } else if (body.event === "click_activation_link") {
+        eventData.key = keyData.hash;
+      } else {
+        eventData.key = keyData.hash;
+      }
+    }
+    if (!isReportEvent && body.event === "click_activation_link" && activationUrl) {
+      eventData.activationUrl = activationUrl;
     }
     if (social) eventData.social = social;
     if (path) eventData.path = path;

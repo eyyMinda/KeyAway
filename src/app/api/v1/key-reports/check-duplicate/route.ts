@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { duplicateKeyReportQuery } from "@/src/lib/sanity/queries";
-import { hashCDKey } from "@/src/lib/keyHashing";
+import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     const b = body as Record<string, unknown>;
     const programSlug = typeof b.programSlug === "string" ? b.programSlug.trim() : "";
     const key = b.key;
+    const programFlow = typeof b.programFlow === "string" ? b.programFlow : undefined;
 
     if (!programSlug) return Errors.validation("programSlug is required");
     if (!key) return Errors.validation("key is required");
@@ -32,16 +33,18 @@ export async function POST(req: NextRequest) {
     const ipHash = hashIp(ip);
     if (!ipHash) return Errors.validation("Unable to generate visitor hash");
 
-    const keyHash = hashCDKey(typeof key === "string" ? key : ((key as { key: string })?.key ?? ""));
+    const kd = getKeyData(key, programFlow);
+    if (!kd?.hash) return Errors.validation("key is invalid or empty for this program flow");
+    const storageKey = kd.hash;
 
     const existingReport = await client.fetch<{
       _id: string;
       eventType: string;
       programSlug: string;
-      keyHash: string;
-      keyIdentifier: string;
+      key: string;
+      label?: string;
       createdAt: string;
-    } | null>(duplicateKeyReportQuery, { ipHash, programSlug, keyHash });
+    } | null>(duplicateKeyReportQuery, { ipHash, programSlug, key: storageKey });
 
     if (existingReport) {
       return NextResponse.json({
@@ -51,8 +54,8 @@ export async function POST(req: NextRequest) {
             _id: existingReport._id,
             eventType: existingReport.eventType,
             programSlug: existingReport.programSlug,
-            keyHash: existingReport.keyHash,
-            keyIdentifier: existingReport.keyIdentifier,
+            key: existingReport.key,
+            label: existingReport.label,
             createdAt: existingReport.createdAt
           }
         },

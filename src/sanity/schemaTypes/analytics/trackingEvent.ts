@@ -33,6 +33,8 @@ export const trackingEvent = defineType({
       options: {
         list: [
           { title: "Copy CD Key", value: "copy_cdkey" },
+          { title: "Copy PRO Account", value: "copy_pro_account" },
+          { title: "Click Activation Link", value: "click_activation_link" },
           { title: "Download Click", value: "download_click" },
           { title: "Social Click", value: "social_click" },
           { title: "Page Viewed", value: "page_viewed" }
@@ -48,22 +50,23 @@ export const trackingEvent = defineType({
     }),
     defineField({ name: "programSlug", title: "Program Slug", type: "string" }),
     defineField({
-      name: "keyHash",
-      title: "Key Hash",
+      name: "programFlow",
+      title: "Program flow",
       type: "string",
-      description: "SHA-256 hash of the CD key for privacy"
+      description: "When set, activation row interpretation (cd_key, account, link-based, etc.)."
     }),
     defineField({
-      name: "keyIdentifier",
-      title: "Key Identifier",
+      name: "key",
+      title: "Key / row id",
       type: "string",
-      description: "Short identifier like ABC***XYZ"
+      description:
+        "Copy events: normalized key or account string. Link-click / row-scoped events: storage row id or per-URL digest when applicable."
     }),
     defineField({
-      name: "keyNormalized",
-      title: "Key Normalized",
+      name: "activationUrl",
+      title: "Activation URL",
       type: "string",
-      description: "Normalized key for matching"
+      description: "For click_activation_link: which URL was opened."
     }),
     defineField({ name: "social", title: "Social Name", type: "string" }),
     defineField({ name: "path", title: "Path", type: "string" }),
