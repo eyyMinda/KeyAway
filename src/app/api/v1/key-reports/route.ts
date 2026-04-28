@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     }
 
     const programSlug = meta?.programSlug as string | undefined;
-    const keyData = getKeyData(meta?.key);
+    const keyData = getKeyData(meta?.key, meta?.programFlow as string | undefined);
     if (!programSlug || !keyData) {
       return Errors.validation("programSlug and key (or meta.key) required");
     }
@@ -97,9 +97,8 @@ export async function POST(req: NextRequest) {
       _type: "keyReport",
       eventType: event,
       programSlug,
-      keyHash: keyData.hash,
-      keyIdentifier: keyData.identifier,
-      keyNormalized: keyData.normalized,
+      key: keyData.hash,
+      label: keyData.identifier,
       userAgent: ua,
       referrer: ref,
       ipHash,
