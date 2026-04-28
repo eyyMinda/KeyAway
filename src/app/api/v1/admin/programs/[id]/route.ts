@@ -7,9 +7,11 @@ import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPorta
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { buildSiteUrl, submitIndexNow } from "@/src/lib/seo/indexnow";
+import type { ProgramFlow } from "@/src/types/program";
 
 const SLUG_REGEX = /^[a-z0-9-]+$/;
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
+const PROGRAM_FLOWS: ProgramFlow[] = ["cd_key", "link_based_cdkey", "account", "link_based_account"];
 
 function normalizeSlug(s: string): string {
   return s
@@ -39,6 +41,11 @@ function parseBody(body: unknown): Record<string, unknown> {
   }
   if (b.description !== undefined) {
     out.description = typeof b.description === "string" ? b.description.trim() : "";
+  }
+  if (b.programFlow !== undefined) {
+    const v = typeof b.programFlow === "string" ? b.programFlow.trim() : "";
+    if (!PROGRAM_FLOWS.includes(v as ProgramFlow)) throw new Error("programFlow must be a valid flow");
+    out.programFlow = v;
   }
   if (b.featuredCopy !== undefined) {
     if (b.featuredCopy === null) {
@@ -119,7 +126,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const keys = Object.keys(updates);
     if (keys.length === 0) {
       return Errors.validation(
-        "No valid fields to update (allowed: title, slug, description, featuredCopy, downloadLink, imageAssetId, showcaseGifAssetId)"
+        "No valid fields to update (allowed: title, slug, description, programFlow, featuredCopy, downloadLink, imageAssetId, showcaseGifAssetId)"
       );
     }
 
@@ -141,6 +148,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (updates.description !== undefined) {
       patch.set({ description: plainTextToPortableText(updates.description as string) });
     }
+    if (updates.programFlow !== undefined) patch.set({ programFlow: updates.programFlow as ProgramFlow });
     if (updates.downloadLink !== undefined) patch.set({ downloadLink: (updates.downloadLink as string) ?? null });
     if (updates.imageAssetId !== undefined) {
       patch.set({ image: buildImageReference(updates.imageAssetId as string | null) });
