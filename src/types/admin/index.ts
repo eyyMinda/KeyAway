@@ -1,5 +1,5 @@
 // Admin-related types
-import { CDKeyStatus } from "../program";
+import type { CDKeyStatus, ProgramFlow } from "../program";
 
 export interface AdminUser {
   id: string;
@@ -58,11 +58,20 @@ export interface TimeFilterProps {
   };
 }
 
-// Expired key reporting types
-export interface ExpiredKeyReport {
-  key: string; // Actual CD key
-  keyHash: string; // Hash for privacy
-  keyIdentifier: string; // Short identifier like ABC***XYZ
+/** Aggregated admin row: community key reports for one program + activation storage key. */
+export interface KeyReport {
+  /** Display label (CD key text, account label, or link titles). */
+  key: string;
+  /** Row storage key: plaintext CD key / lowercase username / link digest — matches `getRowStorageHash` & keyReport `key`. */
+  storageKey: string;
+  /** Program flow when aggregating (from CMS); used to resolve activation row fields for the modal. */
+  programFlow?: ProgramFlow;
+  /** Account flow: username from matched `program.cdKeys[]` row (not stored on keyReport). */
+  resolvedUsername?: string;
+  /** Account flow: password from matched program row. */
+  resolvedPassword?: string;
+  /** Key-like flows: raw `cdKey.key` from program row for admin display. */
+  resolvedCdKey?: string;
   programSlug: string;
   programTitle: string;
   reportCount: number;
@@ -91,7 +100,7 @@ export interface ExpiredKeyReport {
 export interface KeyReportNotificationItem {
   programSlug: string;
   programTitle: string;
-  keyIdentifier: string;
+  label: string;
   negativeCount: number;
   positiveCount: number;
   working: number;
