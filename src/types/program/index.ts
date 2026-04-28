@@ -7,14 +7,30 @@ import type { SocialData } from "../layout";
 
 export type CDKeyStatus = "new" | "active" | "expired" | "limit";
 
+/** How activation is delivered for this program (Sanity `program.programFlow`). */
+export type ProgramFlow = "cd_key" | "link_based_cdkey" | "account" | "link_based_account";
+
+export interface GiveawayLink {
+  title?: string;
+  url?: string;
+  note?: string;
+}
+
 export interface CDKey {
-  key: string;
+  /** CD key string (cd_key / link_based_cdkey flows). */
+  key?: string;
   status: CDKeyStatus;
   version: string;
   validFrom?: string;
   /** Empty / omitted = lifetime (no fixed expiry). */
   validUntil?: string;
   createdAt?: string;
+  /** Optional label shown in UI / admin (account flow). */
+  accountLabel?: string;
+  username?: string;
+  password?: string;
+  /** Signup / partner links where users obtain PRO access (link_based_account). */
+  giveawayLinks?: GiveawayLink[];
 }
 
 export interface ProgramFaqItem {
@@ -51,6 +67,8 @@ export interface Program {
   _id: string;
   title: string;
   slug: { current: string };
+  /** Defaults to cd_key when omitted (legacy documents). */
+  programFlow?: ProgramFlow;
   description: PortableTextBlock[] | string;
   featured?: ProgramFeatured;
   /** Vendor-reported current version (e.g. from product page). */
@@ -77,6 +95,8 @@ export interface Program {
 
 export interface CDKeyTableProps {
   cdKeys: CDKey[];
+  /** Same length/order as `cdKeys`; server row storage key per row (`getRowStorageHash`: plaintext / username / link digest). */
+  rowStorageIds: string[];
   slug: string;
   program: Program;
   /** Program name for table heading and intro copy. */
@@ -100,7 +120,9 @@ export interface ReportData {
 export interface CDKeyItemProps {
   cdKey: CDKey;
   index: number;
+  rowStorageId: string;
   slug: string;
+  programFlow: ProgramFlow;
   reportData: ReportData;
   onReportSubmitted?: () => void;
   isSpammerVisitor?: boolean;
@@ -108,8 +130,10 @@ export interface CDKeyItemProps {
 
 export interface CDKeyActionsProps {
   cdKey: CDKey;
+  rowStorageId: string;
   isDisabled: boolean;
   slug: string;
+  programFlow: ProgramFlow;
   onReportSubmitted?: () => void;
   isSpammerVisitor?: boolean;
 }
@@ -134,4 +158,7 @@ export interface KeyStatusUpdaterProps {
 export interface UseCopyTrackingProps {
   cdKey: CDKey;
   slug: string;
+  programFlow: ProgramFlow;
+  /** Clipboard text that counts as a tracked copy for this row. */
+  clipboardMatch: string;
 }
