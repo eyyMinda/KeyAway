@@ -27,6 +27,10 @@ import { headers } from "next/headers";
 import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import type { Program, ProgramFaqItem } from "@/src/types/program";
+import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
+import { getRowStorageHash } from "@/src/lib/keyHashing";
+import I18nShell from "@/src/components/i18n/I18nShell";
+import { loadMessages } from "@/src/lib/i18n/loadMessages";
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -57,7 +61,9 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
 
   if (!program) return notFound();
 
+  const programFlow = normalizeProgramFlow(program.programFlow);
   const sortedCdKeys = sortCdKeysByStatus(program.cdKeys || []);
+  const rowStorageIds = sortedCdKeys.map(k => getRowStorageHash(k, programFlow));
 
   const totalKeys = sortedCdKeys.length;
   const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
@@ -89,35 +95,39 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
 
   const storeInfo = store || { title: "KeyAway" };
   const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
+  const i18n = await loadMessages({ locale: "en", namespaces: ["common", "program"], programFlow });
 
   return (
     <>
       <JsonLd data={jsonLd} />
-      <main className="min-h-screen bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
-        <ProgramInformation
-          program={program}
-          totalKeys={totalKeys}
-          workingKeys={workingKeys}
-          socialData={socialData}
-          visitorHint={visitorHint}
-        />
-        <CDKeyTable
-          cdKeys={sortedCdKeys}
-          slug={slug}
-          program={program}
-          programTitle={program.title}
-          isSpammerVisitor={isSpammer}
-          vendorReleaseForIntro={vendorReleaseForIntro}
-          introVersionConfirmation={introVersionConfirmation}
-          versionSummaryLine={versionSummaryLine}
-        />
-        <ContributeBanner />
-        <ProgramAboutSection program={program} />
-        <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
-        <ProgramFaqSection programTitle={program.title} items={faqItems} />
-        <RelatedPrograms programs={relatedPrograms} />
-        <CommentsSection />
-      </main>
+      <I18nShell locale={i18n.locale} messages={i18n.messages}>
+        <main className="min-h-screen bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
+          <ProgramInformation
+            program={program}
+            totalKeys={totalKeys}
+            workingKeys={workingKeys}
+            socialData={socialData}
+            visitorHint={visitorHint}
+          />
+          <CDKeyTable
+            cdKeys={sortedCdKeys}
+            rowStorageIds={rowStorageIds}
+            slug={slug}
+            program={program}
+            programTitle={program.title}
+            isSpammerVisitor={isSpammer}
+            vendorReleaseForIntro={vendorReleaseForIntro}
+            introVersionConfirmation={introVersionConfirmation}
+            versionSummaryLine={versionSummaryLine}
+          />
+          <ContributeBanner />
+          <ProgramAboutSection program={program} />
+          <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
+          <ProgramFaqSection programTitle={program.title} items={faqItems} />
+          <RelatedPrograms programs={relatedPrograms} />
+          <CommentsSection />
+        </main>
+      </I18nShell>
     </>
   );
 }
