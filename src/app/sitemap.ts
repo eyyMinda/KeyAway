@@ -3,12 +3,15 @@ import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { Program, CDKey } from "@/src/types";
 
+/** ISR: sitemap can stay cached up to this many seconds before next request may regenerate. Webhook still busts via `revalidateTag("programs")`. */
+export const revalidate = 60;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.keyaway.app";
   const currentDate = new Date();
 
-  // Get all programs for dynamic routes
-  const programs = await client.fetch(allProgramsQuery);
+  // Get all programs for dynamic routes (tag must match /api/v1/webhooks/revalidate)
+  const programs = await client.fetch(allProgramsQuery, {}, { next: { tags: ["programs"] } });
 
   // Static routes with proper SEO optimization
   const staticRoutes: MetadataRoute.Sitemap = [
