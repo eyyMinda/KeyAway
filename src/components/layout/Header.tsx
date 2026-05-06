@@ -16,10 +16,6 @@ import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
 import { usePathname } from "next/navigation";
 import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
 import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
-import {
-  readNotificationsFromClientCache,
-  writeNotificationsToClientCache
-} from "@/src/lib/notifications/notificationsClientCache";
 
 export default function Header({ logoData, notifications: notificationsProp, socialData }: HeaderProps) {
   const storeData = useStoreDetails();
@@ -31,20 +27,12 @@ export default function Header({ logoData, notifications: notificationsProp, soc
       setNotifications(notificationsProp);
       return;
     }
-    const cached = readNotificationsFromClientCache();
-    if (cached) {
-      setNotifications(cached);
-      return;
-    }
     let cancelled = false;
     void fetch("/api/v1/notifications/recent")
       .then(r => r.json())
       .then((body: { data?: { notifications?: Notification[] } }) => {
         const list = body?.data?.notifications ?? [];
-        if (!cancelled) {
-          setNotifications(list);
-          writeNotificationsToClientCache(list);
-        }
+        if (!cancelled) setNotifications(list);
       })
       .catch(() => {});
     return () => {
