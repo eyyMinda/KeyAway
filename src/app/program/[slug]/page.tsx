@@ -31,10 +31,10 @@ import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 import { getRowStorageHash } from "@/src/lib/keyHashing";
 import I18nShell from "@/src/components/i18n/I18nShell";
 import { loadMessages } from "@/src/lib/i18n/loadMessages";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { TAG_PROGRAM_LISTINGS, TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
 
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
+export const revalidate = 120;
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -93,9 +93,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     .map(p => ({ ...p, cdKeys: p.cdKeys ?? [] }));
 
   const faqItems =
-    program.faq?.filter(
-      (f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)
-    ) ?? [];
+    program.faq?.filter((f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)) ?? [];
 
   const storeInfo = store || { title: "KeyAway" };
   const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);

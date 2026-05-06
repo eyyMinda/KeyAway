@@ -16,10 +16,10 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
 import { SocialData } from "@/src/types";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { TAG_HOMEPAGE_PROGRAMS, TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
 
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
+export const revalidate = 120;
 
 export async function generateMetadata() {
   return generateHomePageMetadata();

@@ -1,12 +1,11 @@
 import { MetadataRoute } from "next";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { Program, CDKey } from "@/src/types";
 
-/** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). */
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
+export const revalidate = 120;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.keyaway.app";

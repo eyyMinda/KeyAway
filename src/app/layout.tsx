@@ -17,7 +17,6 @@ import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { headers } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"]
@@ -28,7 +27,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"]
 });
 
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
+export const revalidate = 120;
 
 type HeadMetaTag = {
   name?: string;
@@ -58,7 +58,13 @@ const HEAD_METADATA_GROUPS: Record<string, HeadMetaTag[]> = {
     { name: "database", content: "Sanity.io" },
     { name: "cdn", content: "Vercel Edge Network" }
   ],
-  social: [{ property: "fb:app_id", content: process.env.NEXT_PUBLIC_FB_APP_ID ?? "", condition: !!process.env.NEXT_PUBLIC_FB_APP_ID }]
+  social: [
+    {
+      property: "fb:app_id",
+      content: process.env.NEXT_PUBLIC_FB_APP_ID ?? "",
+      condition: !!process.env.NEXT_PUBLIC_FB_APP_ID
+    }
+  ]
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -104,7 +110,7 @@ export default async function RootLayout({
   };
   const renderedHeadMetaTags = Object.entries(HEAD_METADATA_GROUPS).flatMap(([groupName, tags]) =>
     tags
-      .filter((tag) => tag.condition !== false)
+      .filter(tag => tag.condition !== false)
       .map((tag, index) => (
         <meta
           key={`${groupName}-${tag.name ?? tag.property}-${index}`}
@@ -116,9 +122,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <head>
-        {renderedHeadMetaTags}
-      </head>
+      <head>{renderedHeadMetaTags}</head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <SessionProvider session={session}>
           <PageViewTracker />

@@ -16,10 +16,10 @@ import type { SocialData } from "@/src/types";
 import type { FilterType, SortType } from "@/src/types/programs";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { normalizeFilterType, normalizeSortType, groqProgramsOrderClause } from "@/src/lib/program/programUtils";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
+export const revalidate = 120;
 const PROGRAMS_PER_PAGE = 16;
 
 export async function generateMetadata() {
@@ -38,8 +38,11 @@ export default async function ProgramsPage({
   const page = Math.max(1, Number.parseInt(params.page || "1", 10) || 1);
   const startIdx = (page - 1) * PROGRAMS_PER_PAGE;
   const endIdx = startIdx + PROGRAMS_PER_PAGE - 1;
-  const filterQuery = filter === "hasKeys" ? "count(cdKeys[]) > 0" : filter === "noKeys" ? "count(cdKeys[]) == 0" : "true";
-  const searchFilter = searchTerm ? " && (title match $search || string::lower(pt::text(description)) match $search)" : "";
+  const filterQuery =
+    filter === "hasKeys" ? "count(cdKeys[]) > 0" : filter === "noKeys" ? "count(cdKeys[]) == 0" : "true";
+  const searchFilter = searchTerm
+    ? " && (title match $search || string::lower(pt::text(description)) match $search)"
+    : "";
   const orderClause = groqProgramsOrderClause(sortBy);
   const countQuery = `count(*[_type == "program" && ${filterQuery}${searchFilter}])`;
   const listQuery = `*[_type == "program" && ${filterQuery}${searchFilter}] ${orderClause} [${startIdx}...${endIdx}] {${programsListingProjection}}`;
