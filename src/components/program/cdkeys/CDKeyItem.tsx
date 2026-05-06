@@ -15,7 +15,7 @@ import {
   isLinkAccountFlow
 } from "@/src/lib/program/activationEntry";
 import { trackCopyEvent } from "@/src/lib/analytics/copyTracking";
-import { trackActivationLinkInteraction } from "@/src/lib/analytics/linkActivationTracking";
+import { trackActivationLinkClick } from "@/src/lib/analytics/linkActivationTracking";
 import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src/lib/notifications/notificationUtils";
 import { useI18n } from "@/src/contexts/i18n";
 
@@ -79,7 +79,7 @@ export default function CDKeyItem({
         return;
       }
       window.open(firstLinkUrl, "_blank", "noopener,noreferrer");
-      trackActivationLinkInteraction(cdKey, slug, programFlow, firstLinkUrl, "left");
+      trackActivationLinkClick(cdKey, slug, programFlow, firstLinkUrl, "left");
       return;
     }
   };

@@ -3,7 +3,7 @@ import type { CDKey } from "@/src/types/program";
 import type { ProgramFlow } from "@/src/types/program";
 
 /** Fires when user opens or invokes a giveaway link (left/right/middle). */
-export function trackActivationLinkInteraction(
+export function trackActivationLinkClick(
   cdKey: CDKey,
   slug: string,
   programFlow: ProgramFlow,

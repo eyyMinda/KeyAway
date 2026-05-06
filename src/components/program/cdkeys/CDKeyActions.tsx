@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CDKeyActionsProps } from "@/src/types";
 import { trackCopyEvent } from "@/src/lib/analytics/copyTracking";
-import { trackActivationLinkInteraction } from "@/src/lib/analytics/linkActivationTracking";
+import { trackActivationLinkClick } from "@/src/lib/analytics/linkActivationTracking";
 import ReportPopup from "./ReportPopup";
 import Toast from "@/src/components/ui/Toast";
 import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src/lib/notifications/notificationUtils";
@@ -40,7 +40,7 @@ export default function CDKeyActions({
         return;
       }
       window.open(firstLinkUrl, "_blank", "noopener,noreferrer");
-      trackActivationLinkInteraction(cdKey, slug, programFlow, firstLinkUrl, "left");
+      trackActivationLinkClick(cdKey, slug, programFlow, firstLinkUrl, "left");
       return;
     }
     if (!copyText) {
