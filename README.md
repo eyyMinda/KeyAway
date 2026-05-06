@@ -28,15 +28,15 @@ No database beyond Sanity (document store); no separate backend service. Suited 
 
 ## Tech stack
 
-| Area        | Choices |
-|------------|---------|
-| Framework  | [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/) |
-| CMS        | [Sanity v5](https://www.sanity.io/) (Studio embedded at `/studio`) |
-| Auth       | [Auth.js (NextAuth v5)](https://authjs.dev/) — GitHub (Google optional) |
-| Language   | [TypeScript](https://www.typescriptlang.org/) |
-| Styling    | [Tailwind CSS](https://tailwindcss.com/) v4 |
-| Comments   | [Giscus](https://giscus.app/) (GitHub-based) |
-| Hosting    | [Vercel](https://vercel.com/) (Analytics, Speed Insights, Cron) |
+| Area      | Choices                                                                        |
+| --------- | ------------------------------------------------------------------------------ |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/) |
+| CMS       | [Sanity v5](https://www.sanity.io/) (Studio embedded at `/studio`)             |
+| Auth      | [Auth.js (NextAuth v5)](https://authjs.dev/) — GitHub (Google optional)        |
+| Language  | [TypeScript](https://www.typescriptlang.org/)                                  |
+| Styling   | [Tailwind CSS](https://tailwindcss.com/) v4                                    |
+| Comments  | [Giscus](https://giscus.app/) (GitHub-based)                                   |
+| Hosting   | [Vercel](https://vercel.com/) (Analytics, Speed Insights, Cron)                |
 
 ---
 
@@ -130,8 +130,8 @@ ANALYTICS_SALT=yourRandomSalt                # IP hashing for analytics
 npm run dev
 ```
 
-- **Site:** http://localhost:3000  
-- **Sanity Studio:** http://localhost:3000/studio  
+- **Site:** http://localhost:3000
+- **Sanity Studio:** http://localhost:3000/studio
 - **Admin:** http://localhost:3000/admin (GitHub sign-in)
 
 ### 4. Content
@@ -142,12 +142,12 @@ In Studio, create **Program** documents and add CD keys (key, status, version, v
 
 ## Scripts
 
-| Command        | Description        |
-|----------------|--------------------|
-| `npm run dev`  | Start dev server   |
-| `npm run build`| Production build   |
-| `npm run start`| Start production   |
-| `npm run lint` | Run ESLint         |
+| Command         | Description      |
+| --------------- | ---------------- |
+| `npm run dev`   | Start dev server |
+| `npm run build` | Production build |
+| `npm run start` | Start production |
+| `npm run lint`  | Run ESLint       |
 
 ---
 
