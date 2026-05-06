@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
-import { TAG_NOTIFICATIONS, TAG_PROGRAMS_FULL } from "@/src/lib/cache/cacheTags";
+import { TAG_NOTIFICATION_FEED } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { getRecentNotifications } from "@/src/lib/notifications/notificationUtils.server";
 
@@ -10,7 +10,7 @@ const getRecentNotificationsCached = unstable_cache(
   ["api-recent-notifications", "slim-notification-payload-1"],
   {
     revalidate: PUBLIC_ISR_REVALIDATE_SECONDS,
-    tags: [TAG_NOTIFICATIONS, TAG_PROGRAMS_FULL]
+    tags: [TAG_NOTIFICATION_FEED]
   }
 );
 
