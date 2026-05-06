@@ -1,7 +1,7 @@
 import { SanityClient } from "@sanity/client";
 
 export type CronSource = "vercel_cron" | "bearer" | "manual";
-export type CronJob = "bundle-events" | "update-expired-keys";
+export type CronJob = "bundle-events" | "update-expired-keys" | "prune-cron-runs";
 
 /** Verifies cron auth (x-vercel-cron or Bearer token). Returns ok + source for logging. */
 export function verifyCronAuth(req: Request): { ok: boolean; source: CronSource } {
