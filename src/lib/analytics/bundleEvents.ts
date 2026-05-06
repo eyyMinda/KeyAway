@@ -1,5 +1,6 @@
 /** @fileoverview Cron/migration: moves old `trackingEvent` docs into `trackingEventBundle`, deletes sources, optional retention window. */
 import { randomUUID } from "node:crypto";
+import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
 import { revalidateTag } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
 
@@ -116,7 +117,7 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       created += 1;
     }
 
-    if (created > 0 || appended > 0) revalidateTag("bundle-counts", "max");
+    if (created > 0 || appended > 0) revalidateTag(TAG_BUNDLE_COUNTS, "max");
     return { ok: true, created, appended };
   } catch (err) {
     console.error("Bundle-events error:", err);
