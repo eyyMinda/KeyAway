@@ -17,6 +17,7 @@ import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { headers } from "next/headers";
 import { unstable_noStore as noStore } from "next/cache";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"]
@@ -27,7 +28,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"]
 });
 
-export const revalidate = 60;
+export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
 
 type HeadMetaTag = {
   name?: string;

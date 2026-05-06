@@ -16,8 +16,10 @@ import type { SocialData } from "@/src/types";
 import type { FilterType, SortType } from "@/src/types/programs";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { normalizeFilterType, normalizeSortType, sortPrograms } from "@/src/lib/program/programUtils";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
+import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 
-export const revalidate = 60;
+export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
 const PROGRAMS_PER_PAGE = 16;
 
 export async function generateMetadata() {
@@ -42,7 +44,7 @@ export default async function ProgramsPage({
   const queryParams = searchTerm ? { search: `*${searchTerm.toLowerCase()}*` } : {};
 
   const [rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
-    client.fetch(listQuery, queryParams, { next: { tags: ["programs"] } }),
+    client.fetch(listQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
     getBundleCountsByProgram(),
     getCachedStoreDetailsDocument(),
     getFeaturedProgram()

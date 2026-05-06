@@ -31,6 +31,10 @@ import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 import { getRowStorageHash } from "@/src/lib/keyHashing";
 import I18nShell from "@/src/components/i18n/I18nShell";
 import { loadMessages } from "@/src/lib/i18n/loadMessages";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
+import { TAG_PROGRAM_LISTINGS, TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
+
+export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -40,7 +44,7 @@ export async function generateStaticParams() {
   const slugs = await client.fetch<Array<{ slug?: { current?: string } }>>(
     `*[_type == "program"] | order(coalesce(popularityScore, 0) desc) [0...25]{ slug }`,
     {},
-    { next: { tags: ["programs"] } }
+    { next: { tags: [TAG_SITEMAP_URLS] } }
   );
   return (slugs ?? [])
     .map(item => item.slug?.current)
@@ -73,7 +77,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
   const [allPrograms, store] = await Promise.all([
-    client.fetch(popularProgramsQuery),
+    client.fetch(popularProgramsQuery, {}, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
     getCachedStoreDetailsDocument()
   ]);
 
