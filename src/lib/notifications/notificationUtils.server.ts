@@ -1,4 +1,5 @@
 import type { SanityImageSource } from "@sanity/image-url";
+import { TAG_NOTIFICATIONS, TAG_PROGRAMS_FULL } from "@/src/lib/cache/cacheTags";
 import { client } from "@/src/sanity/lib/client";
 import { urlFor } from "@/src/sanity/lib/image";
 import { Notification } from "@/src/types/notifications";
@@ -50,7 +51,7 @@ export async function getRecentNotifications(): Promise<Notification[]> {
         "cdKeys": cdKeys[]{ status, createdAt, validFrom }
       }`,
       {},
-      { next: { tags: ["notifications", "programs"] } }
+      { next: { tags: [TAG_NOTIFICATIONS, TAG_PROGRAMS_FULL] } }
     );
 
     const notifications: Notification[] = [];

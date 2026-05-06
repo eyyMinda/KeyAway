@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { programDetailTag } from "@/src/lib/cache/cacheTags";
 import { urlFor } from "@/src/sanity/lib/image";
 import { client } from "@/src/sanity/lib/client";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
@@ -81,7 +82,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
       "totalKeys": count(cdKeys[])
     }`;
     const [program, storeData] = await Promise.all([
-      client.fetch(programMetadataQuery, { slug }, { next: { tags: [`program-${slug}`] } }),
+      client.fetch(programMetadataQuery, { slug }, { next: { tags: [programDetailTag(slug)] } }),
       getCachedStoreDetailsDocument()
     ]);
     const storeTitle = storeData?.title || defaultData.store;
