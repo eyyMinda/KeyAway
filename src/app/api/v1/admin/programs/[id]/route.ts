@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
+import { revalidateAfterProgramContentWrite } from "@/src/lib/cache/revalidateProgramContent";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
 import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
@@ -179,8 +179,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const result = await patch.commit();
-    revalidatePath("/sitemap.xml");
     const nextSlug = typeof updates.slug === "string" ? updates.slug : oldSlug;
+    const slugRenamed = typeof updates.slug === "string" && updates.slug !== oldSlug;
+    revalidateAfterProgramContentWrite({
+      slug: nextSlug,
+      previousSlug: oldSlug && oldSlug !== nextSlug ? oldSlug : undefined,
+      invalidateSitemap: slugRenamed
+    });
     const urls = [buildSiteUrl(`/program/${nextSlug}`), buildSiteUrl("/programs"), buildSiteUrl("/")];
     if (oldSlug && oldSlug !== nextSlug) urls.push(buildSiteUrl(`/program/${oldSlug}`));
     void submitIndexNow(urls);
@@ -215,7 +220,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     const oldSlug = existing.slug?.current?.trim() || "";
 
     await client.delete(id);
-    revalidatePath("/sitemap.xml");
+    revalidateAfterProgramContentWrite({ previousSlug: oldSlug || undefined, invalidateSitemap: true });
     const urls = [buildSiteUrl("/programs"), buildSiteUrl("/")];
     if (oldSlug) urls.push(buildSiteUrl(`/program/${oldSlug}`));
     void submitIndexNow(urls);
