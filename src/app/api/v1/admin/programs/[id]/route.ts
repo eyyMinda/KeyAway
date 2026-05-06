@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { revalidateAfterProgramContentWrite } from "@/src/lib/cache/revalidateProgramContent";
+import { rebuildSiteNotificationFeed } from "@/src/lib/notifications/notificationFeed.server";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
 import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
@@ -186,6 +187,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       previousSlug: oldSlug && oldSlug !== nextSlug ? oldSlug : undefined,
       invalidateSitemap: slugRenamed
     });
+    await rebuildSiteNotificationFeed();
     const urls = [buildSiteUrl(`/program/${nextSlug}`), buildSiteUrl("/programs"), buildSiteUrl("/")];
     if (oldSlug && oldSlug !== nextSlug) urls.push(buildSiteUrl(`/program/${oldSlug}`));
     void submitIndexNow(urls);
@@ -221,6 +223,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
 
     await client.delete(id);
     revalidateAfterProgramContentWrite({ previousSlug: oldSlug || undefined, invalidateSitemap: true });
+    await rebuildSiteNotificationFeed();
     const urls = [buildSiteUrl("/programs"), buildSiteUrl("/")];
     if (oldSlug) urls.push(buildSiteUrl(`/program/${oldSlug}`));
     void submitIndexNow(urls);
