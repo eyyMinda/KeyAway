@@ -1,17 +1,40 @@
 /**
- * This route is responsible for the built-in authoring environment using Sanity Studio.
- * All routes under your studio path is handled by this file using Next.js' catch-all routes:
- * https://nextjs.org/docs/routing/dynamic-routes#catch-all-routes
- *
- * You can learn more about the next-sanity package here:
- * https://github.com/sanity-io/next-sanity
+ * Sanity Studio must not SSR: `@sanity/vision`, router, etc. touch `window` during render.
+ * `next/dynamic` + `{ ssr: false }` can be flaky with Turbopack; defer with `useEffect` + dynamic import instead.
  */
+"use client";
 
-import { NextStudio } from "next-sanity/studio";
-import config from "@/sanity.config";
+import { useEffect, useState, type ComponentType } from "react";
 
-export { metadata, viewport } from "next-sanity/studio";
+const loadingFallback = (
+  <div
+    style={{
+      height: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "#0d0d12",
+      color: "#84868c",
+      fontFamily: "ui-sans-serif, system-ui, sans-serif",
+      fontSize: 14
+    }}>
+    Loading Studio…
+  </div>
+);
 
 export default function StudioPage() {
-  return <NextStudio config={config} />;
+  const [Embedded, setEmbedded] = useState<ComponentType | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void import("./StudioEmbedded").then(m => {
+      if (!cancelled) setEmbedded(() => m.default);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!Embedded) return loadingFallback;
+  return <Embedded />;
 }
