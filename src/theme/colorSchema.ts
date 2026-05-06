@@ -46,10 +46,6 @@ export const analyticsEvent = {
   page_viewed: {
     chartHex: analyticsAccents.pageview,
     dotClass: "bg-analytics-pageview"
-  },
-  interaction: {
-    chartHex: "#06B6D4",
-    dotClass: "bg-cyan-500"
   }
 } as const;
 
@@ -72,8 +68,7 @@ export const eventTypePillClass: Record<AnalyticsEventKey, string> = {
   click_activation_link: `${trackingTagTierBackgroundClass.new} ${trackingTagPillTextClass}`,
   download_click: `${trackingTagTierBackgroundClass.returning} ${trackingTagPillTextClass}`,
   social_click: `${trackingTagTierBackgroundClass.regular} ${trackingTagPillTextClass}`,
-  page_viewed: `${trackingTagTierBackgroundClass.star} ${trackingTagPillTextClass}`,
-  interaction: `bg-cyan-600 ${trackingTagPillTextClass}`
+  page_viewed: `${trackingTagTierBackgroundClass.star} ${trackingTagPillTextClass}`
 };
 
 /** Not in tier set — saturated enough for white label text. */

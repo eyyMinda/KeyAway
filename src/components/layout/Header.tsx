@@ -14,13 +14,6 @@ import type { HeaderProps } from "@/src/types/layout";
 import type { Notification } from "@/src/types/notifications";
 import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
 import { usePathname } from "next/navigation";
-import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
-import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
-import {
-  readNotificationsFromClientCache,
-  writeNotificationsToClientCache
-} from "@/src/lib/notifications/notificationsClientCache";
-
 export default function Header({ logoData, notifications: notificationsProp, socialData }: HeaderProps) {
   const storeData = useStoreDetails();
   const pathname = usePathname();
@@ -31,20 +24,12 @@ export default function Header({ logoData, notifications: notificationsProp, soc
       setNotifications(notificationsProp);
       return;
     }
-    const cached = readNotificationsFromClientCache();
-    if (cached) {
-      setNotifications(cached);
-      return;
-    }
     let cancelled = false;
     void fetch("/api/v1/notifications/recent")
       .then(r => r.json())
       .then((body: { data?: { notifications?: Notification[] } }) => {
         const list = body?.data?.notifications ?? [];
-        if (!cancelled) {
-          setNotifications(list);
-          writeNotificationsToClientCache(list);
-        }
+        if (!cancelled) setNotifications(list);
       })
       .catch(() => {});
     return () => {
@@ -108,12 +93,6 @@ export default function Header({ logoData, notifications: notificationsProp, soc
                   <Link
                     key={i}
                     href={href || "/"}
-                    onClick={() =>
-                      void trackInteraction({
-                        interactionId: INTERACTION_IDS.headerNavLink,
-                        sectionId: SECTIONS.global.header
-                      })
-                    }
                     className={`hover:text-primary-500 transition-colors ${isActive ? "text-white font-medium" : "text-gray-300"}`}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noreferrer" : undefined}>
@@ -126,8 +105,6 @@ export default function Header({ logoData, notifications: notificationsProp, soc
           {/* Contact Button */}
           <ContactModalTrigger
             tab="contact"
-            interactionId={INTERACTION_IDS.headerContact}
-            sectionId={SECTIONS.global.header}
             className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-4 h-4" />
@@ -145,8 +122,6 @@ export default function Header({ logoData, notifications: notificationsProp, soc
         <div className="md:hidden flex items-center gap-2">
           <ContactModalTrigger
             tab="contact"
-            interactionId={INTERACTION_IDS.headerContactMobile}
-            sectionId={SECTIONS.global.header}
             className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
             aria-label="Contact us">
             <FaEnvelope className="w-5 h-5" />

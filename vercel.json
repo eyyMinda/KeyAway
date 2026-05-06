@@ -1,6 +1,7 @@
 {
   "crons": [
     { "path": "/api/v1/cron/update-expired-keys", "schedule": "0 22 * * *" },
-    { "path": "/api/v1/cron/bundle-events", "schedule": "0 21 * * *" }
+    { "path": "/api/v1/cron/bundle-events", "schedule": "0 21 * * *" },
+    { "path": "/api/v1/cron/prune-cron-runs", "schedule": "15 3 * * *" }
   ]
 }

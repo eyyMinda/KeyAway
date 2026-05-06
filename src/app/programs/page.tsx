@@ -1,6 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
-import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import { programsListingProjection } from "@/src/lib/sanity/queries";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
@@ -12,12 +11,15 @@ import { ProgramsHero, ContributeSection, WhyUseSection } from "@/src/components
 import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
 import { FacebookGroupButton } from "@/src/components/social";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
+import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { SocialData } from "@/src/types";
 import type { FilterType, SortType } from "@/src/types/programs";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-import { normalizeFilterType, normalizeSortType, sortPrograms } from "@/src/lib/program/programUtils";
+import { normalizeFilterType, normalizeSortType, groqProgramsOrderClause } from "@/src/lib/program/programUtils";
+import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 
-export const revalidate = 60;
+/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
+export const revalidate = 120;
 const PROGRAMS_PER_PAGE = 16;
 
 export async function generateMetadata() {
@@ -34,26 +36,28 @@ export default async function ProgramsPage({
   const filter: FilterType = normalizeFilterType(params.filter);
   const sortBy: SortType = normalizeSortType(params.sort);
   const page = Math.max(1, Number.parseInt(params.page || "1", 10) || 1);
-  const start = (page - 1) * PROGRAMS_PER_PAGE;
-  const end = start + PROGRAMS_PER_PAGE;
-  const filterQuery = filter === "hasKeys" ? "count(cdKeys[]) > 0" : filter === "noKeys" ? "count(cdKeys[]) == 0" : "true";
-  const searchFilter = searchTerm ? " && (title match $search || string::lower(pt::text(description)) match $search)" : "";
-  const listQuery = `*[_type == "program" && ${filterQuery}${searchFilter}] {${programsListingProjection}}`;
+  const startIdx = (page - 1) * PROGRAMS_PER_PAGE;
+  const endIdx = startIdx + PROGRAMS_PER_PAGE - 1;
+  const filterQuery =
+    filter === "hasKeys" ? "count(cdKeys[]) > 0" : filter === "noKeys" ? "count(cdKeys[]) == 0" : "true";
+  const searchFilter = searchTerm
+    ? " && (title match $search || string::lower(pt::text(description)) match $search)"
+    : "";
+  const orderClause = groqProgramsOrderClause(sortBy);
+  const countQuery = `count(*[_type == "program" && ${filterQuery}${searchFilter}])`;
+  const listQuery = `*[_type == "program" && ${filterQuery}${searchFilter}] ${orderClause} [${startIdx}...${endIdx}] {${programsListingProjection}}`;
   const queryParams = searchTerm ? { search: `*${searchTerm.toLowerCase()}*` } : {};
 
-  const [rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
-    client.fetch(listQuery, queryParams, { next: { tags: ["programs"] } }),
+  const [totalCount, rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
+    client.fetch<number>(countQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
+    client.fetch<ProgramWithStats[]>(listQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
     getBundleCountsByProgram(),
     getCachedStoreDetailsDocument(),
     getFeaturedProgram()
   ]);
 
-  const mergedPrograms = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts);
-
-  const sortedPrograms = sortPrograms(mergedPrograms, sortBy);
-
-  const totalCount = sortedPrograms.length;
-  const programs = sortedPrograms.slice(start, end).map(program => ({
+  const mergedPage = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts);
+  const programs = mergedPage.map(program => ({
     ...program,
     descriptionPlain: portableTextToPlainText(program.description)
   })) as ProgramWithStats[];

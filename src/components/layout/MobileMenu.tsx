@@ -8,9 +8,6 @@ import { FacebookGroupButton } from "@/src/components/social";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { FaEnvelope } from "react-icons/fa";
 import { useEffect } from "react";
-import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
-import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
-
 interface MobileMenuProps {
   headerLinks?: SanityLink[];
   isOpen: boolean;
@@ -78,13 +75,7 @@ export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }:
                       className={`block px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer ${
                         isActive ? "text-white bg-gray-800" : "text-gray-300"
                       }`}
-                      onClick={() => {
-                        void trackInteraction({
-                          interactionId: INTERACTION_IDS.mobileNavLink,
-                          sectionId: SECTIONS.global.header
-                        });
-                        onClose();
-                      }}>
+                      onClick={onClose}>
                       {link.title}
                     </Link>
                   );
@@ -98,8 +89,6 @@ export default function MobileMenu({ headerLinks, isOpen, onClose, socialData }:
                 onClick={onClose}>
                 <ContactModalTrigger
                   tab="contact"
-                  interactionId={INTERACTION_IDS.mobileContact}
-                  sectionId={SECTIONS.global.header}
                   className="flex items-center gap-3 w-full">
                   <FaEnvelope className="w-4 h-4" />
                   <span>Contact Us</span>

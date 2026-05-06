@@ -34,10 +34,13 @@ function SourceBadge({ source }: { source: string }) {
 function JobLabel({ job }: { job: string }) {
   const labels: Record<string, string> = {
     "bundle-events": "Bundle Events",
-    "update-expired-keys": "Update Expired Keys"
+    "update-expired-keys": "Update Expired Keys",
+    "prune-cron-runs": "Prune Cron Runs"
   };
   return <>{labels[job] ?? job}</>;
 }
+
+type CronJobKey = "bundle-events" | "update-expired-keys" | "prune-cron-runs";
 
 export default function CronStatusCard() {
   const [runs, setRuns] = useState<CronRun[]>([]);
@@ -73,16 +76,24 @@ export default function CronStatusCard() {
     );
   }
 
-  const vercelByJob = {
-    "bundle-events": runs.find(r => r.job === "bundle-events" && (r.source === "vercel_cron" || r.source === "bearer")),
-    "update-expired-keys": runs.find(r => r.job === "update-expired-keys" && (r.source === "vercel_cron" || r.source === "bearer"))
+  const vercelByJob: Record<CronJobKey, CronRun | undefined> = {
+    "bundle-events": runs.find(
+      r => r.job === "bundle-events" && (r.source === "vercel_cron" || r.source === "bearer")
+    ),
+    "update-expired-keys": runs.find(
+      r => r.job === "update-expired-keys" && (r.source === "vercel_cron" || r.source === "bearer")
+    ),
+    "prune-cron-runs": runs.find(
+      r => r.job === "prune-cron-runs" && (r.source === "vercel_cron" || r.source === "bearer")
+    )
   };
-  const lastByJob = {
+  const lastByJob: Record<CronJobKey, CronRun | undefined> = {
     "bundle-events": runs.find(r => r.job === "bundle-events"),
-    "update-expired-keys": runs.find(r => r.job === "update-expired-keys")
+    "update-expired-keys": runs.find(r => r.job === "update-expired-keys"),
+    "prune-cron-runs": runs.find(r => r.job === "prune-cron-runs")
   };
 
-  function JobStatusRow({ job, schedule, label }: { job: "bundle-events" | "update-expired-keys"; schedule: string; label: string }) {
+  function JobStatusRow({ job, schedule, label }: { job: CronJobKey; schedule: string; label: string }) {
     const vercelRun = vercelByJob[job];
     const lastRun = lastByJob[job];
     return (
@@ -129,6 +140,7 @@ export default function CronStatusCard() {
         <div className="space-y-0 min-w-0 lg:pr-8">
           <JobStatusRow job="bundle-events" schedule="Daily at 21:00 UTC" label="Bundle Events" />
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
+          <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (60d)" />
         </div>
 
         <div className="min-w-0 lg:border-l lg:pl-8 border-gray-200">

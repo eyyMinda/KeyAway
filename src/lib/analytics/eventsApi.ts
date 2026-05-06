@@ -1,4 +1,6 @@
 /** @fileoverview Fetches merged tracking events for admin ranges, bundle program counts for homepage, visitor tag aggregates. */
+import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { client } from "@/src/sanity/lib/client";
 import { trackingEventsWithRangeQuery, trackingEventBundlesQuery, bundleCountsQuery } from "@/src/lib/sanity/queries";
 import { AnalyticsEventData } from "@/src/types";
@@ -15,7 +17,7 @@ export async function getBundleCountsByProgram(): Promise<Map<string, BundleCoun
   const bundles = await client.fetch<{ events: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }[]>(
     bundleCountsQuery,
     {},
-    { next: { revalidate: 60, tags: ["bundle-counts"] } }
+    { next: { revalidate: PUBLIC_ISR_REVALIDATE_SECONDS, tags: [TAG_BUNDLE_COUNTS] } }
   );
   const map = new Map<string, BundleCountsByProgram>();
   for (const b of bundles || []) {

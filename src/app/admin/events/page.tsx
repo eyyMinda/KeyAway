@@ -142,7 +142,7 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
+      <ProtectedAdminLayout title="Events" subtitle="Track and analyze site analytics">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -155,7 +155,7 @@ export default function EventsPage() {
 
   if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
     return (
-      <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
+      <ProtectedAdminLayout title="Events" subtitle="Track and analyze site analytics">
         <div className="mb-6">
           <TimeFilter
             selectedPeriod={selectedPeriod}
@@ -197,7 +197,7 @@ export default function EventsPage() {
   }
 
   return (
-    <ProtectedAdminLayout title="Events" subtitle="Track and analyze user interactions">
+    <ProtectedAdminLayout title="Events" subtitle="Track and analyze site analytics">
       <div className="mb-6">
         <TimeFilter
           selectedPeriod={selectedPeriod}

@@ -4,7 +4,6 @@ import { ProgramCard } from "@/src/components/home";
 import { ProgramsGridProps } from "@/src/types/programs";
 import SuggestKeyCTA from "./SuggestKeyCTA";
 import BrowseAllCTA from "./BrowseAllCTA";
-import { SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 
 export default function ProgramsGrid({
   programs,
@@ -23,7 +22,6 @@ export default function ProgramsGrid({
     );
   }
 
-  // Apply limit if specified (for homepage)
   const displayedPrograms = limit ? programs.slice(0, limit) : programs;
 
   return (
@@ -32,7 +30,6 @@ export default function ProgramsGrid({
         <ProgramCard
           key={program.slug.current}
           program={program}
-          sectionId={limit ? SECTIONS.home.popularPrograms : SECTIONS.browse.allProgramsGrid}
           stats={{
             viewCount: program.viewCount,
             downloadCount: program.downloadCount
@@ -45,11 +42,8 @@ export default function ProgramsGrid({
         />
       ))}
 
-      {/* CTA Cards */}
-      <SuggestKeyCTA sectionId={limit ? SECTIONS.home.popularPrograms : SECTIONS.browse.allProgramsGrid} />
-      {showBrowseAllCTA && (
-        <BrowseAllCTA sectionId={limit ? SECTIONS.home.popularPrograms : SECTIONS.browse.allProgramsGrid} />
-      )}
+      <SuggestKeyCTA />
+      {showBrowseAllCTA && <BrowseAllCTA />}
     </div>
   );
 }

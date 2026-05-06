@@ -26,16 +26,9 @@ export default function AdminHomePage() {
         <DashboardCard
           href="/admin/events"
           title="Events"
-          subtitle="Track and analyze user interactions"
+          subtitle="Track and analyze site analytics"
           icon="📈"
           color="purple"
-        />
-        <DashboardCard
-          href="/admin/interactions"
-          title="Interactions"
-          subtitle="Track lightweight interaction buckets"
-          icon="🖱️"
-          color="blue"
         />
         <DashboardCard
           href="/admin/key-reports"

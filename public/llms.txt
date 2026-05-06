@@ -17,7 +17,7 @@
 ## What operators / admins can do (authenticated)
 
 - **Sanity Studio** is embedded at `/studio` (content management). Programs, keys, store copy, social links, and related content are edited there.
-- **`/admin`** (OAuth sign-in, allowlisted access) provides dashboards for **analytics**, **raw events**, **interactions**, **programs**, **key reports**, **key suggestions**, **messages**, and **featured program** settings—not available to anonymous visitors.
+- **`/admin`** (OAuth sign-in, allowlisted access) provides dashboards for **analytics**, **raw events**, **programs**, **key reports**, **key suggestions**, **messages**, and **featured program** settings—not available to anonymous visitors.
 
 ## Data, privacy, and tracking (high level)
 
@@ -30,14 +30,15 @@
 
 - **Expired keys** can be updated based on validity dates (cron and/or rate-limited checks when loading program data).
 - **Event bundling** (scheduled jobs) rolls up high-volume tracking into aggregated documents to control CMS volume.
-- **Webhooks** can trigger cache revalidation when Sanity content changes so the public site stays in sync with the CMS.
+- **`cronRun` docs** are pruned on a schedule (e.g. older than ~60 days) so the dataset does not grow without bound.
+- **Webhooks** call a revalidate endpoint: tag-based Next.js cache invalidation plus a singleton **`siteNotificationFeed`** rebuild when programs or CD keys change (header bell reads that feed via **`GET /api/v1/notifications/recent`** — recent program/key activity, one entry per program within a ~30-day window).
 
 ## API surface (public, versioned)
 
 Base path: `https://www.keyaway.app/api/v1/`
 
 - **POST** `/analytics/track` — page views, copy/download/social events, key-status reports (rate-limited, deduplicated).
-- **POST** `/interactions/track` — section/interaction tallies for UX analytics.
+- **GET** `/notifications/recent` — JSON used by the header notification list (derived from the rebuilt feed document, not live GROQ over all programs on each request).
 - **POST** `/key-reports` and `/key-reports/check-duplicate` — visitor key status reports.
 - **POST** `/key-suggestions`, `/contact` — user submissions.
 - Cron and webhook routes exist for maintenance and revalidation; they are not general-purpose public APIs for third-party integrations.

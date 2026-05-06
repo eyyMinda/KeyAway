@@ -2,33 +2,14 @@ import Link from "next/link";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { FaEye, FaDownload, FaKey, FaChevronRight } from "react-icons/fa";
 import { ProgramCardProps } from "@/src/types/home";
-import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
-import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 
-export default function ProgramCard({
-  program,
-  stats,
-  badges,
-  showStats = true,
-  sectionId = SECTIONS.home.popularPrograms
-}: ProgramCardProps) {
+export default function ProgramCard({ program, stats, badges, showStats = true }: ProgramCardProps) {
   const viewKeysLabel = `View keys for ${program.title}`;
 
   return (
     <div className="group bg-white rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-primary-400 animate-fade-in flex flex-col transform hover:-translate-y-2 relative before:absolute before:inset-0 before:bg-linear-to-br before:from-primary-50/30 before:to-transparent before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-300">
-      {/* Image Container */}
-      <Link
-        href={`/program/${program.slug.current}`}
-        title={program.title}
-        className="relative overflow-hidden"
-        onClick={() =>
-          void trackInteraction({
-            interactionId: INTERACTION_IDS.programGridViewKeysImage,
-            sectionId,
-            programSlug: program.slug.current
-          })
-        }>
+      <Link href={`/program/${program.slug.current}`} title={program.title} className="relative overflow-hidden">
         {program.image ? (
           <IdealImage
             image={program.image}
@@ -42,13 +23,9 @@ export default function ProgramCard({
             <div className="text-neutral-400 text-3xl sm:text-4xl">💻</div>
           </div>
         )}
-        {/* Overlay gradient */}
         <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Subtle border overlay */}
         <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary-200/50 transition-colors duration-300 rounded-xl sm:rounded-2xl" />
 
-        {/* Badges */}
         <div className="absolute top-2 sm:top-3 lg:top-4 left-2 sm:left-3 lg:left-4 flex flex-col gap-1.5 sm:gap-2">
           {badges?.mostViewed && (
             <div className="bg-primary-500 text-white px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1">
@@ -66,7 +43,6 @@ export default function ProgramCard({
           )}
         </div>
 
-        {/* Key Count Badge */}
         {(program.keyCount ?? program.cdKeys?.length ?? 0) > 0 ? (
           <div className="absolute top-2 sm:top-3 lg:top-4 right-2 sm:right-3 lg:right-4">
             <div className="bg-white/95 backdrop-blur-sm text-gray-800 px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1 shadow-lg border border-gray-200">
@@ -77,7 +53,6 @@ export default function ProgramCard({
         ) : null}
       </Link>
 
-      {/* Content */}
       <div className="p-5 flex flex-col grow bg-linear-to-b from-white to-gray-50/50">
         <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-primary-700 transition-colors leading-tight">
           {program.title}
@@ -93,7 +68,6 @@ export default function ProgramCard({
           </p>
         ) : null}
 
-        {/* Stats above CTA */}
         {showStats && (stats?.viewCount !== undefined || stats?.downloadCount !== undefined) && (
           <div className="flex items-center justify-center gap-3 sm:gap-4 text-xs text-gray-500 mb-2 mt-auto bg-gray-50/80 rounded-lg py-1.5 sm:py-2 px-2 sm:px-3">
             {stats?.viewCount !== undefined && (
@@ -111,20 +85,11 @@ export default function ProgramCard({
           </div>
         )}
 
-        {/* Action Button */}
         <Link
           href={`/program/${program.slug.current}`}
           aria-label={viewKeysLabel}
           title={viewKeysLabel}
-          onClick={() =>
-            void trackInteraction({
-              interactionId: INTERACTION_IDS.programGridViewKeysButton,
-              sectionId,
-              programSlug: program.slug.current
-            })
-          }
           className="group/cta relative isolate inline-flex w-full items-center justify-center overflow-hidden rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-none transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:rounded-xl sm:px-5 sm:py-3 sm:text-base lg:px-6">
-          {/* arbitrary gradients: `globals.css` only wires `from-primary-600`/`to-primary-700` for `bg-linear-to-r` */}
           <span
             className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--primary-700),var(--primary-800))]"
             aria-hidden
@@ -137,9 +102,6 @@ export default function ProgramCard({
           <FaChevronRight className="relative z-10 ml-1.5 h-3 w-3 translate-x-0 transition-transform duration-300 ease-out group-hover/cta:translate-x-1 sm:ml-2 sm:h-3.5 sm:w-3.5" />
         </Link>
       </div>
-
-      {/* Decorative accent */}
-      <div className="h-0.5 sm:h-1 bg-linear-to-r from-primary-500 to-accent-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 }

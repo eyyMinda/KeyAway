@@ -1,5 +1,6 @@
 "use server";
 
+import { programDetailTag, TAG_FEATURED_PROGRAM } from "@/src/lib/cache/cacheTags";
 import { client } from "@/src/sanity/lib/client";
 import { CDKey, Program } from "@/src/types";
 import { programBySlugQuery, featuredProgramSettingsQuery, programsForAutoSelectionQuery } from "./queries";
@@ -88,7 +89,7 @@ export async function updateAllExpiredKeys(): Promise<void> {
 export async function getProgramWithUpdatedKeys(slug: string) {
   try {
     // First, get the program
-    const program = await client.fetch(programBySlugQuery, { slug }, { next: { tags: [`program-${slug}`] } });
+    const program = await client.fetch(programBySlugQuery, { slug }, { next: { tags: [programDetailTag(slug)] } });
 
     if (!program) return null;
 
@@ -208,12 +209,12 @@ export async function getFeaturedProgram(): Promise<
   | null
 > {
   try {
-    const settings = await client.fetch(featuredProgramSettingsQuery, {}, { next: { tags: ["featured-program"] } });
+    const settings = await client.fetch(featuredProgramSettingsQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } });
 
     if (!settings) {
       // No settings: auto-select first program with working keys
       const [rawPrograms, bundleCounts] = await Promise.all([
-        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: ["featured-program"] } }),
+        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } }),
         getBundleCountsByProgram()
       ]);
       const programs = mergeProgramStats(
@@ -248,7 +249,7 @@ export async function getFeaturedProgram(): Promise<
     // Auto-select when rotation needed
     if (needsRot) {
       const [rawPrograms, bundleCounts] = await Promise.all([
-        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: ["featured-program"] } }),
+        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } }),
         getBundleCountsByProgram()
       ]);
       const programs = mergeProgramStats(

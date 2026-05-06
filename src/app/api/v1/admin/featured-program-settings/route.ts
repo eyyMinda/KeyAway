@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { TAG_FEATURED_PROGRAM } from "@/src/lib/cache/cacheTags";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { featuredProgramSettingsQuery } from "@/src/lib/sanity/queries";
@@ -78,6 +80,7 @@ export async function PATCH(req: NextRequest) {
       });
     }
 
+    revalidateTag(TAG_FEATURED_PROGRAM, "max");
     return NextResponse.json({ data: result, meta: {} });
   } catch (err) {
     console.error("[PATCH /api/v1/admin/featured-program-settings]", err);

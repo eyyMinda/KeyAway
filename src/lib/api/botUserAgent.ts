@@ -1,6 +1,6 @@
 /**
  * Heuristic bot / automated client detection from User-Agent (server-side).
- * Used to skip analytics, interactions, and key-report writes — not a security boundary.
+ * Used to skip analytics and key-report writes — not a security boundary.
  *
  * Mirrors storefront crawler lists + extra generic/http-library patterns. No `navigator`
  * here (API routes); optional `Sec-CH-UA` hints can be folded in later if needed.

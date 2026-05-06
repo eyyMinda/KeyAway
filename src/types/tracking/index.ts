@@ -135,23 +135,3 @@ export interface EventAggregation {
   uniquePaths: Set<string>;
   uniquePrograms: Set<string>;
 }
-
-export interface TrackInteractionBody {
-  interactionId: string;
-  sectionId: string;
-  pagePath?: string;
-  programSlug?: string;
-}
-
-export interface InteractionEventBucketData {
-  _id: string;
-  bucketKey: string;
-  bucketDateHour: string;
-  pagePath: string;
-  sectionId: string;
-  interactionId: string;
-  programSlug?: string;
-  count: number;
-  lastSeenAt: string;
-  createdAt: string;
-}

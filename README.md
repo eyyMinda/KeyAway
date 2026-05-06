@@ -8,7 +8,7 @@
 
 - **One place for giveaway keys** — Browse programs, see which keys are working or expiring, copy keys and follow activation instructions.
 - **Always up to date** — Keys are managed in a CMS; expired keys are automatically marked and can be updated in bulk.
-- **Privacy-aware** — Interaction tracking uses hashed identifiers; no personal data is stored.
+- **Privacy-aware** — Analytics uses hashed identifiers; no personal data is stored.
 
 ---
 
@@ -28,15 +28,15 @@ No database beyond Sanity (document store); no separate backend service. Suited 
 
 ## Tech stack
 
-| Area        | Choices |
-|------------|---------|
-| Framework  | [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/) |
-| CMS        | [Sanity v5](https://www.sanity.io/) (Studio embedded at `/studio`) |
-| Auth       | [Auth.js (NextAuth v5)](https://authjs.dev/) — GitHub (Google optional) |
-| Language   | [TypeScript](https://www.typescriptlang.org/) |
-| Styling    | [Tailwind CSS](https://tailwindcss.com/) v4 |
-| Comments   | [Giscus](https://giscus.app/) (GitHub-based) |
-| Hosting    | [Vercel](https://vercel.com/) (Analytics, Speed Insights, Cron) |
+| Area      | Choices                                                                        |
+| --------- | ------------------------------------------------------------------------------ |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/) |
+| CMS       | [Sanity v5](https://www.sanity.io/) (Studio embedded at `/studio`)             |
+| Auth      | [Auth.js (NextAuth v5)](https://authjs.dev/) — GitHub (Google optional)        |
+| Language  | [TypeScript](https://www.typescriptlang.org/)                                  |
+| Styling   | [Tailwind CSS](https://tailwindcss.com/) v4                                    |
+| Comments  | [Giscus](https://giscus.app/) (GitHub-based)                                   |
+| Hosting   | [Vercel](https://vercel.com/) (Analytics, Speed Insights, Cron)                |
 
 ---
 
@@ -54,7 +54,7 @@ src/
       analytics, events, programs, key-reports, key-suggestions, messages
     api/v1/                       # API
       analytics/track, key-reports, key-suggestions, contact
-      cron/update-expired-keys, cron/bundle-events
+      cron/update-expired-keys, cron/bundle-events, cron/prune-cron-runs
       webhooks/revalidate
       admin/*                     # Protected admin APIs
   components/                     # UI (layout, program, admin, home)
@@ -69,7 +69,7 @@ src/
 
 - **Public:** Home (featured + popular programs), program pages with CD key table and status, activation instructions, related programs, Giscus comments, privacy/terms.
 - **Admin (OAuth):** Analytics dashboard, events, program management, key reports (with notifications and `?key=` filtering), key suggestions, messages, featured program settings. Sign-out and Studio link in site nav.
-- **Automation:** Expired keys updated on program load (rate-limited) and via cron; event bundling cron; webhook revalidation on Sanity changes.
+- **Automation:** Expired keys updated on program load (rate-limited) and via cron; event bundling cron; `cronRun` retention prune cron; webhook revalidation on Sanity changes (rebuilds the header notification feed when programs/keys change).
 - **Security & privacy:** Auth.js sessions; admin allowlist or Sanity Access; hashed IPs for analytics; rate limiting on APIs.
 
 ---
@@ -83,7 +83,8 @@ Short notes on what each part does and why.
 - **Key reports** — Visitors submit “working” / “expired” / “limit reached” for a key. Stored as `keyReport` with hashed key and hashed IP; same visitor can update an existing report (e.g. key stopped working). Feeds admin key-reports and notifications.
 - **Key-report notifications** — API aggregates negative reports over the last 60 days, excludes keys already marked expired/limit in the CMS, and returns `lastReportAt`. Admin header shows alerts with links to filtered key-reports (`?program=` and `?key=`).
 - **Analytics tracking** — Copy, download, and social events sent to `/api/v1/analytics/track`. IP is hashed with `ANALYTICS_SALT`; no PII stored. Data is used for popularity and dashboard stats.
-- **Webhook revalidation** — Sanity webhook calls `/api/v1/webhooks/revalidate` with a shared secret. On valid payload, Next.js cache is invalidated so published content changes show up without a redeploy.
+- **Cache & revalidation** — Public pages use a short **segment revalidate** window (shared constant, currently 120s) plus **tagged** Sanity fetches so `revalidateTag` can invalidate data before ISR would. The Sanity webhook (`POST /api/v1/webhooks/revalidate`, `SANITY_WEBHOOK_SECRET`) and admin program saves bust tags by document type — e.g. `storeDetails`, `program` / `cdKey` (and sitemap when the URL set changes), `featuredProgramSettings`, `keyReport`.
+- **Header notifications (program activity)** — One **`siteNotificationFeed`** document stores a capped list of “what’s new” rows, rebuilt when programs or CD keys change (webhook or admin program APIs). **One row per program**, roughly the last 30 days by `_updatedAt` with real listing or key activity in that window. The header uses **`GET /api/v1/notifications/recent`**, cached server-side and cleared when the feed is rewritten.
 - **Admin auth** — Auth.js (NextAuth v5) with GitHub (and optional Google). Access to `/admin` is restricted by email allowlist (`ADMIN_ALLOWED_EMAILS`) or Sanity project membership; JWT session (e.g. 2h prod, 7d dev).
 - **Featured program** — One program is pinned as “featured” in Sanity and highlighted on the home page. Auto-rotation cycles through eligible programs over time so each gets exposure and visitors discover new options.
 
@@ -129,8 +130,8 @@ ANALYTICS_SALT=yourRandomSalt                # IP hashing for analytics
 npm run dev
 ```
 
-- **Site:** http://localhost:3000  
-- **Sanity Studio:** http://localhost:3000/studio  
+- **Site:** http://localhost:3000
+- **Sanity Studio:** http://localhost:3000/studio
 - **Admin:** http://localhost:3000/admin (GitHub sign-in)
 
 ### 4. Content
@@ -141,12 +142,12 @@ In Studio, create **Program** documents and add CD keys (key, status, version, v
 
 ## Scripts
 
-| Command        | Description        |
-|----------------|--------------------|
-| `npm run dev`  | Start dev server   |
-| `npm run build`| Production build   |
-| `npm run start`| Start production   |
-| `npm run lint` | Run ESLint         |
+| Command         | Description      |
+| --------------- | ---------------- |
+| `npm run dev`   | Start dev server |
+| `npm run build` | Production build |
+| `npm run start` | Start production |
+| `npm run lint`  | Run ESLint       |
 
 ---
 
@@ -154,7 +155,7 @@ In Studio, create **Program** documents and add CD keys (key, status, version, v
 
 - Set all required env vars in the Vercel project.
 - Build command: `npm run build`; output: default Next.js.
-- Optional: Vercel Cron for `/api/v1/cron/update-expired-keys` and `/api/v1/cron/bundle-events` (use `CRON_SECRET` or Vercel’s cron headers).
+- Optional: Vercel Cron for `/api/v1/cron/update-expired-keys`, `/api/v1/cron/bundle-events`, and `/api/v1/cron/prune-cron-runs` (use `CRON_SECRET` or Vercel’s cron headers).
 - **Webhook:** Point Sanity revalidate webhook to `https://yourdomain.com/api/v1/webhooks/revalidate` and set `SANITY_WEBHOOK_SECRET`.
 
 ---

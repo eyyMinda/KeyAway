@@ -4,8 +4,6 @@ import Link from "next/link";
 import { FaStar, FaCheckCircle, FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
-import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
-import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 import type { PortableTextBlock } from "@portabletext/types";
 import type { ProgramFeatured } from "@/src/types/program";
 import RichText from "@/src/components/portableText/RichText";
@@ -117,13 +115,6 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
                     href={`/program/${program.slug.current}`}
-                    onClick={() =>
-                      void trackInteraction({
-                        interactionId: INTERACTION_IDS.featuredProgramViewKeys,
-                        sectionId: SECTIONS.home.featuredProgram,
-                        programSlug: program.slug.current
-                      })
-                    }
                     className="inline-flex items-center justify-center bg-linear-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-semibold px-5 py-2.5 sm:px-6 sm:py-3 rounded-lg transition-all duration-300 transform hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-800 shadow-lg text-sm sm:text-base">
                     View All {program.workingKeys} Working Keys
                   </Link>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
+import { revalidateAfterProgramContentWrite } from "@/src/lib/cache/revalidateProgramContent";
+import { rebuildSiteNotificationFeed } from "@/src/lib/notifications/notificationFeed.server";
 import { client } from "@/src/sanity/lib/client";
 import { buildImageReference } from "@/src/lib/admin/adminHelpers";
 import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
@@ -110,7 +111,8 @@ export async function POST(req: NextRequest) {
       cdKeys: []
     });
 
-    revalidatePath("/sitemap.xml");
+    revalidateAfterProgramContentWrite({ slug, invalidateSitemap: true });
+    await rebuildSiteNotificationFeed();
     void submitIndexNow([buildSiteUrl(`/program/${slug}`), buildSiteUrl("/programs"), buildSiteUrl("/")]);
     return NextResponse.json({ data: doc, meta: {} }, { status: 201 });
   } catch (err) {

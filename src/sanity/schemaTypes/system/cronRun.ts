@@ -13,7 +13,8 @@ export const cronRun = defineType({
       options: {
         list: [
           { title: "Bundle Events", value: "bundle-events" },
-          { title: "Update Expired Keys", value: "update-expired-keys" }
+          { title: "Update Expired Keys", value: "update-expired-keys" },
+          { title: "Prune Cron Runs", value: "prune-cron-runs" }
         ]
       },
       validation: Rule => Rule.required()

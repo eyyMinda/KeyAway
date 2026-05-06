@@ -16,8 +16,10 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
 import { SocialData } from "@/src/types";
+import { TAG_HOMEPAGE_PROGRAMS, TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
 
-export const revalidate = 60;
+/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
+export const revalidate = 120;
 
 export async function generateMetadata() {
   return generateHomePageMetadata();
@@ -29,9 +31,9 @@ export default async function HomePage() {
   const weekAgoISO = weekAgo.toISOString();
 
   const [rawPopularPrograms, bundleCounts, stats, store, featuredProgram] = await Promise.all([
-    client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: ["homepage"] } }),
+    client.fetch(popularProgramsByViewsQuery, {}, { next: { tags: [TAG_HOMEPAGE_PROGRAMS] } }),
     getBundleCountsByProgram(),
-    client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: ["homepage"] } }),
+    client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: [TAG_HOMEPAGE_STATS] } }),
     getCachedStoreDetailsDocument(),
     getFeaturedProgram()
   ]);
