@@ -54,6 +54,30 @@ export function sortByOldest(programs: ProgramWithStats[]): ProgramWithStats[] {
   return [...programs].sort((a, b) => new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime());
 }
 
+/** GROQ `| order(...)` segment for server-side /programs pagination (raw document fields). */
+export function groqProgramsOrderClause(sortType: SortType): string {
+  const score =
+    "coalesce(popularityScore, coalesce(viewCount, 0) + coalesce(downloadCount, 0) * 3)";
+  switch (sortType) {
+    case "popular":
+      return `| order(${score} desc)`;
+    case "views":
+      return "| order(coalesce(viewCount, 0) desc)";
+    case "downloads":
+      return "| order(coalesce(downloadCount, 0) desc)";
+    case "latest":
+      return "| order(_createdAt desc)";
+    case "oldest":
+      return "| order(_createdAt asc)";
+    case "name":
+      return "| order(title asc)";
+    case "nameDesc":
+      return "| order(title desc)";
+    default:
+      return `| order(${score} desc)`;
+  }
+}
+
 export function normalizeSortType(value?: string): SortType {
   switch (value) {
     case "views":
