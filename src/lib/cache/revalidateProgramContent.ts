@@ -3,7 +3,6 @@ import {
   TAG_FEATURED_PROGRAM,
   TAG_HOMEPAGE_PROGRAMS,
   TAG_HOMEPAGE_STATS,
-  TAG_NOTIFICATIONS,
   TAG_PROGRAM_LISTINGS,
   TAG_PROGRAMS_FULL,
   TAG_SITEMAP_URLS,
@@ -26,7 +25,6 @@ type ProgramWriteOpts = {
 export function revalidateAfterProgramContentWrite(opts: ProgramWriteOpts = {}): void {
   const { slug, previousSlug, invalidateSitemap } = opts;
   revalidateTag(TAG_PROGRAMS_FULL, "max");
-  revalidateTag(TAG_NOTIFICATIONS, "max");
   revalidateTag(TAG_PROGRAM_LISTINGS, "max");
   revalidateTag(TAG_HOMEPAGE_PROGRAMS, "max");
   revalidateTag(TAG_HOMEPAGE_STATS, "max");
@@ -37,5 +35,4 @@ export function revalidateAfterProgramContentWrite(opts: ProgramWriteOpts = {}):
     revalidateTag(TAG_SITEMAP_URLS, "max");
     revalidatePath("/sitemap.xml");
   }
-  revalidatePath("/api/v1/notifications/recent");
 }
