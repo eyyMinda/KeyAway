@@ -5,9 +5,9 @@ import { bundledTrackingEvent } from "./analytics/bundledTrackingEvent";
 import { trackingEventBundle } from "./analytics/trackingEventBundle";
 import { keyReport } from "./analytics/keyReport";
 import { visitor } from "./analytics/visitor";
-import { interactionEventBucket } from "./analytics/interactionEventBucket";
 
 import { cronRun } from "./system/cronRun";
+import { siteNotificationFeed } from "./system/siteNotificationFeed";
 import contactMessage from "./contact/contactMessage";
 import keySuggestion from "./contact/keySuggestion";
 
@@ -28,6 +28,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     trackingEventBundle,
     keyReport,
     cronRun,
+    siteNotificationFeed,
     contactMessage,
     keySuggestion,
     link,
@@ -40,7 +41,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     program,
     cdKey,
     featuredProgramSettings,
-    visitor,
-    interactionEventBucket
+    visitor
   ]
 };
