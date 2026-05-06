@@ -4,8 +4,6 @@ import Link from "next/link";
 import { FaGithub, FaHeart, FaCarrot, FaKey, FaArrowRight } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { ContactModalTrigger } from "@/src/components/contact";
-import { trackInteraction } from "@/src/lib/analytics/trackInteraction";
-import { INTERACTION_IDS, SECTIONS } from "@/src/lib/analytics/interactionCatalog";
 import { StoreOtherLink } from "@/src/types";
 
 const helpWays = [
@@ -75,12 +73,6 @@ export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[
             <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center">
               <Link
                 href="/programs"
-                onClick={() =>
-                  void trackInteraction({
-                    interactionId: INTERACTION_IDS.ctaBrowseAllPrograms,
-                    sectionId: SECTIONS.home.cta
-                  })
-                }
                 className="inline-flex items-center justify-center px-6 py-3 sm:px-8 sm:py-4 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg transition-colors text-sm sm:text-base">
                 Browse All Programs
                 <FaArrowRight className="ml-2 text-sm" />
@@ -161,8 +153,6 @@ export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[
               <div className="mt-8 text-center">
                 <ContactModalTrigger
                   tab="suggest"
-                  interactionId={INTERACTION_IDS.ctaSuggestCdKey}
-                  sectionId={SECTIONS.home.cta}
                   className="inline-flex items-center justify-center px-6 py-3 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg transition-colors">
                   <FaKey className="mr-2" />
                   Suggest a CD Key Now
