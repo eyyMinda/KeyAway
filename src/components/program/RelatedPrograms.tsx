@@ -1,42 +1,121 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect, useMemo } from "react";
 import Link from "next/link";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight, FaDesktop } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { Program } from "@/src/types";
-import { portableTextExcerpt, portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 
 interface RelatedProgramsProps {
   programs: Program[];
 }
 
+/** Match Tailwind `sm` (640) and `lg` (1024). */
+function readItemsPerView(): number {
+  if (typeof window === "undefined") return 1;
+  const w = window.innerWidth;
+  if (w >= 1024) return 3;
+  if (w >= 640) return 2;
+  return 1;
+}
+
+/**
+ * Start indices for each carousel "page" so the last view always shows the last `k`
+ * programs together (when n > k), instead of a single widened tail tile.
+ * e.g. n=7,k=3 → [0,3,4] → views [1–3],[4–6],[5–7].
+ */
+function computePageStarts(programCount: number, k: number): number[] {
+  const n = programCount;
+  if (n === 0) return [];
+  if (k < 1) return [0];
+  if (n <= k) return [0];
+
+  const starts: number[] = [];
+  for (let s = 0; s <= n - k; s += k) {
+    starts.push(s);
+  }
+  const lastStart = n - k;
+  if (starts[starts.length - 1] !== lastStart) {
+    starts.push(lastStart);
+  }
+  return starts;
+}
+
+/** Four-pane mark (Windows-style tile) for store-row footer. */
+function WindowsGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
+      <path
+        fill="currentColor"
+        d="M0 2.3L6.8 1.3v6.4H0V2.3zm7.6-.9L16 0v8H7.6V1.4zM0 9.3h6.8V16L0 14.9V9.3zm7.6.1H16V16l-8.4-1.2V9.4z"
+      />
+    </svg>
+  );
+}
+
+const navBtn =
+  "flex shrink-0 cursor-pointer items-center justify-center self-center border-0 bg-transparent p-2 text-xl leading-none text-[#8fa3b8] transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1D2634] disabled:cursor-pointer disabled:opacity-35 sm:p-2.5 sm:text-2xl";
+
+const seeMoreBtn =
+  "inline-flex cursor-pointer items-center justify-center rounded border border-[#5a6a7e] bg-transparent px-4 py-2 text-sm font-medium text-[#9eb0c4] transition-colors hover:border-[#7d8fa3] hover:bg-white/[0.04] hover:text-[#dce4ee] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#202B3B]";
+
+const paginationBtn =
+  "flex min-h-11 min-w-9 cursor-pointer items-center justify-center rounded-sm py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#202B3B]";
+
+function ProgramTile({ program }: { program: Program }) {
+  return (
+    <Link href={`/program/${program.slug.current}`} className="group block h-full min-w-0 cursor-pointer">
+      <article className="flex h-full flex-col gap-3 overflow-hidden rounded-sm bg-[#0E141B] ring-1 ring-black/25 transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(0,0,0,0.35)] p-4">
+        <div className="relative aspect-video overflow-hidden rounded-sm">
+          {program.image ? (
+            <IdealImage
+              image={program.image}
+              alt={program.title}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[#4a5568]">
+              <FaDesktop className="h-12 w-12 sm:h-14 sm:w-14" aria-hidden />
+            </div>
+          )}
+        </div>
+
+        <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-white">{program.title}</h3>
+
+        <div className="flex items-center gap-2">
+          <WindowsGlyph className="h-3.5 w-3.5 shrink-0 text-[#7a8799] sm:h-4 sm:w-4" />
+          <span className="grow text-sm text-[#8b9aad]">Free</span>
+          <span className="shrink-0 rounded-sm bg-[#bef571] px-3 py-1.5 text-center text-xs font-bold text-black sm:px-3.5 sm:text-sm">
+            Get keys
+          </span>
+        </div>
+      </article>
+    </Link>
+  );
+}
+
 export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
+  const [itemsPerView, setItemsPerView] = useState(1);
 
-  // Dynamically set items per view based on screen size
-  const itemsPerView = isMobile ? 1 : 3;
-  const maxIndex = Math.max(0, programs.length - itemsPerView);
-
-  // Detect mobile on mount and resize
-  useEffect(() => {
-    const checkMobile = () => {
-      if (typeof window !== "undefined") {
-        setIsMobile(window.innerWidth < 768);
-      }
-    };
-
-    checkMobile();
-
-    if (typeof window !== "undefined") {
-      window.addEventListener("resize", checkMobile);
-      return () => window.removeEventListener("resize", checkMobile);
-    }
+  useLayoutEffect(() => {
+    const update = () => setItemsPerView(readItemsPerView());
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
+  const pageStarts = useMemo(() => computePageStarts(programs.length, itemsPerView), [programs.length, itemsPerView]);
+
+  const numPages = pageStarts.length;
+  const maxPage = Math.max(0, numPages - 1);
+
+  useLayoutEffect(() => {
+    setCurrentIndex(i => Math.min(i, maxPage));
+  }, [maxPage]);
+
   const nextSlide = () => {
-    setCurrentIndex(prev => Math.min(prev + 1, maxIndex));
+    setCurrentIndex(prev => Math.min(prev + 1, maxPage));
   };
 
   const prevSlide = () => {
@@ -45,114 +124,95 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
 
   if (programs.length === 0) return null;
 
+  const showNav = numPages > 1;
+
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 overflow-hidden">
+    <section className="overflow-hidden border-t border-[#2d3d52] bg-[#202B3B] py-8 sm:py-10">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-          <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-2 sm:mb-3 lg:mb-4">
-            You Might Also Be Interested In
-          </h2>
-          <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-gray-300 px-2">
-            Discover more premium software with free CD keys
-          </p>
+        <div className="mb-6 flex w-full items-end justify-between lg:mb-8">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <div className="section-label">You Might Also Like</div>
+            <h2 className="section-title tracking-tight">
+              Related <span className="text-gradient-pro">Programs</span>
+            </h2>
+            <p className="max-w-2xl text-sm text-[#9eb0c4] sm:text-base">
+              Discover more premium software with free CD keys
+            </p>
+          </div>
+
+          <Link href="/programs" className={`${seeMoreBtn} shrink-0`}>
+            See more
+          </Link>
         </div>
 
-        <div className="relative">
-          {/* Navigation Buttons */}
-          {programs.length > itemsPerView && (
-            <>
+        <div className="rounded-sm bg-[#1D2634] px-2 py-4 lg:py-6">
+          <div className="flex items-center gap-1 sm:gap-2">
+            {showNav ? (
               <button
                 type="button"
                 aria-label="Previous related programs"
                 onClick={prevSlide}
                 disabled={currentIndex === 0}
-                className="absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-800 disabled:opacity-50 rounded-full flex items-center justify-center text-white transition-all duration-200 disabled:cursor-not-allowed cursor-pointer">
-                <FaChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden />
+                className={navBtn}>
+                <FaChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
               </button>
+            ) : null}
+
+            <div className="min-w-0 flex-1 overflow-hidden rounded-sm">
+              <div
+                className="flex transition-transform duration-300 ease-out"
+                style={{
+                  width: `${numPages * 100}%`,
+                  transform: `translateX(-${(100 / numPages) * currentIndex}%)`
+                }}>
+                {pageStarts.map(start => (
+                  <div
+                    key={start}
+                    className="flex shrink-0 gap-2 px-0.5 sm:gap-3 sm:px-1"
+                    style={{ width: `${100 / numPages}%` }}>
+                    {programs.slice(start, start + itemsPerView).map(program => (
+                      <div key={program.slug.current} className="min-w-0 flex-1">
+                        <ProgramTile program={program} />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {showNav ? (
               <button
                 type="button"
                 aria-label="Next related programs"
                 onClick={nextSlide}
-                disabled={currentIndex >= maxIndex}
-                className="absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 sm:w-12 sm:h-12 bg-neutral-700 hover:bg-neutral-600 disabled:bg-neutral-800 disabled:opacity-50 rounded-full flex items-center justify-center text-white transition-all duration-200 disabled:cursor-not-allowed cursor-pointer">
-                <FaChevronRight className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden />
+                disabled={currentIndex >= maxPage}
+                className={navBtn}>
+                <FaChevronRight className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden />
               </button>
-            </>
-          )}
-
-          {/* Programs Grid */}
-          <div className="px-2 sm:px-0">
-            <div
-              className="flex transition-transform duration-300 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)` }}>
-              {programs.map(program => (
-                <div key={program.slug.current} className="shrink-0 w-full sm:w-1/2 lg:w-1/3 px-2 sm:px-4">
-                  <Link href={`/program/${program.slug.current}`} className="block group">
-                    <div className="bg-linear-to-b from-gray-800 via-gray-900 via-80% to-gray-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border border-gray-600 hover:border-blue-400">
-                      {/* Image */}
-                      <div className="relative h-36 sm:h-40 lg:h-48 overflow-hidden">
-                        {program.image ? (
-                          <IdealImage
-                            image={program.image}
-                            alt={program.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-linear-to-br from-primary-900 to-accent-900 flex items-center justify-center">
-                            <div className="text-neutral-500 text-4xl">🎮</div>
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-4 sm:p-5 lg:p-6">
-                        <h3 className="text-base sm:text-lg font-semibold text-white mb-2 group-hover:text-primary-400 transition-colors duration-200 line-clamp-1">
-                          {program.title}
-                        </h3>
-                        {portableTextHasContent(program.description) ? (
-                          <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 mb-3 sm:mb-4 leading-tight">
-                            {portableTextExcerpt(program.description, 180)}
-                          </p>
-                        ) : null}
-
-                        {/* Stats */}
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-                          <span>CD Keys Available</span>
-                          <span className="text-primary-400 font-medium">
-                            {program.keyCount ?? program.cdKeys?.length ?? 0}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              ))}
-            </div>
+            ) : null}
           </div>
-
-          {/* Dots Indicator */}
-          {programs.length > itemsPerView && (
-            <div className="mt-6 flex justify-center sm:mt-8">
-              {Array.from({ length: maxIndex + 1 }, (_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  aria-label={`Show related programs slide ${index + 1} of ${maxIndex + 1}`}
-                  aria-current={index === currentIndex ? "true" : undefined}
-                  onClick={() => setCurrentIndex(index)}
-                  className="inline-flex shrink-0 items-center justify-center rounded-full py-4 px-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900">
-                  <span
-                    className={`block h-3 rounded-full transition-all duration-200 ${
-                      index === currentIndex ? "w-8 bg-primary-400" : "w-3 bg-neutral-600 hover:bg-neutral-500"
-                    }`}
-                    aria-hidden
-                  />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
+
+        {showNav ? (
+          <div className="mt-4 flex justify-center gap-0.5 sm:gap-1 sm:mt-5">
+            {pageStarts.map((_, index) => (
+              <button
+                key={pageStarts[index]}
+                type="button"
+                aria-label={`Show related programs page ${index + 1} of ${numPages}`}
+                aria-current={index === currentIndex ? "true" : undefined}
+                onClick={() => setCurrentIndex(index)}
+                className={paginationBtn}>
+                <span
+                  className={`block h-2 rounded-sm transition-all duration-200 ${
+                    index === currentIndex ? "w-9 bg-[#8ebff5] sm:w-10" : "w-6 bg-[#0E141B] hover:bg-[#4d5f78] sm:w-7"
+                  }`}
+                  aria-hidden
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );
