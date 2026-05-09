@@ -55,16 +55,16 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-gray-600 text-sm">
+      <p className="text-sm text-[#8f98a0]">
         Found a free CD key? Help the community by suggesting it! We&apos;ll review and add it to the website.
       </p>
 
-      {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{error}</div>}
+      {error && <div className="rounded-sm border border-[#6d2626] bg-[#2a2020] p-3 text-sm text-[#df7f7f]">{error}</div>}
 
       {/* CD Key */}
       <div>
-        <label htmlFor="suggest-cdkey" className="block text-sm font-medium text-gray-700 mb-1">
-          CD Key <span className="text-red-500">*</span>
+        <label htmlFor="suggest-cdkey" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+          CD Key <span className="text-[#d36868]">*</span>
         </label>
         <input
           id="suggest-cdkey"
@@ -72,7 +72,7 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
           required
           value={formData.cdKey}
           onChange={e => setFormData({ ...formData, cdKey: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono text-gray-900"
+          className="key-mono w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
           placeholder="XXXXX-XXXXX-XXXXX-XXXXX"
         />
       </div>
@@ -80,8 +80,8 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
       {/* Program Details */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="suggest-program" className="block text-sm font-medium text-gray-700 mb-1">
-            Program Name <span className="text-red-500">*</span>
+          <label htmlFor="suggest-program" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+            Program Name <span className="text-[#d36868]">*</span>
           </label>
           <input
             id="suggest-program"
@@ -89,14 +89,14 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
             required
             value={formData.programName}
             onChange={e => setFormData({ ...formData, programName: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+            className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
             placeholder="e.g., IObit Driver Booster"
           />
         </div>
 
         <div>
-          <label htmlFor="suggest-version" className="block text-sm font-medium text-gray-700 mb-1">
-            Program Version <span className="text-red-500">*</span>
+          <label htmlFor="suggest-version" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+            Program Version <span className="text-[#d36868]">*</span>
           </label>
           <input
             id="suggest-version"
@@ -104,7 +104,7 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
             required
             value={formData.programVersion}
             onChange={e => setFormData({ ...formData, programVersion: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+            className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
             placeholder="e.g., 12.0"
           />
         </div>
@@ -112,8 +112,8 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
 
       {/* Program Link */}
       <div>
-        <label htmlFor="suggest-link" className="block text-sm font-medium text-gray-700 mb-1">
-          Program/Download Link <span className="text-red-500">*</span>
+        <label htmlFor="suggest-link" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+          Program/Download Link <span className="text-[#d36868]">*</span>
         </label>
         <input
           id="suggest-link"
@@ -121,43 +121,43 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
           required
           value={formData.programLink}
           onChange={e => setFormData({ ...formData, programLink: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+          className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
           placeholder="https://example.com/program"
         />
       </div>
 
       {/* Optional Contact Info */}
-      <div className="pt-4 border-t border-gray-200">
-        <p className="text-sm text-gray-600 mb-3">
-          <span className="font-medium">Optional:</span> Leave your contact info in case we need more details about this
+      <div className="border-t border-[#2a475e] pt-4">
+        <p className="mb-3 text-sm text-[#8f98a0]">
+          <span className="font-medium text-[#c6d4df]">Optional:</span> Leave your contact info in case we need more details about this
           key.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="suggest-name" className="block text-sm font-medium text-gray-700 mb-1">
-              Name <span className="text-gray-400 text-xs">(optional)</span>
+            <label htmlFor="suggest-name" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+              Name <span className="text-xs text-[#8f98a0]">(optional)</span>
             </label>
             <input
               id="suggest-name"
               type="text"
               value={formData.name}
               onChange={e => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+              className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
               placeholder="Your name"
             />
           </div>
 
           <div>
-            <label htmlFor="suggest-email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email <span className="text-gray-400 text-xs">(optional)</span>
+            <label htmlFor="suggest-email" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+              Email <span className="text-xs text-[#8f98a0]">(optional)</span>
             </label>
             <input
               id="suggest-email"
               type="email"
               value={formData.email}
               onChange={e => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+              className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
               placeholder="your@email.com"
             />
           </div>
@@ -165,15 +165,15 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
 
         {/* Optional Message */}
         <div className="mt-4">
-          <label htmlFor="suggest-message" className="block text-sm font-medium text-gray-700 mb-1">
-            Additional Notes <span className="text-gray-400 text-xs">(optional)</span>
+          <label htmlFor="suggest-message" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+            Additional Notes <span className="text-xs text-[#8f98a0]">(optional)</span>
           </label>
           <textarea
             id="suggest-message"
             rows={3}
             value={formData.message}
             onChange={e => setFormData({ ...formData, message: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none text-gray-900"
+            className="w-full resize-none rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
             placeholder="Any additional information..."
           />
         </div>
@@ -183,7 +183,7 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+        className="w-full cursor-pointer rounded-sm border border-[#5c8529] bg-[#4c6b22] py-3 font-medium text-[#c6d4df] transition-colors hover:bg-[#5c8529] hover:text-white disabled:cursor-not-allowed disabled:opacity-50">
         {loading ? "Submitting..." : "Submit Suggestion"}
       </button>
     </form>
