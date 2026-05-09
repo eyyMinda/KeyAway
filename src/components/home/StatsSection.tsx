@@ -1,6 +1,6 @@
 "use client";
 
-import { FaUsers, FaKey, FaChartLine, FaClock } from "react-icons/fa";
+import { FaDesktop, FaKey, FaChartLine, FaClock } from "react-icons/fa";
 
 interface StatsSectionProps {
   stats: {
@@ -21,7 +21,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
       color: "blue"
     },
     {
-      icon: FaUsers,
+      icon: FaDesktop,
       value: stats.totalPrograms,
       label: "Software Programs",
       description: "In our collection",
@@ -45,69 +45,76 @@ export default function StatsSection({ stats }: StatsSectionProps) {
 
   const getColorClasses = (color: string) => {
     const colors = {
-      blue: "bg-blue-500/20 text-blue-600 border-blue-200",
-      green: "bg-green-500/20 text-green-600 border-green-200",
-      purple: "bg-purple-500/20 text-purple-600 border-purple-200",
-      orange: "bg-orange-500/20 text-orange-600 border-orange-200"
+      blue: "bg-[#1a3a5c] text-[#66c0f4] border-[#4a90c4]",
+      green: "bg-[#1a3a2a] text-[#5ba32b] border-[#3d6e1c]",
+      purple: "bg-[#2a2040] text-[#7b5ea7] border-[#5a4592]",
+      orange: "bg-[#3a2800] text-[#e8632a] border-[#a3421b]"
     };
     return colors[color as keyof typeof colors] || colors.blue;
   };
 
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-linear-to-b from-gray-800 via-sky-500 via-50% via-sky-800 via-80% to-gray-900 text-white">
-      <div className="max-w-360 mx-auto px-4 sm:px-6">
-        {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Community Impact</h2>
-          <p className="text-base sm:text-lg lg:text-xl text-blue-100 max-w-2xl mx-auto px-2 leading-relaxed">
+    <section className="border-y border-[#2a475e] bg-[#1b2838] py-12 text-[#c6d4df] sm:py-14 lg:py-16">
+      <div className="mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-8">
+        {/* Header — unchanged hierarchy, slightly less air before the grid */}
+        <div className="mb-6 sm:mb-8 lg:mb-9">
+          <div className="section-label mb-3">Community Impact</div>
+          <h2 className="section-title mb-3 sm:mb-4">
+            Community <span className="text-gradient-pro">Impact</span>
+          </h2>
+          <p className="max-w-2xl text-base leading-relaxed text-[#8f98a0] sm:text-lg lg:text-xl">
             Our community-driven platform has helped thousands of users access premium software for free
           </p>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-          {statItems.map((item, index) => {
-            const IconComponent = item.icon;
-            return (
-              <div key={index} className="text-center group">
+        {/* Stats — dense panel + hairline gutters (Steam-ish) */}
+        <div className="overflow-hidden rounded-sm border border-[#2a475e]">
+          <div className="grid grid-cols-2 gap-px bg-[#2a475e] lg:grid-cols-4">
+            {statItems.map((item, index) => {
+              const IconComponent = item.icon;
+              return (
                 <div
-                  className={`inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl border-2 ${getColorClasses(item.color)} mb-3 sm:mb-4 lg:mb-6 group-hover:scale-110 transition-transform`}>
-                  <IconComponent className="w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10" />
-                </div>
-                <div className="space-y-1 sm:space-y-2">
-                  <div className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-white leading-tight">
-                    {item.value.toLocaleString()}
+                  key={index}
+                  className="group bg-[#16202d] px-3 py-3.5 text-center sm:px-4 sm:py-4 lg:px-3 lg:py-3.5">
+                  <div
+                    className={`mx-auto mb-2 inline-flex h-11 w-11 items-center justify-center rounded-sm border transition-transform group-hover:scale-105 sm:mb-2.5 sm:h-12 sm:w-12 ${getColorClasses(item.color)}`}>
+                    <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
-                  <h3 className="text-sm sm:text-base lg:text-lg font-semibold text-blue-100 leading-snug">
-                    {item.label}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-blue-200 leading-tight">{item.description}</p>
+                  <div className="space-y-0.5 sm:space-y-1">
+                    <div className="text-xl font-bold leading-none text-white sm:text-2xl lg:text-3xl">
+                      {item.value.toLocaleString()}
+                    </div>
+                    <h3 className="text-xs font-semibold leading-snug text-[#8f98a0] sm:text-sm">
+                      {item.label}
+                    </h3>
+                    <p className="text-[11px] leading-tight text-[#556772] sm:text-xs">{item.description}</p>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        {/* Additional Info */}
-        <div className="mt-10 sm:mt-12 lg:mt-16 text-center">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold mb-3 sm:mb-4">Join Our Growing Community</h3>
-            <p className="text-blue-100 text-sm sm:text-base lg:text-lg leading-relaxed mb-4 sm:mb-6 px-2">
+        {/* Secondary blurb — tighter footprint */}
+        <div className="mt-6 text-center sm:mt-8 lg:mt-9">
+          <div className="mx-auto max-w-2xl rounded-sm border border-[#2a475e] bg-[#16202d] px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-5">
+            <h3 className="mb-2 text-lg font-bold sm:text-xl">Join Our Growing Community</h3>
+            <p className="mb-3 text-xs leading-relaxed text-[#8f98a0] sm:mb-4 sm:text-sm">
               Every day, our community helps maintain the quality of our key database by reporting working, expired, or
               limit-reached keys. Your participation makes this platform better for everyone.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <div className="flex items-center space-x-2 text-blue-100">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-sm">Real-time updates</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:gap-x-5">
+              <div className="flex items-center gap-1.5 text-[#8f98a0]">
+                <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#5ba32b]" />
+                <span className="text-xs sm:text-sm">Real-time updates</span>
               </div>
-              <div className="flex items-center space-x-2 text-blue-100">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <span className="text-sm">Community verified</span>
+              <div className="flex items-center gap-1.5 text-[#8f98a0]">
+                <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#66c0f4]" />
+                <span className="text-xs sm:text-sm">Community verified</span>
               </div>
-              <div className="flex items-center space-x-2 text-blue-100">
-                <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                <span className="text-sm">Always free</span>
+              <div className="flex items-center gap-1.5 text-[#8f98a0]">
+                <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#d4af37]" />
+                <span className="text-xs sm:text-sm">Always free</span>
               </div>
             </div>
           </div>
