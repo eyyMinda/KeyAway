@@ -10,45 +10,46 @@ export default function ProgramsFilter({
   onSortChange
 }: ProgramsFilterProps) {
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 mb-6 sm:mb-8">
+    <div className="card-base mb-6 rounded-sm p-4 sm:mb-8 sm:p-5 lg:p-6">
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-5 lg:gap-6">
-        {/* Search */}
         <div className="flex-1">
-          <SearchInput value={searchTerm} onChange={onSearchChange} placeholder="Search programs..." />
+          <SearchInput
+            value={searchTerm}
+            onChange={onSearchChange}
+            placeholder="Search programs..."
+            className="[&_input]:rounded-sm [&_input]:border-[#3d6e8c] [&_input]:bg-[#32465a] [&_input]:text-[#c6d4df] [&_input]:placeholder:text-[#556772] [&_input]:focus:border-[#66c0f4] [&_input]:focus:ring-[#1a9fff]/30 [&_svg]:text-[#8f98a0]"
+          />
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col xs:flex-row gap-3 sm:gap-4">
-          {/* Key Availability Filter */}
           <div className="flex items-center space-x-2">
             <label
               htmlFor="programs-filter-keys"
-              className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+              className="whitespace-nowrap text-xs font-medium text-[#8f98a0] sm:text-sm">
               Keys:
             </label>
             <select
               id="programs-filter-keys"
               value={filter}
               onChange={e => onFilterChange(e.target.value as FilterType)}
-              className="flex-1 xs:flex-none px-2.5 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+              className="xs:flex-none flex-1 rounded-sm border border-[#3d6e8c] bg-[#32465a] px-2.5 py-2 text-xs text-[#c6d4df] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30 sm:px-3 sm:text-sm">
               <option value="all">All Programs</option>
               <option value="hasKeys">With Keys</option>
               <option value="noKeys">Without Keys</option>
             </select>
           </div>
 
-          {/* Sort Filter */}
           <div className="flex items-center space-x-2">
             <label
               htmlFor="programs-filter-sort"
-              className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+              className="whitespace-nowrap text-xs font-medium text-[#8f98a0] sm:text-sm">
               Sort:
             </label>
             <select
               id="programs-filter-sort"
               value={sortBy}
               onChange={e => onSortChange(e.target.value as SortType)}
-              className="flex-1 xs:flex-none px-2.5 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 text-gray-900 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+              className="xs:flex-none flex-1 rounded-sm border border-[#3d6e8c] bg-[#32465a] px-2.5 py-2 text-xs text-[#c6d4df] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30 sm:px-3 sm:text-sm">
               <option value="popular">Most Popular</option>
               <option value="views">Most Viewed</option>
               <option value="downloads">Most Downloaded</option>
