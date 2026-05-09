@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import ContactForm from "./ContactForm";
 import KeySuggestionForm from "./KeySuggestionForm";
@@ -13,7 +14,13 @@ interface ContactModalProps {
 
 export default function ContactModal({ isOpen, onClose, defaultTab = "suggest" }: ContactModalProps) {
   const [activeTab, setActiveTab] = useState<"contact" | "suggest">(defaultTab);
+  const [mounted, setMounted] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   // Update active tab when defaultTab changes and modal opens
   useEffect(() => {
@@ -54,37 +61,34 @@ export default function ContactModal({ isOpen, onClose, defaultTab = "suggest" }
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fadeIn">
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+  return createPortal(
+    <div className="fixed inset-0 z-300 flex items-center justify-center overflow-y-auto p-4 animate-fadeIn">
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
 
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+        className="relative my-auto w-full max-w-2xl overflow-hidden rounded-sm border border-[#2a475e] bg-[#1b2838] shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-h-[90vh]"
         style={{ animation: "slideDown 0.3s ease-out" }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-2xl font-bold text-gray-900">Get in Touch</h2>
+        <div className="flex items-center justify-between border-b border-[#2a475e] bg-[#16202d] px-6 py-4">
+          <h2 className="text-xl font-bold text-[#c6d4df]">Get in Touch</h2>
           <ModalCloseButton
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg"
+            className="rounded-sm p-2 text-[#8f98a0] hover:bg-[#213246] hover:text-[#c6d4df]"
             iconClassName="h-5 w-5"
             aria-label="Close modal"
           />
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 bg-gray-50 px-6">
+        <div className="flex border-b border-[#2a475e] bg-[#16202d] px-6">
           <button
             onClick={() => setActiveTab("suggest")}
             className={`px-6 py-3 font-medium text-sm transition-colors cursor-pointer relative ${
               activeTab === "suggest"
-                ? "text-primary-600 border-b-2 border-primary-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "border-b-2 border-[#66c0f4] text-[#c6d4df]"
+                : "text-[#8f98a0] hover:text-[#c6d4df]"
             }`}>
             Suggest a Key
           </button>
@@ -92,18 +96,18 @@ export default function ContactModal({ isOpen, onClose, defaultTab = "suggest" }
             onClick={() => setActiveTab("contact")}
             className={`px-6 py-3 font-medium text-sm transition-colors cursor-pointer relative ${
               activeTab === "contact"
-                ? "text-primary-600 border-b-2 border-primary-600"
-                : "text-gray-600 hover:text-gray-900"
+                ? "border-b-2 border-[#66c0f4] text-[#c6d4df]"
+                : "text-[#8f98a0] hover:text-[#c6d4df]"
             }`}>
             Contact Us
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+        <div className="max-h-[calc(90vh-140px)] overflow-y-auto bg-[#1b2838] p-6">
           {activeTab === "suggest" ? <KeySuggestionForm onSuccess={onClose} /> : <ContactForm onSuccess={onClose} />}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
