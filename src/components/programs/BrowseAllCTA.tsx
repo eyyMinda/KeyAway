@@ -7,19 +7,18 @@ export default function BrowseAllCTA() {
   return (
     <Link
       href="/programs"
-      className="group relative bg-white hover:bg-gray-50 border-2 border-dashed border-gray-300 hover:border-primary-400 rounded-xl sm:rounded-2xl p-6 transition-all duration-300 hover:shadow-xl cursor-pointer flex flex-col items-center justify-center min-h-[280px] text-center">
-      <div className="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-        <FaArrowRight className="w-8 h-8 text-white" />
+      className="card-base group relative flex min-h-[280px] cursor-pointer flex-col items-center justify-center rounded-sm border-dashed p-6 text-center">
+      <div className="section-label mb-3">Programs</div>
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a3a5c] transition-transform duration-300 group-hover:scale-110">
+        <FaArrowRight className="h-8 w-8 text-[#c6d4df]" />
       </div>
-      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors">
+      <h3 className="mb-2 text-lg font-bold text-[#c6d4df] transition-colors group-hover:text-white sm:text-xl">
         Browse All Programs
       </h3>
-      <p className="text-sm text-gray-600 leading-relaxed">
+      <p className="text-sm leading-relaxed text-[#8f98a0]">
         Explore our complete library of programs with advanced filters and search.
       </p>
-      <div className="mt-4 text-xs font-semibold text-primary-900 group-hover:text-primary-950 uppercase tracking-wider">
-        View All
-      </div>
+      <div className="section-label-plain mt-4 group-hover:text-[#c6d4df]">View all →</div>
     </Link>
   );
 }
