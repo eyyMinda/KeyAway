@@ -121,15 +121,15 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <head>{renderedHeadMetaTags}</head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f1923] text-[#c6d4df]`}>
         <SessionProvider session={session}>
           <PageViewTracker />
           <StoreDetailsProvider value={storeData}>
-            <div className="mainContent flex flex-col min-h-screen">
+            <div className="mainContent flex min-h-screen flex-col bg-[#0f1923] text-[#c6d4df]">
               <Header logoData={logoData} socialData={socialData} />
-              {children}
+              <main className="w-full">{children}</main>
               <Footer logoData={logoData} socialData={socialData} />
             </div>
           </StoreDetailsProvider>
