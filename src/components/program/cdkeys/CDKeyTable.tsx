@@ -1,7 +1,7 @@
 "use client";
 
 /** @fileoverview Program activation table: report counts, sort, mobile cards (flow-aware). */
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { CDKey, CDKeyTableProps, ReportData } from "@/src/types";
 import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import CDKeyMobileCard from "@/src/components/program/cdkeys/CDKeyMobileCard";
@@ -24,12 +24,14 @@ export default function CDKeyTable({
   introVersionConfirmation,
   versionSummaryLine
 }: CDKeyTableProps) {
+  const PAGE_SIZE = 10;
   const { t } = useI18n("program");
   const programFlow = normalizeProgramFlow(program.programFlow);
   const expiringKeysMessage = getExpiringKeysMessage(cdKeys);
   const { reportData, loading, refreshReportData } = useKeyReportData(slug, rowStorageIds);
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const idForCdKey = useMemo(() => {
     const m = new WeakMap<CDKey, string>();
@@ -80,6 +82,13 @@ export default function CDKeyTable({
     }
     return sortCdKeysByColumn(cdKeys, sortColumn, sortDirection, reportData, programFlow, storageKeyOf);
   }, [cdKeys, sortColumn, sortDirection, reportData, programFlow, storageKeyOf]);
+  const visibleKeys = useMemo(() => sortedKeys.slice(0, visibleCount), [sortedKeys, visibleCount]);
+  const remainingCount = Math.max(sortedKeys.length - visibleCount, 0);
+  const canShowMore = remainingCount > 0;
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [sortColumn, sortDirection, slug, cdKeys.length]);
 
   const headingSuffix = t.keyTable.headingSuffix();
   const intro = t.keyTable.intro({ programTitle });
@@ -87,31 +96,31 @@ export default function CDKeyTable({
   const expiringDisclaimer = t.keyTable.expiringDisclaimer();
 
   return (
-    <section className="py-6 sm:py-10 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
+    <section className="border-t border-[#2a475e] bg-[#0f1923] py-6 sm:py-10">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-2xl border border-gray-600 overflow-hidden">
+        <div className="overflow-visible rounded-sm border border-[#2a475e] bg-[#1b2838] shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1 min-w-0">
-                <h2 className="text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight mb-1.5 sm:mb-2">
-                  <span className="text-white">{formatProgramDisplayTitle(program)}</span>
-                  <span className="text-gray-500 font-normal mx-1 sm:mx-1.5" aria-hidden>
+                <h2 className="section-title mb-1.5 leading-tight sm:mb-2">
+                  <span>{formatProgramDisplayTitle(program)}</span>
+                  <span className="mx-1 font-normal text-[#556772] sm:mx-1.5" aria-hidden>
                     —
                   </span>
                   <span className="text-gradient-pro">{headingSuffix}</span>
                 </h2>
-                <p className="text-xs sm:text-sm lg:text-base leading-relaxed text-gray-300">
+                <p className="text-xs leading-relaxed text-[#8f98a0] sm:text-sm lg:text-base">
                   {intro}
                   {introVersionConfirmation ? (
                     <>
                       {" "}
-                      <span className="text-gray-400">{introVersionConfirmation}</span>
+                      <span className="text-[#556772]">{introVersionConfirmation}</span>
                     </>
                   ) : null}
                   {versionSummaryLine ? (
                     <>
                       {" "}
-                      <span className="text-gray-400">{versionSummaryLine}</span>
+                      <span className="text-[#556772]">{versionSummaryLine}</span>
                     </>
                   ) : null}
                 </p>
@@ -121,10 +130,10 @@ export default function CDKeyTable({
               </div>
             </div>
             {expiringKeysMessage && (
-              <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-amber-500/10 border border-amber-400/30 rounded-lg sm:rounded-xl">
+              <div className="mt-3 rounded-sm border border-[#a3421b] bg-[#3a2800] p-3 sm:mt-4 sm:p-4">
                 <div className="flex items-start gap-2 sm:gap-3">
                   <svg
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 mt-0.5 shrink-0"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-[#e8632a] sm:h-5 sm:w-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -136,10 +145,10 @@ export default function CDKeyTable({
                     />
                   </svg>
                   <div className="flex-1 min-w-0">
-                    <p className="text-amber-300 font-medium text-xs sm:text-sm leading-tight sm:leading-normal">
+                    <p className="text-xs font-medium leading-tight text-[#f4a460] sm:text-sm sm:leading-normal">
                       {expiringKeysMessage}
                     </p>
-                    <p className="text-amber-400/70 text-xs sm:text-sm mt-1 leading-tight">{expiringDisclaimer}</p>
+                    <p className="mt-1 text-xs leading-tight text-[#e8b28f] sm:text-sm">{expiringDisclaimer}</p>
                   </div>
                 </div>
               </div>
@@ -150,7 +159,7 @@ export default function CDKeyTable({
             <>
               <div className="block lg:hidden px-3 sm:px-4 py-4 sm:py-6">
                 <div className="grid auto-rows-auto grid-flow-dense grid-cols-1 xs:grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-3">
-                  {sortedKeys.map((cdKey: CDKey, i: number) => {
+                  {visibleKeys.map((cdKey: CDKey, i: number) => {
                     const rowStorageId = storageKeyOf(cdKey);
                     return (
                       <CDKeyMobileCard
@@ -175,10 +184,10 @@ export default function CDKeyTable({
                     sortColumn={sortColumn}
                     sortDirection={sortDirection}
                     onSort={handleSort}
-                    className="bg-white/5 text-gray-200"
+                    className="bg-[#16202d] text-[#c6d4df]"
                   />
-                  <tbody className="divide-y divide-white/10">
-                    {sortedKeys.map((cdKey: CDKey, i: number) => {
+                  <tbody className="divide-y divide-[#2a475e]">
+                    {visibleKeys.map((cdKey: CDKey, i: number) => {
                       const rowStorageId = storageKeyOf(cdKey);
                       return (
                         <CDKeyItem
@@ -197,11 +206,22 @@ export default function CDKeyTable({
                   </tbody>
                 </table>
               </div>
+
+              {canShowMore ? (
+                <div className="flex justify-center px-3 py-4 sm:px-4 sm:pb-6">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)}
+                    className="w-fit cursor-pointer rounded-sm border border-[#4a90c4] bg-[#1a3a5c] px-4 py-2 text-sm font-semibold text-[#c6d4df] transition-colors hover:bg-[#213246] hover:text-white">
+                    Show 10 more ({remainingCount} remaining)
+                  </button>
+                </div>
+              ) : null}
             </>
           ) : (
             <div className="px-8 py-16 text-center">
-              <div className="text-gray-500 text-6xl mb-6">🔑</div>
-              <h3 className="text-xl font-semibold text-gray-300 mb-3">{emptyTitle}</h3>
+              <div className="mb-6 text-6xl text-[#556772]">🔑</div>
+              <h3 className="mb-3 text-xl font-semibold text-[#8f98a0]">{emptyTitle}</h3>
             </div>
           )}
         </div>
