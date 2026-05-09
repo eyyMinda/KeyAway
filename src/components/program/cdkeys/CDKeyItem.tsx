@@ -85,12 +85,12 @@ export default function CDKeyItem({
   };
 
   const codeVisual = (interactive: boolean) =>
-    `px-3 py-1 rounded-lg text-sm font-mono select-text max-w-md inline-block align-bottom ${
+    `inline-block max-w-md select-text rounded-sm px-3 py-1 text-sm font-mono align-bottom ${
       isDisabled
-        ? "bg-neutral-100/80 text-neutral-700"
+        ? "bg-[#32465a] text-[#8f98a0]"
         : interactive
-          ? "bg-neutral-100 text-black cursor-pointer hover:bg-neutral-200"
-          : "bg-neutral-100 text-black"
+          ? "cursor-pointer bg-[#32465a] text-[#c6d4df] hover:bg-[#3d5770]"
+          : "bg-[#32465a] text-[#c6d4df]"
     }`;
 
   return (
@@ -106,7 +106,7 @@ export default function CDKeyItem({
             document.body
           )
         : null}
-      <tr className={`hover:bg-neutral-700 transition-colors ${isDisabled ? "opacity-50" : ""}`}>
+      <tr className={`transition-colors hover:bg-[#213246] ${isDisabled ? "opacity-50" : ""}`}>
       <td className="p-4 text-nowrap">
         {isInteractiveFirstCell ? (
           <button
@@ -136,20 +136,20 @@ export default function CDKeyItem({
         </td>
       )}
       <td className="p-4">
-        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(cdKey.status)}`}>
+        <span className={`inline-flex rounded-sm px-3 py-1 text-xs font-semibold ${getStatusColor(cdKey.status)}`}>
           {cdKey.status}
         </span>
       </td>
       <td className="p-4">
         <ReportProgressBar reportData={reportData} />
       </td>
-      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
+      <td className={`p-4 text-center text-sm ${isDisabled ? "text-[#556772]" : "text-[#8f98a0]"}`}>
         {cdKey.version}
       </td>
-      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
+      <td className={`p-4 text-center text-sm ${isDisabled ? "text-[#556772]" : "text-[#8f98a0]"}`}>
         {cdKey.validFrom?.split("T")[0]}
       </td>
-      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
+      <td className={`p-4 text-center text-sm ${isDisabled ? "text-[#556772]" : "text-[#8f98a0]"}`}>
         {formatValidUntilDisplay(cdKey.validUntil)}
       </td>
       <td className="p-4 text-center">
@@ -164,7 +164,7 @@ export default function CDKeyItem({
             isSpammerVisitor={isSpammerVisitor}
           />
         ) : (
-          <span className="text-neutral-500 text-xs">—</span>
+          <span className="text-xs text-[#556772]">—</span>
         )}
       </td>
     </tr>
