@@ -1,10 +1,11 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import { ProgramsFilter, ProgramsGrid } from "@/src/components/programs";
 import Pagination from "@/src/components/ui/Pagination";
 import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 export default function ProgramsPageClient({
   programs,
@@ -19,6 +20,14 @@ export default function ProgramsPageClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const wasPending = useRef(false);
+
+  useEffect(() => {
+    if (wasPending.current && !isPending) {
+      scrollToSectionWithHeaderOffset("#programs-grid");
+    }
+    wasPending.current = isPending;
+  }, [isPending]);
 
   const maxViews = Math.max(...programs.map(p => p.viewCount), 0);
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
@@ -59,8 +68,12 @@ export default function ProgramsPageClient({
     updateQuery({ search: newSearch, page: 1 });
   };
 
+  const handlePageChange = (page: number) => {
+    updateQuery({ page });
+  };
+
   return (
-    <div id="programs-grid" className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
+    <div id="programs-grid" className="mx-auto max-w-360 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
       <ProgramsFilter
         searchTerm={searchTerm}
         filter={filter}
@@ -72,9 +85,9 @@ export default function ProgramsPageClient({
 
       <div className="mb-4 sm:mb-6">
         {totalPrograms === 0 ? (
-          <p className="text-sm sm:text-base text-gray-600">No results</p>
+          <p className="text-sm text-[#8f98a0] sm:text-base">No results</p>
         ) : (
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm text-[#8f98a0] sm:text-base">
             Showing {startIndex}-{endIndex} of {totalPrograms} programs
           </p>
         )}
@@ -88,7 +101,7 @@ export default function ProgramsPageClient({
           totalPages={totalPages}
           totalItems={totalPrograms}
           itemsPerPage={programsPerPage}
-          onPageChange={page => updateQuery({ page })}
+          onPageChange={handlePageChange}
           variant="detailed"
           showInfo={false}
           className={`mt-8 sm:mt-10 lg:mt-12 ${isPending ? "opacity-70" : ""}`}
