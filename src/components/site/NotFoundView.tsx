@@ -37,7 +37,7 @@ export default function NotFoundView({ variant }: { variant: NotFoundVariant }) 
         </div>
 
         <div className="bg-neutral-800 rounded-2xl shadow-soft p-8 mb-8">
-          <h1 className="text-3xl font-bold text-white mb-4">{heading}</h1>
+          <h1 className="section-title mb-4">{heading}</h1>
           <p className="text-lg text-neutral-300 mb-6 leading-relaxed">{lead}</p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
