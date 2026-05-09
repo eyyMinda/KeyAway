@@ -21,13 +21,10 @@ export default function AnnouncementNotifications({ notifications, socialData }:
   const miniPopupTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
 
-  // Function to schedule mini popup appearance
   const scheduleMiniPopup = useCallback(
     (delay: number) => {
-      // Clear any existing timer
       if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
 
-      // Schedule new timer
       miniPopupTimerRef.current = setTimeout(() => {
         if (notifications.length > 0) setShowMiniPopup(true);
       }, delay);
@@ -35,7 +32,6 @@ export default function AnnouncementNotifications({ notifications, socialData }:
     [notifications.length]
   );
 
-  // Show mini popup after 5 seconds on initial load
   useEffect(() => {
     scheduleMiniPopup(5000);
 
@@ -44,7 +40,6 @@ export default function AnnouncementNotifications({ notifications, socialData }:
     };
   }, [notifications.length, scheduleMiniPopup]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -61,96 +56,93 @@ export default function AnnouncementNotifications({ notifications, socialData }:
 
   const unreadCount = notifications.length;
 
-  // Handle opening the dropdown
   const handleOpenDropdown = () => {
     setIsOpen(!isOpen);
-    setShowMiniPopup(false); // Hide mini popup when opening dropdown
+    setShowMiniPopup(false);
 
-    // When closing the dropdown, schedule mini popup to appear after 2 minutes
     if (isOpen) {
-      scheduleMiniPopup(120000); // 2 minutes
+      scheduleMiniPopup(120000);
     }
   };
 
-  // Handle clicking on the mini popup (hide it and reschedule)
   const handleMiniPopupClick = () => {
     setShowMiniPopup(false);
-    scheduleMiniPopup(120000); // Reappear after 2 minutes
+    scheduleMiniPopup(120000);
   };
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Notification Bell Button */}
       <button
+        type="button"
         onClick={handleOpenDropdown}
-        className="relative p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer focus:outline-none"
-        aria-label="View announcements">
-        <FaBell size={20} />
+        className="relative cursor-pointer rounded-sm p-2 text-[#8f98a0] transition-colors hover:text-[#66c0f4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#16202d]"
+        aria-label="View announcements"
+        aria-expanded={isOpen}
+        aria-haspopup="true">
+        <FaBell size={20} aria-hidden />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-primary-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a3a5c] px-1 text-[10px] font-bold leading-none text-[#c6d4df]">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* Mini Popup - Appears after 5 seconds */}
       {showMiniPopup && !isOpen && (
-        <div
+        <button
+          type="button"
           onClick={handleMiniPopupClick}
-          className="absolute top-full right-0 mt-2 px-3 py-2 bg-primary-700 text-white text-xs font-medium rounded-lg shadow-lg whitespace-nowrap z-50"
-          style={{ animation: "fadeIn 0.5s ease-out" }}>
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+          className="absolute right-0 top-full z-110 mt-2 cursor-pointer whitespace-nowrap rounded-sm border border-[#2a475e] bg-[#1b2838] px-3 py-2 text-left text-xs font-medium text-[#c6d4df] shadow-[0_8px_24px_rgba(0,0,0,0.55)] animate-[fadeIn_0.5s_ease-out]"
+          aria-label="New announcements — open list">
+          <span className="pointer-events-none absolute -top-1 right-4 h-2 w-2 rotate-45 border-l border-t border-[#2a475e] bg-[#1b2838]" aria-hidden />
+          <span className="relative flex items-center gap-2">
+            <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[#5ba32b]" aria-hidden />
             <span>New updates available!</span>
-          </div>
-          {/* Small arrow pointer */}
-          <div className="absolute -top-1 right-4 w-2 h-2 bg-primary-600 transform rotate-45 pointer-events-none"></div>
-        </div>
+          </span>
+        </button>
       )}
 
-      {/* Dropdown */}
       {isOpen && (
         <div
-          className="fixed md:absolute right-2 md:right-0 mt-2 w-[calc(100vw-1rem)] md:w-80 max-w-sm bg-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50 transition-all duration-200 ease-out"
-          style={{
-            animation: "slideDown 0.2s ease-out"
-          }}>
-          {/* Header */}
-          <div className="px-4 py-3 bg-gray-750 border-b border-gray-700">
-            <h3 className="text-sm font-semibold text-white">Recent Announcements</h3>
+          className="fixed right-2 top-[calc(4.5rem+env(safe-area-inset-top,0))] z-110 w-[min(100vw-1rem,20rem)] overflow-hidden rounded-sm border border-[#2a475e] bg-[#1b2838] shadow-[0_12px_40px_rgba(0,0,0,0.75)] animate-[slideDown_0.2s_ease-out] md:absolute md:right-0 md:top-full md:mt-2 md:w-80"
+          role="dialog"
+          aria-label="Announcements">
+          <div className="border-b border-[#2a475e] bg-[#16202d] px-4 py-3">
+            <h3 className="text-sm font-semibold text-[#c6d4df]">
+              Recent <span className="text-gradient-pro">Announcements</span>
+            </h3>
+            <p className="mt-0.5 text-xs text-[#8f98a0]">New programs and key drops</p>
           </div>
 
-          {/* Notifications List - Shows ~2.8 notifications at once */}
-          <div className="max-h-[240px] overflow-y-auto">
+          <div className="max-h-[min(240px,50dvh)] overflow-y-auto overscroll-contain">
             {notifications.length > 0 ? (
               notifications.map(notification => (
                 <NotificationItem key={notification.id} notification={notification} onClose={() => setIsOpen(false)} />
               ))
             ) : (
               <div className="px-4 py-8 text-center">
-                <div className="text-gray-400 text-sm mb-2">No recent announcements</div>
-                <div className="text-gray-500 text-xs">Check back later for updates!</div>
+                <p className="mb-1 text-sm text-[#8f98a0]">No recent announcements</p>
+                <p className="text-xs text-[#556772]">Check back later for updates.</p>
               </div>
             )}
 
-            {/* Facebook Group Button */}
-            <div className="p-3 border-t border-gray-700">
-              <FacebookGroupButton
-                socialData={socialData}
-                path={pathname}
-                variant="outline"
-                taglinePlacement="inside"
-                className="text-xs"
-              />
-            </div>
+            {socialData ? (
+              <div className="border-t border-[#2a475e] bg-[#16202d] p-3">
+                <FacebookGroupButton
+                  socialData={socialData}
+                  path={pathname}
+                  variant="outline"
+                  taglinePlacement="inside"
+                  className="text-xs"
+                />
+              </div>
+            ) : null}
           </div>
 
-          {/* Footer */}
-          <div className="px-4 py-2 bg-gray-750 border-t border-gray-700">
+          <div className="border-t border-[#2a475e] bg-[#16202d] px-4 py-2.5">
             <Link
               href="/programs"
               onClick={() => setIsOpen(false)}
-              className="text-xs text-primary-400 hover:text-primary-300 font-medium">
+              className="text-xs font-medium text-[#66d9ff] underline-offset-2 hover:text-white hover:underline">
               View all programs →
             </Link>
           </div>
