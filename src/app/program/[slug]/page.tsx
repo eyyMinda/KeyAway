@@ -122,9 +122,9 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             introVersionConfirmation={introVersionConfirmation}
             versionSummaryLine={versionSummaryLine}
           />
-          <ContributeBanner />
-          <ProgramAboutSection program={program} />
           <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
+          <ProgramAboutSection program={program} />
+          <ContributeBanner />
           <ProgramFaqSection programTitle={program.title} items={faqItems} />
           <RelatedPrograms programs={relatedPrograms} />
           <CommentsSection />
