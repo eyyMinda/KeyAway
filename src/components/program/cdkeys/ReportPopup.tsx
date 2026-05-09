@@ -73,7 +73,7 @@ function ReportButton({ status, isSubmitting, onReport, blockedBySpammer }: Repo
       onClick={() => !blockedBySpammer && onReport(status)}
       disabled={disabled}
       title={blockedBySpammer ? SPAMMER_REPORT_DISABLED_OPTION_TITLE : undefined}
-      className={`w-full flex items-center justify-center px-4 py-3 font-medium rounded-lg transition-colors ${styleClass}`}>
+      className={`flex w-full items-center justify-center rounded-sm px-4 py-3 font-medium transition-colors ${styleClass}`}>
       <span className="mr-2">{getIcon()}</span>
       {config.label}
     </button>
@@ -229,46 +229,44 @@ export default function ReportPopup({
       )}
 
       {/* Main Modal Backdrop */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        onClick={handleBackdropClick}>
-        <div className="bg-neutral-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={handleBackdropClick}>
+        <div className="mx-4 w-full max-w-md rounded-sm border border-[#2a475e] bg-[#1b2838] p-6 shadow-xl">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white">Report activation status</h3>
-            <ModalCloseButton onClick={handleClose} className="p-1 text-neutral-400 hover:text-white" />
+            <h3 className="text-lg font-semibold text-[#c6d4df]">Report activation status</h3>
+            <ModalCloseButton onClick={handleClose} className="p-1 text-[#8f98a0] hover:text-white" />
           </div>
 
           <div className="mb-4">
-            <p className="text-neutral-300 text-sm mb-2">
-              Entry: <code className="bg-neutral-700 px-2 py-1 rounded text-xs break-all">{activationLabel}</code>
+            <p className="mb-2 text-sm text-[#8f98a0]">
+              Entry: <code className="break-all rounded-sm bg-[#32465a] px-2 py-1 text-xs text-[#c6d4df]">{activationLabel}</code>
             </p>
 
             {/* Loading state */}
             {isCheckingDuplicate && (
               <div className="flex items-center justify-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-500"></div>
-                <span className="ml-2 text-neutral-400 text-sm">{getInfoMessage("CHECKING_DUPLICATE")}</span>
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-[#66c0f4]"></div>
+                <span className="ml-2 text-sm text-[#8f98a0]">{getInfoMessage("CHECKING_DUPLICATE")}</span>
               </div>
             )}
 
             {/* Duplicate report found */}
             {duplicateReport && !isCheckingDuplicate && (
-              <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4 mb-4">
+              <div className="mb-4 rounded-sm border border-[#a3421b] bg-[#3a2800] p-4">
                 <div className="flex items-start space-x-3">
-                  <FiRefreshCw className="w-5 h-5 text-orange-400 mt-0.5 shrink-0" />
+                    <FiRefreshCw className="mt-0.5 h-5 w-5 shrink-0 text-[#e8632a]" />
                   <div className="flex-1">
-                    <h4 className="text-orange-300 font-medium text-sm mb-1">{getInfoMessage("DUPLICATE_FOUND")}</h4>
-                    <p className="text-orange-200 text-xs mb-2">Status: {getStatusText(duplicateReport.eventType)}</p>
-                    <p className="text-orange-300 text-xs">Reported: {formatDate(duplicateReport.createdAt)}</p>
+                    <h4 className="mb-1 text-sm font-medium text-[#f4a460]">{getInfoMessage("DUPLICATE_FOUND")}</h4>
+                    <p className="mb-2 text-xs text-[#e8b28f]">Status: {getStatusText(duplicateReport.eventType)}</p>
+                    <p className="text-xs text-[#f4a460]">Reported: {formatDate(duplicateReport.createdAt)}</p>
                     <div className="mt-3 flex space-x-2">
                       <button
                         onClick={handleRenewReport}
-                        className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">
+                        className="rounded-sm bg-[#a3421b] px-3 py-1.5 text-xs font-medium text-[#c6d4df] transition-colors hover:bg-[#c85222] hover:text-white">
                         Renew Report
                       </button>
                       <button
                         onClick={handleClose}
-                        className="bg-neutral-600 hover:bg-neutral-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors">
+                        className="rounded-sm bg-[#32465a] px-3 py-1.5 text-xs font-medium text-[#c6d4df] transition-colors hover:bg-[#3d5770] hover:text-white">
                         Cancel
                       </button>
                     </div>
@@ -280,9 +278,9 @@ export default function ReportPopup({
             {/* Normal report interface */}
             {!duplicateReport && !isCheckingDuplicate && (
               <>
-                <p className="text-neutral-400 text-sm">How is this entry working for you?</p>
+                <p className="text-sm text-[#8f98a0]">How is this entry working for you?</p>
                 {isSpammerVisitor && (
-                  <p className="text-amber-200/90 text-sm mt-3 leading-relaxed border border-amber-500/25 bg-amber-950/30 rounded-lg px-3 py-2">
+                  <p className="mt-3 rounded-sm border border-[#a3421b] bg-[#3a2800] px-3 py-2 text-sm leading-relaxed text-[#f4a460]">
                     {SPAMMER_REPORT_RESTRICTION_NOTICE}
                   </p>
                 )}
@@ -309,8 +307,8 @@ export default function ReportPopup({
             </div>
           )}
 
-          <div className="mt-4 pt-4 border-t border-neutral-700">
-            <p className="text-neutral-500 text-xs text-center">
+          <div className="mt-4 border-t border-[#2a475e] pt-4">
+            <p className="text-center text-xs text-[#556772]">
               {duplicateReport ? getInfoMessage("RENEWAL_INSTRUCTIONS") : getInfoMessage("REPORT_INSTRUCTIONS")}
             </p>
           </div>
