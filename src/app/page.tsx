@@ -61,14 +61,12 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd data={jsonLd} />
-      <main>
-        <HeroSection socialData={socialData} />
-        <FeaturedProgramSection program={featuredProgram} />
-        <PopularProgramsSection programs={normalizedPopularPrograms} />
-        <FeaturesSection />
-        <StatsSection stats={stats} />
-        <CTASection otherLinks={store?.otherLinks ?? []} />
-      </main>
+      <HeroSection socialData={socialData} stats={stats} />
+      <FeaturedProgramSection program={featuredProgram} />
+      <PopularProgramsSection programs={normalizedPopularPrograms} />
+      <FeaturesSection />
+      <StatsSection stats={stats} />
+      <CTASection otherLinks={store?.otherLinks ?? []} />
     </>
   );
 }
