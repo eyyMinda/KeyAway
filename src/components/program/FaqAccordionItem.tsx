@@ -14,8 +14,8 @@ export default function FaqAccordionItem({ question, answer }: Props) {
 
   return (
     <div
-      className={`rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm transition-colors duration-300 ${
-        open ? "border-primary-500/30 bg-white/[0.07]" : ""
+      className={`rounded-sm border border-[#2a475e] bg-[#1b2838] transition-colors duration-300 ${
+        open ? "border-[#4a90c4] bg-[#213246]" : ""
       }`}>
       <button
         type="button"
@@ -24,9 +24,9 @@ export default function FaqAccordionItem({ question, answer }: Props) {
         aria-controls={`${panelId}-panel`}
         onClick={() => setOpen(v => !v)}
         className="flex w-full cursor-pointer list-none items-start justify-between gap-3 p-4 sm:p-5 text-left">
-        <span className="text-sm sm:text-base font-semibold text-white pr-2">{question}</span>
+        <span className="pr-2 text-sm font-semibold text-[#c6d4df] sm:text-base">{question}</span>
         <FaChevronDown
-          className={`mt-0.5 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-300 ease-out motion-reduce:transition-none ${
+          className={`mt-0.5 h-4 w-4 shrink-0 text-[#8f98a0] transition-transform duration-300 ease-out motion-reduce:transition-none ${
             open ? "rotate-180" : ""
           }`}
           aria-hidden
@@ -40,8 +40,8 @@ export default function FaqAccordionItem({ question, answer }: Props) {
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}>
         <div className="min-h-0">
-          <div className="border-t border-white/10 px-4 pb-4 pt-0 sm:px-5 sm:pb-5">
-            <div className="pt-3 text-sm sm:text-base text-gray-300 leading-relaxed [&_a]:text-primary-300 [&_p]:my-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-5">
+          <div className="border-t border-[#2a475e] px-4 pb-4 pt-0 sm:px-5 sm:pb-5">
+            <div className="pt-3 text-sm leading-relaxed text-[#8f98a0] [&_a]:text-[#66d9ff] [&_p]:my-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 sm:text-base">
               <RichText value={answer} />
             </div>
           </div>
