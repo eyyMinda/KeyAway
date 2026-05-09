@@ -1,4 +1,10 @@
-import { FaChevronDown } from "react-icons/fa";
+"use client";
+
+import Image from "next/image";
+import { FaKey } from "react-icons/fa";
+import { ContactModalTrigger } from "@/src/components/contact";
+import { HeroAtAGlanceStrip } from "@/src/components/home/HeroAtAGlanceStrip";
+import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 
 interface ProgramsHeroProps {
   totalCount: number;
@@ -7,75 +13,78 @@ interface ProgramsHeroProps {
 
 export default function ProgramsHero({ totalCount, totalKeys }: ProgramsHeroProps) {
   return (
-    <section
-      id="programs-hero"
-      className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 sm:py-16 lg:py-20 xl:py-24 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-500 rounded-full blur-3xl"></div>
-      </div>
+    <section id="programs-hero" className="relative overflow-hidden border-b border-[#2a475e] bg-[#0f1923]">
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,#0f1923_0%,#1b2838_55%,#16304a_100%)]" />
+      <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_18px,rgba(102,192,244,0.06)_18px,rgba(102,192,244,0.06)_19px)] opacity-25" />
 
-      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 sm:px-5 py-2 mb-4 sm:mb-6">
-            <span className="text-xs sm:text-sm font-semibold text-primary-300">
-              {totalCount} Software Programs Available
-            </span>
+      <div className="relative z-10 mx-auto w-full max-w-360">
+        <div className="flex min-h-0 flex-col gap-6 px-4 pb-8 pt-10 sm:gap-8 sm:px-6 sm:pb-10 sm:pt-12 lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-8 lg:gap-y-0 lg:px-8 lg:pb-11 lg:pt-12 xl:gap-x-10">
+          <div className="flex flex-col justify-center">
+            <div className="mx-auto w-full max-w-2xl space-y-5 lg:mx-0">
+              <div className="section-label">Programs</div>
+
+              <h1 className="section-title">
+                Discover free software <span className="text-gradient-pro">with working CD keys</span>
+              </h1>
+
+              <p className="text-base leading-relaxed text-[#8f98a0] sm:text-[17px] lg:max-w-md">
+                Browse the catalog—community-tested keys, filters, and sorting so you can jump in fast.
+              </p>
+
+              <div className="flex flex-wrap gap-3 pt-1">
+                <ContactModalTrigger
+                  tab="suggest"
+                  className="inline-flex cursor-pointer items-center justify-center rounded-sm border border-[#5c8529] bg-[#4c6b22] px-5 py-2.5 text-sm font-bold text-[#c6d4df] transition-colors hover:bg-[#5c8529] hover:text-white">
+                  <FaKey className="mr-2 text-sm" />
+                  Suggest a Key
+                </ContactModalTrigger>
+                <button
+                  type="button"
+                  onClick={() => scrollToSectionWithHeaderOffset("#programs-grid")}
+                  className="inline-flex cursor-pointer items-center justify-center rounded-sm border border-[#4a90c4] px-5 py-2.5 text-sm font-semibold text-[#66c0f4] transition-colors hover:bg-[#1a3a5c]">
+                  Browse program list
+                </button>
+              </div>
+
+              <div className="max-w-sm overflow-hidden rounded-sm border border-[#2a475e]">
+                <div className="grid grid-cols-2 gap-px bg-[#2a475e]">
+                  <div className="bg-[#16202d] px-3 py-3 text-center sm:py-3.5">
+                    <div className="text-xl font-bold leading-none text-white sm:text-2xl lg:text-3xl">
+                      {totalCount.toLocaleString()}
+                    </div>
+                    <div className="mt-1 text-xs font-medium text-[#8f98a0]">Programs</div>
+                  </div>
+                  <div className="bg-[#16202d] px-3 py-3 text-center sm:py-3.5">
+                    <div className="text-xl font-bold leading-none text-[#5ba32b] sm:text-2xl lg:text-3xl">
+                      {totalKeys.toLocaleString()}
+                    </div>
+                    <div className="mt-1 text-xs font-medium text-[#8f98a0]">CD keys listed</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 lg:mb-5 leading-tight">
-            Discover Free Software <br />
-            <span className="text-gradient-pro">with Working CD Keys</span>
-          </h1>
-
-          <p className="text-sm sm:text-base lg:text-lg text-gray-300 max-w-2xl mx-auto mb-6 sm:mb-8 leading-relaxed">
-            Browse our complete collection of premium software programs with verified, community-tested CD keys. All
-            free, always updated, and ready to activate.
-          </p>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 max-w-2xl mx-auto mb-6 sm:mb-8">
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
-              <div className="text-2xl lg:text-3xl font-bold text-primary-400 mb-1">{totalCount}</div>
-              <div className="text-xs sm:text-sm text-gray-400 leading-tight">Programs</div>
-            </div>
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
-              <div className="text-2xl lg:text-3xl font-bold text-green-400 mb-1">{totalKeys}</div>
-              <div className="text-xs sm:text-sm text-gray-400 leading-tight">Active Keys</div>
-            </div>
-            <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5">
-              <div className="text-2xl lg:text-3xl font-bold text-blue-400 mb-1">24/7</div>
-              <div className="text-xs sm:text-sm text-gray-400 leading-tight">Updated</div>
-            </div>
-          </div>
-
-          {/* Features */}
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm">
-            <div className="flex items-center space-x-2 bg-white/5 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/10">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-gray-300">Community Verified</span>
-            </div>
-            <div className="flex items-center space-x-2 bg-white/5 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/10">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-              <span className="text-gray-300">Real-Time Status</span>
-            </div>
-            <div className="flex items-center space-x-2 bg-white/5 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/10">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-              <span className="text-gray-300">100% Free</span>
+          <div className="flex w-full justify-center">
+            <div className="relative aspect-5/3 w-full max-w-2xl overflow-hidden rounded-sm lg:max-w-none">
+              <Image
+                src="/images/Hero_laptop_software_icons.webp"
+                alt="Software and activation keys"
+                fill
+                className="object-cover object-[56%_40%]"
+                sizes="(max-width: 1023px) 90vw, (max-width: 1536px) 50vw, 560px"
+                priority
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,#1b2838_0%,transparent_28%)] opacity-45"
+                aria-hidden
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <a
-        href="#programs-grid"
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce hidden lg:flex items-center justify-center w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/20 transition-all duration-300 cursor-pointer group"
-        aria-label="Scroll to programs">
-        <FaChevronDown className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
-      </a>
+      <HeroAtAGlanceStrip stripId="programs-at-a-glance" navLabel="KeyAway highlights" />
     </section>
   );
 }
