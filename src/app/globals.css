@@ -5,90 +5,109 @@
   html {
     scroll-padding-top: 72px;
   }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  a {
+    color: var(--text-secondary);
+    &:hover {
+      color: white;
+    }
+  }
 }
-
 /* Canonical palette + semantics: `src/theme/colorSchema.ts`. Keep :root hex aligned when changing scales. */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+  --background: #0f1923;
+  --foreground: #c6d4df;
 
-  /* Custom color variables */
-  --primary-50: #f0f9ff;
-  --primary-100: #e0f2fe;
-  --primary-200: #bae6fd;
-  --primary-300: #7dd3fc;
-  --primary-400: #38bdf8;
-  --primary-500: #0ea5e9;
-  --primary-600: #0284c7;
-  --primary-700: #0369a1;
-  --primary-800: #075985;
-  --primary-900: #0c4a6e;
-  --primary-950: #082f49;
+  --surface: #1b2838;
+  --surface-raised: #213246;
+  --surface-subtle: #16202d;
+  --surface-overlay: #2a3f5a;
+  --border: #2a475e;
+  --border-strong: #4a90c4;
 
-  --neutral-50: #fafafa;
-  --neutral-100: #f5f5f5;
-  --neutral-200: #e5e5e5;
-  --neutral-300: #d4d4d4;
-  --neutral-400: #a3a3a3;
-  --neutral-500: #737373;
-  --neutral-600: #525252;
-  --neutral-700: #404040;
-  --neutral-800: #262626;
-  --neutral-900: #171717;
-  --neutral-950: #0a0a0a;
+  --text-primary: #c6d4df;
+  --text-secondary: #8f98a0;
+  --text-muted: #556772;
+  --text-link: #4fc3f7;
+  --text-link-hover: #66d9ff;
 
-  /* Success colors */
-  --success-50: #f0fdf4;
-  --success-100: #dcfce7;
-  --success-200: #bbf7d0;
-  --success-300: #86efac;
-  --success-400: #4ade80;
-  --success-500: #22c55e;
-  --success-600: #16a34a;
-  --success-700: #15803d;
-  --success-800: #166534;
-  --success-900: #14532d;
-  --success-950: #052e16;
+  --primary-50: #d9f2ff;
+  --primary-100: #b9e7ff;
+  --primary-200: #90d8ff;
+  --primary-300: #66c0f4;
+  --primary-400: #4fc3f7;
+  --primary-500: #1a9fff;
+  --primary-600: #4a90c4;
+  --primary-700: #2a475e;
+  --primary-800: #213246;
+  --primary-900: #1b2838;
+  --primary-950: #0f1923;
 
-  /* Warning colors */
-  --warning-50: #fffbeb;
-  --warning-100: #fef3c7;
-  --warning-200: #fde68a;
-  --warning-300: #fcd34d;
-  --warning-400: #fbbf24;
-  --warning-500: #f59e0b;
-  --warning-600: #d97706;
-  --warning-700: #b45309;
-  --warning-800: #92400e;
-  --warning-900: #78350f;
-  --warning-950: #451a03;
+  --neutral-50: #c6d4df;
+  --neutral-100: #aebdca;
+  --neutral-200: #8f98a0;
+  --neutral-300: #758691;
+  --neutral-400: #556772;
+  --neutral-500: #4a5f6d;
+  --neutral-600: #32465a;
+  --neutral-700: #2a475e;
+  --neutral-800: #1b2838;
+  --neutral-900: #16202d;
+  --neutral-950: #0f1923;
 
-  /* Error colors */
-  --error-50: #fef2f2;
-  --error-100: #fee2e2;
-  --error-200: #fecaca;
-  --error-300: #fca5a5;
-  --error-400: #f87171;
-  --error-500: #ef4444;
-  --error-600: #dc2626;
-  --error-700: #b91c1c;
-  --error-800: #991b1b;
-  --error-900: #7f1d1d;
-  --error-950: #450a0a;
+  --success-50: #ecf6df;
+  --success-100: #d9ecbf;
+  --success-200: #c2dfa0;
+  --success-300: #a4d07a;
+  --success-400: #7eb84f;
+  --success-500: #5ba32b;
+  --success-600: #4c8a24;
+  --success-700: #3d6e1c;
+  --success-800: #2f5316;
+  --success-900: #213910;
+  --success-950: #152408;
 
-  /* Accent colors */
-  --accent-50: #fdf4ff;
-  --accent-100: #fae8ff;
-  --accent-200: #f5d0fe;
-  --accent-300: #f0abfc;
-  --accent-400: #e879f9;
-  --accent-500: #d946ef;
-  --accent-600: #c026d3;
-  --accent-700: #a21caf;
-  --accent-800: #86198f;
-  --accent-900: #701a75;
-  --accent-950: #4a044e;
+  --warning-50: #fff1e8;
+  --warning-100: #ffd8c2;
+  --warning-200: #ffc29f;
+  --warning-300: #f4a460;
+  --warning-400: #f18a4b;
+  --warning-500: #e8632a;
+  --warning-600: #c85222;
+  --warning-700: #a3421b;
+  --warning-800: #7d3315;
+  --warning-900: #5a240e;
+  --warning-950: #3b1709;
+
+  --error-50: #f9e3e3;
+  --error-100: #f4caca;
+  --error-200: #eca4a4;
+  --error-300: #df7f7f;
+  --error-400: #d36868;
+  --error-500: #c94f4f;
+  --error-600: #a83f3f;
+  --error-700: #8a3232;
+  --error-800: #6d2626;
+  --error-900: #4f1b1b;
+  --error-950: #311010;
+
+  --accent-50: #e6f5ff;
+  --accent-100: #cfeaff;
+  --accent-200: #add8ff;
+  --accent-300: #84c0ff;
+  --accent-400: #66a7ff;
+  --accent-500: #4c8eda;
+  --accent-600: #3f79ba;
+  --accent-700: #325f93;
+  --accent-800: #264a71;
+  --accent-900: #1c3551;
+  --accent-950: #14243a;
 }
 
 @theme {
@@ -103,37 +122,112 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), "Noto Sans", Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
+  /* Eyebrow / kicker above section titles — matches Featured + Hero chips */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #2a475e;
+    border-radius: 4px;
+    background: #16202d;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8f98a0;
+  }
+
+  /* Same typography as .section-label but no pill (inside cards, dense UI) */
+  .section-label-plain {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8f98a0;
+  }
+
+  .section-title {
+    color: var(--section-title-color, #fff);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.35;
+
+    @media (min-width: 48rem) {
+      font-size: 1.875rem;
+    }
+    @media (min-width: 80rem) {
+      font-size: 2.25rem;
+    }
+
+    &:is(h1):not(.h2) {
+      font-size: 1.875rem;
+      @media (min-width: 48rem) {
+        font-size: 2.25rem;
+      }
+      @media (min-width: 80rem) {
+        font-size: 3rem;
+      }
+    }
+  }
+
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0 20px;
+  }
+
+  .card-base {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition:
+      background 0.2s,
+      border-color 0.2s,
+      transform 0.15s;
+  }
+
+  .card-base:hover {
+    background: var(--surface-raised);
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+  }
+
+  .key-mono {
+    font-family: var(--font-geist-mono), Consolas, "Courier New", monospace;
+    letter-spacing: 0.08em;
+    font-size: 13px;
+  }
+
   .line-clamp-2 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
   .line-clamp-3 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
   .line-clamp-4 {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
   }
 
   /* Gradient utilities */
