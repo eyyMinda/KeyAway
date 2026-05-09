@@ -5,15 +5,16 @@ export default function ProgramFaqSection({ programTitle, items }: { programTitl
   if (!items || items.length < 2) return null;
 
   return (
-    <section
-      id="faq"
-      className="py-8 sm:py-10 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 border-t border-white/5">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-8 lg:gap-16 xl:gap-24 items-center">
-          <h2 className="flex flex-col items-center text-2xl lg:text-3xl xl:text-4xl font-bold text-white text-center">
-            <span>{programTitle}</span>
-            <span className="text-gradient-pro">Frequently Asked Questions</span>
-          </h2>
+    <section id="faq" className="border-t border-[#2a475e] bg-[#0f1923] py-8 sm:py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-start gap-4 lg:gap-8">
+          <div className="flex flex-col gap-3">
+            <div className="section-label">FAQ</div>
+            <h2 className="section-title flex flex-col">
+              <span>{programTitle}</span>
+              <span className="text-gradient-pro">Frequently Asked Questions</span>
+            </h2>
+          </div>
 
           <div className="space-y-2">
             {items.map((item, index) => (
