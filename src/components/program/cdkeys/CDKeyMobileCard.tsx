@@ -44,8 +44,7 @@ export default function CDKeyMobileCard({
   const username = (cdKey.username ?? "").trim();
   const password = (cdKey.password ?? "").trim();
   const rawCopy = getActivationCopyText(cdKey, programFlow) ?? "";
-  const clipboardMatch =
-    isLinkAccountFlow(programFlow) || isAccountFlow(programFlow) ? "" : rawCopy;
+  const clipboardMatch = isLinkAccountFlow(programFlow) || isAccountFlow(programFlow) ? "" : rawCopy;
 
   useCopyTracking({ cdKey, slug, programFlow, clipboardMatch });
 
@@ -64,21 +63,16 @@ export default function CDKeyMobileCard({
   };
 
   const accountCodeBtn =
-    "block w-full text-xs xs:text-sm text-center font-mono text-neutral-900 bg-neutral-100 px-4 py-3 rounded-xl whitespace-pre-wrap break-words font-semibold border border-neutral-200/80 select-text";
+    "block w-full whitespace-pre-wrap break-words rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-3 text-center font-mono text-xs font-semibold text-[#c6d4df] select-text xs:text-sm";
 
   return (
     <div
-      className={`flex flex-col gap-3 bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10 transition-all duration-300 max-w-xs w-full mx-auto ${
-        isDisabled ? "opacity-50" : "hover:bg-white/10"
+      className={`mx-auto flex w-full max-w-xs flex-col gap-3 rounded-sm border border-[#2a475e] bg-[#1b2838] p-3 transition-all duration-300 ${
+        isDisabled ? "opacity-50" : "hover:bg-[#213246]"
       }`}>
       {toast && typeof document !== "undefined"
         ? createPortal(
-            <Toast
-              message={toast}
-              type="info"
-              duration={NOTIFICATION_DURATION.SHORT}
-              onClose={() => setToast(null)}
-            />,
+            <Toast message={toast} type="info" duration={NOTIFICATION_DURATION.SHORT} onClose={() => setToast(null)} />,
             document.body
           )
         : null}
@@ -86,7 +80,7 @@ export default function CDKeyMobileCard({
       {isAccountFlow(programFlow) ? (
         <button
           type="button"
-          className={`${accountCodeBtn} ${isDisabled || !username ? "cursor-not-allowed opacity-80" : "cursor-pointer hover:bg-neutral-200"}`}
+          className={`${accountCodeBtn} ${isDisabled || !username ? "cursor-not-allowed opacity-80" : "cursor-pointer hover:bg-[#3d5770]"}`}
           disabled={isDisabled || !username}
           title={t.keyTable.copyUsernameTitle()}
           onClick={() => void copyAccountField(username, "username")}>
@@ -99,7 +93,7 @@ export default function CDKeyMobileCard({
       {isAccountFlow(programFlow) && (
         <button
           type="button"
-          className={`${accountCodeBtn} ${isDisabled || !password ? "cursor-not-allowed opacity-80" : "cursor-pointer hover:bg-neutral-200"}`}
+          className={`${accountCodeBtn} ${isDisabled || !password ? "cursor-not-allowed opacity-80" : "cursor-pointer hover:bg-[#3d5770]"}`}
           disabled={isDisabled || !password}
           title={t.keyTable.copyPasswordTitle()}
           onClick={() => void copyAccountField(password, "password")}>
@@ -107,36 +101,36 @@ export default function CDKeyMobileCard({
         </button>
       )}
 
-      <div className="text-xs text-neutral-400">
+      <div className="text-xs text-[#8f98a0]">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <span className="text-neutral-500">Program Version:</span>
-            <div className="text-white font-medium">{cdKey.version}</div>
+            <span className="text-[#556772]">Program Version:</span>
+            <div className="font-medium text-[#c6d4df]">{cdKey.version}</div>
           </div>
           <div>
-            <span className="text-neutral-500">Status:</span>
+            <span className="text-[#556772]">Status:</span>
             <div className="mt-1">
               <span
-                className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(cdKey.status)}`}>
+                className={`inline-flex rounded-sm px-3 py-1 text-xs font-semibold ${getStatusColor(cdKey.status)}`}>
                 {cdKey.status}
               </span>
             </div>
           </div>
           <div>
-            <span className="text-neutral-500">Valid From:</span>
-            <div className="text-white font-medium">{cdKey.validFrom?.split("T")[0]}</div>
+            <span className="text-[#556772]">Valid From:</span>
+            <div className="font-medium text-[#c6d4df]">{cdKey.validFrom?.split("T")[0]}</div>
           </div>
           <div>
-            <span className="text-neutral-500">Valid Until:</span>
-            <div className="text-white font-medium">{formatValidUntilDisplay(cdKey.validUntil)}</div>
+            <span className="text-[#556772]">Valid Until:</span>
+            <div className="font-medium text-[#c6d4df]">{formatValidUntilDisplay(cdKey.validUntil)}</div>
           </div>
         </div>
       </div>
 
       <ReportProgressBar reportData={reportData} />
 
-      <div className="pt-3 border-t border-white/10">
-        {!isDisabled ? (
+      {!isDisabled && (
+        <div className="border-t border-[#2a475e] pt-3">
           <CDKeyActions
             cdKey={cdKey}
             rowStorageId={rowStorageId}
@@ -146,10 +140,8 @@ export default function CDKeyMobileCard({
             onReportSubmitted={onReportSubmitted}
             isSpammerVisitor={isSpammerVisitor}
           />
-        ) : (
-          <p className="text-center text-neutral-500 text-xs py-2">—</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
