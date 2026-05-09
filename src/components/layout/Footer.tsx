@@ -37,8 +37,8 @@ export default function Footer({ logoData, socialData }: FooterProps) {
   const hasSupportLinks = Boolean(buyMeACoffeeUrl || githubRepoUrl);
 
   return (
-    <footer className="bg-linear-to-b from-gray-900 via-gray-800 to-gray-900 text-white mt-auto">
-      <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="mt-auto border-t border-[#2a475e] bg-[#16202d] text-[#c6d4df]">
+      <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
@@ -46,10 +46,10 @@ export default function Footer({ logoData, socialData }: FooterProps) {
               {isLogo ? (
                 <IdealImageClient {...logoData} className="h-12 w-auto" />
               ) : (
-                <h3 className="text-2xl font-bold text-white">{storeData.title}</h3>
+                <h3 className="text-2xl font-bold text-[#c6d4df]">{storeData.title}</h3>
               )}
             </Link>
-            <p className="text-gray-300 max-w-md mb-2">
+            <p className="mb-2 max-w-md text-[#8f98a0]">
               {portableTextToPlainText(storeData.description) ||
                 "Free Giveaway CD Keys for your favorite games and software."}
             </p>
@@ -69,7 +69,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
 
           {/* Navigation Links */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+            <h4 className="section-label mb-4 text-[#c6d4df]!">Navigate</h4>
             <ul className="space-y-2">
               {footerLinks &&
                 footerLinks.map((link, i) => {
@@ -85,8 +85,8 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                     <li key={i}>
                       <Link
                         href={href || "/"}
-                        className={`text-gray-300 hover:text-primary-500 transition-colors ${
-                          isActive ? "text-white font-medium" : ""
+                        className={`transition-colors ${
+                          isActive ? "font-medium text-[#c6d4df]" : "text-[#8f98a0] hover:text-white"
                         }`}
                         target={link.external ? "_blank" : undefined}
                         rel={link.external ? "noreferrer" : undefined}>
@@ -106,19 +106,19 @@ export default function Footer({ logoData, socialData }: FooterProps) {
 
           {/* Contribute Section */}
           <div>
-            <h4 className="text-lg font-semibold mb-4">Contribute</h4>
+            <h4 className="section-label mb-4 text-[#c6d4df]!">Contribute</h4>
             <div className="space-y-3">
               {/* Suggest a Key Button */}
               <ContactModalTrigger
                 tab="suggest"
-                className="group w-full bg-linear-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-4 py-4 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] hover:shadow-xl border-2 border-primary-400/30 cursor-pointer">
+                className="group w-full cursor-pointer rounded-sm border border-[#4a90c4] bg-[#1a3a5c] px-4 py-4 font-semibold text-[#c6d4df] transition-colors duration-200 hover:border-[#66c0f4] hover:bg-[#213246]">
                 <div className="flex items-center space-x-3">
-                  <div className="shrink-0 w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-[#213246]">
                     <FaKey className="w-5 h-5" />
                   </div>
                   <div className="text-left flex-1">
                     <div className="text-sm font-bold">Suggest a Key</div>
-                    <div className="text-xs text-primary-100 opacity-90">Share free CD keys</div>
+                    <div className="text-xs text-[#8f98a0]">Share free CD keys</div>
                   </div>
                   <FaChevronRight className="w-4 h-4 opacity-75" />
                 </div>
@@ -127,7 +127,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
               {/* Contact Us Button */}
               <ContactModalTrigger
                 tab="contact"
-                className="group w-full bg-gray-700 hover:bg-gray-600 text-white px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg border border-gray-600/50 cursor-pointer">
+                className="group w-full cursor-pointer rounded-sm border border-[#2a475e] bg-[#1b2838] px-4 py-3 font-medium text-[#c6d4df] transition-colors duration-200 hover:border-[#4a90c4] hover:bg-[#213246]">
                 <div className="flex items-center space-x-3">
                   <FaEnvelope className="w-5 h-5 shrink-0" />
                   <div className="text-left flex-1">
@@ -138,8 +138,8 @@ export default function Footer({ logoData, socialData }: FooterProps) {
             </div>
 
             {hasSupportLinks ? (
-              <div className="mt-6 pt-6 border-t border-gray-700">
-                <p className="text-xs text-gray-400 mb-3">Support the Project</p>
+              <div className="mt-6 border-t border-[#2a475e] pt-6">
+                <p className="mb-3 text-xs text-[#8f98a0]">Support the Project</p>
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-wrap items-center gap-2">
                     {buyMeACoffeeUrl ? (
@@ -153,7 +153,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                             path: window.location.pathname
                           });
                         }}
-                        className="inline-flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                        className="inline-flex items-center gap-2 rounded-sm bg-[#7d3315] px-3 py-2 text-xs font-semibold text-[#c6d4df] transition-colors hover:bg-[#a3421b] hover:text-white">
                         🥕 Carrot Juice
                       </Link>
                     ) : null}
@@ -170,7 +170,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                             path: window.location.pathname
                           });
                         }}
-                        className="inline-flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs font-semibold transition-colors">
+                        className="inline-flex items-center gap-2 rounded-sm bg-[#213246] px-3 py-2 text-xs font-semibold text-[#c6d4df] transition-colors hover:bg-[#2a475e]">
                         ⭐ KeyAway repo
                       </Link>
                     ) : null}
@@ -182,15 +182,15 @@ export default function Footer({ logoData, socialData }: FooterProps) {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
-          <p className="text-gray-300 text-sm">
+        <div className="mt-8 flex flex-col items-center justify-between border-t border-[#2a475e] pt-8 sm:flex-row">
+          <p className="text-sm text-[#8f98a0]">
             © {currentYear} {storeData.title}. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
-            <Link href="/privacy" className="text-gray-300 hover:text-primary-500 text-sm transition-colors">
+            <Link href="/privacy" className="text-sm text-[#8f98a0] transition-colors hover:text-white">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-gray-300 hover:text-primary-500 text-sm transition-colors">
+            <Link href="/terms" className="text-sm text-[#8f98a0] transition-colors hover:text-white">
               Terms of Service
             </Link>
           </div>
