@@ -61,16 +61,19 @@ export default function Header({ logoData, notifications: notificationsProp, soc
   }, []);
 
   return (
-    <header className="bg-gray-900 shadow-lg sticky top-0 z-101">
-      <div className="max-w-360 mx-auto p-4 sm:px-6 lg:px-8 flex items-center justify-between max-h-20">
+    <header
+      className={`sticky top-0 z-101 border-b border-[#2a475e] bg-[#0E141B] backdrop-blur max-md:transition-transform max-md:duration-300 max-md:ease-out ${
+        isOpen ? "max-md:pointer-events-none max-md:-translate-y-full" : "max-md:translate-y-0"
+      }`}>
+      <div className="mx-auto flex h-18 w-full max-w-360 items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
           title={storeData.title}
-          className="flex items-center text-xl font-bold text-gray-300 hover:text-primary-500 transition-colors">
+          className="flex items-center text-xl font-bold text-[#c6d4df] transition-colors hover:text-[#66c0f4]">
           {isLogo ? (
             <IdealImageClient {...logoData} priority className="max-w-3xs max-h-10 xs:max-h-12 w-auto h-auto" />
           ) : (
-            <span className="text-xl font-bold text-gray-300 hover:text-primary-500 transition-colors">
+            <span className="text-xl font-bold text-[#c6d4df] transition-colors hover:text-[#66c0f4]">
               {storeData.title || "KeyAway"}
             </span>
           )}
@@ -78,7 +81,7 @@ export default function Header({ logoData, notifications: notificationsProp, soc
 
         {/* Desktop Links */}
         <div className="hidden md:flex items-center space-x-6">
-          <nav className="flex flex-wrap justify-end gap-6 gap-y-2">
+          <nav className="flex flex-wrap justify-end gap-6 gap-y-0.5">
             {headerLinks &&
               headerLinks.map((link, i) => {
                 let isActive = false;
@@ -93,7 +96,9 @@ export default function Header({ logoData, notifications: notificationsProp, soc
                   <Link
                     key={i}
                     href={href || "/"}
-                    className={`hover:text-primary-500 transition-colors ${isActive ? "text-white font-medium" : "text-gray-300"}`}
+                    className={`px-0.5 py-0.5 transition-colors font-semibold ${
+                      isActive ? "font-bold text-[#66c0f4]" : "text-white hover:text-[#aae0ff]"
+                    }`}
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noreferrer" : undefined}>
                     {link.title}
@@ -105,7 +110,7 @@ export default function Header({ logoData, notifications: notificationsProp, soc
           {/* Contact Button */}
           <ContactModalTrigger
             tab="contact"
-            className="flex items-center gap-2 px-3 py-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            className="flex cursor-pointer items-center gap-2 rounded-sm border border-[#2a475e] px-3 py-1.5 text-[#8f98a0] transition-colors hover:border-[#4a90c4] hover:text-[#66c0f4]"
             aria-label="Contact us">
             <FaEnvelope className="w-4 h-4" />
             <span className="text-sm font-medium">Contact</span>
@@ -122,14 +127,14 @@ export default function Header({ logoData, notifications: notificationsProp, soc
         <div className="md:hidden flex items-center gap-2">
           <ContactModalTrigger
             tab="contact"
-            className="p-2 text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            className="cursor-pointer p-2 text-[#8f98a0] transition-colors hover:text-[#66c0f4]"
             aria-label="Contact us">
             <FaEnvelope className="w-5 h-5" />
           </ContactModalTrigger>
-          <AnnouncementNotifications notifications={notifications} />
+          <AnnouncementNotifications notifications={notifications} socialData={socialData} />
           <button
             type="button"
-            className="focus:outline-none text-gray-300 hover:text-primary-500 transition-colors cursor-pointer"
+            className="cursor-pointer text-[#8f98a0] transition-colors hover:text-[#66c0f4] focus:outline-none"
             aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={isOpen}
             onClick={() => setIsOpen(!isOpen)}>
@@ -139,7 +144,7 @@ export default function Header({ logoData, notifications: notificationsProp, soc
       </div>
 
       {/* Mobile Menu */}
-      <MobileMenu headerLinks={headerLinks} isOpen={isOpen} onClose={toggleMenu} socialData={socialData} />
+      <MobileMenu headerLinks={headerLinks} isOpen={isOpen} onClose={() => setIsOpen(false)} socialData={socialData} />
 
       {/* Contact Modal */}
       <ContactModal
