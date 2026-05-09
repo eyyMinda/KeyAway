@@ -1,6 +1,6 @@
 "use client";
 
-import { FaUsers, FaChartLine, FaShieldAlt, FaClock, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { FaUsers, FaChartLine, FaShieldAlt, FaClock, FaCheckCircle, FaSearch, FaKey, FaClipboardList } from "react-icons/fa";
 import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function FeaturesSection() {
@@ -39,43 +39,46 @@ export default function FeaturesSection() {
       step: "1",
       title: "Find a Key",
       description: "Browse our collection and find a software key you want to use",
-      icon: FaCheckCircle,
+      icon: FaSearch,
       color: "green"
     },
     {
       step: "2",
       title: "Test the Key",
       description: "Try activating the key with your software",
-      icon: FaExclamationTriangle,
+      icon: FaKey,
       color: "yellow"
     },
     {
       step: "3",
       title: "Report Status",
       description: "Let us know if the key worked, expired, or reached its limit",
-      icon: FaUsers,
+      icon: FaClipboardList,
       color: "blue"
     }
   ];
 
   const getColorClasses = (color: string) => {
     const colors = {
-      blue: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-      green: "bg-green-500/20 text-green-400 border-green-500/30",
-      purple: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-      orange: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-      yellow: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+      blue: "bg-[#1a3a5c] text-[#66c0f4] border-[#4a90c4]",
+      green: "bg-[#1a3a2a] text-[#5ba32b] border-[#3d6e1c]",
+      purple: "bg-[#2a2040] text-[#7b5ea7] border-[#5a4592]",
+      orange: "bg-[#3a2800] text-[#e8632a] border-[#a3421b]",
+      yellow: "bg-[#3a2800] text-[#f4a460] border-[#a3421b]"
     };
     return colors[color as keyof typeof colors] || colors.blue;
   };
 
   return (
-    <section id="how-it-works" className="py-12 sm:py-16 lg:py-20 bg-gray-100">
-      <div className="max-w-360 mx-auto px-4 sm:px-6">
+    <section id="how-it-works" className="border-t border-[#2a475e] bg-[#16202d] py-12 sm:py-16 lg:py-20">
+      <div className="mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">How KeyAway Works</h2>
-          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-2">
+        <div className="mb-8 sm:mb-12 lg:mb-16">
+          <div className="section-label mb-3">How It Works</div>
+          <h2 className="section-title mb-3">
+            How <span className="text-gradient-pro">KeyAway Works</span>
+          </h2>
+          <p className="max-w-3xl px-2 text-base text-[#8f98a0] sm:text-lg lg:text-xl">
             We provide a community-driven platform for sharing and maintaining free CD keys. Our system ensures you
             always have access to working activation keys.
           </p>
@@ -86,25 +89,25 @@ export default function FeaturesSection() {
           {features.map((feature, index) => {
             const IconComponent = feature.icon;
             return (
-              <div key={index} className="text-center group">
+              <div key={index} className="group text-left">
                 <div
-                  className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl border-2 ${getColorClasses(feature.color)} mb-6 group-hover:scale-110 transition-transform`}>
+                  className={`mb-4 inline-flex h-14 w-14 items-center justify-center rounded-sm border ${getColorClasses(feature.color)} transition-transform group-hover:scale-110`}>
                   <IconComponent className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="mb-2 text-lg font-semibold text-[#c6d4df]">{feature.title}</h3>
+                <p className="leading-relaxed text-[#8f98a0]">{feature.description}</p>
               </div>
             );
           })}
         </div>
 
         {/* Key Reporting System */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-5 sm:p-6 lg:p-8 xl:p-12">
+        <div className="card-base p-5 sm:p-6 lg:p-8 xl:p-12">
           <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-            <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
+            <h3 className="mb-3 text-2xl font-bold text-[#c6d4df] sm:mb-4 lg:text-3xl">
               Community Key Reporting System
             </h3>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-2">
+            <p className="mx-auto max-w-2xl px-2 text-sm text-[#8f98a0] sm:text-base lg:text-lg">
               Help maintain our database by reporting key status. Your feedback keeps our community informed and ensures
               everyone gets working keys.
             </p>
@@ -116,67 +119,67 @@ export default function FeaturesSection() {
               return (
                 <div key={index} className="text-center relative">
                   <div
-                    className={`inline-flex items-center justify-center w-16 h-16 rounded-full border-2 ${getColorClasses(step.color)} mb-6`}>
+                    className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-sm border ${getColorClasses(step.color)}`}>
                     <IconComponent className="w-8 h-8" />
                   </div>
                   <div className="flex items-center justify-center gap-2 mb-3">
-                    <div className="shrink-0 w-6 h-6 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-sm bg-[#213246] text-sm font-bold text-[#66c0f4]">
                       {step.step}
                     </div>
-                    <h4 className="text-xl font-semibold text-gray-900">{step.title}</h4>
+                    <h4 className="text-xl font-semibold text-[#c6d4df]">{step.title}</h4>
                   </div>
-                  <p className="text-gray-600">{step.description}</p>
+                  <p className="text-[#8f98a0]">{step.description}</p>
                 </div>
               );
             })}
           </div>
 
           {/* Key Status Indicators */}
-          <div className="mt-12 pt-8 border-t border-gray-200">
-            <h4 className="text-lg font-semibold text-gray-900 mb-6 text-center">Understanding Key Status</h4>
+          <div className="mt-12 border-t border-[#2a475e] pt-8">
+            <h4 className="mb-6 text-center text-lg font-semibold text-[#c6d4df]">Understanding Key Status</h4>
             <div className="grid sm:grid-cols-3 gap-6">
-              <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-lg">
-                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+              <div className="flex items-center space-x-3 rounded-sm border border-[#3d6e1c] bg-[#1a3a2a] p-4">
+                <div className="h-4 w-4 rounded-full bg-[#5ba32b]"></div>
                 <div>
-                  <h5 className="font-semibold text-gray-900">Working</h5>
-                  <p className="text-sm text-gray-600">Key is active and functional</p>
+                  <h5 className="font-semibold text-[#c6d4df]">Working</h5>
+                  <p className="text-sm text-[#8f98a0]">Key is active and functional</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 p-4 bg-red-50 rounded-lg">
-                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+              <div className="flex items-center space-x-3 rounded-sm border border-[#6d2626] bg-[#2a2020] p-4">
+                <div className="h-4 w-4 rounded-full bg-[#c94f4f]"></div>
                 <div>
-                  <h5 className="font-semibold text-gray-900">Expired</h5>
-                  <p className="text-sm text-gray-600">Key is no longer valid</p>
+                  <h5 className="font-semibold text-[#c6d4df]">Expired</h5>
+                  <p className="text-sm text-[#8f98a0]">Key is no longer valid</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 p-4 bg-yellow-50 rounded-lg">
-                <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+              <div className="flex items-center space-x-3 rounded-sm border border-[#a3421b] bg-[#3a2800] p-4">
+                <div className="h-4 w-4 rounded-full bg-[#e8632a]"></div>
                 <div>
-                  <h5 className="font-semibold text-gray-900">Limit Reached</h5>
-                  <p className="text-sm text-gray-600">Maximum activations exceeded</p>
+                  <h5 className="font-semibold text-[#c6d4df]">Limit Reached</h5>
+                  <p className="text-sm text-[#8f98a0]">Maximum activations exceeded</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Contribution CTA */}
-          <div className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 border-t border-gray-200 bg-linear-to-br from-primary-50 to-blue-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8">
+          <div className="mt-8 rounded-sm border border-[#2a475e] bg-[#16202d] p-5 pt-6 sm:mt-10 sm:p-6 sm:pt-8 lg:mt-12 lg:p-8">
             <div className="text-center max-w-2xl mx-auto">
-              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-primary-100 rounded-full mb-3 sm:mb-4">
-                <FaUsers className="w-6 h-6 sm:w-7 sm:h-7 text-primary-800" />
+              <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-sm bg-[#213246] sm:mb-4 sm:h-14 sm:w-14">
+                <FaUsers className="h-6 w-6 text-[#66c0f4] sm:h-7 sm:w-7" />
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-3">Got Free CD Keys to Share?</h4>
-              <p className="text-sm sm:text-base text-gray-700 mb-5 sm:mb-6 leading-relaxed px-2">
+              <h4 className="mb-3 text-2xl font-bold text-[#c6d4df]">Got Free CD Keys to Share?</h4>
+              <p className="mb-5 px-2 text-sm leading-relaxed text-[#8f98a0] sm:mb-6 sm:text-base">
                 Help grow our community database! If you have working CD keys for any software (not just IObit), share
                 them with us. Together we can build the largest free software key repository.
               </p>
               <ContactModalTrigger
                 tab="suggest"
-                className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-700 hover:bg-primary-800 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl text-sm sm:text-base">
+                className="inline-flex items-center justify-center rounded-sm border border-[#5c8529] bg-[#4c6b22] px-5 py-2.5 text-sm font-semibold text-[#c6d4df] transition-colors hover:bg-[#5c8529] hover:text-white sm:px-6 sm:py-3 sm:text-base">
                 <FaCheckCircle className="mr-2 text-sm sm:text-base" />
                 Suggest a CD Key
               </ContactModalTrigger>
-              <p className="text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4 px-2">
+              <p className="mt-3 px-2 text-xs text-[#8f98a0] sm:mt-4 sm:text-sm">
                 Every contribution helps users worldwide access premium software for free
               </p>
             </div>
