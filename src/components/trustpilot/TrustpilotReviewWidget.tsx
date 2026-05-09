@@ -22,9 +22,9 @@ export default function TrustpilotReviewWidget({ className, reviewUrl }: Trustpi
       target="_blank"
       rel="noopener"
       onClick={handleClick}
-      className={`inline-flex items-center gap-2 justify-center border border-gray-200 bg-gray-100 rounded-lg py-2 px-4 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-200 hover:border-gray-600 ${className || ""}`}>
+      className={`inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-medium text-black transition-colors hover:border-gray-600 hover:bg-gray-200 hover:text-black ${className || ""}`}>
       <span>Leave a review on</span>
-      <span className="inline-flex items-center gap-2 text-gray-900">
+      <span className="inline-flex items-center gap-2 text-black">
         <img
           src="/images/Trustpilot_Logo.png"
           alt="Trustpilot"
