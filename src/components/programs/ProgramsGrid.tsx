@@ -15,9 +15,9 @@ export default function ProgramsGrid({
   if (programs.length === 0) {
     return (
       <div className="text-center py-10 sm:py-12">
-        <div className="text-gray-400 text-5xl sm:text-6xl mb-3 sm:mb-4">🔍</div>
-        <h3 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">No programs found</h3>
-        <p className="text-sm sm:text-base text-gray-500">Try adjusting your search or filter criteria</p>
+        <div className="mb-3 text-5xl text-[#8f98a0] sm:mb-4 sm:text-6xl">🔍</div>
+        <h3 className="mb-2 text-lg font-semibold text-[#c6d4df] sm:text-xl">No programs found</h3>
+        <p className="text-sm text-[#8f98a0] sm:text-base">Try adjusting your search or filter criteria</p>
       </div>
     );
   }
