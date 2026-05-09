@@ -18,14 +18,14 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
   const content = (
     <div className="mx-auto max-w-3xl text-start">
       {sectionTitle ? (
-        <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-3">{sectionTitle}</h3>
+        <h3 className="mb-3 text-lg font-bold text-[#c6d4df] sm:text-xl lg:text-2xl">{sectionTitle}</h3>
       ) : null}
-      <div className="text-sm sm:text-base text-gray-300 leading-snug [&_a]:text-primary-300 [&_p]:my-2 [&_p]:leading-relaxed">
+      <div className="text-sm leading-snug text-[#8f98a0] [&_a]:text-[#66d9ff] [&_p]:my-2 [&_p]:leading-relaxed sm:text-base">
         <RichText value={description} className="[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal" />
       </div>
       {points && points.length > 0 ? (
         <ul
-          className={`mt-4 space-y-2.5 text-sm sm:text-base text-gray-300 ${
+          className={`mt-4 space-y-2.5 text-sm text-[#8f98a0] sm:text-base ${
             hasImage ? "text-left" : "inline-block text-left mx-auto max-w-lg"
           }`}>
           {points.map((p, i) => (
@@ -44,9 +44,9 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
                   />
                 </span>
               ) : (
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary-400" aria-hidden />
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#66c0f4]" aria-hidden />
               )}
-              <div className="min-w-0 flex-1 text-sm sm:text-base text-gray-300 [&_a]:text-primary-300 [&_p]:my-1 [&_p]:leading-relaxed">
+              <div className="min-w-0 flex-1 text-sm text-[#8f98a0] [&_a]:text-[#66d9ff] [&_p]:my-1 [&_p]:leading-relaxed sm:text-base">
                 <RichText value={p.text} />
               </div>
             </li>
@@ -62,7 +62,7 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
 
   const imageEl = (
     <div className="w-full max-w-md lg:w-2/5 shrink-0 mx-auto lg:mx-0">
-      <div className="overflow-hidden rounded-2xl ring-1 ring-white/10 bg-white/5">
+      <div className="overflow-hidden rounded-sm border border-[#2a475e] bg-[#1b2838]">
         <IdealImage image={image} alt={sectionTitle || "About"} className="w-full h-auto object-cover" />
       </div>
     </div>
