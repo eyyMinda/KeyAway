@@ -24,11 +24,11 @@ function ContributeSection({
   return (
     <div className={`text-center lg:text-left ${className}`}>
       <div
-        className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl mb-3 ${iconContainerClassName}`}>
+        className={`mb-3 inline-flex h-12 w-12 items-center justify-center rounded-sm sm:h-14 sm:w-14 lg:h-16 lg:w-16 ${iconContainerClassName}`}>
         {icon}
       </div>
-      <h3 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white mb-2 sm:mb-3">{title}</h3>
-      <p className="text-gray-300 text-sm sm:text-base lg:text-lg mb-4 sm:mb-5 lg:mb-6 leading-relaxed">
+      <h3 className="mb-2 text-lg font-bold text-[#c6d4df] sm:mb-3 sm:text-xl lg:text-2xl xl:text-3xl">{title}</h3>
+      <p className="mb-4 text-sm leading-relaxed text-[#8f98a0] sm:mb-5 sm:text-base lg:mb-6 lg:text-lg">
         {description}
       </p>
       {content}
@@ -38,19 +38,20 @@ function ContributeSection({
 
 export default function ContributeBanner() {
   return (
-    <section className="py-6 sm:py-10 lg:py-12 bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
+    <section className="border-t border-[#2a475e] bg-[#16202d] py-6 sm:py-10 lg:py-12">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-linear-to-r from-primary-600/20 to-blue-600/20 backdrop-blur-sm rounded-2xl sm:rounded-3xl border border-primary-500/30 p-5 sm:p-6 lg:p-8 xl:p-12">
-          <div className="grid md:grid-cols-2 gap-6 sm:gap-8 items-center">
+        <div className="rounded-sm border border-[#2a475e] bg-[#1b2838] p-5 sm:p-6 lg:p-8 xl:p-12">
+          <div className="section-label mb-6">Community</div>
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6 items-center">
             <ContributeSection
-              iconContainerClassName="bg-primary-500/20"
-              icon={<FaKey className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-primary-400" />}
+              iconContainerClassName="border border-[#4a90c4] bg-[#1a3a5c]"
+              icon={<FaKey className="h-6 w-6 text-[#c6d4df] sm:h-7 sm:w-7 lg:h-8 lg:w-8" />}
               title="Have More Keys to Share?"
               description="Know of other free CD keys for this or any other software? Share them with the community and help others unlock premium features!"
               content={
                 <ContactModalTrigger
                   tab="suggest"
-                  className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg sm:rounded-xl transition-all duration-200 transform hover:scale-[1.02] shadow-lg hover:shadow-xl cursor-pointer text-sm sm:text-base">
+                  className="inline-flex cursor-pointer items-center justify-center rounded-sm border border-[#5c8529] bg-[#4c6b22] px-5 py-2.5 text-sm font-semibold text-[#c6d4df] transition-colors hover:bg-[#5c8529] hover:text-white sm:px-6 sm:py-3 sm:text-base">
                   <FaKey className="mr-2 text-sm" />
                   Suggest a CD Key
                 </ContactModalTrigger>
@@ -58,24 +59,24 @@ export default function ContributeBanner() {
             />
 
             <ContributeSection
-              className="md:border-l lg:border-white/10 lg:pl-8 pt-6 lg:pt-0 border-t md:border-t-0 border-white/10"
-              iconContainerClassName="bg-amber-500/20"
-              icon={<FaExclamationCircle className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-amber-400" />}
+              className="border-t border-[#2a475e] pt-6 md:border-t-0 md:border-l lg:border-[#2a475e] lg:pt-0 pl-4 sm:pl-6 lg:pl-8"
+              iconContainerClassName="border border-[#a3421b] bg-[#3a2800]"
+              icon={<FaExclamationCircle className="h-6 w-6 text-[#c6d4df] sm:h-7 sm:w-7 lg:h-8 lg:w-8" />}
               title="Found a Problem with a Key?"
               description="Help keep our database accurate by reporting keys that are expired, reached their limit, or are still working perfectly."
               content={
                 <div className="flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3 text-xs sm:text-sm">
-                  <div className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full mr-1.5 sm:mr-2"></div>
-                    <span className="text-green-300 font-medium whitespace-nowrap">Report Working</span>
+                  <div className="flex items-center rounded-sm border border-[#3d6e1c] bg-[#1a3a2a] px-3 py-1.5 sm:px-4 sm:py-2">
+                    <div className="mr-1.5 h-1.5 w-1.5 rounded-full bg-[#5ba32b] sm:mr-2 sm:h-2 sm:w-2"></div>
+                    <span className="whitespace-nowrap font-medium text-[#c6d4df]">Report Working</span>
                   </div>
-                  <div className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-red-400 rounded-full mr-1.5 sm:mr-2"></div>
-                    <span className="text-red-300 font-medium whitespace-nowrap">Report Expired</span>
+                  <div className="flex items-center rounded-sm border border-[#6d2626] bg-[#2a2020] px-3 py-1.5 sm:px-4 sm:py-2">
+                    <div className="mr-1.5 h-1.5 w-1.5 rounded-full bg-[#c94f4f] sm:mr-2 sm:h-2 sm:w-2"></div>
+                    <span className="whitespace-nowrap font-medium text-[#c6d4df]">Report Expired</span>
                   </div>
-                  <div className="flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-                    <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-yellow-400 rounded-full mr-1.5 sm:mr-2"></div>
-                    <span className="text-yellow-300 font-medium whitespace-nowrap">Report Limit</span>
+                  <div className="flex items-center rounded-sm border border-[#a3421b] bg-[#3a2800] px-3 py-1.5 sm:px-4 sm:py-2">
+                    <div className="mr-1.5 h-1.5 w-1.5 rounded-full bg-[#e8632a] sm:mr-2 sm:h-2 sm:w-2"></div>
+                    <span className="whitespace-nowrap font-medium text-[#c6d4df]">Report Limit</span>
                   </div>
                 </div>
               }
