@@ -45,11 +45,13 @@ export default async function ProgramsPage({
     : "";
   const orderClause = groqProgramsOrderClause(sortBy);
   const countQuery = `count(*[_type == "program" && ${filterQuery}${searchFilter}])`;
+  const keyCountQuery = `*[_type == "program" && ${filterQuery}${searchFilter}]{"keyCount": count(cdKeys[])}`;
   const listQuery = `*[_type == "program" && ${filterQuery}${searchFilter}] ${orderClause} [${startIdx}...${endIdx}] {${programsListingProjection}}`;
   const queryParams = searchTerm ? { search: `*${searchTerm.toLowerCase()}*` } : {};
 
-  const [totalCount, rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
+  const [totalCount, keyCountRows, rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
     client.fetch<number>(countQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
+    client.fetch<Array<{ keyCount?: number }>>(keyCountQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
     client.fetch<ProgramWithStats[]>(listQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
     getBundleCountsByProgram(),
     getCachedStoreDetailsDocument(),
@@ -66,16 +68,16 @@ export default async function ProgramsPage({
     socialLinks: storeRow?.socialLinks ?? []
   };
 
-  const totalKeys = programs.reduce((sum, p) => sum + (p.keyCount || p.cdKeys?.length || 0), 0);
+  const totalKeys = (keyCountRows ?? []).reduce((sum, row) => sum + (row.keyCount ?? 0), 0);
   const jsonLd = generateProgramsPageJsonLd(programs, totalCount, resolveSiteBaseUrl(storeRow?.seo));
 
   return (
     <>
       <JsonLd data={jsonLd} />
-      <main className="min-h-screen bg-gray-100">
+      <main className="min-h-screen bg-[#0f1923]">
         <ProgramsHero totalCount={totalCount} totalKeys={totalKeys} />
 
-        <section className="py-8 bg-linear-to-b from-gray-50 to-gray-100">
+        <section className="border-b border-[#2a475e] bg-[#16202d] py-8">
           <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
             <FacebookGroupButton socialData={socialData} variant="outline" className="text-base" />
           </div>
