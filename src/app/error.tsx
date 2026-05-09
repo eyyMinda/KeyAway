@@ -39,7 +39,7 @@ export default function GlobalRouteError({
     <main className="min-h-screen bg-neutral-900 flex items-center justify-center px-4">
       <div className="max-w-xl w-full text-center">
         <div className="text-6xl font-bold text-amber-500 mb-4">!</div>
-        <h1 className="text-2xl font-bold text-white mb-3">Something went wrong</h1>
+        <h1 className="section-title mb-3">Something went wrong</h1>
         <p className="text-neutral-300 mb-6 leading-relaxed">
           This page could not be loaded. The site may be having a temporary problem, or new content may not match the
           app yet. You can go back home, browse programs, or email the team with one click (opens your mail app).
