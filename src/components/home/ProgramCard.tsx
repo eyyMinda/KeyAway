@@ -6,36 +6,40 @@ import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/porta
 
 export default function ProgramCard({ program, stats, badges, showStats = true }: ProgramCardProps) {
   const viewKeysLabel = `View keys for ${program.title}`;
+  const keyCount = program.keyCount ?? program.cdKeys?.length ?? 0;
+  const hasKeys = keyCount > 0;
+  const keyBadgeClass = hasKeys
+    ? "bg-[#4c6b22] text-[#c6d4df] border border-[#5c8529]"
+    : "bg-[#2a2020] text-[#c6d4df] border border-[#6d2626]";
 
   return (
-    <div className="group bg-white rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-primary-400 animate-fade-in flex flex-col transform hover:-translate-y-2 relative before:absolute before:inset-0 before:bg-linear-to-br before:from-primary-50/30 before:to-transparent before:opacity-0 before:group-hover:opacity-100 before:transition-opacity before:duration-300">
+    <div className="card-base group relative flex flex-col overflow-hidden rounded-sm">
       <Link href={`/program/${program.slug.current}`} title={program.title} className="relative overflow-hidden">
         {program.image ? (
           <IdealImage
             image={program.image}
             alt={program.title}
-            className="w-full h-36 sm:h-40 lg:h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            className="h-36 w-full object-cover transition-transform duration-300 group-hover:scale-105 sm:h-40 lg:h-48"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             widthHint={520}
           />
         ) : (
-          <div className="w-full h-36 sm:h-40 lg:h-48 bg-linear-to-br from-primary-50 to-accent-50 flex items-center justify-center">
-            <div className="text-neutral-400 text-3xl sm:text-4xl">💻</div>
+          <div className="flex h-36 w-full items-center justify-center bg-[#213246] sm:h-40 lg:h-48">
+            <div className="text-3xl text-[#8f98a0] sm:text-4xl">💻</div>
           </div>
         )}
         <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary-200/50 transition-colors duration-300 rounded-xl sm:rounded-2xl" />
 
         <div className="absolute top-2 sm:top-3 lg:top-4 left-2 sm:left-3 lg:left-4 flex flex-col gap-1.5 sm:gap-2">
           {badges?.mostViewed && (
-            <div className="bg-primary-500 text-white px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1">
+            <div className="flex items-center space-x-1 rounded-sm bg-[#1a3a5c] px-2 py-0.5 text-xs font-semibold text-[#c6d4df] sm:px-2.5 sm:py-1 sm:text-sm lg:px-3">
               <FaEye className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span className="hidden xs:inline">Most Viewed</span>
               <span className="xs:hidden">Top</span>
             </div>
           )}
           {badges?.mostDownloaded && (
-            <div className="bg-success-500 text-white px-2 sm:px-2.5 lg:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1">
+            <div className="flex items-center space-x-1 rounded-sm bg-[#1a3a2a] px-2 py-0.5 text-xs font-semibold text-[#c6d4df] sm:px-2.5 sm:py-1 sm:text-sm lg:px-3">
               <FaDownload className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               <span className="hidden xs:inline">Most Downloaded</span>
               <span className="xs:hidden">Top</span>
@@ -43,43 +47,41 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
           )}
         </div>
 
-        {(program.keyCount ?? program.cdKeys?.length ?? 0) > 0 ? (
-          <div className="absolute top-2 sm:top-3 lg:top-4 right-2 sm:right-3 lg:right-4">
-            <div className="bg-white/95 backdrop-blur-sm text-gray-800 px-2 sm:px-2.5 lg:px-3 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-semibold flex items-center space-x-1 shadow-lg border border-gray-200">
-              <FaKey className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary-600" />
-              <span>{program.keyCount ?? program.cdKeys?.length ?? 0}</span>
-            </div>
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 lg:top-4 lg:right-4">
+          <div className={`flex items-center space-x-1 rounded-sm px-2 py-1 text-xs font-semibold sm:px-2.5 sm:py-1.5 sm:text-sm lg:px-3 ${keyBadgeClass}`}>
+            <FaKey className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
+            <span>{keyCount}</span>
           </div>
-        ) : null}
+        </div>
       </Link>
 
-      <div className="p-5 flex flex-col grow bg-linear-to-b from-white to-gray-50/50">
-        <h2 className="text-base sm:text-lg lg:text-xl font-bold text-gray-900 mb-1 line-clamp-2 group-hover:text-primary-700 transition-colors leading-tight">
+      <div className="flex grow flex-col p-5">
+        <h2 className="mb-1 line-clamp-2 text-base font-bold leading-tight text-[#c6d4df] transition-colors group-hover:text-white sm:text-lg lg:text-xl">
           {program.title}
         </h2>
 
         {program.descriptionPlain ? (
-          <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-3 sm:line-clamp-4 leading-relaxed">
+          <p className="mb-2 line-clamp-3 text-xs leading-relaxed text-[#8f98a0] sm:line-clamp-4 sm:text-sm">
             {program.descriptionPlain}
           </p>
         ) : portableTextHasContent(program.description) ? (
-          <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-3 sm:line-clamp-4 leading-relaxed">
+          <p className="mb-2 line-clamp-3 text-xs leading-relaxed text-[#8f98a0] sm:line-clamp-4 sm:text-sm">
             {portableTextToPlainText(program.description)}
           </p>
         ) : null}
 
         {showStats && (stats?.viewCount !== undefined || stats?.downloadCount !== undefined) && (
-          <div className="flex items-center justify-center gap-3 sm:gap-4 text-xs text-gray-500 mb-2 mt-auto bg-gray-50/80 rounded-lg py-1.5 sm:py-2 px-2 sm:px-3">
+          <div className="mt-auto mb-2 flex items-center justify-center gap-3 rounded-sm border border-[#2a475e] bg-[#16202d] px-2 py-1.5 text-xs text-[#8f98a0] sm:gap-4 sm:px-3 sm:py-2">
             {stats?.viewCount !== undefined && (
               <div className="flex items-center space-x-1">
-                <FaEye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-500" />
-                <span className="font-medium">{stats.viewCount} views</span>
+                <FaEye className="h-2.5 w-2.5 text-[#66c0f4] sm:h-3 sm:w-3" />
+                <span className="font-medium">{stats.viewCount.toLocaleString()} views</span>
               </div>
             )}
             {stats?.downloadCount !== undefined && (
               <div className="flex items-center space-x-1">
-                <FaDownload className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-green-500" />
-                <span className="font-medium">{stats.downloadCount} downloads</span>
+                <FaDownload className="h-2.5 w-2.5 text-[#5ba32b] sm:h-3 sm:w-3" />
+                <span className="font-medium">{stats.downloadCount.toLocaleString()} downloads</span>
               </div>
             )}
           </div>
@@ -89,15 +91,7 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
           href={`/program/${program.slug.current}`}
           aria-label={viewKeysLabel}
           title={viewKeysLabel}
-          className="group/cta relative isolate inline-flex w-full items-center justify-center overflow-hidden rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-none transition-[transform,box-shadow] duration-300 ease-out hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:rounded-xl sm:px-5 sm:py-3 sm:text-base lg:px-6">
-          <span
-            className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--primary-700),var(--primary-800))]"
-            aria-hidden
-          />
-          <span
-            className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(to_right,var(--primary-500),var(--primary-600))] transition-transform duration-500 ease-out group-hover/cta:translate-x-0"
-            aria-hidden
-          />
+          className="group/cta inline-flex w-full items-center justify-center rounded-sm border border-[#5c8529] bg-[#4c6b22] px-4 py-2.5 text-sm font-semibold text-[#c6d4df] transition-colors duration-200 ease-out hover:bg-[#5c8529] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#66c0f4] focus:ring-offset-2 focus:ring-offset-[#1b2838] sm:px-5 sm:py-3 sm:text-base lg:px-6">
           <span className="relative z-10">View Keys</span>
           <FaChevronRight className="relative z-10 ml-1.5 h-3 w-3 translate-x-0 transition-transform duration-300 ease-out group-hover/cta:translate-x-1 sm:ml-2 sm:h-3.5 sm:w-3.5" />
         </Link>
