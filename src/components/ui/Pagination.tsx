@@ -55,7 +55,7 @@ export default function Pagination({
     return (
       <div className={`flex items-center justify-between ${className}`}>
         {showInfo && (
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-[#8f98a0]">
             Showing <span className="font-medium">{totalItems === 0 ? 0 : startIndex + 1}</span> to{" "}
             <span className="font-medium">{endIndex}</span> of <span className="font-medium">{totalItems}</span> results
           </div>
@@ -64,16 +64,16 @@ export default function Pagination({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-3 py-1.5 text-sm rounded border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            className="cursor-pointer rounded-sm border border-[#2a475e] px-3 py-1.5 text-sm text-[#c6d4df] transition-colors hover:bg-[#213246] disabled:cursor-not-allowed disabled:opacity-50">
             Prev
           </button>
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-[#8f98a0]">
             Page <span className="font-medium">{currentPage}</span> of <span className="font-medium">{totalPages}</span>
           </span>
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="px-3 py-1.5 text-sm rounded border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            className="cursor-pointer rounded-sm border border-[#2a475e] px-3 py-1.5 text-sm text-[#c6d4df] transition-colors hover:bg-[#213246] disabled:cursor-not-allowed disabled:opacity-50">
             Next
           </button>
         </div>
@@ -83,35 +83,32 @@ export default function Pagination({
 
   return (
     <div className={`flex justify-center items-center space-x-2 ${className}`}>
-      {/* Previous Button */}
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        className="cursor-pointer rounded-sm border border-[#2a475e] px-3 py-2 text-[#c6d4df] transition-colors hover:bg-[#213246] disabled:cursor-not-allowed disabled:opacity-50">
         Previous
       </button>
 
-      {/* Page Numbers */}
       <div className="flex space-x-1">
         {pageNumbers.map(page => (
           <button
             key={page}
             onClick={() => onPageChange(page)}
-            className={`px-3 py-2 rounded-lg border transition-colors cursor-pointer ${
+            className={`cursor-pointer rounded-sm border px-3 py-2 transition-colors ${
               page === currentPage
-                ? "bg-primary-600 text-white border-primary-600"
-                : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                ? "border-[#66c0f4] bg-[#213246] text-[#c6d4df]"
+                : "border-[#2a475e] text-[#8f98a0] hover:bg-[#213246] hover:text-[#c6d4df]"
             }`}>
             {page}
           </button>
         ))}
       </div>
 
-      {/* Next Button */}
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+        className="cursor-pointer rounded-sm border border-[#2a475e] px-3 py-2 text-[#c6d4df] transition-colors hover:bg-[#213246] disabled:cursor-not-allowed disabled:opacity-50">
         Next
       </button>
     </div>
