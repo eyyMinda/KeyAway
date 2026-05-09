@@ -31,10 +31,10 @@ export function FacebookGroupHeroPromo({ socialData, className = "", path }: Fac
 
   return (
     <div
-      className={`bg-linear-to-r from-blue-600/10 to-blue-700/10 border border-blue-500/20 rounded-xl p-4 ${className}`}>
+      className={`bg-linear-to-r from-blue-600/10 to-blue-700/10 border border-blue-500/20 rounded-sm p-4 ${className}`}>
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="hidden sm:block shrink-0">
-          <div className="bg-blue-600 p-2 rounded-lg">
+          <div className="bg-blue-600 p-2 rounded-sm">
             <FaFacebook className="h-5 w-5 text-white" />
           </div>
         </div>
@@ -42,7 +42,7 @@ export function FacebookGroupHeroPromo({ socialData, className = "", path }: Fac
           <div className="flex items-center gap-2 mb-1">
             <p className="text-sm font-semibold text-white">Stay Updated</p>
             <span className="inline-flex shrink-0 animate-bell-ring" aria-hidden>
-              <FaBell className="h-3 w-3 text-blue-400" />
+              <FaBell className="h-3 w-3 text-white" />
             </span>
           </div>
           <p className="text-xs text-gray-300 leading-relaxed">
@@ -55,7 +55,7 @@ export function FacebookGroupHeroPromo({ socialData, className = "", path }: Fac
             target="_blank"
             rel="noreferrer"
             onClick={handleClick}
-            className="inline-flex w-full sm:w-auto justify-center items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition-colors">
+            className="inline-flex w-full sm:w-auto justify-center items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-sm text-xs font-medium transition-colors">
             <FaUsers className="h-3 w-3" />
             Join Group
           </Link>
