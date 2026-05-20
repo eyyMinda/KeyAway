@@ -103,32 +103,30 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     <>
       <JsonLd data={jsonLd} />
       <I18nShell locale={i18n.locale} messages={i18n.messages}>
-        <main className="min-h-screen bg-linear-to-b from-gray-900 via-gray-800 to-gray-900">
-          <ProgramInformation
-            program={program}
-            totalKeys={totalKeys}
-            workingKeys={workingKeys}
-            socialData={socialData}
-            visitorHint={visitorHint}
-          />
-          <CDKeyTable
-            cdKeys={sortedCdKeys}
-            rowStorageIds={rowStorageIds}
-            slug={slug}
-            program={program}
-            programTitle={program.title}
-            isSpammerVisitor={isSpammer}
-            vendorReleaseForIntro={vendorReleaseForIntro}
-            introVersionConfirmation={introVersionConfirmation}
-            versionSummaryLine={versionSummaryLine}
-          />
-          <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
-          <ProgramAboutSection program={program} />
-          <ContributeBanner />
-          <ProgramFaqSection programTitle={program.title} items={faqItems} />
-          <RelatedPrograms programs={relatedPrograms} />
-          <CommentsSection />
-        </main>
+        <ProgramInformation
+          program={program}
+          totalKeys={totalKeys}
+          workingKeys={workingKeys}
+          socialData={socialData}
+          visitorHint={visitorHint}
+        />
+        <CDKeyTable
+          cdKeys={sortedCdKeys}
+          rowStorageIds={rowStorageIds}
+          slug={slug}
+          program={program}
+          programTitle={program.title}
+          isSpammerVisitor={isSpammer}
+          vendorReleaseForIntro={vendorReleaseForIntro}
+          introVersionConfirmation={introVersionConfirmation}
+          versionSummaryLine={versionSummaryLine}
+        />
+        <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
+        <ProgramAboutSection program={program} />
+        <ContributeBanner />
+        <ProgramFaqSection programTitle={program.title} items={faqItems} />
+        <RelatedPrograms programs={relatedPrograms} />
+        <CommentsSection />
       </I18nShell>
     </>
   );
