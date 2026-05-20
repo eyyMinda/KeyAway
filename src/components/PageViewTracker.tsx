@@ -1,12 +1,13 @@
 "use client";
 
-/** @fileoverview Sends `page_viewed` with program slug, UTM, and resolved referrer; skips admin/studio, localhost, and paths handled by NotFoundTracker. */
+/** @fileoverview Sends `page_viewed` after human engagement/dwell; skips bots, admin/studio, localhost. */
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { getUTMParameters } from "@/src/lib/analytics/utmUtils";
 import { pageViewSkipKey } from "@/src/lib/analytics/pageViewSkip";
 import { primaryReferrerForPageView } from "@/src/lib/analytics/referrerResolve";
+import { shouldSkipClientPageView, waitForPageViewEngagement } from "@/src/lib/analytics/shouldSendPageView";
 
 const log = (...args: unknown[]) => {
   console.info("PageViewTracker:", ...args);
@@ -29,13 +30,22 @@ export default function PageViewTracker() {
       return log("skipped on hostname", window.location.hostname, "path:", pathname);
     }
     if (isExcludedPath(pathname)) return log("skipped excluded path", pathname);
+    if (shouldSkipClientPageView()) return log("skipped automated client", pathname);
 
     const search = typeof window !== "undefined" ? window.location.search : "";
     const dedupeKey = `${pathname}${search}`;
     if (lastSentKeyRef.current === dedupeKey) return;
 
+    const controller = new AbortController();
+
     const trackPageView = async () => {
       try {
+        try {
+          await waitForPageViewEngagement(controller.signal);
+        } catch {
+          return log("skipped page view (bot or aborted)", pathname);
+        }
+
         try {
           const sk = pageViewSkipKey(pathname);
           if (sessionStorage.getItem(sk)) {
@@ -76,8 +86,9 @@ export default function PageViewTracker() {
       }
     };
 
-    const timer = setTimeout(trackPageView, 200);
-    return () => clearTimeout(timer);
+    void trackPageView();
+
+    return () => controller.abort();
   }, [pathname]);
 
   return null;

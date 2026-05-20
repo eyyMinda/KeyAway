@@ -75,9 +75,7 @@ export default function CDKeyItem({
     }
 
     if (isLinkAccount) {
-      if (!firstLinkUrl) {
-        return;
-      }
+      if (!firstLinkUrl) return;
       window.open(firstLinkUrl, "_blank", "noopener,noreferrer");
       trackActivationLinkClick(cdKey, slug, programFlow, firstLinkUrl, "left");
       return;
@@ -85,89 +83,82 @@ export default function CDKeyItem({
   };
 
   const codeVisual = (interactive: boolean) =>
-    `px-3 py-1 rounded-lg text-sm font-mono select-text max-w-md inline-block align-bottom ${
+    `inline-block max-w-md select-text rounded-sm px-3 py-1 text-sm font-mono align-bottom ${
       isDisabled
-        ? "bg-neutral-100/80 text-neutral-700"
+        ? "bg-[#32465a] text-neutral-100"
         : interactive
-          ? "bg-neutral-100 text-black cursor-pointer hover:bg-neutral-200"
-          : "bg-neutral-100 text-black"
+          ? "cursor-pointer bg-[#32465a] text-neutral-50 hover:bg-[#3d5770]"
+          : "bg-[#32465a] text-white"
     }`;
 
   return (
     <>
       {toast && typeof document !== "undefined"
         ? createPortal(
-            <Toast
-              message={toast}
-              type="info"
-              duration={NOTIFICATION_DURATION.SHORT}
-              onClose={() => setToast(null)}
-            />,
+            <Toast message={toast} type="info" duration={NOTIFICATION_DURATION.SHORT} onClose={() => setToast(null)} />,
             document.body
           )
         : null}
-      <tr className={`hover:bg-neutral-700 transition-colors ${isDisabled ? "opacity-50" : ""}`}>
-      <td className="p-4 text-nowrap">
-        {isInteractiveFirstCell ? (
-          <button
-            type="button"
-            className={`${codeVisual(true)} truncate text-left`}
-            disabled={
-              isDisabled || (isAccount ? !username : isLinkAccount ? !firstLinkUrl : true)
-            }
-            title={firstCellTitle}
-            onClick={() => void handleFirstColumnClick()}>
-            {rowLabel}
-          </button>
-        ) : (
-          <code className={`${codeVisual(false)} truncate`}>{rowLabel}</code>
-        )}
-      </td>
-      {isAccount && (
-        <td className="p-4 text-nowrap text-center">
-          <button
-            type="button"
-            className={`${codeVisual(true)} break-all`}
-            disabled={isDisabled || !password}
-            title={t.keyTable.copyPasswordTitle()}
-            onClick={() => void copyAccountField(password, "password")}>
-            {password || "—"}
-          </button>
+      <tr className={`transition-colors hover:bg-[#213246] ${isDisabled ? "opacity-50" : ""}`}>
+        <td className="p-4 text-nowrap">
+          {isInteractiveFirstCell ? (
+            <button
+              type="button"
+              className={`${codeVisual(true)} truncate text-left`}
+              disabled={isDisabled || (isAccount ? !username : isLinkAccount ? !firstLinkUrl : true)}
+              title={firstCellTitle}
+              onClick={() => void handleFirstColumnClick()}>
+              {rowLabel}
+            </button>
+          ) : (
+            <code className={`${codeVisual(false)} truncate`}>{rowLabel}</code>
+          )}
         </td>
-      )}
-      <td className="p-4">
-        <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(cdKey.status)}`}>
-          {cdKey.status}
-        </span>
-      </td>
-      <td className="p-4">
-        <ReportProgressBar reportData={reportData} />
-      </td>
-      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
-        {cdKey.version}
-      </td>
-      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
-        {cdKey.validFrom?.split("T")[0]}
-      </td>
-      <td className={`p-4 text-center text-sm ${isDisabled ? "text-neutral-500" : "text-neutral-300"}`}>
-        {formatValidUntilDisplay(cdKey.validUntil)}
-      </td>
-      <td className="p-4 text-center">
-        {!isDisabled ? (
-          <CDKeyActions
-            cdKey={cdKey}
-            rowStorageId={rowStorageId}
-            isDisabled={isDisabled}
-            slug={slug}
-            programFlow={programFlow}
-            onReportSubmitted={onReportSubmitted}
-            isSpammerVisitor={isSpammerVisitor}
-          />
-        ) : (
-          <span className="text-neutral-500 text-xs">—</span>
+        {isAccount && (
+          <td className="p-4 text-nowrap text-center">
+            <button
+              type="button"
+              className={`${codeVisual(true)} break-all`}
+              disabled={isDisabled || !password}
+              title={t.keyTable.copyPasswordTitle()}
+              onClick={() => void copyAccountField(password, "password")}>
+              {password || "—"}
+            </button>
+          </td>
         )}
-      </td>
-    </tr>
+        <td className="p-4">
+          <span className={`inline-flex rounded-sm px-3 py-1 text-xs font-semibold ${getStatusColor(cdKey.status)}`}>
+            {cdKey.status}
+          </span>
+        </td>
+        <td className="p-4">
+          <ReportProgressBar reportData={reportData} />
+        </td>
+        <td className={`p-4 text-center text-sm ${isDisabled ? "text-gray-400" : "text-neutral-100"}`}>
+          {cdKey.version}
+        </td>
+        <td className={`p-4 text-center text-sm ${isDisabled ? "text-gray-400" : "text-neutral-100"}`}>
+          {cdKey.validFrom?.split("T")[0]}
+        </td>
+        <td className={`p-4 text-center text-sm ${isDisabled ? "text-gray-400" : "text-neutral-100"}`}>
+          {formatValidUntilDisplay(cdKey.validUntil)}
+        </td>
+        <td className="p-4 text-center">
+          {!isDisabled ? (
+            <CDKeyActions
+              cdKey={cdKey}
+              rowStorageId={rowStorageId}
+              isDisabled={isDisabled}
+              slug={slug}
+              programFlow={programFlow}
+              onReportSubmitted={onReportSubmitted}
+              isSpammerVisitor={isSpammerVisitor}
+            />
+          ) : (
+            <span className="text-xs text-gray-400">—</span>
+          )}
+        </td>
+      </tr>
     </>
   );
 }

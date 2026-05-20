@@ -5,6 +5,7 @@ import { client } from "@/src/sanity/lib/client";
 import { CDKey, Program } from "@/src/types";
 import { programBySlugQuery, featuredProgramSettingsQuery, programsForAutoSelectionQuery } from "./queries";
 import { getBundleCountsByProgram, mergeProgramStats, mergeSingleProgramStats } from "@/src/lib/analytics/eventsApi";
+import { applyKeyStatusForDisplay } from "@/src/lib/program/applyKeyStatusForDisplay";
 
 /**
  * Updates expired CD keys in Sanity for a specific program
@@ -81,62 +82,18 @@ export async function updateAllExpiredKeys(): Promise<void> {
   }
 }
 
-/**
- * Gets a program by slug and updates any expired keys
- * @param slug - The program slug
- * @returns Updated program data
- */
-export async function getProgramWithUpdatedKeys(slug: string) {
+/** Fetch program by slug with display-only key status (no Sanity writes). */
+export async function getProgramBySlug(slug: string) {
   try {
-    // First, get the program
     const program = await client.fetch(programBySlugQuery, { slug }, { next: { tags: [programDetailTag(slug)] } });
-
     if (!program) return null;
-
-    // Process and update keys (expired and new->active)
-    const now = new Date();
-    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    let hasUpdates = false;
-    const updatedKeys = (program.cdKeys || []).map((key: CDKey) => {
-      let updatedKey = { ...key };
-
-      // Check if key should be expired based on validUntil date
-      if (key.status !== "expired" && key.validUntil) {
-        const validUntil = new Date(key.validUntil);
-        if (now > validUntil) {
-          hasUpdates = true;
-          updatedKey = { ...updatedKey, status: "expired" };
-        }
-      }
-
-      // Check if "new" key is older than 1 month and convert to "active"
-      if (updatedKey.status === "new") {
-        // Check createdAt first, then fall back to validFrom
-        const keyDate = key.createdAt || key.validFrom;
-        if (keyDate) {
-          const checkDate = new Date(keyDate);
-          if (checkDate < oneMonthAgo) {
-            hasUpdates = true;
-            updatedKey = { ...updatedKey, status: "active" };
-          }
-        }
-      }
-
-      return updatedKey;
-    });
-
-    // Intentionally avoid write-on-read in route requests.
-    // Persisted key status updates should be handled by background jobs.
     program.slug = { current: slug };
-
-    // Return the updated program
     return {
       ...program,
-      cdKeys: updatedKeys
+      cdKeys: applyKeyStatusForDisplay(program.cdKeys || [])
     };
   } catch (error) {
     console.error("Failed to fetch program:", error);
-    // Only throw if it's a fetch error - this means the program doesn't exist or network failed
     return null;
   }
 }
@@ -242,7 +199,7 @@ export async function getFeaturedProgram(): Promise<
 
     // Use current program if rotation not needed
     if (!needsRot && settings.currentFeaturedProgram) {
-      const program = await getProgramWithUpdatedKeys(settings.currentFeaturedProgram.slug.current);
+      const program = await getProgramBySlug(settings.currentFeaturedProgram.slug.current);
       return program ? await getProgramStats(program) : null;
     }
 

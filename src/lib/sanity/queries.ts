@@ -50,9 +50,9 @@ export const programsListingProjection = `
   _createdAt,
   "keyCount": count(cdKeys[]),
   "hasKeys": count(cdKeys[]) > 0,
-  "viewCount": coalesce(viewCount, count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)])),
-  "downloadCount": coalesce(downloadCount, count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])),
-  "popularityScore": coalesce(popularityScore, (coalesce(viewCount, count(*[_type == "trackingEvent" && event == "page_viewed" && programSlug == ^.slug.current && (notFound != true)])) + coalesce(downloadCount, count(*[_type == "trackingEvent" && event == "download_click" && programSlug == ^.slug.current])) * 3))
+  "viewCount": coalesce(viewCount, 0),
+  "downloadCount": coalesce(downloadCount, 0),
+  "popularityScore": coalesce(popularityScore, 0)
 `;
 
 /** Related / card rows: no tracking aggregates, no cdKeys[]. */

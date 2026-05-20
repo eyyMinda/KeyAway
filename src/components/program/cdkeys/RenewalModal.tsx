@@ -15,6 +15,8 @@ import {
 } from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
 import type { CDKey, ProgramFlow } from "@/src/types/program";
+import { useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvider";
+import SpammerReportAlert from "@/src/components/program/cdkeys/SpammerReportAlert";
 
 interface RenewalModalProps {
   isOpen: boolean;
@@ -92,13 +94,20 @@ export default function RenewalModal({
   activationLabel,
   existingReport,
   slug,
-  isSpammerVisitor = false
+  isSpammerVisitor: isSpammerVisitorProp = false
 }: RenewalModalProps) {
+  const { isSpammer: isSpammerCtx, isLoading: isVisitorLoading } = useProgramVisitor();
+  const isSpammerVisitor = isSpammerVisitorProp || isSpammerCtx;
   const [notification, setNotification] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRenew = async (status: CDKeyStatus) => {
-    if (isSubmitting) return;
+    if (isSubmitting || isVisitorLoading) return;
+
+    if (isSpammerVisitor && status !== "working") {
+      setNotification(SPAMMER_REPORT_RESTRICTION_NOTICE);
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -125,6 +134,10 @@ export default function RenewalModal({
         onRenew();
         onClose();
       } else {
+        if (response.status === 403 && err?.code === "FORBIDDEN") {
+          setNotification(SPAMMER_REPORT_RESTRICTION_NOTICE);
+          return;
+        }
         const apiMsg = err?.message ?? (typeof err === "string" ? err : null);
         setNotification(apiMsg ?? getErrorMessage("RENEWAL_FAILED"));
       }
@@ -174,6 +187,8 @@ export default function RenewalModal({
             <ModalCloseButton onClick={onClose} className="p-1 text-neutral-400 hover:text-white" />
           </div>
 
+          {isSpammerVisitor ? <SpammerReportAlert /> : null}
+
           <div className="mb-4">
             <p className="text-neutral-300 text-sm mb-2">
               Entry: <code className="bg-neutral-700 px-2 py-1 rounded text-xs break-all">{activationLabel}</code>
@@ -185,30 +200,25 @@ export default function RenewalModal({
               <p className="text-neutral-400 text-xs mt-1">Last reported: {formatDate(existingReport.createdAt)}</p>
             </div>
             <p className="text-neutral-400 text-sm">Update the status of this key:</p>
-            {isSpammerVisitor && (
-              <p className="text-amber-200/90 text-sm mt-3 leading-relaxed border border-amber-500/25 bg-amber-950/30 rounded-lg px-3 py-2">
-                {SPAMMER_REPORT_RESTRICTION_NOTICE}
-              </p>
-            )}
           </div>
 
           <div className="space-y-3">
             <RenewButton
               status="working"
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || isVisitorLoading}
               onRenew={handleRenew}
               currentStatus={existingReport.eventType}
             />
             <RenewButton
               status="expired"
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || isVisitorLoading}
               onRenew={handleRenew}
               currentStatus={existingReport.eventType}
               blockedBySpammer={isSpammerVisitor}
             />
             <RenewButton
               status="limit_reached"
-              isSubmitting={isSubmitting}
+              isSubmitting={isSubmitting || isVisitorLoading}
               onRenew={handleRenew}
               currentStatus={existingReport.eventType}
               blockedBySpammer={isSpammerVisitor}

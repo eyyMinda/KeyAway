@@ -5,7 +5,7 @@ import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { Program, CDKey } from "@/src/types";
 
 /** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 120;
+export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.keyaway.app";

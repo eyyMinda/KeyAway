@@ -42,11 +42,14 @@ export const SUCCESS_MESSAGES = {
 export const INFO_MESSAGES = {
   DUPLICATE_FOUND: "You've already reported this key",
   CHECKING_DUPLICATE: "Checking for previous reports...",
+  CHECKING_REPORTING_PERMISSIONS: "Checking your reporting permissions…",
   RENEWAL_INSTRUCTIONS: "You can renew your report to update the status and timestamp",
   REPORT_INSTRUCTIONS: "Your feedback helps us maintain accurate key statuses"
 } as const;
 
 /** Report / renew modals when `isSpammerVisitor` — full sentence, second person. */
+export const SPAMMER_REPORT_MODAL_ALERT_TITLE = "Spam reporting restriction active";
+
 export const SPAMMER_REPORT_RESTRICTION_NOTICE =
   "Because your recent reports were marked as spam, you can no longer report keys as expired or limit reached. You can still report them as working.";
 

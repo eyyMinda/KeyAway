@@ -27,14 +27,20 @@ export function hashIp(ip: string | undefined): string | undefined {
 
 const locationCache = new Map<string, { data: { country?: string; city?: string }; expires: number }>();
 const CACHE_TTL_MS = 60 * 60 * 1000;
-const CLEANUP_INTERVAL_MS = 10 * 60 * 1000;
+const MAX_CACHE_ENTRIES = 500;
 
-setInterval(() => {
-  const now = Date.now();
+function pruneLocationCache(now = Date.now()) {
   for (const [ip, entry] of locationCache.entries()) {
     if (entry.expires <= now) locationCache.delete(ip);
   }
-}, CLEANUP_INTERVAL_MS);
+  if (locationCache.size <= MAX_CACHE_ENTRIES) return;
+  const overflow = locationCache.size - MAX_CACHE_ENTRIES;
+  const keys = locationCache.keys();
+  for (let i = 0; i < overflow; i++) {
+    const k = keys.next().value;
+    if (k) locationCache.delete(k);
+  }
+}
 
 const GEO_SERVICES = [
   {
@@ -57,6 +63,7 @@ export async function getLocationFromIP(
   userAgent = "KeyAway"
 ): Promise<{ country?: string; city?: string } | undefined> {
   if (!ip) return undefined;
+  pruneLocationCache();
   const cached = locationCache.get(ip);
   if (cached && cached.expires > Date.now()) return cached.data;
 

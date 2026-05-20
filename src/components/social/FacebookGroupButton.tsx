@@ -48,16 +48,16 @@ export function FacebookGroupButton({
       case "secondary":
         return "bg-gray-600 hover:bg-gray-700 text-white";
       case "outline":
-        return "border-2 border-blue-500/70 text-blue-400 hover:bg-blue-500/20 hover:border-blue-400";
+        return "border-2 border-blue-500/70 text-white hover:text-white hover:bg-blue-500/10 hover:border-blue-400";
       default: // primary
         return "bg-blue-600 hover:bg-blue-700 text-white";
     }
   };
 
   const taglineMuted =
-    variant === "outline" ? "text-blue-200/85" : variant === "secondary" ? "text-white/80" : "text-white/85";
+    variant === "outline" ? "text-white/85" : variant === "secondary" ? "text-white/80" : "text-white/85";
 
-  const linkBase = `rounded-lg font-medium transition-colors ${getVariantClasses()}`;
+  const linkBase = `rounded-sm font-medium transition-colors ${getVariantClasses()}`;
 
   const joinRow = (
     <>
@@ -98,8 +98,7 @@ export function FacebookGroupButton({
         rel="noreferrer"
         onClick={handleClick}
         className={`w-fit inline-flex items-center gap-2 px-4 py-2 ${linkBase}`}>
-        <FaUsers className="h-4 w-4" />
-        <span>Join Group</span>
+        {joinRow}
       </Link>
       {showTagline ? <span className="mt-1 text-xs leading-tight text-gray-400">{TAGLINE}</span> : null}
     </div>

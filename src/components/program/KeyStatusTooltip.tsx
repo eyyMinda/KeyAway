@@ -82,19 +82,19 @@ export default function KeyStatusTooltip() {
   const caret =
     placement === "bottom" ? (
       <div
-        className="absolute right-4 top-0 h-0 w-0 -translate-y-full border-x-[6px] border-b-8 border-x-transparent border-b-gray-900"
+        className="absolute right-4 top-0 h-0 w-0 -translate-y-full border-x-[6px] border-b-8 border-x-transparent border-b-[#1b2838]"
         aria-hidden
       />
     ) : (
       <div
-        className="absolute right-4 bottom-0 h-0 w-0 translate-y-full border-x-[6px] border-t-8 border-x-transparent border-t-gray-900"
+        className="absolute right-4 bottom-0 h-0 w-0 translate-y-full border-x-[6px] border-t-8 border-x-transparent border-t-[#1b2838]"
         aria-hidden
       />
     );
 
   return (
     <details ref={detailsRef} className="relative shrink-0" onToggle={onToggle}>
-      <summary className="flex cursor-pointer list-none items-center justify-center rounded p-2 text-neutral-400 transition-colors hover:text-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 marker:hidden [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-center rounded-sm p-2 text-[#8f98a0] transition-colors hover:text-[#c6d4df] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1b2838] marker:hidden [&::-webkit-details-marker]:hidden">
         <span className="sr-only">Key status guide</span>
         <FaInfoCircle className="h-5 w-5 shrink-0" aria-hidden />
       </summary>
@@ -103,38 +103,38 @@ export default function KeyStatusTooltip() {
         <div
           ref={panelRef}
           data-key-status-panel
-          className={`absolute right-0 z-50 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-lg border border-gray-600 bg-gray-900 px-4 py-3 text-sm text-white shadow-lg transition-all duration-200 ease-out ${panelPosition}`}
+          className={`absolute right-0 z-50 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-sm border border-[#2a475e] bg-[#1b2838] px-4 py-3 text-sm text-[#c6d4df] shadow-lg transition-all duration-200 ease-out ${panelPosition}`}
           style={{
             animation: `${placement === "bottom" ? "slideDown" : "slideUp"} 0.2s ease-out`
           }}>
           {caret}
           <div className="space-y-2">
-            <p className="mb-2 font-semibold text-white">Key Status Guide:</p>
+            <p className="mb-2 font-semibold text-[#c6d4df]">Key Status Guide:</p>
             <div className="flex items-center space-x-2">
-              <span className="h-3 w-3 shrink-0 rounded-full bg-primary-500" />
+              <span className="h-3 w-3 shrink-0 rounded-full bg-[#66c0f4]" />
               <span>
                 <strong>New:</strong> Fresh, unused keys
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="h-3 w-3 shrink-0 rounded-full bg-success-500" />
+              <span className="h-3 w-3 shrink-0 rounded-full bg-[#5ba32b]" />
               <span>
                 <strong>Active:</strong> Working and available
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="h-3 w-3 shrink-0 rounded-full bg-warning-500" />
+              <span className="h-3 w-3 shrink-0 rounded-full bg-[#e8632a]" />
               <span>
                 <strong>Limit:</strong> Usage limit reached
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="h-3 w-3 shrink-0 rounded-full bg-error-500" />
+              <span className="h-3 w-3 shrink-0 rounded-full bg-[#c94f4f]" />
               <span>
                 <strong>Expired:</strong> Past validity date
               </span>
             </div>
-            <p className="mt-3 border-t border-gray-600 pt-2 text-xs text-neutral-300">
+            <p className="mt-3 border-t border-[#2a475e] pt-2 text-xs text-[#8f98a0]">
               Keys automatically expire based on their validity dates. Report non-working keys to help improve the
               system.
             </p>

@@ -52,7 +52,7 @@ interface SocialsProps {
 export function Social({
   platform,
   url,
-  className = "text-gray-300 hover:text-primary-500 transition-colors",
+  className = "text-gray-300 hover:text-white transition-colors",
   iconSize = "h-6 w-6",
   showLabel = false,
   trackClick = true,

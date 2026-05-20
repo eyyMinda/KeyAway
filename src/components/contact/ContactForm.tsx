@@ -44,14 +44,14 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <p className="text-gray-600 text-sm">Have a question or feedback? Send us a message!</p>
+      <p className="text-sm text-[#8f98a0]">Have a question or feedback? Send us a message.</p>
 
-      {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{error}</div>}
+      {error && <div className="rounded-sm border border-[#6d2626] bg-[#2a2020] p-3 text-sm text-[#df7f7f]">{error}</div>}
 
       {/* Title */}
       <div>
-        <label htmlFor="contact-title" className="block text-sm font-medium text-gray-700 mb-1">
-          Title <span className="text-red-500">*</span>
+        <label htmlFor="contact-title" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+          Title <span className="text-[#d36868]">*</span>
         </label>
         <input
           id="contact-title"
@@ -59,15 +59,15 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
           required
           value={formData.title}
           onChange={e => setFormData({ ...formData, title: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+          className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
           placeholder="Brief subject of your message"
         />
       </div>
 
       {/* Message */}
       <div>
-        <label htmlFor="contact-message" className="block text-sm font-medium text-gray-700 mb-1">
-          Message <span className="text-red-500">*</span>
+        <label htmlFor="contact-message" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+          Message <span className="text-[#d36868]">*</span>
         </label>
         <textarea
           id="contact-message"
@@ -75,7 +75,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
           rows={5}
           value={formData.message}
           onChange={e => setFormData({ ...formData, message: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none text-gray-900"
+          className="w-full resize-none rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
           placeholder="Your message..."
         />
       </div>
@@ -83,29 +83,29 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       {/* Optional Fields */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="contact-name" className="block text-sm font-medium text-gray-700 mb-1">
-            Name <span className="text-gray-400 text-xs">(optional)</span>
+          <label htmlFor="contact-name" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+            Name <span className="text-xs text-[#8f98a0]">(optional)</span>
           </label>
           <input
             id="contact-name"
             type="text"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+            className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
             placeholder="Your name"
           />
         </div>
 
         <div>
-          <label htmlFor="contact-email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email <span className="text-gray-400 text-xs">(optional)</span>
+          <label htmlFor="contact-email" className="mb-1 block text-sm font-medium text-[#c6d4df]">
+            Email <span className="text-xs text-[#8f98a0]">(optional)</span>
           </label>
           <input
             id="contact-email"
             type="email"
             value={formData.email}
             onChange={e => setFormData({ ...formData, email: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900"
+            className="w-full rounded-sm border border-[#3d6e8c] bg-[#32465a] px-4 py-2 text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30"
             placeholder="your@email.com"
           />
         </div>
@@ -115,7 +115,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+        className="w-full cursor-pointer rounded-sm border border-[#5c8529] bg-[#4c6b22] py-3 font-medium text-[#c6d4df] transition-colors hover:bg-[#5c8529] hover:text-white disabled:cursor-not-allowed disabled:opacity-50">
         {loading ? "Sending..." : "Send Message"}
       </button>
     </form>

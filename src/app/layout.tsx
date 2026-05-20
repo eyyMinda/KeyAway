@@ -2,21 +2,17 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import VercelPublicMetrics from "@/src/components/analytics/VercelPublicMetrics";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
-import { auth } from "@/auth";
 import { SessionProvider } from "@components/providers/SessionProvider";
 import { StoreDetailsProvider } from "@components/providers/StoreDetailsProvider";
 import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
-import { headers } from "next/headers";
-import { unstable_noStore as noStore } from "next/cache";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"]
@@ -28,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 /** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 120;
+export const revalidate = 300;
 
 type HeadMetaTag = {
   name?: string;
@@ -76,19 +72,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || headersList.get("referer") || "";
-  const isAdminOrStudio = pathname.includes("/admin") || pathname.includes("/studio");
-  const needsSession = isAdminOrStudio;
-
-  if (isAdminOrStudio) {
-    noStore();
-  }
-
-  const [session, storeData] = await Promise.all([
-    needsSession ? auth() : Promise.resolve(null),
-    getCachedStoreDetailsDocument()
-  ]);
+  const storeData = await getCachedStoreDetailsDocument();
 
   const currentLogo = storeData?.logoLight;
   /** Match header/footer slot (~104×48 CSS px); keeps `/_next/image` width near 128–256 instead of 384+. */
@@ -121,21 +105,20 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <head>{renderedHeadMetaTags}</head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <SessionProvider session={session}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f1923] text-[#c6d4df]`}>
+        <SessionProvider>
           <PageViewTracker />
           <StoreDetailsProvider value={storeData}>
-            <div className="mainContent flex flex-col min-h-screen">
+            <div className="mainContent flex min-h-screen flex-col bg-[#0f1923] text-[#c6d4df]">
               <Header logoData={logoData} socialData={socialData} />
-              {children}
+              <main className="w-full page-bg">{children}</main>
               <Footer logoData={logoData} socialData={socialData} />
             </div>
           </StoreDetailsProvider>
         </SessionProvider>
-        <Analytics />
-        <SpeedInsights />
+        <VercelPublicMetrics />
       </body>
     </html>
   );

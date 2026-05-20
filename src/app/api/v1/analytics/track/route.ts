@@ -7,7 +7,7 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { normalizePath } from "@/src/lib/api/inputNormalize";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
-import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
+import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
@@ -94,8 +94,8 @@ export async function POST(req: NextRequest) {
     }
 
     const ua = req.headers.get("user-agent") || undefined;
-    if (isLikelyBotUserAgent(ua)) {
-      return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
+    if (isAutomatedAnalyticsRequest(req, body.event)) {
+      return NextResponse.json({ data: { accepted: true, skipped: true, reason: "automated" }, meta: {} });
     }
 
     const ip = getClientIp(req);
@@ -126,8 +126,13 @@ export async function POST(req: NextRequest) {
     const slugWasProvided = Boolean(programSlug?.trim());
 
     if (body.event === "page_viewed" && programSlug) {
-      const ok = await isProgramSlugPublished(programSlug);
-      if (!ok) programSlug = undefined;
+      const pathNorm = normalizePath(typeof body.meta?.path === "string" ? body.meta.path : "");
+      const slugFromPath = pathNorm.startsWith("/program/") ? pathNorm.split("/")[2] : undefined;
+      const trustedProgramPath = Boolean(slugFromPath && slugFromPath === programSlug.trim());
+      if (!trustedProgramPath) {
+        const ok = await isProgramSlugPublished(programSlug);
+        if (!ok) programSlug = undefined;
+      }
     }
 
     const ipHash = ipHashEarly;

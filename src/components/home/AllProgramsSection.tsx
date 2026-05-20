@@ -13,7 +13,7 @@ export default function AllProgramsSection({ programs }: AllProgramsSectionProps
       <div className="max-w-360 mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">All Available Programs</h2>
+          <h2 className="section-title mb-4 [--section-title-color:#111827]">All Available Programs</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Browse our complete collection of free software with verified CD keys
           </p>

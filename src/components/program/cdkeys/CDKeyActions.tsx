@@ -10,6 +10,7 @@ import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src
 import { getActivationCopyText, isAccountFlow, isLinkAccountFlow } from "@/src/lib/program/activationEntry";
 import { useI18n } from "@/src/contexts/i18n";
 import type { GiveawayLink } from "@/src/types/program";
+import { prefetchProgramVisitorContext } from "@/src/components/visitors/ProgramVisitorProvider";
 
 export default function CDKeyActions({
   cdKey,
@@ -58,6 +59,7 @@ export default function CDKeyActions({
   };
 
   const handleReportClick = () => {
+    prefetchProgramVisitorContext();
     setIsReportPopupOpen(true);
   };
 
@@ -71,11 +73,13 @@ export default function CDKeyActions({
     <button
       type="button"
       onClick={handleReportClick}
-      className={`inline-flex justify-center items-center px-3 py-1 text-white text-xs font-semibold rounded-lg transition-colors duration-200 bg-primary-600 hover:bg-primary-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+      className={`inline-flex items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a3a5c] px-3 py-1 text-xs font-semibold text-neutral-50 transition-colors duration-200 hover:bg-[#213246] hover:text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
         isAccount ? "w-full max-w-[220px] py-2 text-sm" : "w-full"
       }`}
       disabled={isDisabled}
-      title={reportTitle}>
+      title={reportTitle}
+      onMouseEnter={prefetchProgramVisitorContext}
+      onFocus={prefetchProgramVisitorContext}>
       Report
     </button>
   );
@@ -123,7 +127,7 @@ export default function CDKeyActions({
       <div className="flex justify-center space-x-2">
         <button
           onClick={() => void handlePrimaryClick()}
-          className="w-full inline-flex justify-center items-center px-4 py-2 bg-neutral-100 hover:bg-neutral-300 text-black text-sm font-semibold rounded-lg transition-all duration-200 transform border-2 border-neutral-400 hover:border-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none cursor-pointer"
+          className="inline-flex w-full cursor-pointer items-center justify-center rounded-sm border border-[#5c8529] bg-[#4c6b22] px-4 py-2 text-sm font-semibold text-neutral-50 transition-colors duration-200 hover:bg-[#5c8529] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           disabled={primaryDisabled}
           title={copyTitle}
           type="button">

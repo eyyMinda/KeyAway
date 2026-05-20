@@ -11,13 +11,7 @@ function buildReportMailto(supportEmail: string, message: string): string {
   return `mailto:${supportEmail}?subject=${subject}&body=${body}`;
 }
 
-export default function GlobalRouteError({
-  error,
-  reset
-}: {
-  error: Error & { digest?: string };
-  reset: () => void;
-}) {
+export default function GlobalRouteError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const supportEmail = resolveSupportEmail(useStoreDetails());
 
   const reportBody = useMemo(() => {
@@ -36,10 +30,10 @@ export default function GlobalRouteError({
   const mailtoHref = useMemo(() => buildReportMailto(supportEmail, reportBody), [reportBody, supportEmail]);
 
   return (
-    <main className="min-h-screen bg-neutral-900 flex items-center justify-center px-4">
+    <div className="flex items-center justify-center px-4">
       <div className="max-w-xl w-full text-center">
         <div className="text-6xl font-bold text-amber-500 mb-4">!</div>
-        <h1 className="text-2xl font-bold text-white mb-3">Something went wrong</h1>
+        <h1 className="section-title mb-3">Something went wrong</h1>
         <p className="text-neutral-300 mb-6 leading-relaxed">
           This page could not be loaded. The site may be having a temporary problem, or new content may not match the
           app yet. You can go back home, browse programs, or email the team with one click (opens your mail app).
@@ -68,6 +62,6 @@ export default function GlobalRouteError({
           Email support ({supportEmail})
         </a>
       </div>
-    </main>
+    </div>
   );
 }

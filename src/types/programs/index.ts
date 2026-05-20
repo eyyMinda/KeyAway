@@ -20,6 +20,8 @@ export interface ProgramsFilterProps {
   filter: FilterType;
   sortBy: SortType;
   onSearchChange: (searchTerm: string) => void;
+  /** Fire search immediately (e.g. Enter) instead of waiting for debounce. */
+  onSearchCommit?: () => void;
   onFilterChange: (filter: FilterType) => void;
   onSortChange: (sortBy: SortType) => void;
 }
