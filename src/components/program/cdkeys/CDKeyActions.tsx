@@ -10,6 +10,7 @@ import { NOTIFICATION_DURATION, getSuccessMessage, getErrorMessage } from "@/src
 import { getActivationCopyText, isAccountFlow, isLinkAccountFlow } from "@/src/lib/program/activationEntry";
 import { useI18n } from "@/src/contexts/i18n";
 import type { GiveawayLink } from "@/src/types/program";
+import { prefetchProgramVisitorContext } from "@/src/components/visitors/ProgramVisitorProvider";
 
 export default function CDKeyActions({
   cdKey,
@@ -58,6 +59,7 @@ export default function CDKeyActions({
   };
 
   const handleReportClick = () => {
+    prefetchProgramVisitorContext();
     setIsReportPopupOpen(true);
   };
 
@@ -75,7 +77,9 @@ export default function CDKeyActions({
         isAccount ? "w-full max-w-[220px] py-2 text-sm" : "w-full"
       }`}
       disabled={isDisabled}
-      title={reportTitle}>
+      title={reportTitle}
+      onMouseEnter={prefetchProgramVisitorContext}
+      onFocus={prefetchProgramVisitorContext}>
       Report
     </button>
   );

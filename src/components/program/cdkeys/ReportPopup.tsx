@@ -23,6 +23,8 @@ import {
   SPAMMER_REPORT_RESTRICTION_NOTICE,
   SPAMMER_REPORT_DISABLED_OPTION_TITLE
 } from "@/src/lib/notifications/notificationUtils";
+import { prefetchProgramVisitorContext, useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvider";
+import SpammerReportAlert from "@/src/components/program/cdkeys/SpammerReportAlert";
 import { formatDate } from "@/src/lib/dateUtils";
 
 interface ReportPopupProps {
@@ -48,6 +50,7 @@ interface ReportButtonProps {
 function ReportButton({ status, isSubmitting, onReport, blockedBySpammer }: ReportButtonProps) {
   const config = getReportButtonConfig(status);
   const disabled = isSubmitting || blockedBySpammer;
+  const showSpammerStyle = blockedBySpammer && !isSubmitting;
 
   // Get the appropriate icon for the status
   const getIcon = () => {
@@ -63,7 +66,7 @@ function ReportButton({ status, isSubmitting, onReport, blockedBySpammer }: Repo
     }
   };
 
-  const styleClass = blockedBySpammer
+  const styleClass = showSpammerStyle
     ? "bg-neutral-700 text-neutral-500 cursor-not-allowed"
     : `${config.bgColor} text-white cursor-pointer`;
 
@@ -88,8 +91,10 @@ export default function ReportPopup({
   programFlow,
   rowStorageId,
   onReportSubmitted,
-  isSpammerVisitor = false
+  isSpammerVisitor: isSpammerVisitorProp = false
 }: ReportPopupProps) {
+  const { isSpammer: isSpammerCtx, isLoading: isVisitorLoading } = useProgramVisitor();
+  const isSpammerVisitor = isSpammerVisitorProp || isSpammerCtx;
   const activationLabel = getActivationEntryDisplayLabel(cdKey, programFlow);
   const [notification, setNotification] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,8 +134,17 @@ export default function ReportPopup({
     if (isOpen) void checkForDuplicate();
   }, [isOpen, slug, rowStorageId, checkForDuplicate]);
 
+  useEffect(() => {
+    if (isOpen) prefetchProgramVisitorContext();
+  }, [isOpen]);
+
   const handleReport = async (status: CDKeyStatus) => {
-    if (isSubmitting) return;
+    if (isSubmitting || isVisitorLoading) return;
+
+    if (isSpammerVisitor && status !== "working") {
+      setNotification(SPAMMER_REPORT_RESTRICTION_NOTICE);
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -152,7 +166,12 @@ export default function ReportPopup({
 
       if (!res.ok) {
         console.error("[Report] API error:", res.status, payload);
+        const code = payload?.error?.code;
         const msg = payload?.error?.message;
+        if (res.status === 403 && code === "FORBIDDEN") {
+          setNotification(SPAMMER_REPORT_RESTRICTION_NOTICE);
+          return;
+        }
         setNotification(typeof msg === "string" ? msg : getErrorMessage("REPORT_FAILED"));
         return;
       }
@@ -236,6 +255,8 @@ export default function ReportPopup({
             <ModalCloseButton onClick={handleClose} className="p-1 text-[#8f98a0] hover:text-white" />
           </div>
 
+          {isSpammerVisitor ? <SpammerReportAlert /> : null}
+
           <div className="mb-4">
             <p className="mb-2 text-sm text-[#8f98a0]">
               Entry: <code className="break-all rounded-sm bg-[#32465a] px-2 py-1 text-xs text-[#c6d4df]">{activationLabel}</code>
@@ -278,11 +299,10 @@ export default function ReportPopup({
             {/* Normal report interface */}
             {!duplicateReport && !isCheckingDuplicate && (
               <>
-                <p className="text-sm text-[#8f98a0]">How is this entry working for you?</p>
-                {isSpammerVisitor && (
-                  <p className="mt-3 rounded-sm border border-[#a3421b] bg-[#3a2800] px-3 py-2 text-sm leading-relaxed text-[#f4a460]">
-                    {SPAMMER_REPORT_RESTRICTION_NOTICE}
-                  </p>
+                {isVisitorLoading ? (
+                  <p className="text-sm text-[#8f98a0]">{getInfoMessage("CHECKING_REPORTING_PERMISSIONS")}</p>
+                ) : (
+                  <p className="text-sm text-[#8f98a0]">How is this entry working for you?</p>
                 )}
               </>
             )}
@@ -291,16 +311,20 @@ export default function ReportPopup({
           {/* Report buttons - only show if no duplicate found */}
           {!duplicateReport && !isCheckingDuplicate && (
             <div className="space-y-3">
-              <ReportButton status="working" isSubmitting={isSubmitting} onReport={handleReport} />
+              <ReportButton
+                status="working"
+                isSubmitting={isSubmitting || isVisitorLoading}
+                onReport={handleReport}
+              />
               <ReportButton
                 status="expired"
-                isSubmitting={isSubmitting}
+                isSubmitting={isSubmitting || isVisitorLoading}
                 onReport={handleReport}
                 blockedBySpammer={isSpammerVisitor}
               />
               <ReportButton
                 status="limit_reached"
-                isSubmitting={isSubmitting}
+                isSubmitting={isSubmitting || isVisitorLoading}
                 onReport={handleReport}
                 blockedBySpammer={isSpammerVisitor}
               />

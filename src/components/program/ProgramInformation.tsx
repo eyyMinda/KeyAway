@@ -13,6 +13,7 @@ import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReview
 import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
 import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
+import { useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvider";
 import RichText from "@/src/components/portableText/RichText";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import { useI18n } from "@/src/contexts/i18n";
@@ -46,8 +47,10 @@ export default function ProgramInformation({
   totalKeys,
   workingKeys,
   socialData,
-  visitorHint
+  visitorHint: visitorHintProp
 }: ProgramInformationProps) {
+  const { visitorHint: visitorHintCtx } = useProgramVisitor();
+  const visitorHint = visitorHintProp ?? visitorHintCtx;
   const { t } = useI18n("program");
   const trustpilotUrl = getTrustpilotReviewUrl(socialData);
   const heroSubtitle = t.hero.subtitle({ programTitle: program.title });

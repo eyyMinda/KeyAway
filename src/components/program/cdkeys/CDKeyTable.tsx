@@ -12,6 +12,7 @@ import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
 import { useI18n } from "@/src/contexts/i18n";
 import { isAccountFlow, normalizeProgramFlow } from "@/src/lib/program/activationEntry";
+import { useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvider";
 
 export default function CDKeyTable({
   cdKeys,
@@ -19,11 +20,13 @@ export default function CDKeyTable({
   slug,
   program,
   programTitle,
-  isSpammerVisitor = false,
+  isSpammerVisitor: isSpammerVisitorProp = false,
   vendorReleaseForIntro,
   introVersionConfirmation,
   versionSummaryLine
 }: CDKeyTableProps) {
+  const { isSpammer: isSpammerCtx } = useProgramVisitor();
+  const isSpammerVisitor = isSpammerVisitorProp || isSpammerCtx;
   const PAGE_SIZE = 10;
   const { t } = useI18n("program");
   const programFlow = normalizeProgramFlow(program.programFlow);
