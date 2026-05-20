@@ -19,7 +19,7 @@ import { SocialData } from "@/src/types";
 import { TAG_HOMEPAGE_PROGRAMS, TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
 
 /** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 120;
+export const revalidate = 300;
 
 export async function generateMetadata() {
   return generateHomePageMetadata();
