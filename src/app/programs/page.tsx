@@ -74,29 +74,27 @@ export default async function ProgramsPage({
   return (
     <>
       <JsonLd data={jsonLd} />
-      <main className="min-h-screen bg-[#0f1923]">
-        <ProgramsHero totalCount={totalCount} totalKeys={totalKeys} />
+      <ProgramsHero totalCount={totalCount} totalKeys={totalKeys} />
 
-        <section className="border-b border-[#2a475e] bg-[#16202d] py-8">
-          <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-            <FacebookGroupButton socialData={socialData} variant="outline" className="text-base" />
-          </div>
-        </section>
+      <section className="border-b border-[#2a475e] bg-[#16202d] py-8">
+        <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <FacebookGroupButton socialData={socialData} variant="outline" className="text-base" />
+        </div>
+      </section>
 
-        <ProgramsPageClient
-          programs={programs}
-          searchTerm={searchTerm}
-          filter={filter}
-          sortBy={sortBy}
-          currentPage={page}
-          totalPrograms={totalCount}
-          programsPerPage={PROGRAMS_PER_PAGE}
-        />
+      <ProgramsPageClient
+        programs={programs}
+        searchTerm={searchTerm}
+        filter={filter}
+        sortBy={sortBy}
+        currentPage={page}
+        totalPrograms={totalCount}
+        programsPerPage={PROGRAMS_PER_PAGE}
+      />
 
-        <ContributeSection />
-        <FeaturedProgramSection program={featuredProgram} />
-        <WhyUseSection />
-      </main>
+      <ContributeSection />
+      <FeaturedProgramSection program={featuredProgram} />
+      <WhyUseSection />
     </>
   );
 }
