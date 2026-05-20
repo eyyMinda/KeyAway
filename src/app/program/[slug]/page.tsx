@@ -1,4 +1,4 @@
-/** @fileoverview Program detail: keys, related programs, JSON-LD; visitor context for hero and spammer gate on reports. */
+/** @fileoverview Program detail: keys, related programs, JSON-LD; visitor context via client fetch. */
 import { CDKey, SocialData } from "@/src/types";
 import { notFound } from "next/navigation";
 import ProgramInformation from "@/src/components/program/ProgramInformation";
@@ -16,25 +16,24 @@ import {
   getCdKeyTableIntroVersionConfirmation,
   getHighestKeyVersion
 } from "@/src/lib/program/versionSummary";
-import { getProgramWithUpdatedKeys } from "@/src/lib/sanity/sanityActions";
-import { client } from "@/src/sanity/lib/client";
-import { popularProgramsQuery } from "@/src/lib/sanity/queries";
+import { getProgramBySlug } from "@/src/lib/sanity/sanityActions";
+import { getCachedRelatedPrograms } from "@/src/lib/sanity/getCachedRelatedPrograms";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
-import { headers } from "next/headers";
-import { getVisitorContextForPublicPage } from "@/src/lib/visitors/serverVisitorContext";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import type { Program, ProgramFaqItem } from "@/src/types/program";
 import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
 import { getRowStorageHash } from "@/src/lib/keyHashing";
 import I18nShell from "@/src/components/i18n/I18nShell";
 import { loadMessages } from "@/src/lib/i18n/loadMessages";
-import { TAG_PROGRAM_LISTINGS, TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
+import { ProgramVisitorProvider } from "@/src/components/visitors/ProgramVisitorProvider";
+import { client } from "@/src/sanity/lib/client";
+import { TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
 
 /** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 120;
+export const revalidate = 300;
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -42,7 +41,7 @@ interface ProgramPageProps {
 
 export async function generateStaticParams() {
   const slugs = await client.fetch<Array<{ slug?: { current?: string } }>>(
-    `*[_type == "program"] | order(coalesce(popularityScore, 0) desc) [0...25]{ slug }`,
+    `*[_type == "program"] | order(coalesce(popularityScore, 0) desc) [0...50]{ slug }`,
     {},
     { next: { tags: [TAG_SITEMAP_URLS] } }
   );
@@ -52,7 +51,6 @@ export async function generateStaticParams() {
     .map(slug => ({ slug }));
 }
 
-// Generate dynamic metadata for each program page
 export async function generateMetadata({ params }: ProgramPageProps) {
   const { slug } = await params;
   return generateProgramMetadata(slug);
@@ -61,7 +59,7 @@ export async function generateMetadata({ params }: ProgramPageProps) {
 export default async function ProgramPage({ params }: ProgramPageProps) {
   const { slug } = await params;
 
-  const program = await getProgramWithUpdatedKeys(slug);
+  const program = await getProgramBySlug(slug);
 
   if (!program) return notFound();
 
@@ -76,18 +74,13 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, store] = await Promise.all([
-    client.fetch(popularProgramsQuery, {}, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
-    getCachedStoreDetailsDocument()
-  ]);
+  const [allPrograms, store] = await Promise.all([getCachedRelatedPrograms(), getCachedStoreDetailsDocument()]);
 
   const socialData: SocialData = {
     socialLinks: store?.socialLinks ?? []
   };
 
-  const hdrs = await headers();
-  const { isSpammer, visitorHint } = await getVisitorContextForPublicPage(hdrs);
-  const relatedPrograms = (allPrograms as Program[])
+  const relatedPrograms = allPrograms
     .filter(p => p.slug.current !== slug)
     .slice(0, 5)
     .map(p => ({ ...p, cdKeys: p.cdKeys ?? [] }));
@@ -103,24 +96,24 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     <>
       <JsonLd data={jsonLd} />
       <I18nShell locale={i18n.locale} messages={i18n.messages}>
-        <ProgramInformation
-          program={program}
-          totalKeys={totalKeys}
-          workingKeys={workingKeys}
-          socialData={socialData}
-          visitorHint={visitorHint}
-        />
-        <CDKeyTable
-          cdKeys={sortedCdKeys}
-          rowStorageIds={rowStorageIds}
-          slug={slug}
-          program={program}
-          programTitle={program.title}
-          isSpammerVisitor={isSpammer}
-          vendorReleaseForIntro={vendorReleaseForIntro}
-          introVersionConfirmation={introVersionConfirmation}
-          versionSummaryLine={versionSummaryLine}
-        />
+        <ProgramVisitorProvider>
+          <ProgramInformation
+            program={program}
+            totalKeys={totalKeys}
+            workingKeys={workingKeys}
+            socialData={socialData}
+          />
+          <CDKeyTable
+            cdKeys={sortedCdKeys}
+            rowStorageIds={rowStorageIds}
+            slug={slug}
+            program={program}
+            programTitle={program.title}
+            vendorReleaseForIntro={vendorReleaseForIntro}
+            introVersionConfirmation={introVersionConfirmation}
+            versionSummaryLine={versionSummaryLine}
+          />
+        </ProgramVisitorProvider>
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
         <ProgramAboutSection program={program} />
         <ContributeBanner />
