@@ -59,7 +59,7 @@ export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[
       : [];
 
   return (
-    <section className="bg-[#0f1923] py-12 text-[#c6d4df] sm:py-16 lg:py-20">
+    <section className="static-bg py-12 text-[#c6d4df] sm:py-16 lg:py-20">
       <div className="mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           {/* Main CTA */}
@@ -68,7 +68,7 @@ export default function CTASection({ otherLinks }: { otherLinks: StoreOtherLink[
             <h2 className="section-title mb-4 sm:mb-6">
               Ready to <span className="text-gradient-pro">Get Started?</span>
             </h2>
-            <p className="mb-6 px-2 text-base leading-relaxed text-[#8f98a0] sm:mb-8 sm:text-lg lg:text-xl">
+            <p className="mb-6 section-text">
               Join thousands of users who have already discovered premium software for free. Browse our collection, find
               what you need, and start using it today.
             </p>
