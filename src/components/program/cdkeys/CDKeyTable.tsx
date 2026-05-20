@@ -96,7 +96,7 @@ export default function CDKeyTable({
   const expiringDisclaimer = t.keyTable.expiringDisclaimer();
 
   return (
-    <section className="border-t border-[#2a475e] bg-[#0f1923] py-6 sm:py-10">
+    <section className="py-6 sm:py-10">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="overflow-visible rounded-sm border border-[#2a475e] bg-[#1b2838] shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">
@@ -109,18 +109,18 @@ export default function CDKeyTable({
                   </span>
                   <span className="text-gradient-pro">{headingSuffix}</span>
                 </h2>
-                <p className="text-xs leading-relaxed text-[#8f98a0] sm:text-sm lg:text-base">
+                <p className="section-text">
                   {intro}
                   {introVersionConfirmation ? (
                     <>
                       {" "}
-                      <span className="text-[#556772]">{introVersionConfirmation}</span>
+                      <span className="underline">{introVersionConfirmation}</span>
                     </>
                   ) : null}
                   {versionSummaryLine ? (
                     <>
                       {" "}
-                      <span className="text-[#556772]">{versionSummaryLine}</span>
+                      <span className="underline">{versionSummaryLine}</span>
                     </>
                   ) : null}
                 </p>
@@ -184,7 +184,7 @@ export default function CDKeyTable({
                     sortColumn={sortColumn}
                     sortDirection={sortDirection}
                     onSort={handleSort}
-                    className="bg-[#16202d] text-[#c6d4df]"
+                    className="bg-[#212B45] text-white"
                   />
                   <tbody className="divide-y divide-[#2a475e]">
                     {visibleKeys.map((cdKey: CDKey, i: number) => {
