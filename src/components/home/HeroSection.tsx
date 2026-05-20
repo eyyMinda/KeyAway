@@ -26,10 +26,7 @@ export default function HeroSection({ socialData, visitorHint, stats }: HeroSect
   const totalReports = stats?.totalReports ?? 0;
 
   return (
-    <section className="relative overflow-hidden border-b border-[#2a475e] bg-[#0f1923]">
-      <div className="absolute inset-0 bg-[linear-gradient(135deg,#0f1923_0%,#1b2838_55%,#16304a_100%)]" />
-      <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_18px,rgba(102,192,244,0.06)_18px,rgba(102,192,244,0.06)_19px)] opacity-25" />
-
+    <section className="relative overflow-hidden border-b border-[#2a475e]">
       {/* Copy-led band; illustration is a bounded accent (not the hero focal) */}
       <div className="relative z-10 mx-auto w-full max-w-360">
         <div className="flex min-h-0 flex-col gap-6 px-4 pb-8 pt-10 sm:gap-8 sm:px-6 sm:pb-10 sm:pt-12 lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-8 lg:gap-y-0 lg:px-8 lg:pb-11 lg:pt-12 xl:gap-x-10">
@@ -46,7 +43,7 @@ export default function HeroSection({ socialData, visitorHint, stats }: HeroSect
                 <span className="text-gradient-pro">Free CD Keys</span>
                 {" for Professional Software"}
               </h1>
-              <p className="text-base leading-relaxed text-[#8f98a0] sm:text-[17px] lg:max-w-md">
+              <p className="section-text">
                 Verified keys for premium Windows software—copy, activate, and report so the vault stays accurate.
               </p>
 
