@@ -129,7 +129,7 @@ export default async function RootLayout({
           <StoreDetailsProvider value={storeData}>
             <div className="mainContent flex min-h-screen flex-col bg-[#0f1923] text-[#c6d4df]">
               <Header logoData={logoData} socialData={socialData} />
-              <main className="w-full">{children}</main>
+              <main className="w-full page-bg">{children}</main>
               <Footer logoData={logoData} socialData={socialData} />
             </div>
           </StoreDetailsProvider>
