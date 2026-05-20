@@ -34,7 +34,7 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
   const imageSource = program.featured?.showcaseGif || program.image;
 
   return (
-    <section id="featured-program" className="border-y border-[#2a475e] bg-[#1b2838] py-8 sm:py-12 lg:py-16">
+    <section id="featured-program" className="border-y border-[#2a475e] py-8 sm:py-12 lg:py-16">
       <div className="max-w-360 mx-auto px-4 sm:px-6">
         <div className="mb-6 sm:mb-8">
           <div className="section-label mb-3 gap-2">
@@ -87,14 +87,15 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
                     <li className="flex items-start space-x-2">
                       <FaCheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#5ba32b] sm:h-5 sm:w-5" />
                       <span>
-                        <strong className="text-[#c6d4df]">{program.workingKeys}</strong> verified working keys available
+                        <strong className="text-[#c6d4df]">{program.workingKeys}</strong> verified working keys
+                        available
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">
                       <FaCheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#5ba32b] sm:h-5 sm:w-5" />
                       <span>
-                        <strong className="text-[#c6d4df]">{program.viewCount.toLocaleString()}</strong> users have viewed
-                        this program
+                        <strong className="text-[#c6d4df]">{program.viewCount.toLocaleString()}</strong> users have
+                        viewed this program
                       </span>
                     </li>
                     <li className="flex items-start space-x-2">
