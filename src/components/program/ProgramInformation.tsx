@@ -55,7 +55,7 @@ export default function ProgramInformation({
   const workingLabel = t.stats.workingLabel();
 
   return (
-    <section className="bg-[#0f1923] py-6 sm:py-10">
+    <section className=" py-6 sm:py-10 relative">
       <div className="max-w-3xl lg:max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile: intro → image+FB → body. Desktop: left col image+FB (sticky), right col intro + body. */}
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12 relative">
@@ -68,7 +68,7 @@ export default function ProgramInformation({
 
             <div>
               <h1 className="section-title h2 mb-3 max-w-[540px]">{formatProgramDisplayTitle(program)}</h1>
-              <p className="text-base leading-relaxed text-[#8f98a0] sm:text-lg">{heroSubtitle}</p>
+              <p className="text-base leading-relaxed text-neutral-100 sm:text-lg">{heroSubtitle}</p>
             </div>
           </div>
 
@@ -81,7 +81,7 @@ export default function ProgramInformation({
             {portableTextHasContent(program.description) ? (
               <RichText
                 value={program.description}
-                className="text-sm text-[#c6d4df] [&_li]:text-[#c6d4df] [&_p]:leading-relaxed sm:text-base"
+                className="text-sm text-neutral-100 [&_p]:leading-relaxed sm:text-base"
               />
             ) : null}
 
@@ -124,7 +124,7 @@ export default function ProgramInformation({
                   key={index}
                   className={`rounded-sm border border-[#2a475e] bg-[#1b2838] p-3 text-center ${stat.hoverColor} transition-all duration-300`}>
                   <div className={`text-2xl sm:text-3xl font-bold ${stat.color} mb-1 sm:mb-2`}>{stat.value}</div>
-                  <div className="text-xs font-medium leading-tight text-[#8f98a0] sm:text-sm">{stat.label}</div>
+                  <div className="text-xs font-medium leading-tight text-neutral-100 sm:text-sm">{stat.label}</div>
                 </div>
               ))}
             </div>
