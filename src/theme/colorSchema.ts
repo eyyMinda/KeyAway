@@ -132,7 +132,7 @@ export function getAnalyticsEventDotClass(event: string): string {
 /** Shared admin / marketing class strings (map legacy blue/green to theme `primary` / `success`). */
 export const adminChrome = {
   filterPillActive: "bg-primary-500 text-white",
-  filterPillIdle: "bg-neutral-100 text-neutral-700 hover:bg-neutral-200",
+  filterPillIdle: "bg-gray-100 text-gray-700 hover:bg-gray-200",
   progressBarFill: "bg-primary-500",
   statCardBlue: {
     bg: "bg-primary-500/50",
