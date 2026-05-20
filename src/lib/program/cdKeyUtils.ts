@@ -97,17 +97,26 @@ export function isKeyExpiringSoon(key: { validUntil?: string }): boolean {
   return Number.isFinite(daysUntilExpiry) && daysUntilExpiry <= 30 && daysUntilExpiry > 0;
 }
 
+/** True when the key row is still treated as claimable (`new` / `active` / unknown), not `expired` / `limit`. */
+export function isKeyStatusWorking(status?: string | null): boolean {
+  if (status == null || typeof status !== "string") return true;
+  const s = status.trim().toLowerCase();
+  return s !== "expired" && s !== "limit" && s !== "limit_reached";
+}
+
 /**
  * Gets a human-readable message for expiring keys
  * @param cdKeys - Array of CD keys to check
  * @returns A message describing how soon keys are expiring, or null if no expiring keys
  */
-export function getExpiringKeysMessage(cdKeys: Array<{ validUntil?: string }> | null | undefined): string | null {
+export function getExpiringKeysMessage(
+  cdKeys: Array<{ validUntil?: string; status?: string }> | null | undefined
+): string | null {
   if (!Array.isArray(cdKeys) || cdKeys.length === 0) return null;
   // No expiry dates (e.g. all lifetime keys) → nothing is "expiring soon"
   if (!cdKeys.some(k => cdKeyHasExpiry(k.validUntil))) return null;
 
-  const expiringKeys = cdKeys.filter(isKeyExpiringSoon);
+  const expiringKeys = cdKeys.filter(k => isKeyExpiringSoon(k) && isKeyStatusWorking(k.status));
   if (expiringKeys.length === 0) return null;
 
   const now = new Date();
