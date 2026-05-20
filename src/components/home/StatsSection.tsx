@@ -54,7 +54,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
   };
 
   return (
-    <section className="border-y border-[#2a475e] bg-[#1b2838] py-12 text-[#c6d4df] sm:py-14 lg:py-16">
+    <section className="border-y border-[#2a475e] py-12 text-[#c6d4df] sm:py-14 lg:py-16">
       <div className="mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-8">
         {/* Header — unchanged hierarchy, slightly less air before the grid */}
         <div className="mb-6 sm:mb-8 lg:mb-9">
@@ -62,7 +62,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
           <h2 className="section-title mb-3 sm:mb-4">
             Community <span className="text-gradient-pro">Impact</span>
           </h2>
-          <p className="max-w-2xl text-base leading-relaxed text-[#8f98a0] sm:text-lg lg:text-xl">
+          <p className="max-w-2xl section-text">
             Our community-driven platform has helped thousands of users access premium software for free
           </p>
         </div>
@@ -84,9 +84,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
                     <div className="text-xl font-bold leading-none text-white sm:text-2xl lg:text-3xl">
                       {item.value.toLocaleString()}
                     </div>
-                    <h3 className="text-xs font-semibold leading-snug text-[#8f98a0] sm:text-sm">
-                      {item.label}
-                    </h3>
+                    <h3 className="text-xs font-semibold leading-snug text-[#8f98a0] sm:text-sm">{item.label}</h3>
                     <p className="text-[11px] leading-tight text-[#556772] sm:text-xs">{item.description}</p>
                   </div>
                 </div>
