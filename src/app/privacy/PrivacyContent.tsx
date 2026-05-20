@@ -2,6 +2,7 @@
 
 import { ContactModalTrigger } from "@/src/components/contact";
 import { useStoreDetails } from "@/src/components/providers/StoreDetailsProvider";
+import EnumeratedSectionHeading from "@/src/components/site/EnumeratedSectionHeading";
 import { resolveStoreDisplayName } from "@/src/lib/site/storeIdentity";
 
 export default function PrivacyContent() {
@@ -10,7 +11,7 @@ export default function PrivacyContent() {
   const storeTitle = storeDetails?.title?.trim() || "KeyAway";
 
   return (
-    <main className="min-h-screen bg-[#0f1923] text-[#c6d4df]">
+    <div className="min-h-screen static-bg text-[#c6d4df]">
       {/* Hero Section */}
       <div className="border-b border-[#2a475e] bg-[#16202d]">
         <div className="mx-auto max-w-360 px-4 py-14 sm:px-6 lg:px-8">
@@ -32,12 +33,9 @@ export default function PrivacyContent() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="space-y-6 rounded-sm border border-[#2a475e] bg-[#1b2838] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:p-8">
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                1
-              </span>
+            <EnumeratedSectionHeading index={1}>
               Information We <span className="text-gradient-pro">Collect</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">
                 {storeTitle} does not require account registration. We may collect limited information when you:
@@ -55,12 +53,9 @@ export default function PrivacyContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                2
-              </span>
+            <EnumeratedSectionHeading index={2}>
               Purpose of <span className="text-gradient-pro">Content</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">
                 All CD keys listed on {storeTitle} are <strong className="text-[#66d9ff]">public giveaway keys</strong>{" "}
@@ -76,12 +71,9 @@ export default function PrivacyContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                3
-              </span>
+            <EnumeratedSectionHeading index={3}>
               Cookies and <span className="text-gradient-pro">Analytics</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               We may use basic analytics or cookies to understand site usage. No personal data is sold or shared with
               advertisers.
@@ -89,12 +81,9 @@ export default function PrivacyContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                4
-              </span>
+            <EnumeratedSectionHeading index={4}>
               Third-Party <span className="text-gradient-pro">Services</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">
                 Comments and donations are handled by trusted third-party services (e.g., GitHub Discussions, PayPal, or
@@ -114,12 +103,9 @@ export default function PrivacyContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                5
-              </span>
+            <EnumeratedSectionHeading index={5}>
               Key Suggestions &amp; <span className="text-gradient-pro">Contact Forms</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">
                 When you submit a CD key suggestion or contact us through our forms:
@@ -155,12 +141,9 @@ export default function PrivacyContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                6
-              </span>
+            <EnumeratedSectionHeading index={6}>
               Data <span className="text-gradient-pro">Security</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               We take reasonable measures to protect your data, including secure HTTPS connections and trusted CMS
               infrastructure. However, no online service is 100% secure.
@@ -168,12 +151,9 @@ export default function PrivacyContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                7
-              </span>
+            <EnumeratedSectionHeading index={7}>
               <span className="text-gradient-pro">Contact</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               If you have questions about this Privacy Policy, please{" "}
               <ContactModalTrigger
@@ -186,6 +166,6 @@ export default function PrivacyContent() {
           </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
