@@ -15,7 +15,13 @@ import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics
 import type { SocialData } from "@/src/types";
 import type { FilterType, SortType } from "@/src/types/programs";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-import { normalizeFilterType, normalizeSortType, groqProgramsOrderClause } from "@/src/lib/program/programUtils";
+import {
+  normalizeFilterType,
+  normalizeSortType,
+  groqProgramsOrderClause,
+  isStatsBasedProgramsSort,
+  sortPrograms
+} from "@/src/lib/program/programUtils";
 import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 
 /** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
@@ -43,10 +49,13 @@ export default async function ProgramsPage({
   const searchFilter = searchTerm
     ? " && (title match $search || string::lower(pt::text(description)) match $search)"
     : "";
-  const orderClause = groqProgramsOrderClause(sortBy);
-  const countQuery = `count(*[_type == "program" && ${filterQuery}${searchFilter}])`;
-  const keyCountQuery = `*[_type == "program" && ${filterQuery}${searchFilter}]{"keyCount": count(cdKeys[])}`;
-  const listQuery = `*[_type == "program" && ${filterQuery}${searchFilter}] ${orderClause} [${startIdx}...${endIdx}] {${programsListingProjection}}`;
+  const programsFilter = `*[_type == "program" && ${filterQuery}${searchFilter}]`;
+  const countQuery = `count(${programsFilter})`;
+  const keyCountQuery = `${programsFilter}{"keyCount": count(cdKeys[])}`;
+  const statsSort = isStatsBasedProgramsSort(sortBy);
+  const listQuery = statsSort
+    ? `${programsFilter} {${programsListingProjection}}`
+    : `${programsFilter} {${programsListingProjection}} ${groqProgramsOrderClause(sortBy)} [${startIdx}...${endIdx}]`;
   const queryParams = searchTerm ? { search: `*${searchTerm.toLowerCase()}*` } : {};
 
   const [totalCount, keyCountRows, rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
@@ -58,8 +67,11 @@ export default async function ProgramsPage({
     getFeaturedProgram()
   ]);
 
-  const mergedPage = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts);
-  const programs = mergedPage.map(program => ({
+  const mergedAll = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts);
+  const pageSlice = statsSort
+    ? sortPrograms(mergedAll, sortBy).slice(startIdx, endIdx + 1)
+    : mergedAll;
+  const programs = pageSlice.map(program => ({
     ...program,
     descriptionPlain: portableTextToPlainText(program.description)
   })) as ProgramWithStats[];
