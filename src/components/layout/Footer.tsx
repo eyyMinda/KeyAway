@@ -37,7 +37,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
   const hasSupportLinks = Boolean(buyMeACoffeeUrl || githubRepoUrl);
 
   return (
-    <footer className="mt-auto border-t border-[#2a475e] bg-[#16202d] text-[#c6d4df]">
+    <footer className="mt-auto border-t border-[#2a475e] bg-[#0E141B] text-neutral-100">
       <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
@@ -46,10 +46,10 @@ export default function Footer({ logoData, socialData }: FooterProps) {
               {isLogo ? (
                 <IdealImageClient {...logoData} className="h-12 w-auto" />
               ) : (
-                <h3 className="text-2xl font-bold text-[#c6d4df]">{storeData.title}</h3>
+                <h3 className="text-2xl font-bold text-white">{storeData.title}</h3>
               )}
             </Link>
-            <p className="mb-2 max-w-md text-[#8f98a0]">
+            <p className="mb-2 max-w-md section-text">
               {portableTextToPlainText(storeData.description) ||
                 "Free Giveaway CD Keys for your favorite games and software."}
             </p>
@@ -69,7 +69,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
 
           {/* Navigation Links */}
           <div>
-            <h4 className="section-label mb-4 text-[#c6d4df]!">Navigate</h4>
+            <h4 className="section-label mb-4 text-neutral-50">Navigate</h4>
             <ul className="space-y-2">
               {footerLinks &&
                 footerLinks.map((link, i) => {
@@ -86,7 +86,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                       <Link
                         href={href || "/"}
                         className={`transition-colors ${
-                          isActive ? "font-medium text-[#c6d4df]" : "text-[#8f98a0] hover:text-white"
+                          isActive ? "font-medium text-white" : "text-neutral-150 hover:text-neutral-50"
                         }`}
                         target={link.external ? "_blank" : undefined}
                         rel={link.external ? "noreferrer" : undefined}>
@@ -106,7 +106,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
 
           {/* Contribute Section */}
           <div>
-            <h4 className="section-label mb-4 text-[#c6d4df]!">Contribute</h4>
+            <h4 className="section-label mb-4 text-neutral-50">Contribute</h4>
             <div className="space-y-3">
               {/* Suggest a Key Button */}
               <ContactModalTrigger
@@ -117,8 +117,8 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                     <FaKey className="w-5 h-5" />
                   </div>
                   <div className="text-left flex-1">
-                    <div className="text-sm font-bold">Suggest a Key</div>
-                    <div className="text-xs text-[#8f98a0]">Share free CD keys</div>
+                    <div className="text-sm font-bold text-neutral-50">Suggest a Key</div>
+                    <div className="text-xs text-neutral-200">Share free CD keys</div>
                   </div>
                   <FaChevronRight className="w-4 h-4 opacity-75" />
                 </div>
@@ -127,7 +127,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
               {/* Contact Us Button */}
               <ContactModalTrigger
                 tab="contact"
-                className="group w-full cursor-pointer rounded-sm border border-[#2a475e] bg-[#1b2838] px-4 py-3 font-medium text-[#c6d4df] transition-colors duration-200 hover:border-[#4a90c4] hover:bg-[#213246]">
+                className="group w-full cursor-pointer rounded-sm border border-[#2a475e] bg-[#1b2838] px-4 py-3 font-medium text-neutral-50 transition-colors duration-200 hover:border-[#4a90c4] hover:bg-[#213246]">
                 <div className="flex items-center space-x-3">
                   <FaEnvelope className="w-5 h-5 shrink-0" />
                   <div className="text-left flex-1">
@@ -139,7 +139,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
 
             {hasSupportLinks ? (
               <div className="mt-6 border-t border-[#2a475e] pt-6">
-                <p className="mb-3 text-xs text-[#8f98a0]">Support the Project</p>
+                <p className="mb-3 text-xs">Support the Project</p>
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-wrap items-center gap-2">
                     {buyMeACoffeeUrl ? (
@@ -153,7 +153,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                             path: window.location.pathname
                           });
                         }}
-                        className="inline-flex items-center gap-2 rounded-sm bg-[#7d3315] px-3 py-2 text-xs font-semibold text-[#c6d4df] transition-colors hover:bg-[#a3421b] hover:text-white">
+                        className="inline-flex items-center gap-2 rounded-sm bg-[#7d3315] px-3 py-2 text-xs font-semibold text-neutral-50 transition-colors hover:bg-[#a3421b] hover:text-white">
                         🥕 Carrot Juice
                       </Link>
                     ) : null}
@@ -170,7 +170,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                             path: window.location.pathname
                           });
                         }}
-                        className="inline-flex items-center gap-2 rounded-sm bg-[#213246] px-3 py-2 text-xs font-semibold text-[#c6d4df] transition-colors hover:bg-[#2a475e]">
+                        className="inline-flex items-center gap-2 rounded-sm bg-[#213246] px-3 py-2 text-xs font-semibold text-neutral-50 hover:text-white transition-colors hover:bg-[#2a475e]">
                         ⭐ KeyAway repo
                       </Link>
                     ) : null}
