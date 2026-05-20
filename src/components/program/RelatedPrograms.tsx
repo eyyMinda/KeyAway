@@ -127,7 +127,7 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
   const showNav = numPages > 1;
 
   return (
-    <section className="overflow-hidden border-t border-[#2d3d52] bg-[#202B3B] py-8 sm:py-10">
+    <section className="overflow-hidden border-t border-[#2d3d52] static-bg py-8 sm:py-10">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex w-full items-end justify-between lg:mb-8">
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -135,9 +135,7 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
             <h2 className="section-title tracking-tight">
               Related <span className="text-gradient-pro">Programs</span>
             </h2>
-            <p className="max-w-2xl text-sm text-[#9eb0c4] sm:text-base">
-              Discover more premium software with free CD keys
-            </p>
+            <p className="max-w-2xl section-text">Discover more premium software with free CD keys</p>
           </div>
 
           <Link href="/programs" className={`${seeMoreBtn} shrink-0`}>
