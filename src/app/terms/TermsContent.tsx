@@ -2,6 +2,7 @@
 
 import { ContactModalTrigger } from "@/src/components/contact";
 import { useStoreDetails } from "@/src/components/providers/StoreDetailsProvider";
+import EnumeratedSectionHeading from "@/src/components/site/EnumeratedSectionHeading";
 import { resolveStoreDisplayName, resolveStoreDomain, resolveStoreWebsiteHref } from "@/src/lib/site/storeIdentity";
 
 export default function TermsContent() {
@@ -12,7 +13,7 @@ export default function TermsContent() {
   const storeWebsiteHref = resolveStoreWebsiteHref(storeDetails?.seo?.siteUrl);
 
   return (
-    <main className="min-h-screen bg-[#0f1923] text-[#c6d4df]">
+    <div className="min-h-screen static-bg text-[#c6d4df]">
       {/* Hero Section */}
       <div className="border-b border-[#2a475e] bg-[#16202d]">
         <div className="mx-auto max-w-360 px-4 py-14 sm:px-6 lg:px-8">
@@ -37,12 +38,9 @@ export default function TermsContent() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="space-y-6 rounded-sm border border-[#2a475e] bg-[#1b2838] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.35)] sm:p-8">
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                1
-              </span>
+            <EnumeratedSectionHeading index={1}>
               Acceptance of <span className="text-gradient-pro">Terms</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               By accessing and using KeyAway, you agree to comply with these Terms of Service. If you do not agree,
               please discontinue use of the website.
@@ -50,12 +48,9 @@ export default function TermsContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                2
-              </span>
+            <EnumeratedSectionHeading index={2}>
               Purpose of the <span className="text-gradient-pro">Site</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">
                 {storeTitle} provides access to publicly available giveaway CD keys for selected software programs.
@@ -75,12 +70,9 @@ export default function TermsContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                3
-              </span>
+            <EnumeratedSectionHeading index={3}>
               Affiliate disclosure and <span className="text-gradient-pro">outbound links</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">
                 {storeTitle} does <strong className="text-white">not</strong> sell software, licenses, or subscriptions
@@ -114,12 +106,9 @@ export default function TermsContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                4
-              </span>
+            <EnumeratedSectionHeading index={4}>
               User Contributions &amp; <span className="text-gradient-pro">Key Suggestions</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">Users can contribute to KeyAway by:</p>
               <ul className="ml-4 list-inside list-disc space-y-2 text-[#c6d4df]">
@@ -151,12 +140,9 @@ export default function TermsContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                5
-              </span>
+            <EnumeratedSectionHeading index={5}>
               Validity of <span className="text-gradient-pro">Keys</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               Giveaway keys may only work with specific versions of the software and for a limited time. We cannot
               guarantee their availability or functionality once the distributor ends the promotion.
@@ -164,12 +150,9 @@ export default function TermsContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                6
-              </span>
+            <EnumeratedSectionHeading index={6}>
               <span className="text-gradient-pro">Donations</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               Donations are voluntary and non-refundable. They are used solely to support the operation and hosting of
               the website.
@@ -177,12 +160,9 @@ export default function TermsContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                7
-              </span>
+            <EnumeratedSectionHeading index={7}>
               Limitation of <span className="text-gradient-pro">Liability</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               {storeTitle} is provided &quot;as is.&quot; We are not responsible for invalid, expired, or misused CD
               keys, nor for damages arising from the use of this website.
@@ -190,12 +170,9 @@ export default function TermsContent() {
           </section>
 
           <section>
-            <h2 className="section-title mb-4 flex items-center">
-              <span className="mr-3 flex h-8 w-8 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
-                8
-              </span>
+            <EnumeratedSectionHeading index={8}>
               Contact &amp; <span className="text-gradient-pro">Questions</span>
-            </h2>
+            </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
               If you have any questions about these Terms of Service or need to report an issue, please{" "}
               <ContactModalTrigger
@@ -208,6 +185,6 @@ export default function TermsContent() {
           </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
