@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <main className="min-h-screen bg-neutral-900">
+    <div className="min-h-screen bg-neutral-900">
       {/* Program Information Section Loading */}
       <section className="relative py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
@@ -137,6 +137,6 @@ export default function Loading() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
