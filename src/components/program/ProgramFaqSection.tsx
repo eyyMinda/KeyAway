@@ -5,7 +5,7 @@ export default function ProgramFaqSection({ programTitle, items }: { programTitl
   if (!items || items.length < 2) return null;
 
   return (
-    <section id="faq" className="border-t border-[#2a475e] bg-[#0f1923] py-8 sm:py-10">
+    <section id="faq" className="border-t border-[#2a475e] page-bg py-8 sm:py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start gap-4 lg:gap-8">
           <div className="flex flex-col gap-3">
