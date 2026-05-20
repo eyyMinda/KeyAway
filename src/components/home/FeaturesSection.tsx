@@ -1,6 +1,15 @@
 "use client";
 
-import { FaUsers, FaChartLine, FaShieldAlt, FaClock, FaCheckCircle, FaSearch, FaKey, FaClipboardList } from "react-icons/fa";
+import {
+  FaUsers,
+  FaChartLine,
+  FaShieldAlt,
+  FaClock,
+  FaCheckCircle,
+  FaSearch,
+  FaKey,
+  FaClipboardList
+} from "react-icons/fa";
 import { ContactModalTrigger } from "@/src/components/contact";
 
 export default function FeaturesSection() {
@@ -70,7 +79,7 @@ export default function FeaturesSection() {
   };
 
   return (
-    <section id="how-it-works" className="border-t border-[#2a475e] bg-[#16202d] py-12 sm:py-16 lg:py-20">
+    <section id="how-it-works" className="border-t border-[#2a475e] static-bg py-12 sm:py-16 lg:py-20">
       <div className="mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 sm:mb-12 lg:mb-16">
@@ -78,7 +87,7 @@ export default function FeaturesSection() {
           <h2 className="section-title mb-3">
             How <span className="text-gradient-pro">KeyAway Works</span>
           </h2>
-          <p className="max-w-3xl px-2 text-base text-[#8f98a0] sm:text-lg lg:text-xl">
+          <p className="max-w-3xl section-text">
             We provide a community-driven platform for sharing and maintaining free CD keys. Our system ensures you
             always have access to working activation keys.
           </p>
