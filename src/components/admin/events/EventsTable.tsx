@@ -155,6 +155,7 @@ export default function EventsTable({
           itemsPerPage={itemsPerPage}
           onPageChange={onPageChange}
           variant="simple"
+          tone="dark"
           className=""
         />
       </div>
