@@ -91,18 +91,18 @@ export default function ActivationInstructions({
   }, [pageTitle, programTitle]);
 
   return (
-    <section className="border-t border-[#2a475e] bg-[#0f1923] py-8 sm:py-12 lg:py-16">
+    <section className="border-t border-[#2a475e] static-bg py-8 sm:py-12 lg:py-16">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8 lg:mb-12">
           <div className="section-label mb-3">Activation Guide</div>
           <h2 className="section-title mb-3 sm:mb-4">
             {activationTitleParts.before}
-            {activationTitleParts.middle ? <span>{activationTitleParts.middle}</span> : null}
-            {activationTitleParts.after.trim() ? (
-              <span className="text-gradient-pro">{activationTitleParts.after}</span>
+            {activationTitleParts.middle ? (
+              <span className="text-gradient-pro">{activationTitleParts.middle}</span>
             ) : null}
+            {activationTitleParts.after}
           </h2>
-          <p className="max-w-3xl px-2 text-sm text-[#8f98a0] sm:text-base lg:text-lg xl:text-xl">{pageLead}</p>
+          <p className="max-w-3xl px-2 section-text">{pageLead}</p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
@@ -125,24 +125,22 @@ export default function ActivationInstructions({
                 ) : (
                   <div className={iconClasses}>{iconEl}</div>
                 )}
-                <h3 className="mb-2 text-base font-semibold text-[#c6d4df] sm:mb-3 sm:text-lg lg:text-xl">{step.title}</h3>
-                <p className="px-2 text-sm leading-relaxed text-[#8f98a0] sm:text-base">{step.description}</p>
+                <h3 className="mb-2 text-base font-semibold sm:mb-3 sm:text-lg lg:text-xl">{step.title}</h3>
+                <p className="px-2 text-sm leading-relaxed text-neutral-100 sm:text-base">{step.description}</p>
               </div>
             );
           })}
         </div>
 
         <div className="rounded-sm border border-[#4a90c4] bg-[#1a2f45] p-5 sm:p-6 lg:p-8">
-          <h3 className="mb-4 text-base font-semibold text-[#c6d4df] sm:mb-6 sm:text-lg lg:text-xl">
-            {tipsSectionTitle}
-          </h3>
+          <h3 className="mb-4 text-base font-semibold sm:mb-6 sm:text-lg lg:text-xl">{tipsSectionTitle}</h3>
           <div className="grid md:grid-cols-3 gap-4 sm:gap-6">
             {tipBlocks.map((tip, index) => (
               <div key={index} className="flex items-start space-x-2 sm:space-x-3">
                 <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-[#3a2800] sm:h-6 sm:w-6">
                   <tip.icon className="h-2.5 w-2.5 text-[#e8632a] sm:h-3 sm:w-3" />
                 </div>
-                <p className="text-xs leading-relaxed text-[#c6d4df] sm:text-sm">{tip.text}</p>
+                <p className="text-xs leading-relaxed text-neutral-100 sm:text-sm">{tip.text}</p>
               </div>
             ))}
           </div>
