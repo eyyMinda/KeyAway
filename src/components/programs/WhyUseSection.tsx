@@ -4,14 +4,14 @@ import { FaCheckCircle, FaClock, FaUsers } from "react-icons/fa";
 
 export default function WhyUseSection() {
   return (
-    <section className="border-t border-[#2a475e] bg-[#0f1923] py-12 sm:py-16 lg:py-20">
+    <section className="border-t border-[#2a475e] static-bg py-12 sm:py-16 lg:py-20">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10 sm:mb-12 lg:mb-16">
           <div className="section-label mb-3">Why Use KeyAway</div>
           <h2 className="section-title mb-4 sm:mb-6">
             Why Use <span className="text-gradient-pro">KeyAway?</span>
           </h2>
-          <p className="max-w-2xl text-base leading-relaxed text-[#8f98a0] sm:text-lg">
+          <p className="max-w-2xl section-text">
             Your go-to platform for finding, verifying, and sharing free CD keys—built and maintained by the community.
           </p>
         </div>
