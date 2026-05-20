@@ -6,6 +6,7 @@ export default function ProgramsFilter({
   filter,
   sortBy,
   onSearchChange,
+  onSearchCommit,
   onFilterChange,
   onSortChange
 }: ProgramsFilterProps) {
@@ -16,6 +17,12 @@ export default function ProgramsFilter({
           <SearchInput
             value={searchTerm}
             onChange={onSearchChange}
+            onKeyDown={e => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onSearchCommit?.();
+              }
+            }}
             placeholder="Search programs..."
             className="[&_input]:rounded-sm [&_input]:border-[#3d6e8c] [&_input]:bg-[#32465a] [&_input]:text-[#c6d4df] [&_input]:placeholder:text-[#556772] [&_input]:focus:border-[#66c0f4] [&_input]:focus:ring-[#1a9fff]/30 [&_svg]:text-[#8f98a0]"
           />
