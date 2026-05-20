@@ -137,6 +137,7 @@ export default function KeyReportsTable({
         itemsPerPage={pageSize}
         onPageChange={setCurrentPage}
         variant="simple"
+        tone="dark"
         alwaysVisible={true}
         className="p-4 border-t border-gray-200"
       />
