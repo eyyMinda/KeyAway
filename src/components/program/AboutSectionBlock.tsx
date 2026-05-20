@@ -18,14 +18,14 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
   const content = (
     <div className="mx-auto max-w-3xl text-start">
       {sectionTitle ? (
-        <h3 className="mb-3 text-lg font-bold text-[#c6d4df] sm:text-xl lg:text-2xl">{sectionTitle}</h3>
+        <h3 className="mb-3 text-lg font-bold text-white sm:text-xl lg:text-2xl">{sectionTitle}</h3>
       ) : null}
-      <div className="text-sm leading-snug text-[#8f98a0] [&_a]:text-[#66d9ff] [&_p]:my-2 [&_p]:leading-relaxed sm:text-base">
+      <div className="text-sm leading-snug text-neutral-100 [&_a]:text-[#66d9ff] [&_p]:my-2 [&_p]:leading-relaxed sm:text-base">
         <RichText value={description} className="[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal" />
       </div>
       {points && points.length > 0 ? (
         <ul
-          className={`mt-4 space-y-2.5 text-sm text-[#8f98a0] sm:text-base ${
+          className={`mt-4 space-y-2.5 text-sm text-neutral-100 sm:text-base ${
             hasImage ? "text-left" : "inline-block text-left mx-auto max-w-lg"
           }`}>
           {points.map((p, i) => (
@@ -46,7 +46,7 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
               ) : (
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#66c0f4]" aria-hidden />
               )}
-              <div className="min-w-0 flex-1 text-sm text-[#8f98a0] [&_a]:text-[#66d9ff] [&_p]:my-1 [&_p]:leading-relaxed sm:text-base">
+              <div className="min-w-0 flex-1 text-sm text-neutral-100 [&_a]:text-[#66d9ff] [&_p]:my-1 [&_p]:leading-relaxed sm:text-base">
                 <RichText value={p.text} />
               </div>
             </li>
