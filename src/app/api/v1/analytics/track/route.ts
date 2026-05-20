@@ -126,8 +126,13 @@ export async function POST(req: NextRequest) {
     const slugWasProvided = Boolean(programSlug?.trim());
 
     if (body.event === "page_viewed" && programSlug) {
-      const ok = await isProgramSlugPublished(programSlug);
-      if (!ok) programSlug = undefined;
+      const pathNorm = normalizePath(typeof body.meta?.path === "string" ? body.meta.path : "");
+      const slugFromPath = pathNorm.startsWith("/program/") ? pathNorm.split("/")[2] : undefined;
+      const trustedProgramPath = Boolean(slugFromPath && slugFromPath === programSlug.trim());
+      if (!trustedProgramPath) {
+        const ok = await isProgramSlugPublished(programSlug);
+        if (!ok) programSlug = undefined;
+      }
     }
 
     const ipHash = ipHashEarly;
