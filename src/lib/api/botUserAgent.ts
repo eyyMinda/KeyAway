@@ -8,7 +8,7 @@
 
 /** Named crawlers / preview bots (must stay in sync with storefront guard where possible). */
 const EXPLICIT_CRAWLER_RE =
-  /googlebot|adsbot-google|textadsbot-google|mediapartners-google|google-adwords|feedfetcher-google|apis-google|storebot-google|googleproducer|adsbot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|facebookexternalhit|twitterbot|pinterestbot|linkedinbot|slackbot|telegrambot|whatsapp|applebot/i;
+  /googlebot|adsbot-google|textadsbot-google|mediapartners-google|google-adwords|feedfetcher-google|apis-google|storebot-google|googleproducer|adsbot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|facebookexternalhit|facebookbot|meta-externalagent|meta-externalfetcher|meta-externalads|meta-webindexer|twitterbot|pinterestbot|linkedinbot|slackbot|discordbot|telegrambot|whatsapp|applebot|instagrambot|vkshare|w3c_validator/i;
 
 /** Browser automation / headless (UA substring — no `navigator.webdriver` on server). */
 const AUTOMATION_UA_RE = /(headless|phantomjs|puppeteer|playwright|webdriver|headlesschrome)/i;
@@ -18,10 +18,10 @@ const AUTOMATION_UA_RE = /(headless|phantomjs|puppeteer|playwright|webdriver|hea
  * Kept alongside EXPLICIT_CRAWLER_RE so behavior stays at least as broad as before.
  */
 const ADDITIONAL_BOT_HEURISTIC_RE =
-  /\bbot\b|crawl|spider|embedly|quora link preview|pinterest|discordbot|preview|lighthouse|pingdom|uptime|statuscake|semrush|ahrefs|mj12bot|dotbot|bytespider|petalbot|yandex|ia_archiver|archive\.org|wget|curl\/|libwww|python-requests|go-http|java\/|axios|httpie|scrapy|prerender|sitebulb|screaming frog/i;
+  /\bbot\b|crawl|spider|embedly|quora link preview|linkpreview|pinterest|preview|lighthouse|pingdom|uptime|statuscake|semrush|ahrefs|mj12bot|dotbot|bytespider|petalbot|ia_archiver|archive\.org|wget|curl\/|libwww|python-requests|go-http|java\/|axios|httpie|scrapy|prerender|sitebulb|screaming frog|gptbot|claudebot|anthropic-ai|cohere-ai|perplexitybot|amazonbot|applebot-extended/i;
 
 export function isLikelyBotUserAgent(userAgent: string | undefined | null): boolean {
-  if (!userAgent || !userAgent.trim()) return false;
+  if (!userAgent || !userAgent.trim()) return true;
 
   const ua = userAgent;
   if (EXPLICIT_CRAWLER_RE.test(ua)) return true;
