@@ -3,10 +3,7 @@ import NotFoundTracker from "@/src/components/NotFoundTracker";
 
 export type NotFoundVariant = "page" | "program";
 
-const copy: Record<
-  NotFoundVariant,
-  { heading: string; lead: string; browseLabel: string; browseHref: string }
-> = {
+const copy: Record<NotFoundVariant, { heading: string; lead: string; browseLabel: string; browseHref: string }> = {
   page: {
     heading: "Page Not Found",
     lead: "Oops! It looks like this page has gone missing. The CD key you're looking for might have been claimed or moved.",
@@ -25,7 +22,7 @@ export default function NotFoundView({ variant }: { variant: NotFoundVariant }) 
   const { heading, lead, browseLabel, browseHref } = copy[variant];
 
   return (
-    <main className="min-h-screen bg-neutral-900 flex items-center justify-center">
+    <div className="flex items-center justify-center px-4">
       <NotFoundTracker />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="mb-8">
@@ -88,6 +85,6 @@ export default function NotFoundView({ variant }: { variant: NotFoundVariant }) 
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
