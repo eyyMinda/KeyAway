@@ -1,4 +1,3 @@
-import React from "react";
 import { FaChevronDown } from "react-icons/fa";
 
 export type SortDirection = "asc" | "desc";
@@ -22,28 +21,21 @@ function renderHeaderCell(
   column: SortableColumn,
   sortColumn?: string,
   sortDirection?: SortDirection,
-  onSort?: (column: string) => void,
-  themeClass?: string
+  onSort?: (column: string) => void
 ) {
-  const isDarkTheme = themeClass?.includes("text-gray-200");
-
   if (column.sortable && onSort) {
     const isActive = sortColumn === column.key;
     const aria = isActive ? (sortDirection === "asc" ? "ascending" : "descending") : "none";
-    // All columns same color, active is darker (full black/white)
-    const baseColor = isDarkTheme ? "text-gray-300" : "text-gray-600";
-    const activeColor = isDarkTheme ? "text-white" : "text-gray-900";
-    const hoverColor = isDarkTheme ? "group-hover:text-gray-200" : "group-hover:text-gray-800";
 
     return (
       <th
         key={column.key}
         scope="col"
         aria-sort={aria}
-        className={`p-4 text-sm font-semibold ${isActive ? activeColor : baseColor} tracking-wider select-none ${column.className || ""}`}>
+        className={`p-4 text-sm font-semibold ${isActive ? "text-black" : "text-gray-600 hover:text-gray-500"} tracking-wider select-none ${column.className || ""}`}>
         <button onClick={() => onSort(column.key)} className="flex items-center group cursor-pointer w-full">
           <span>{column.label}</span>
-          <span className={`ml-1 ${hoverColor} ${isActive ? activeColor : baseColor}`}>
+          <span className="ml-1">
             <FaChevronDown
               className={`w-3 h-3 inline-block transition-transform ${
                 isActive && sortDirection === "desc" ? "rotate-180" : "rotate-0"
@@ -54,13 +46,9 @@ function renderHeaderCell(
       </th>
     );
   }
-  // Non-sortable columns use same color as inactive sortable columns
-  const nonSortableColor = isDarkTheme ? "text-gray-300" : "text-gray-600";
 
   return (
-    <th
-      key={column.key}
-      className={`p-4 text-sm font-semibold tracking-wider ${nonSortableColor} ${column.className || ""}`}>
+    <th key={column.key} className={`p-4 text-sm font-semibold tracking-wider text-gray-600 ${column.className || ""}`}>
       {column.label}
     </th>
   );
@@ -74,8 +62,8 @@ export default function SortableTableHead({
   className = ""
 }: SortableTableHeadProps) {
   return (
-    <thead className={`bg-gray-50 ${className}`}>
-      <tr>{columns.map(column => renderHeaderCell(column, sortColumn, sortDirection, onSort, className))}</tr>
+    <thead className={`${className}`}>
+      <tr>{columns.map(column => renderHeaderCell(column, sortColumn, sortDirection, onSort))}</tr>
     </thead>
   );
 }
