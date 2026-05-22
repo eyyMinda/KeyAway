@@ -178,7 +178,7 @@ export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHas
 /* ------------ Popular Programs (related / light cards — no per-program stats) ------------ */
 export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt desc) [0...6]{ ${relatedProgramsCardProjection} }`;
 
-/* ------------ Popular Programs by Page Views (same listing + featured shape as programsWithStatsQuery) ------------ */
+/* @deprecated Use programsWithStatsQuery + mergeProgramStats + sortPrograms("popular") — GROQ order uses stored scores only. */
 export const popularProgramsByViewsQuery = `*[_type == "program"]{ ${programsListingProjection}, ${featuredBlockProjection} } | order(popularityScore desc) [0...6]`;
 
 /* ------------ Statistics ------------ */
