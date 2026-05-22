@@ -3,13 +3,7 @@
 import { FaFire } from "react-icons/fa";
 import { ProgramsGrid } from "@/src/components/programs";
 import { PopularProgramsSectionProps } from "@/src/types/home";
-import { sortByPopularity } from "@/src/lib/program/programUtils";
-
 export default function PopularProgramsSection({ programs }: PopularProgramsSectionProps) {
-  // Sort programs by popularity score (highest first)
-  const sortedPrograms = sortByPopularity(programs);
-
-  // Find programs with highest stats for badges
   const maxViews = Math.max(...programs.map(p => p.viewCount), 0);
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
 
@@ -32,7 +26,7 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
 
         {/* Programs Grid with CTAs */}
         <ProgramsGrid
-          programs={sortedPrograms}
+          programs={programs}
           maxViews={maxViews}
           maxDownloads={maxDownloads}
           showBrowseAllCTA={true}

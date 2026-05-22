@@ -1,11 +1,15 @@
 /** @fileoverview Fetches merged tracking events for admin ranges, bundle program counts for homepage, visitor tag aggregates. */
+import { BUNDLING_RETENTION_MS } from "@/src/lib/analytics/bundlingConstants";
 import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { client } from "@/src/sanity/lib/client";
-import { trackingEventsWithRangeQuery, trackingEventBundlesQuery, bundleCountsQuery } from "@/src/lib/sanity/queries";
+import {
+  trackingEventsWithRangeQuery,
+  trackingEventBundlesQuery,
+  bundleCountsQuery,
+  visitorTagAggregatesQuery
+} from "@/src/lib/sanity/queries";
 import { AnalyticsEventData } from "@/src/types";
-
-const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 export interface BundleCountsByProgram {
   page_viewed: number;
@@ -61,11 +65,11 @@ export function mergeSingleProgramStats(
 
 /**
  * Fetches all events (singular + bundled) for a date range.
- * Skips bundle fetch when range is entirely within retention (since >= now - 7d).
+ * Skips bundle fetch when range is entirely within retention window.
  */
 export async function fetchEventsForRange(since: string, until: string): Promise<AnalyticsEventData[]> {
   const now = Date.now();
-  const retentionCutoff = new Date(now - RETENTION_MS).toISOString();
+  const retentionCutoff = new Date(now - BUNDLING_RETENTION_MS).toISOString();
   const needBundles = since < retentionCutoff;
 
   const [singular, bundles] = await Promise.all([
@@ -95,10 +99,11 @@ export async function fetchVisitorTagAggregatesForRange(
   since: string,
   until: string
 ): Promise<VisitorTagAggregateRow[]> {
-  const rows = await client.fetch<Array<{ visitTier?: string; isSpammer?: boolean }>>(
-    `*[_type == "visitor" && lastActivityAt >= $since && lastActivityAt <= $until]{ visitTier, isSpammer }`,
-    { since, until }
-  );
+  const { singular, bundled } = await client.fetch<{
+    singular?: Array<{ visitTier?: string; isSpammer?: boolean }>;
+    bundled?: Array<{ visitTier?: string; isSpammer?: boolean }>;
+  }>(visitorTagAggregatesQuery, { since, until });
+  const rows = [...(singular ?? []), ...(bundled ?? [])];
   const tierOrder = ["new", "returning", "regular", "star"] as const;
   const tierCounts = new Map<string, number>();
   let spammers = 0;

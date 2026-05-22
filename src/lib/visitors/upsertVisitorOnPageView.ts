@@ -1,4 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
+import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
 
 const SESSION_GAP_MS = 60 * 60 * 1000;
@@ -25,16 +26,21 @@ export async function upsertVisitorOnPageView(
   );
 
   if (!existing) {
+    const archived = await fetchVisitorByHash(visitorHash);
+    const prevCount = archived?.visitCount ?? 0;
+    const contributionScore = archived?.contributionScore ?? 0;
+    const isSpammer = archived?.isSpammer === true;
+    const nextCount = prevCount + 1;
     await client.create({
       _type: "visitor",
       visitorHash,
-      visitCount: 1,
+      visitCount: nextCount,
       lastActivityAt: now,
-      visitTier: resolveVisitTier(1, 0, false),
-      isSpammer: false,
-      reportCount: 0,
-      suggestionCount: 0,
-      contributionScore: 0,
+      visitTier: resolveVisitTier(nextCount, contributionScore, isSpammer),
+      isSpammer,
+      reportCount: archived?.reportCount ?? 0,
+      suggestionCount: archived?.suggestionCount ?? 0,
+      contributionScore,
       ...(location?.country ? { country: location.country } : {}),
       ...(location?.city ? { city: location.city } : {}),
       ...(location?.country || location?.city ? { geoUpdatedAt: now } : {}),
