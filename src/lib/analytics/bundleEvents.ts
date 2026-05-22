@@ -1,12 +1,13 @@
 /** @fileoverview Cron/migration: moves old `trackingEvent` docs into `trackingEventBundle`, deletes sources, optional retention window. */
 import { randomUUID } from "node:crypto";
+import {
+  BUNDLE_MAX_ITERATIONS,
+  BUNDLE_SIZE,
+  BUNDLING_RETENTION_DAYS
+} from "@/src/lib/analytics/bundlingConstants";
 import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
 import { revalidateTag } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
-
-const RETENTION_DAYS = 7;
-const BUNDLE_SIZE = 1000;
-const MAX_ITERATIONS = 10;
 
 const EVENT_FIELDS =
   "event, programSlug, notFound, path, referrer, country, city, social, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
@@ -43,11 +44,11 @@ export interface BundleEventsResult {
   error?: string;
 }
 
-/** Runs the event bundling process. Uses retention cutoff (7 days) by default. Set skipRetention=true for one-time migration. */
+/** Runs the event bundling process. Uses retention cutoff (2 days) by default. Set skipRetention=true for one-time migration. */
 export async function runBundleEvents(skipRetention = false): Promise<BundleEventsResult> {
   const cutoff = skipRetention
     ? new Date(Date.now() + 864e5).toISOString() // future = bundle all
-    : new Date(Date.now() - RETENTION_DAYS * 864e5).toISOString();
+    : new Date(Date.now() - BUNDLING_RETENTION_DAYS * 864e5).toISOString();
   let created = 0;
   let appended = 0;
 
@@ -87,7 +88,7 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
       `*[_type == "trackingEventBundle"] | order(timeRangeEnd desc) [0]{ timeRangeEnd }`
     );
     let after = latestBundle?.timeRangeEnd ?? "";
-    for (let i = 0; i < MAX_ITERATIONS; i++) {
+    for (let i = 0; i < BUNDLE_MAX_ITERATIONS; i++) {
       const batch = await client.fetch<Array<Record<string, unknown> & { _id: string }>>(
         after
           ? `*[_type == "trackingEvent" && createdAt < $cutoff && createdAt > $after] | order(createdAt asc) [0...$limit]{ _id, ${EVENT_FIELDS} }`
