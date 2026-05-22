@@ -13,6 +13,7 @@ export const cronRun = defineType({
       options: {
         list: [
           { title: "Bundle Events", value: "bundle-events" },
+          { title: "Bundle Visitors", value: "bundle-visitors" },
           { title: "Update Expired Keys", value: "update-expired-keys" },
           { title: "Prune Cron Runs", value: "prune-cron-runs" }
         ]

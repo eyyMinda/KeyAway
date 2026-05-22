@@ -2,7 +2,9 @@ import { type SchemaTypeDefinition } from "sanity";
 
 import { trackingEvent } from "./analytics/trackingEvent";
 import { bundledTrackingEvent } from "./analytics/bundledTrackingEvent";
+import { bundledVisitor } from "./analytics/bundledVisitor";
 import { trackingEventBundle } from "./analytics/trackingEventBundle";
+import { visitorBundle } from "./analytics/visitorBundle";
 import { keyReport } from "./analytics/keyReport";
 import { visitor } from "./analytics/visitor";
 
@@ -25,7 +27,9 @@ export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     trackingEvent,
     bundledTrackingEvent,
+    bundledVisitor,
     trackingEventBundle,
+    visitorBundle,
     keyReport,
     cronRun,
     siteNotificationFeed,

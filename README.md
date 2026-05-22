@@ -54,7 +54,7 @@ src/
       analytics, events, programs, key-reports, key-suggestions, messages
     api/v1/                       # API
       analytics/track, key-reports, key-suggestions, contact
-      cron/update-expired-keys, cron/bundle-events, cron/prune-cron-runs
+      cron/update-expired-keys, cron/bundle-events, cron/bundle-visitors, cron/prune-cron-runs
       webhooks/revalidate
       admin/*                     # Protected admin APIs
   components/                     # UI (layout, program, admin, home)
@@ -155,7 +155,7 @@ In Studio, create **Program** documents and add CD keys (key, status, version, v
 
 - Set all required env vars in the Vercel project.
 - Build command: `npm run build`; output: default Next.js.
-- Optional: Vercel Cron for `/api/v1/cron/update-expired-keys`, `/api/v1/cron/bundle-events`, and `/api/v1/cron/prune-cron-runs` (use `CRON_SECRET` or Vercel’s cron headers).
+- Optional: Vercel Cron for `/api/v1/cron/update-expired-keys`, `/api/v1/cron/bundle-events`, `/api/v1/cron/bundle-visitors`, and `/api/v1/cron/prune-cron-runs` (use `CRON_SECRET` or Vercel’s cron headers).
 - **Webhook:** Point Sanity revalidate webhook to `https://yourdomain.com/api/v1/webhooks/revalidate` and set `SANITY_WEBHOOK_SECRET`.
 
 ---
