@@ -7,6 +7,7 @@ import ModalSection from "./ModalSection";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { FiAlertTriangle, FiCheck, FiX } from "react-icons/fi";
 import { client } from "@/src/sanity/lib/client";
+import { fetchVisitorsByHashes } from "@/src/lib/visitors/visitorLookup";
 import { effectiveReferrerHref, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
 import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import {
@@ -128,16 +129,12 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
       return;
     }
     let cancelled = false;
-    client
-      .fetch<Array<{ visitorHash?: string; visitTier?: string; isSpammer?: boolean }>>(
-        `*[_type=="visitor" && visitorHash in $hashes]{ visitorHash, visitTier, isSpammer }`,
-        { hashes }
-      )
-      .then(rows => {
+    fetchVisitorsByHashes(hashes)
+      .then(map => {
         if (cancelled) return;
         const m: Record<string, { visitTier?: string; isSpammer?: boolean }> = {};
-        for (const r of rows ?? []) {
-          if (r.visitorHash) m[r.visitorHash] = { visitTier: r.visitTier, isSpammer: r.isSpammer };
+        for (const [hash, v] of map) {
+          m[hash] = { visitTier: v.visitTier, isSpammer: v.isSpammer };
         }
         setVisitorByHash(m);
       })

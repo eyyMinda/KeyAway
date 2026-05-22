@@ -3,6 +3,7 @@ import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { visitorFieldsFromHashProjection } from "@/src/lib/sanity/queries";
 
 type BundledEvent = Record<string, unknown> & { _key?: string };
 
@@ -107,13 +108,14 @@ export async function GET(req: NextRequest) {
     const singular = await client.fetch<Array<Record<string, unknown> & { _id: string; _type: string }>>(
       `*[_type == "trackingEvent" ${singularFilter} ${programFilter} ${pathFilter}]{
         _id, _type, event, programSlug, notFound, social, path, referrer, country, city,
-        key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
+        key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
+        ${visitorFieldsFromHashProjection}
       } | order(${sort} ${order})`,
       { term, programSlug: programSlug ?? "", path: path ?? "" }
     );
 
     const allBundles = await client.fetch<Array<{ _id: string; events: BundledEvent[] }>>(
-      `*[_type == "trackingEventBundle"]{ _id, "events": events[] }`
+      `*[_type == "trackingEventBundle"]{ _id, "events": events[]{ event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _key, ${visitorFieldsFromHashProjection} } }`
     );
 
     const matchingFromBundles: Array<{ bundleId: string; event: BundledEvent }> = [];

@@ -10,6 +10,7 @@ import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
 import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
+import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 
 const ANALYTICS_EVENTS = new Set([
@@ -136,12 +137,18 @@ export async function POST(req: NextRequest) {
     }
 
     const ipHash = ipHashEarly;
-    const visitor = ipHash
-      ? await client.fetch<{ _id?: string; isSpammer?: boolean; country?: string; city?: string } | null>(
-          `*[_type == "visitor" && visitorHash == $h][0]{ _id, isSpammer, country, city }`,
-          { h: ipHash }
-        )
-      : null;
+    const resolvedVisitor = ipHash ? await fetchVisitorByHash(ipHash) : null;
+    const visitor =
+      resolvedVisitor?.source === "live" && resolvedVisitor._id
+        ? {
+            _id: resolvedVisitor._id,
+            isSpammer: resolvedVisitor.isSpammer,
+            country: resolvedVisitor.country,
+            city: resolvedVisitor.city
+          }
+        : resolvedVisitor
+          ? { isSpammer: resolvedVisitor.isSpammer, country: resolvedVisitor.country, city: resolvedVisitor.city }
+          : null;
 
     let location: { country?: string; city?: string } | undefined =
       visitor?.country || visitor?.city ? { country: visitor.country, city: visitor.city } : undefined;

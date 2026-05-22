@@ -5,6 +5,7 @@ import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
+import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 
 export async function PATCH(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
@@ -22,35 +23,35 @@ export async function PATCH(req: NextRequest) {
     if (!visitorHash) return Errors.validation("visitorHash required");
 
     const now = new Date().toISOString();
-    const docId = await client.fetch<string | null>(`*[_type == "visitor" && visitorHash == $h][0]._id`, {
-      h: visitorHash
-    });
+    const resolved = await fetchVisitorByHash(visitorHash);
+    const docId = resolved?.source === "live" ? resolved._id : undefined;
 
     if (!docId) {
-      if (!isSpammer) return Errors.notFound("No visitor document for this hash");
+      if (!isSpammer && !resolved) return Errors.notFound("No visitor document for this hash");
+      const visitCount = resolved?.visitCount ?? 0;
+      const contributionScore = resolved?.contributionScore ?? 0;
+      const visitTier = resolveVisitTier(visitCount, contributionScore, isSpammer);
       await client.create({
         _type: "visitor",
         visitorHash,
-        visitCount: 0,
-        lastActivityAt: now,
-        visitTier: "new",
-        isSpammer: true,
-        reportCount: 0,
-        suggestionCount: 0,
-        contributionScore: 0,
-        spamMarkedAt: now,
+        visitCount,
+        lastActivityAt: resolved?.lastActivityAt ?? now,
+        visitTier,
+        isSpammer,
+        reportCount: resolved?.reportCount ?? 0,
+        suggestionCount: resolved?.suggestionCount ?? 0,
+        contributionScore,
+        ...(isSpammer ? { spamMarkedAt: now } : {}),
+        ...(resolved?.country ? { country: resolved.country } : {}),
+        ...(resolved?.city ? { city: resolved.city } : {}),
         createdAt: now,
         updatedAt: now
       });
-      return NextResponse.json({ data: { ok: true, visitorHash, isSpammer: true }, meta: {} });
+      return NextResponse.json({ data: { ok: true, visitorHash, isSpammer }, meta: {} });
     }
 
-    const current = await client.fetch<{ visitCount?: number; contributionScore?: number } | null>(
-      `*[_type == "visitor" && _id == $id][0]{ visitCount, contributionScore }`,
-      { id: docId }
-    );
-    const visitCount = current?.visitCount ?? 0;
-    const contributionScore = current?.contributionScore ?? 0;
+    const visitCount = resolved?.visitCount ?? 0;
+    const contributionScore = resolved?.contributionScore ?? 0;
     const visitTier = resolveVisitTier(visitCount, contributionScore, isSpammer);
 
     if (isSpammer) {

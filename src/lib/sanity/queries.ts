@@ -114,6 +114,17 @@ export const programBySlugQuery = `
 `;
 
 /* ------------ Analytics ------------ */
+/** Resolves tier/spammer from live visitor or archived visitor bundles (for bundled events). */
+export const visitorFieldsFromHashProjection = `
+  "visitTier": coalesce(
+    *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier,
+    *[_type=="visitorBundle"].visitors[visitorHash == ^.ipHash][0].visitTier
+  ),
+  "visitorIsSpammer": coalesce(
+    *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer,
+    *[_type=="visitorBundle"].visitors[visitorHash == ^.ipHash][0].isSpammer
+  )`;
+
 export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $since]{
       _id, event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
@@ -121,8 +132,7 @@ export const trackingEventsQuery = `*[_type=="trackingEvent" && createdAt >= $si
 /* ------------ Analytics with Custom Date Range ------------ */
 export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && createdAt >= $since && createdAt <= $until]{
       _id, event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
-      "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier,
-      "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer
+      ${visitorFieldsFromHashProjection}
     } | order(createdAt desc)`;
 
 /* ------------ Bundle counts by program (for merging with singular counts) ------------ */
@@ -133,7 +143,15 @@ export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
 /* ------------ Bundled Events (overlaps range, events filtered in-doc) ------------ */
 export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
   _id,
-  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, "visitTier": *[_type=="visitor" && visitorHash == ^.ipHash][0].visitTier, "visitorIsSpammer": *[_type=="visitor" && visitorHash == ^.ipHash][0].isSpammer }
+  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, ${visitorFieldsFromHashProjection} }
+}`;
+
+/** Active + bundled visitors with lastActivityAt in range (admin tier aggregates). */
+export const visitorTagAggregatesQuery = `{
+  "singular": *[_type == "visitor" && lastActivityAt >= $since && lastActivityAt <= $until]{ visitTier, isSpammer },
+  "bundled": *[_type == "visitorBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
+    "rows": visitors[lastActivityAt >= $since && lastActivityAt <= $until]{ visitTier, isSpammer }
+  }.rows[]
 }`;
 
 /* ------------ Key Reports ------------ */

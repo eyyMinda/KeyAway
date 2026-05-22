@@ -1,4 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
+import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
 
 export type VisitorContributionKind = "report" | "suggestion";
@@ -47,16 +48,25 @@ export async function upsertVisitorContribution(
   const nextVisitTier = resolveVisitTier(prevVisitCount, nextContributionScore, isSpammer);
 
   if (!existing?._id) {
+    const archived = await fetchVisitorByHash(visitorHash);
+    const visitCount = archived?.visitCount ?? 0;
+    const restoredReport = archived?.reportCount ?? 0;
+    const restoredSuggestion = archived?.suggestionCount ?? 0;
+    const restoredScore = archived?.contributionScore ?? 0;
+    const isSpammer = archived?.isSpammer === true;
+    const reportCount = kind === "report" ? restoredReport + 1 : restoredReport;
+    const suggestionCount = kind === "suggestion" ? restoredSuggestion + 1 : restoredSuggestion;
+    const contributionScore = restoredScore + 1;
     await client.create({
       _type: "visitor",
       visitorHash,
-      visitCount: 0,
-      lastActivityAt: now,
-      visitTier: nextVisitTier,
-      isSpammer: false,
-      reportCount: nextReportCount,
-      suggestionCount: nextSuggestionCount,
-      contributionScore: nextContributionScore,
+      visitCount,
+      lastActivityAt: archived?.lastActivityAt ?? now,
+      visitTier: resolveVisitTier(visitCount, contributionScore, isSpammer),
+      isSpammer,
+      reportCount,
+      suggestionCount,
+      contributionScore,
       createdAt: now,
       updatedAt: now
     });
