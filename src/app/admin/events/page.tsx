@@ -9,7 +9,7 @@ import { SortableColumn, SortDirection } from "@/src/components/ui/SortableTable
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AnalyticsEventData } from "@/src/types";
 import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
-import { fetchEventsForRange } from "@/src/lib/analytics/eventsApi";
+import { fetchEventsForRangeFromAdminApi } from "@/src/lib/analytics/eventsApi";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);
@@ -45,7 +45,7 @@ export default function EventsPage() {
         return;
       }
       const { since, until } = getDateRange(selectedPeriod, customDateRange);
-      const eventsData = await fetchEventsForRange(since, until);
+      const eventsData = await fetchEventsForRangeFromAdminApi(since, until);
       setEvents(eventsData);
     } catch (error) {
       console.error("Error fetching events:", error);

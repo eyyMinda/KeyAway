@@ -3,7 +3,7 @@ import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-import { visitorFieldsFromHashProjection } from "@/src/lib/sanity/queries";
+import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
 
 type BundledEvent = Record<string, unknown> & { _key?: string };
 
@@ -108,14 +108,13 @@ export async function GET(req: NextRequest) {
     const singular = await client.fetch<Array<Record<string, unknown> & { _id: string; _type: string }>>(
       `*[_type == "trackingEvent" ${singularFilter} ${programFilter} ${pathFilter}]{
         _id, _type, event, programSlug, notFound, social, path, referrer, country, city,
-        key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
-        ${visitorFieldsFromHashProjection}
+        key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
       } | order(${sort} ${order})`,
       { term, programSlug: programSlug ?? "", path: path ?? "" }
     );
 
     const allBundles = await client.fetch<Array<{ _id: string; events: BundledEvent[] }>>(
-      `*[_type == "trackingEventBundle"]{ _id, "events": events[]{ event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _key, ${visitorFieldsFromHashProjection} } }`
+      `*[_type == "trackingEventBundle"]{ _id, "events": events[]{ event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _key } }`
     );
 
     const matchingFromBundles: Array<{ bundleId: string; event: BundledEvent }> = [];
@@ -129,7 +128,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Normalize: singular have _id, bundled have _key + bundleId
-    const allEvents = [
+    let allEvents = [
       ...(singular ?? []).map(s => ({ ...s, source: "singular" as const })),
       ...matchingFromBundles.map(({ bundleId, event }) => ({
         ...event,
@@ -138,6 +137,8 @@ export async function GET(req: NextRequest) {
         source: "bundle" as const
       }))
     ];
+
+    allEvents = await enrichEventsWithVisitorMeta(allEvents);
 
     // Sort merged (simple in-memory; singular already sorted)
     allEvents.sort((a, b) => {

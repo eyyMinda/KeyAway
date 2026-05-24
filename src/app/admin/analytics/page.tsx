@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { client } from "@/src/sanity/lib/client";
-import { fetchEventsForRange, fetchVisitorTagAggregatesForRange } from "@/src/lib/analytics/eventsApi";
+import { fetchEventsForRangeFromAdminApi, fetchVisitorTagAggregatesForRange } from "@/src/lib/analytics/eventsApi";
 import type { VisitorTagAggregateRow } from "@/src/lib/analytics/eventsApi";
 import { visitorTierSwatchBgClass } from "@/src/theme/colorSchema";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
@@ -48,7 +48,7 @@ export default function AnalyticsPage() {
       }
       const { since, until } = getDateRange(selectedPeriod, customDateRange);
       const [eventsData, programsData, visitorRows] = await Promise.all([
-        fetchEventsForRange(since, until),
+        fetchEventsForRangeFromAdminApi(since, until),
         client.fetch(allProgramsQuery),
         fetchVisitorTagAggregatesForRange(since, until)
       ]);
