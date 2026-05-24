@@ -134,6 +134,11 @@ export const trackingEventsWithRangeQuery = `*[_type=="trackingEvent" && created
       _id, event, programSlug, notFound, social, path, referrer, country, city, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt
     } | order(createdAt desc)`;
 
+/** Admin list / summary: slim projection (import fields in merge helper). */
+export const trackingEventsWithRangeSlimQuery = `*[_type=="trackingEvent" && createdAt >= $since && createdAt <= $until]{
+      _id, event, programSlug, notFound, social, path, referrer, country, city, ipHash, createdAt
+    } | order(createdAt desc)`;
+
 /* ------------ Bundle counts by program (for merging with singular counts) ------------ */
 export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
   "events": events[]{ programSlug, event, notFound }
@@ -143,6 +148,11 @@ export const bundleCountsQuery = `*[_type == "trackingEventBundle"]{
 export const trackingEventBundlesQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
   _id,
   "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, path, referrer, country, city, social, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt }
+}`;
+
+export const trackingEventBundlesSlimQuery = `*[_type == "trackingEventBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
+  _id,
+  "events": events[createdAt >= $since && createdAt <= $until]{ event, programSlug, notFound, social, path, referrer, country, city, ipHash, createdAt, _key }
 }`;
 
 /** Active + bundled visitors with lastActivityAt in range (admin tier aggregates). */
