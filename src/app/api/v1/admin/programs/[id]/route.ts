@@ -58,6 +58,16 @@ function parseBody(body: unknown): Record<string, unknown> {
       out.featuredCopy = null;
     }
   }
+  if (b.latestOfficialVersion !== undefined) {
+    if (b.latestOfficialVersion === null) {
+      out.latestOfficialVersion = null;
+    } else if (typeof b.latestOfficialVersion === "string") {
+      const t = b.latestOfficialVersion.trim();
+      out.latestOfficialVersion = t.length ? t : null;
+    } else {
+      out.latestOfficialVersion = null;
+    }
+  }
   if (b.downloadLink !== undefined) {
     const v = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
     if (v && !URL_REGEX.test(v)) throw new Error("downloadLink must be a valid URL");
@@ -127,7 +137,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const keys = Object.keys(updates);
     if (keys.length === 0) {
       return Errors.validation(
-        "No valid fields to update (allowed: title, slug, description, programFlow, featuredCopy, downloadLink, imageAssetId, showcaseGifAssetId)"
+        "No valid fields to update (allowed: title, slug, description, programFlow, latestOfficialVersion, featuredCopy, downloadLink, imageAssetId, showcaseGifAssetId)"
       );
     }
 
@@ -150,6 +160,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       patch.set({ description: plainTextToPortableText(updates.description as string) });
     }
     if (updates.programFlow !== undefined) patch.set({ programFlow: updates.programFlow as ProgramFlow });
+    if (updates.latestOfficialVersion !== undefined) {
+      patch.set({ latestOfficialVersion: (updates.latestOfficialVersion as string | null) ?? null });
+    }
     if (updates.downloadLink !== undefined) patch.set({ downloadLink: (updates.downloadLink as string) ?? null });
     if (updates.imageAssetId !== undefined) {
       patch.set({ image: buildImageReference(updates.imageAssetId as string | null) });

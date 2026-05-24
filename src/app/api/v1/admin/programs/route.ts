@@ -62,6 +62,10 @@ export async function POST(req: NextRequest) {
 
     const featuredCopy = typeof b.featuredCopy === "string" ? b.featuredCopy.trim() : "";
 
+    const latestOfficialVersionRaw =
+      typeof b.latestOfficialVersion === "string" ? b.latestOfficialVersion.trim() : "";
+    const latestOfficialVersion = latestOfficialVersionRaw || undefined;
+
     const downloadLinkRaw = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
     if (downloadLinkRaw && !URL_REGEX.test(downloadLinkRaw)) {
       return Errors.validation("downloadLink must be a valid URL", [{ field: "downloadLink", message: "Invalid URL" }]);
@@ -106,6 +110,7 @@ export async function POST(req: NextRequest) {
       description: plainTextToPortableText(description),
       programFlow,
       ...(Object.keys(featured).length > 0 ? { featured } : {}),
+      ...(latestOfficialVersion && { latestOfficialVersion }),
       ...(downloadLink && { downloadLink }),
       ...(buildImageReference(imageAssetId) && { image: buildImageReference(imageAssetId) }),
       cdKeys: []
