@@ -1,15 +1,10 @@
 /** @fileoverview Fetches merged tracking events for admin ranges, bundle program counts for homepage, visitor tag aggregates. */
 import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
-import { BUNDLING_RETENTION_MS } from "@/src/lib/analytics/bundlingConstants";
+import { mergeTrackingEventsForRange } from "@/src/lib/analytics/mergeTrackingEventsForRange";
 import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 import { client } from "@/src/sanity/lib/client";
-import {
-  trackingEventsWithRangeQuery,
-  trackingEventBundlesQuery,
-  bundleCountsQuery,
-  visitorTagAggregatesQuery
-} from "@/src/lib/sanity/queries";
+import { bundleCountsQuery, visitorTagAggregatesQuery } from "@/src/lib/sanity/queries";
 import { AnalyticsEventData } from "@/src/types";
 
 export interface BundleCountsByProgram {
@@ -65,31 +60,70 @@ export function mergeSingleProgramStats(
 }
 
 /**
- * Fetches all events (singular + bundled) for a date range.
- * Skips bundle fetch when range is entirely within retention window.
+ * Fetches all events (singular + bundled) for a date range with visitor meta.
+ * Prefer paginated admin API for large ranges.
  */
 export async function fetchEventsForRange(since: string, until: string): Promise<AnalyticsEventData[]> {
-  const now = Date.now();
-  const retentionCutoff = new Date(now - BUNDLING_RETENTION_MS).toISOString();
-  const needBundles = since < retentionCutoff;
-
-  const [singular, bundles] = await Promise.all([
-    client.fetch(trackingEventsWithRangeQuery, { since, until }),
-    needBundles ? client.fetch(trackingEventBundlesQuery, { since, until }) : Promise.resolve([])
-  ]);
-
-  const bundleEvents: AnalyticsEventData[] = (bundles as { _id: string; events: AnalyticsEventData[] }[]).flatMap(b =>
-    (b.events || []).map((e, i) => ({
-      ...e,
-      _id: `${b._id}:${i}`
-    }))
-  );
-
-  const merged = [...(singular as AnalyticsEventData[]), ...bundleEvents].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const merged = await mergeTrackingEventsForRange(since, until);
   const enriched = await enrichEventsWithVisitorMeta(merged as unknown as Array<Record<string, unknown>>);
   return enriched as unknown as AnalyticsEventData[];
+}
+
+export interface AdminEventsPageMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+  countsByEvent: Record<string, number>;
+  cacheHit?: boolean;
+  cachedAt?: string | null;
+}
+
+export interface AdminEventsPageResult {
+  data: AnalyticsEventData[];
+  meta: AdminEventsPageMeta;
+}
+
+export type FetchAdminEventsPageParams = {
+  since: string;
+  until: string;
+  event?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: "asc" | "desc";
+  refresh?: boolean;
+};
+
+/** Paginated admin events list (server merge, cache, enrich page slice only). */
+export async function fetchAdminEventsPage(
+  params: FetchAdminEventsPageParams
+): Promise<AdminEventsPageResult> {
+  const sp = new URLSearchParams();
+  sp.set("since", params.since);
+  sp.set("until", params.until);
+  if (params.event && params.event !== "all") sp.set("event", params.event);
+  if (params.page != null) sp.set("page", String(params.page));
+  if (params.limit != null) sp.set("limit", String(params.limit));
+  if (params.sort) sp.set("sort", params.sort);
+  if (params.order) sp.set("order", params.order);
+  if (params.refresh) sp.set("refresh", "true");
+
+  const res = await fetch(`/api/v1/admin/events?${sp.toString()}`);
+  const json = (await res.json()) as { data?: AnalyticsEventData[]; meta?: AdminEventsPageMeta };
+  if (!res.ok) throw new Error("Failed to fetch events");
+  return {
+    data: json.data ?? [],
+    meta: json.meta ?? {
+      page: 1,
+      limit: 25,
+      total: 0,
+      totalPages: 1,
+      hasMore: false,
+      countsByEvent: {}
+    }
+  };
 }
 
 /** Admin UI: load range via server route (token + batched visitor lookup). */
@@ -103,6 +137,48 @@ export async function fetchEventsForRangeFromAdminApi(
   const json = (await res.json()) as { data?: AnalyticsEventData[] };
   if (!res.ok) throw new Error("Failed to fetch events");
   return json.data ?? [];
+}
+
+export interface AnalyticsSummaryData {
+  totalEvents: number;
+  uniqueVisitors: number;
+  uniqueCountries: number;
+  totals: Record<string, number>;
+  eventChart: Array<{ name: string; value: number; color: string }>;
+  programTable: Array<{ key: string; value: number; label: string }>;
+  socialTable: Array<{ key: string; value: number; label: string }>;
+  pathTable: Array<{ key: string; value: number; label: string }>;
+  countryTable: Array<{ key: string; value: number; label: string }>;
+  referrerTable: Array<{ key: string; value: number; label: string; referrerParam?: string }>;
+  recentEvents: AnalyticsEventData[];
+}
+
+/** Server-side analytics aggregates for dashboard (no full event array to client). */
+export async function fetchAnalyticsSummary(
+  since: string,
+  until: string,
+  options?: { refresh?: boolean }
+): Promise<AnalyticsSummaryData> {
+  const sp = new URLSearchParams({ since, until });
+  if (options?.refresh) sp.set("refresh", "true");
+  const res = await fetch(`/api/v1/admin/analytics/summary?${sp.toString()}`);
+  const json = (await res.json()) as { data?: AnalyticsSummaryData };
+  if (!res.ok) throw new Error("Failed to fetch analytics summary");
+  return (
+    json.data ?? {
+      totalEvents: 0,
+      uniqueVisitors: 0,
+      uniqueCountries: 0,
+      totals: {},
+      eventChart: [],
+      programTable: [],
+      socialTable: [],
+      pathTable: [],
+      countryTable: [],
+      referrerTable: [],
+      recentEvents: []
+    }
+  );
 }
 
 export interface VisitorTagAggregateRow {
