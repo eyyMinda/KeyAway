@@ -4,8 +4,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { client } from "@/src/sanity/lib/client";
-import { fetchEventsForRangeFromAdminApi, fetchVisitorTagAggregatesForRange } from "@/src/lib/analytics/eventsApi";
-import type { VisitorTagAggregateRow } from "@/src/lib/analytics/eventsApi";
+import {
+  fetchAnalyticsSummary,
+  fetchVisitorTagAggregatesForRange,
+  type AnalyticsSummaryData,
+  type VisitorTagAggregateRow
+} from "@/src/lib/analytics/eventsApi";
 import { visitorTierSwatchBgClass } from "@/src/theme/colorSchema";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
@@ -13,58 +17,60 @@ import DataTable from "@/src/components/admin/DataTable";
 import EventChart from "@/src/components/admin/EventChart";
 import TimeFilter from "@/src/components/admin/TimeFilter";
 import RecentActivity from "@/src/components/admin/RecentActivity";
-import { Program, AnalyticsEventData } from "@/src/types";
-import {
-  getDateRange,
-  aggregateEvents,
-  transformEventData,
-  transformProgramData,
-  transformSocialData,
-  transformPathActivityTable,
-  transformCountryData,
-  transformReferrerDataWithParams
-} from "@/src/lib/analytics/analyticsUtils";
+import { Program } from "@/src/types";
+import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
 
 export default function AnalyticsPage() {
-  const [events, setEvents] = useState<AnalyticsEventData[]>([]);
+  const [summary, setSummary] = useState<AnalyticsSummaryData | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [visitorTagRows, setVisitorTagRows] = useState<VisitorTagAggregateRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState("30d");
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState("24h");
   const [customDateRange, setCustomDateRange] = useState({
     start: "",
     end: ""
   });
 
-  const fetchEvents = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
-        setEvents([]);
-        setPrograms([]);
-        setVisitorTagRows([]);
+  const fetchData = useCallback(
+    async (options?: { refresh?: boolean }) => {
+      const isRefresh = options?.refresh === true;
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+
+      try {
+        if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
+          setSummary(null);
+          setPrograms([]);
+          setVisitorTagRows([]);
+          return;
+        }
+        const { since, until } = getDateRange(selectedPeriod, customDateRange);
+        const [summaryData, programsData, visitorRows] = await Promise.all([
+          fetchAnalyticsSummary(since, until, { refresh: isRefresh }),
+          client.fetch(allProgramsQuery),
+          fetchVisitorTagAggregatesForRange(since, until)
+        ]);
+        setSummary(summaryData);
+        setPrograms(programsData);
+        setVisitorTagRows(visitorRows);
+      } catch (error) {
+        console.error("Error fetching analytics:", error);
+      } finally {
         setLoading(false);
-        return;
+        setRefreshing(false);
       }
-      const { since, until } = getDateRange(selectedPeriod, customDateRange);
-      const [eventsData, programsData, visitorRows] = await Promise.all([
-        fetchEventsForRangeFromAdminApi(since, until),
-        client.fetch(allProgramsQuery),
-        fetchVisitorTagAggregatesForRange(since, until)
-      ]);
-      setEvents(eventsData);
-      setPrograms(programsData);
-      setVisitorTagRows(visitorRows);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedPeriod, customDateRange]);
+    },
+    [selectedPeriod, customDateRange]
+  );
 
   useEffect(() => {
-    fetchEvents();
-  }, [fetchEvents]);
+    fetchData();
+  }, [fetchData]);
+
+  const handleRefresh = () => {
+    fetchData({ refresh: true });
+  };
 
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
@@ -74,12 +80,10 @@ export default function AnalyticsPage() {
     setCustomDateRange({ start, end });
   };
 
-  const { totals, byProgram, bySocial, byPath, byCountry } = aggregateEvents(events);
-  const totalEvents = events.length;
   const totalPrograms = programs.filter(p => p.slug?.current).length;
-  const uniqueVisitors = new Set(events.map(e => e.ipHash).filter(Boolean)).size;
+  const totals = summary?.totals ?? {};
 
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <ProtectedAdminLayout title="Analytics" subtitle="Real-time insights into user behavior and engagement">
         <div className="flex items-center justify-center h-64">
@@ -92,12 +96,13 @@ export default function AnalyticsPage() {
     );
   }
 
-  const eventData = transformEventData(totals);
-  const programData = transformProgramData(byProgram);
-  const socialData = transformSocialData(bySocial);
-  const pathData = transformPathActivityTable(events, byPath);
-  const countryData = transformCountryData(byCountry);
-  const referrerData = transformReferrerDataWithParams(events);
+  const eventData = summary?.eventChart ?? [];
+  const programData = summary?.programTable ?? [];
+  const socialData = summary?.socialTable ?? [];
+  const pathData = summary?.pathTable ?? [];
+  const countryData = summary?.countryTable ?? [];
+  const referrerData = summary?.referrerTable ?? [];
+  const recentEvents = summary?.recentEvents ?? [];
 
   return (
     <ProtectedAdminLayout title="Analytics" subtitle="Real-time insights into user behavior and engagement">
@@ -107,11 +112,20 @@ export default function AnalyticsPage() {
           onPeriodChange={handlePeriodChange}
           customDateRange={customDateRange}
           onCustomDateChange={handleCustomDateChange}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          refreshDisabled={loading}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 mb-8">
-        <AnalyticsCard title="Total Events" value={totalEvents} subtitle="Last 30 days" icon="📊" color="blue" />
+        <AnalyticsCard
+          title="Total Events"
+          value={summary?.totalEvents ?? 0}
+          subtitle="Selected period"
+          icon="📊"
+          color="blue"
+        />
         <AnalyticsCard
           title="Total Programs"
           value={totalPrograms}
@@ -121,28 +135,28 @@ export default function AnalyticsPage() {
         />
         <AnalyticsCard
           title="Social Clicks"
-          value={totals.get("social_click") || 0}
+          value={totals.social_click ?? 0}
           subtitle="Social media engagement"
           icon="📱"
           color="purple"
         />
         <AnalyticsCard
           title="Page Views"
-          value={totals.get("page_viewed") || 0}
+          value={totals.page_viewed ?? 0}
           subtitle="Total page views"
           icon="👁️"
           color="orange"
         />
         <AnalyticsCard
           title="Unique Visitors"
-          value={uniqueVisitors}
+          value={summary?.uniqueVisitors ?? 0}
           subtitle="Distinct visitors"
           icon="👨‍👩‍👧"
           color="purple"
         />
         <AnalyticsCard
           title="Unique Countries"
-          value={byCountry.size}
+          value={summary?.uniqueCountries ?? 0}
           subtitle="Geographic reach"
           icon="🌍"
           color="blue"
@@ -173,13 +187,12 @@ export default function AnalyticsPage() {
             label: r.label,
             swatchClass: visitorTierSwatchBgClass(r.key)
           }))}
-          maxItems={10}
           showPercentage={true}
         />
         <DataTable title="Social Media Engagement" data={socialData} maxItems={10} showPercentage={true} />
       </div>
 
-      <RecentActivity events={events} maxItems={10} />
+      <RecentActivity events={recentEvents} maxItems={10} />
     </ProtectedAdminLayout>
   );
 }
