@@ -6,19 +6,31 @@ import TimeFilter from "@/src/components/admin/TimeFilter";
 import EventsFilter from "@/src/components/admin/events/EventsFilter";
 import EventsTable from "@/src/components/admin/events/EventsTable";
 import { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AnalyticsEventData } from "@/src/types";
 import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
-import { fetchEventsForRangeFromAdminApi } from "@/src/lib/analytics/eventsApi";
+import { fetchAdminEventsPage } from "@/src/lib/analytics/eventsApi";
+
+const SORT_API_MAP: Record<string, string> = {
+  timestamp: "createdAt",
+  event: "event",
+  program: "programSlug",
+  social: "social",
+  path: "path"
+};
 
 export default function EventsPage() {
   const [events, setEvents] = useState<AnalyticsEventData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<string>("all");
-  const [selectedPeriod, setSelectedPeriod] = useState("30d");
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState("all");
+  const [selectedPeriod, setSelectedPeriod] = useState("24h");
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortColumn, setSortColumn] = useState<string>("timestamp");
+  const [sortColumn, setSortColumn] = useState("timestamp");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [countsByEvent, setCountsByEvent] = useState<Record<string, number>>({});
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [customDateRange, setCustomDateRange] = useState({
     start: "",
     end: ""
@@ -36,27 +48,53 @@ export default function EventsPage() {
   ];
   const eventsPerPage = 25;
 
-  const fetchEvents = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
-        setEvents([]);
+  const fetchEvents = useCallback(
+    async (options?: { refresh?: boolean }) => {
+      const isRefresh = options?.refresh === true;
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+
+      try {
+        if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
+          setEvents([]);
+          setCountsByEvent({});
+          setTotalItems(0);
+          setTotalPages(1);
+          return;
+        }
+        const { since, until } = getDateRange(selectedPeriod, customDateRange);
+        const sort = SORT_API_MAP[sortColumn] ?? "createdAt";
+        const result = await fetchAdminEventsPage({
+          since,
+          until,
+          event: selectedEvent,
+          page: currentPage,
+          limit: eventsPerPage,
+          sort,
+          order: sortDirection,
+          refresh: isRefresh
+        });
+        setEvents(result.data);
+        setCountsByEvent(result.meta.countsByEvent);
+        setTotalItems(result.meta.total);
+        setTotalPages(result.meta.totalPages);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
         setLoading(false);
-        return;
+        setRefreshing(false);
       }
-      const { since, until } = getDateRange(selectedPeriod, customDateRange);
-      const eventsData = await fetchEventsForRangeFromAdminApi(since, until);
-      setEvents(eventsData);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedPeriod, customDateRange]);
+    },
+    [selectedPeriod, customDateRange, selectedEvent, currentPage, sortColumn, sortDirection]
+  );
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
+
+  const handleRefresh = () => {
+    fetchEvents({ refresh: true });
+  };
 
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
@@ -83,64 +121,9 @@ export default function EventsPage() {
     }
   };
 
-  const filteredEvents = selectedEvent === "all" ? events : events.filter(event => event.event === selectedEvent);
+  const eventTypes = Object.keys(countsByEvent).sort();
 
-  const sortedEvents = useMemo(() => {
-    return [...filteredEvents].sort((a, b) => {
-      let cmp = 0;
-      switch (sortColumn) {
-        case "visitorTags": {
-          const tag = (e: (typeof filteredEvents)[number]) =>
-            !e.ipHash ? "" : e.visitorIsSpammer ? "spammer" : e.visitTier || "new";
-          cmp = tag(a).localeCompare(tag(b));
-          break;
-        }
-        case "event":
-          cmp = a.event.localeCompare(b.event);
-          break;
-        case "program":
-          const aProgram = a.programSlug || "";
-          const bProgram = b.programSlug || "";
-          cmp = aProgram.localeCompare(bProgram);
-          break;
-        case "social": {
-          cmp = (a.social || "").localeCompare(b.social || "");
-          break;
-        }
-        case "path":
-          const aPath = a.path || "";
-          const bPath = b.path || "";
-          cmp = aPath.localeCompare(bPath);
-          break;
-        case "location":
-          const aLocation = `${a.country || ""} ${a.city || ""}`.trim();
-          const bLocation = `${b.country || ""} ${b.city || ""}`.trim();
-          cmp = aLocation.localeCompare(bLocation);
-          break;
-        case "referrer":
-          const aReferrer = a.referrer || "";
-          const bReferrer = b.referrer || "";
-          cmp = aReferrer.localeCompare(bReferrer);
-          break;
-        case "timestamp":
-          cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-        default:
-          return 0;
-      }
-      return sortDirection === "asc" ? cmp : -cmp;
-    });
-  }, [filteredEvents, sortColumn, sortDirection]);
-
-  const totalPages = Math.max(1, Math.ceil(sortedEvents.length / eventsPerPage));
-  const clampedPage = Math.min(currentPage, totalPages);
-  const pageStartIndex = (clampedPage - 1) * eventsPerPage;
-  const pageEndIndex = Math.min(pageStartIndex + eventsPerPage, sortedEvents.length);
-  const paginatedEvents = sortedEvents.slice(pageStartIndex, pageEndIndex);
-
-  const eventTypes = Array.from(new Set(events.map(e => e.event)));
-
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <ProtectedAdminLayout title="Events" subtitle="Track and analyze site analytics">
         <div className="flex items-center justify-center h-64">
@@ -162,17 +145,20 @@ export default function EventsPage() {
             onPeriodChange={handlePeriodChange}
             customDateRange={customDateRange}
             onCustomDateChange={handleCustomDateChange}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+            refreshDisabled={loading}
           />
         </div>
 
         <EventsFilter
           selectedEvent={selectedEvent}
           eventTypes={[]}
-          events={events}
+          countsByEvent={{}}
+          totalCount={0}
           onEventChange={handleEventFilterChange}
         />
 
-        {/* Custom Range Message */}
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
           <div className="flex items-center">
             <div className="shrink-0">
@@ -204,24 +190,28 @@ export default function EventsPage() {
           onPeriodChange={handlePeriodChange}
           customDateRange={customDateRange}
           onCustomDateChange={handleCustomDateChange}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          refreshDisabled={loading}
         />
       </div>
 
       <EventsFilter
         selectedEvent={selectedEvent}
         eventTypes={eventTypes}
-        events={events}
+        countsByEvent={countsByEvent}
+        totalCount={Object.values(countsByEvent).reduce((a, b) => a + b, 0)}
         onEventChange={handleEventFilterChange}
       />
 
       <EventsTable
-        events={paginatedEvents}
-        totalItems={sortedEvents.length}
+        events={events}
+        totalItems={totalItems}
         columns={tableColumns}
         sortColumn={sortColumn}
         sortDirection={sortDirection}
         onSort={handleSort}
-        currentPage={clampedPage}
+        currentPage={currentPage}
         totalPages={totalPages}
         itemsPerPage={eventsPerPage}
         onPageChange={setCurrentPage}
