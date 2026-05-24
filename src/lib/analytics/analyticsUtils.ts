@@ -37,6 +37,9 @@ export function getDateRange(
     case "90d":
       since = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
       break;
+    case "all":
+      since = "1970-01-01T00:00:00.000Z";
+      break;
     case "custom":
       if (customDateRange?.start && customDateRange?.end) {
         since = new Date(customDateRange.start).toISOString();
@@ -63,6 +66,8 @@ export function getDateFromPeriod(period: string, customDateRange?: { start: str
       return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
     case "90d":
       return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    case "all":
+      return "1970-01-01T00:00:00.000Z";
     case "custom":
       if (customDateRange?.start && customDateRange?.end) {
         return new Date(customDateRange.start).toISOString();

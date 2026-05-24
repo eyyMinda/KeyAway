@@ -5,11 +5,25 @@ import { adminChrome } from "@/src/theme/colorSchema";
 interface EventsFilterProps {
   selectedEvent: string;
   eventTypes: string[];
-  events: AnalyticsEventData[];
+  events?: AnalyticsEventData[];
+  countsByEvent?: Record<string, number>;
+  totalCount?: number;
   onEventChange: (eventType: string) => void;
 }
 
-export default function EventsFilter({ selectedEvent, eventTypes, events, onEventChange }: EventsFilterProps) {
+export default function EventsFilter({
+  selectedEvent,
+  eventTypes,
+  events = [],
+  countsByEvent,
+  totalCount,
+  onEventChange
+}: EventsFilterProps) {
+  const allCount = totalCount ?? (countsByEvent ? Object.values(countsByEvent).reduce((a, b) => a + b, 0) : events.length);
+
+  const countFor = (eventType: string) =>
+    countsByEvent?.[eventType] ?? events.filter(e => e.event === eventType).length;
+
   return (
     <div className="mb-6">
       <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
@@ -20,7 +34,7 @@ export default function EventsFilter({ selectedEvent, eventTypes, events, onEven
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               selectedEvent === "all" ? adminChrome.filterPillActive : adminChrome.filterPillIdle
             }`}>
-            All Events ({events.length})
+            All Events ({allCount})
           </button>
           {eventTypes.map(eventType => (
             <button
@@ -29,7 +43,7 @@ export default function EventsFilter({ selectedEvent, eventTypes, events, onEven
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                 selectedEvent === eventType ? adminChrome.filterPillActive : adminChrome.filterPillIdle
               }`}>
-              {eventType.replace(/_/g, " ").toUpperCase()} ({events.filter(e => e.event === eventType).length})
+              {eventType.replace(/_/g, " ").toUpperCase()} ({countFor(eventType)})
             </button>
           ))}
         </div>

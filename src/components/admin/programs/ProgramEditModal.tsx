@@ -32,6 +32,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
   const [description, setDescription] = useState("");
   const [programFlow, setProgramFlow] = useState<ProgramFlow>("cd_key");
   const [featuredCopy, setFeaturedCopy] = useState("");
+  const [latestOfficialVersion, setLatestOfficialVersion] = useState("");
   const [downloadLink, setDownloadLink] = useState("");
   const [imageAssetId, setImageAssetId] = useState<string | null>(null);
   const [showcaseGifAssetId, setShowcaseGifAssetId] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           ? program.featured.description.trim()
           : portableTextToPlainText(program.featured?.description)
       );
+      setLatestOfficialVersion(program.latestOfficialVersion ?? "");
       setDownloadLink(program.downloadLink ?? "");
       setImageAssetId(program.image?.asset?._ref ?? null);
       setShowcaseGifAssetId(program.featured?.showcaseGif?.asset?._ref ?? null);
@@ -70,6 +72,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       setDescription("");
       setProgramFlow("cd_key");
       setFeaturedCopy("");
+      setLatestOfficialVersion("");
       setDownloadLink("");
       setImageAssetId(null);
       setShowcaseGifAssetId(null);
@@ -136,6 +139,11 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           ? { featuredCopy: featuredCopy.trim() }
           : featuredCopy.trim()
             ? { featuredCopy: featuredCopy.trim() }
+            : {}),
+        ...(program?._id
+          ? { latestOfficialVersion: latestOfficialVersion.trim() || null }
+          : latestOfficialVersion.trim()
+            ? { latestOfficialVersion: latestOfficialVersion.trim() }
             : {}),
         downloadLink: downloadLink.trim() || undefined,
         ...(program?._id ? { imageAssetId: imageAssetId ?? null } : imageAssetId ? { imageAssetId } : {}),
@@ -289,6 +297,20 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
                 {slugValidation.error}
               </p>
             )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Program version
+              <span className="text-xs text-gray-500 ml-1">(latest official, e.g. 18.5)</span>
+            </label>
+            <input
+              type="text"
+              value={latestOfficialVersion}
+              onChange={e => setLatestOfficialVersion(e.target.value)}
+              placeholder="18.5"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              disabled={saveLoading}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
