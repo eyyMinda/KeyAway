@@ -1,4 +1,5 @@
 /** @fileoverview Fetches merged tracking events for admin ranges, bundle program counts for homepage, visitor tag aggregates. */
+import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
 import { BUNDLING_RETENTION_MS } from "@/src/lib/analytics/bundlingConstants";
 import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
@@ -84,8 +85,24 @@ export async function fetchEventsForRange(since: string, until: string): Promise
     }))
   );
 
-  const merged = [...(singular as AnalyticsEventData[]), ...bundleEvents];
-  return merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const merged = [...(singular as AnalyticsEventData[]), ...bundleEvents].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  const enriched = await enrichEventsWithVisitorMeta(merged as unknown as Array<Record<string, unknown>>);
+  return enriched as unknown as AnalyticsEventData[];
+}
+
+/** Admin UI: load range via server route (token + batched visitor lookup). */
+export async function fetchEventsForRangeFromAdminApi(
+  since: string,
+  until: string
+): Promise<AnalyticsEventData[]> {
+  const res = await fetch(
+    `/api/v1/admin/analytics/events?since=${encodeURIComponent(since)}&until=${encodeURIComponent(until)}`
+  );
+  const json = (await res.json()) as { data?: AnalyticsEventData[] };
+  if (!res.ok) throw new Error("Failed to fetch events");
+  return json.data ?? [];
 }
 
 export interface VisitorTagAggregateRow {
