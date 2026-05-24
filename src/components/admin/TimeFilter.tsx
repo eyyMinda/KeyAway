@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FaChevronDown } from "react-icons/fa";
+import { FaArrowsRotate } from "react-icons/fa6";
 import { adminChrome } from "@/src/theme/colorSchema";
 
 interface TimeFilterProps {
@@ -12,6 +13,9 @@ interface TimeFilterProps {
     end: string;
   };
   onCustomDateChange?: (start: string, end: string) => void;
+  onRefresh?: () => void;
+  refreshing?: boolean;
+  refreshDisabled?: boolean;
 }
 
 const timePeriods = [
@@ -27,7 +31,10 @@ export default function TimeFilter({
   selectedPeriod,
   onPeriodChange,
   customDateRange,
-  onCustomDateChange
+  onCustomDateChange,
+  onRefresh,
+  refreshing = false,
+  refreshDisabled = false
 }: TimeFilterProps) {
   const [showCustomRange, setShowCustomRange] = useState(false);
 
@@ -57,7 +64,30 @@ export default function TimeFilter({
 
   return (
     <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Time Period</h3>
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <h3 className="text-lg font-semibold text-gray-900">Time Period</h3>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => handlePeriodChange("all")}
+            className={`text-sm font-medium underline-offset-2 hover:underline cursor-pointer ${
+              selectedPeriod === "all" ? "text-blue-600 underline" : "text-gray-600 hover:text-gray-900"
+            }`}>
+            All time
+          </button>
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={refreshDisabled || refreshing}
+              title="Refresh data (bypass cache)"
+              aria-label="Refresh data"
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 bg-white transition-colors cursor-pointer disabled:opacity-50 ${adminChrome.filterPillIdle} hover:border-blue-300`}>
+              <FaArrowsRotate className={`w-4 h-4 text-gray-700 ${refreshing ? "animate-spin" : ""}`} />
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
         {timePeriods.map(period => (
