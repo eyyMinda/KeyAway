@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
-import { fetchEventsForRange } from "@/src/lib/analytics/eventsApi";
+import { mergeTrackingEventsForRange } from "@/src/lib/analytics/mergeTrackingEventsForRange";
+import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
@@ -23,7 +24,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const rows = await fetchEventsForRange(sinceDate.toISOString(), untilDate.toISOString());
+    const merged = await mergeTrackingEventsForRange(sinceDate.toISOString(), untilDate.toISOString());
+    const rows = await enrichEventsWithVisitorMeta(merged as unknown as Array<Record<string, unknown>>);
     return NextResponse.json({ data: rows, meta: { count: rows.length } });
   } catch (err) {
     console.error("[GET /api/v1/admin/analytics/events]", err);
