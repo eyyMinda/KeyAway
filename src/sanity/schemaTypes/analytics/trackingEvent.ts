@@ -36,6 +36,7 @@ export const trackingEvent = defineType({
           { title: "Copy PRO Account", value: "copy_pro_account" },
           { title: "Click Activation Link", value: "click_activation_link" },
           { title: "Download Click", value: "download_click" },
+          { title: "Affiliate Click", value: "affiliate_click" },
           { title: "Social Click", value: "social_click" },
           { title: "Page Viewed", value: "page_viewed" }
         ]
