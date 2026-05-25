@@ -1,0 +1,4 @@
+Contact: mailto:support@keyaway.app
+Preferred-Languages: en
+Policy: https://www.keyaway.app/verification-policy
+Canonical: https://www.keyaway.app/.well-known/security.txt
