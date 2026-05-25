@@ -55,6 +55,12 @@ Base path: `https://www.keyaway.app/api/v1/`
 - https://www.keyaway.app/ — Home
 - https://www.keyaway.app/programs — All programs
 - https://www.keyaway.app/program/{slug} — Program detail (replace `{slug}` with the program slug)
+- https://www.keyaway.app/about — About KeyAway
+- https://www.keyaway.app/how-it-works — How listings and community reports work
+- https://www.keyaway.app/affiliate-disclosure — Affiliate disclosure
+- https://www.keyaway.app/verification-policy — Verification policy
+- https://www.keyaway.app/dmca — Report content
+- https://www.keyaway.app/partners — Vendors and partners
 - https://www.keyaway.app/privacy — Privacy policy
 - https://www.keyaway.app/terms — Terms of use
 - https://www.keyaway.app/studio — Sanity Studio (admin)
