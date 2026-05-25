@@ -18,10 +18,7 @@ import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { isDevelopmentEnv } from "@/src/lib/env/isDevelopment";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
-import {
-  STAFF_COMMENT_AUTHOR_NAME,
-  STAFF_COMMENT_AUTHOR_ROLE
-} from "@/src/lib/program/staffCommentIdentity";
+import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
 
 const DUPLICATE_WINDOW_MS = 2 * 60_000;
 
@@ -55,16 +52,12 @@ export async function POST(req: NextRequest) {
     const commentBody = sanitizeCommentBody(typeof b.body === "string" ? b.body : "");
     const honeypot = typeof b.website === "string" ? b.website : "";
     const parentCommentKey =
-      typeof b.parentCommentKey === "string" && b.parentCommentKey.trim()
-        ? b.parentCommentKey.trim()
-        : undefined;
+      typeof b.parentCommentKey === "string" && b.parentCommentKey.trim() ? b.parentCommentKey.trim() : undefined;
 
     if (!programSlug)
       return Errors.validation("programSlug is required", [{ field: "programSlug", message: "Required" }]);
-    if (!authorName)
-      return Errors.validation("authorName is required", [{ field: "authorName", message: "Required" }]);
-    if (!commentBody)
-      return Errors.validation("body is required", [{ field: "body", message: "Required" }]);
+    if (!authorName) return Errors.validation("authorName is required", [{ field: "authorName", message: "Required" }]);
+    if (!commentBody) return Errors.validation("body is required", [{ field: "body", message: "Required" }]);
     if (authorName.length > MAX_COMMENT_AUTHOR)
       return Errors.validation("authorName is too long", [{ field: "authorName", message: "Too long" }]);
     if (commentBody.length > MAX_COMMENT_BODY)
@@ -118,10 +111,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (parentCommentKey) {
-      const parentExists = await client.fetch<boolean>(
-        `defined(*[_id == $id][0].programComments[_key == $key][0])`,
-        { id: program._id, key: parentCommentKey }
-      );
+      const parentExists = await client.fetch<boolean>(`defined(*[_id == $id][0].programComments[_key == $key][0])`, {
+        id: program._id,
+        key: parentCommentKey
+      });
       if (!parentExists)
         return Errors.validation("parentCommentKey is invalid", [
           { field: "parentCommentKey", message: "Comment not found" }
