@@ -49,6 +49,7 @@ export const program = defineType({
   name: "program",
   title: "Program",
   type: "document",
+  groups: [{ name: "default", title: "Content", default: true }],
   fields: [
     defineField({
       name: "title",
@@ -102,6 +103,29 @@ export const program = defineType({
       description:
         "Short summary shown on the program page. Unique to this program; mention category and who it is for.",
       validation: Rule => Rule.custom(value => validatePortableTextRequired(value, "Description is required"))
+    }),
+    defineField({
+      name: "affiliatePro",
+      title: "Affiliate PRO CTA",
+      type: "object",
+      options: { collapsible: true, collapsed: true },
+      description:
+        "Optional upgrade block below the keys table on the program page. Leave URL empty to hide the CTA.",
+      fields: [
+        defineField({
+          name: "affiliateProUrl",
+          title: "Affiliate Pro purchase URL",
+          type: "url",
+          description: "Official vendor upgrade link (affiliate)."
+        }),
+        defineField({
+          name: "affiliateProLabel",
+          title: "Affiliate Pro button label",
+          type: "string",
+          description: 'e.g. "Get Driver Booster PRO (official store)".',
+          validation: Rule => Rule.max(120)
+        })
+      ]
     }),
     defineField({
       name: "seo",
@@ -161,6 +185,13 @@ export const program = defineType({
         "Optional Q&A for this program only. Use at least 2 entries or leave empty (structured data requires 2+).",
       of: [{ type: "faqItem" }],
       validation: Rule => Rule.custom(items => validateFaqNotExactlyOne(items))
+    }),
+    defineField({
+      name: "programComments",
+      title: "Comments",
+      type: "array",
+      of: [{ type: "programComment" }],
+      description: "Comments on the public program page (visitors post via the site; you can moderate in Studio)."
     }),
     defineField({
       name: "featured",
