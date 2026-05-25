@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   FaUsers,
   FaChartLine,
@@ -30,9 +31,9 @@ export default function FeaturesSection() {
     },
     {
       icon: FaShieldAlt,
-      title: "Verified Sources",
+      title: "Legitimate Sources",
       description:
-        "All software and keys come from legitimate sources, ensuring safety and compliance with software terms.",
+        "Programs link to official vendor downloads. We do not host installers, cracks, or gray-market reseller keys.",
       color: "purple"
     },
     {
@@ -90,6 +91,11 @@ export default function FeaturesSection() {
           <p className="max-w-3xl section-text">
             We provide a community-driven platform for sharing and maintaining free CD keys. Our system ensures you
             always have access to working activation keys.
+          </p>
+          <p className="mt-4 max-w-3xl text-sm">
+            <Link href="/how-it-works" className="font-semibold text-[#66c0f4] underline hover:text-white">
+              Read the full transparency guide →
+            </Link>
           </p>
         </div>
 
