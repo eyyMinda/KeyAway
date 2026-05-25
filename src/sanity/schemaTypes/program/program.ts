@@ -109,8 +109,7 @@ export const program = defineType({
       title: "Affiliate PRO CTA",
       type: "object",
       options: { collapsible: true, collapsed: true },
-      description:
-        "Optional upgrade block below the keys table on the program page. Leave URL empty to hide the CTA.",
+      description: "Optional upgrade block below the keys table on the program page. Leave URL empty to hide the CTA.",
       fields: [
         defineField({
           name: "affiliateProUrl",
@@ -222,11 +221,7 @@ export const program = defineType({
         },
         prepare(selection) {
           const plain = portableTextToPlainText(selection.desc);
-          const subtitle = plain
-            ? plain.length > 72
-              ? `${plain.slice(0, 72)}…`
-              : plain
-            : "No featured description";
+          const subtitle = plain ? (plain.length > 72 ? `${plain.slice(0, 72)}…` : plain) : "No featured description";
           return {
             title: "Featured Section",
             subtitle,
@@ -244,7 +239,10 @@ export const program = defineType({
       components: { input: CdKeysArrayInput },
       validation: Rule =>
         Rule.custom((keys, context) =>
-          validateProgramActivationEntries(keys, (context.document as { programFlow?: string } | undefined)?.programFlow)
+          validateProgramActivationEntries(
+            keys,
+            (context.document as { programFlow?: string } | undefined)?.programFlow
+          )
         )
     })
   ],
