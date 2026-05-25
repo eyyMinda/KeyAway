@@ -42,10 +42,7 @@ export async function appendProgramComment(opts: {
     return { reply, parentCommentKey: parentKey };
   }
 
-  const existingCount = await client.fetch<number>(
-    `count(*[_id == $id][0].programComments)`,
-    { id: programId }
-  );
+  const existingCount = await client.fetch<number>(`count(*[_id == $id][0].programComments)`, { id: programId });
   if (existingCount >= MAX_COMMENTS_ON_PROGRAM) {
     throw new Error("COMMENT_LIMIT");
   }
