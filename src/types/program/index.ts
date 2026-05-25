@@ -57,6 +57,26 @@ export interface ProgramAboutSectionBlock {
   points?: ProgramAboutPoint[];
 }
 
+export interface ProgramCommentReply {
+  _key?: string;
+  authorName: string;
+  authorRole?: string;
+  ipHash?: string;
+  body: string;
+  createdAt?: string;
+}
+
+export interface ProgramComment {
+  _key?: string;
+  authorName: string;
+  authorRole?: string;
+  ipHash?: string;
+  body: string;
+  createdAt?: string;
+  isPinned?: boolean;
+  replies?: ProgramCommentReply[];
+}
+
 export interface ProgramFeatured {
   /** Featured homepage copy; optional portable text. */
   description?: PortableTextBlock[] | string | null;
@@ -83,6 +103,11 @@ export interface Program {
   faq?: ProgramFaqItem[];
   image?: { asset: { url?: string; _ref?: string } };
   downloadLink?: string;
+  affiliatePro?: {
+    affiliateProUrl?: string;
+    affiliateProLabel?: string;
+  };
+  programComments?: ProgramComment[];
   cdKeys: CDKey[];
   keyCount?: number;
   hasKeys?: boolean;
