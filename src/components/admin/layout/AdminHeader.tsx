@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HiChartBar, HiViewGrid } from "react-icons/hi";
 import { MdRateReview, MdEventNote } from "react-icons/md";
-import { FaKey, FaEnvelopeOpenText } from "react-icons/fa";
+import { FaKey, FaEnvelopeOpenText, FaCommentDots } from "react-icons/fa";
 import { useKeyReportAlerts, KeyReportAlertsDesktop, KeyReportAlertsMobile } from "./KeyReportAlerts";
 
 export default function AdminHeader() {
@@ -31,6 +31,7 @@ export default function AdminHeader() {
     { href: "/admin/programs", label: "Programs", icon: HiViewGrid },
     { href: "/admin/events", label: "Events", icon: MdEventNote },
     { href: "/admin/key-reports", label: "Key Reports", icon: MdRateReview },
+    { href: "/admin/comments", label: "Comments", icon: FaCommentDots },
     { href: "/admin/key-suggestions", label: "Key Suggestions", icon: FaKey, countKey: "suggestions" },
     { href: "/admin/messages", label: "Messages", icon: FaEnvelopeOpenText, countKey: "messages" }
   ];
