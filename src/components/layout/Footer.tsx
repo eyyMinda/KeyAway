@@ -50,9 +50,9 @@ export default function Footer({ logoData, socialData }: FooterProps) {
   return (
     <footer className="mt-auto border-t border-[#2a475e] bg-[#0E141B] text-neutral-100">
       <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
+          <div className="col-span-1 xs:col-span-2 flex flex-col gap-4">
             <Link href="/" className="inline-block">
               {isLogo ? (
                 <IdealImageClient {...logoData} className="h-12 w-auto" />
@@ -85,33 +85,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
             </div>
           </div>
 
-          {/* Trust & navigation */}
-          <div>
-            <h4 className="section-label mb-4 text-neutral-50">Trust</h4>
-            <ul className="mb-6 space-y-2">
-              {TRUST_FOOTER_LINKS.map(({ href, label }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className={`transition-colors ${
-                      pathname === href ? "font-medium text-white" : "text-neutral-150 hover:text-neutral-50"
-                    }`}>
-                    {label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <a
-                  href="/llms.txt"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-neutral-150 transition-colors hover:text-neutral-50">
-                  llms.txt
-                </a>
-              </li>
-            </ul>
-          </div>
-
+          {/* Navigation */}
           <div>
             <h4 className="section-label mb-4 text-neutral-50">Navigate</h4>
             <ul className="space-y-2">
@@ -148,8 +122,35 @@ export default function Footer({ logoData, socialData }: FooterProps) {
             )}
           </div>
 
-          {/* Contribute Section */}
+          {/* Trust */}
           <div>
+            <h4 className="section-label mb-4 text-neutral-50">Trust</h4>
+            <ul className="mb-6 space-y-2">
+              {TRUST_FOOTER_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`transition-colors ${
+                      pathname === href ? "font-medium text-white" : "text-neutral-150 hover:text-neutral-50"
+                    }`}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-neutral-150 transition-colors hover:text-neutral-50">
+                  llms.txt
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contribute Section */}
+          <div className="xs:col-span-2 xl:col-span-1">
             <h4 className="section-label mb-4 text-neutral-50">Contribute</h4>
             <div className="space-y-3">
               {/* Suggest a Key Button */}
