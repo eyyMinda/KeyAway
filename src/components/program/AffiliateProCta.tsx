@@ -19,8 +19,7 @@ export default function AffiliateProCta({ program }: AffiliateProCtaProps) {
   const url = program.affiliatePro?.affiliateProUrl?.trim();
   if (!url) return null;
 
-  const label =
-    program.affiliatePro?.affiliateProLabel?.trim() || `Get ${program.title} PRO — official store`;
+  const label = program.affiliatePro?.affiliateProLabel?.trim() || `Get ${program.title} PRO — official store`;
 
   return (
     <section
@@ -29,12 +28,8 @@ export default function AffiliateProCta({ program }: AffiliateProCtaProps) {
       <div className="overflow-hidden rounded-sm border border-[#5c8529]/35 bg-linear-to-br from-[#1e2d1a] via-[#1b2838] to-[#16202d] shadow-[0_8px_28px_rgba(0,0,0,0.45)] ring-1 ring-[#5c8529]/25">
         <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6">
           <div className="min-w-0 flex-1">
-            <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#8bc34a]">
-              Official PRO license
-            </p>
-            <h3
-              id="affiliate-pro-cta-heading"
-              className="mb-3 text-lg font-bold leading-snug text-white sm:text-xl">
+            <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#8bc34a]">Official PRO license</p>
+            <h3 id="affiliate-pro-cta-heading" className="mb-3 text-lg font-bold leading-snug text-white sm:text-xl">
               Tried the giveaways? Upgrade on the vendor&apos;s site
             </h3>
             <ul className="space-y-1.5">
