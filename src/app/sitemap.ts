@@ -1,17 +1,30 @@
 import { MetadataRoute } from "next";
 import { TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { Program, CDKey } from "@/src/types";
 
 /** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
 export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://www.keyaway.app";
+  const [store, programs] = await Promise.all([
+    getCachedStoreDetailsDocument(),
+    client.fetch(allProgramsQuery, {}, { next: { tags: [TAG_SITEMAP_URLS] } })
+  ]);
+  const baseUrl = resolveSiteBaseUrl(store?.seo);
   const currentDate = new Date();
 
-  const programs = await client.fetch(allProgramsQuery, {}, { next: { tags: [TAG_SITEMAP_URLS] } });
+  const trustPaths = [
+    "/about",
+    "/how-it-works",
+    "/affiliate-disclosure",
+    "/verification-policy",
+    "/dmca",
+    "/partners"
+  ];
 
   // Static routes with proper SEO optimization
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -27,6 +40,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 0.9
     },
+    ...trustPaths.map(path => ({
+      url: `${baseUrl}${path}`,
+      lastModified: currentDate,
+      changeFrequency: "monthly" as const,
+      priority: 0.4
+    })),
     {
       url: `${baseUrl}/privacy`,
       lastModified: currentDate,
