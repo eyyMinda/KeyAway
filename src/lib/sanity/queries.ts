@@ -91,9 +91,57 @@ export const adminProgramsQuery = `
   faq,
   image,
   downloadLink,
+  "affiliatePro": coalesce(
+    affiliatePro,
+    select(defined(affiliateProUrl) || defined(affiliateProLabel) => {
+      "affiliateProUrl": affiliateProUrl,
+      "affiliateProLabel": affiliateProLabel
+    })
+  ),
+  programComments[]{
+    _key,
+    authorName,
+    authorRole,
+    ipHash,
+    body,
+    createdAt,
+    isPinned,
+    replies[]{
+      _key,
+      authorName,
+      authorRole,
+      ipHash,
+      body,
+      createdAt
+    }
+  },
   cdKeys[]
 }
 `;
+export const adminProgramsWithCommentsQuery = `
+*[_type == "program" && count(programComments) > 0] | order(_updatedAt desc) {
+  _id,
+  title,
+  slug,
+  programComments[]{
+    _key,
+    authorName,
+    authorRole,
+    ipHash,
+    body,
+    createdAt,
+    isPinned,
+    replies[]{
+      _key,
+      authorName,
+      authorRole,
+      ipHash,
+      body,
+      createdAt
+    }
+  }
+}`;
+
 export const programBySlugQuery = `
 *[_type == "program" && slug.current == $slug][0]{
   _id,
@@ -109,6 +157,30 @@ export const programBySlugQuery = `
   faq,
   image,
   downloadLink,
+  "affiliatePro": coalesce(
+    affiliatePro,
+    select(defined(affiliateProUrl) || defined(affiliateProLabel) => {
+      "affiliateProUrl": affiliateProUrl,
+      "affiliateProLabel": affiliateProLabel
+    })
+  ),
+  programComments[]{
+    _key,
+    authorName,
+    authorRole,
+    ipHash,
+    body,
+    createdAt,
+    isPinned,
+    replies[]{
+      _key,
+      authorName,
+      authorRole,
+      ipHash,
+      body,
+      createdAt
+    }
+  },
   cdKeys[]
 }
 `;
