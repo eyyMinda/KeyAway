@@ -196,6 +196,55 @@ export async function generateTermsMetadata(): Promise<Metadata> {
   };
 }
 
+async function generateTrustRouteMetadata(
+  resolve: (store: Awaited<ReturnType<typeof getCachedStoreDetailsDocument>>) => {
+    title: string;
+    description: string;
+    pageUrl: string;
+  }
+): Promise<Metadata> {
+  const storeData = await getCachedStoreDetailsDocument();
+  const { title, description, pageUrl: url } = resolve(storeData);
+
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: "website", url },
+    twitter: { card: "summary", title, description },
+    alternates: { canonical: url }
+  };
+}
+
+export async function generateHowItWorksMetadata(): Promise<Metadata> {
+  const { resolveHowItWorksPageSeo } = await import("@/src/lib/seo/trustPageSeo");
+  return generateTrustRouteMetadata(resolveHowItWorksPageSeo);
+}
+
+export async function generateAboutMetadata(): Promise<Metadata> {
+  const { resolveAboutPageSeo } = await import("@/src/lib/seo/trustPageSeo");
+  return generateTrustRouteMetadata(resolveAboutPageSeo);
+}
+
+export async function generateAffiliateDisclosureMetadata(): Promise<Metadata> {
+  const { resolveAffiliateDisclosurePageSeo } = await import("@/src/lib/seo/trustPageSeo");
+  return generateTrustRouteMetadata(resolveAffiliateDisclosurePageSeo);
+}
+
+export async function generateVerificationPolicyMetadata(): Promise<Metadata> {
+  const { resolveVerificationPolicyPageSeo } = await import("@/src/lib/seo/trustPageSeo");
+  return generateTrustRouteMetadata(resolveVerificationPolicyPageSeo);
+}
+
+export async function generateDmcaMetadata(): Promise<Metadata> {
+  const { resolveDmcaPageSeo } = await import("@/src/lib/seo/trustPageSeo");
+  return generateTrustRouteMetadata(resolveDmcaPageSeo);
+}
+
+export async function generatePartnersMetadata(): Promise<Metadata> {
+  const { resolvePartnersPageSeo } = await import("@/src/lib/seo/trustPageSeo");
+  return generateTrustRouteMetadata(resolvePartnersPageSeo);
+}
+
 export async function generateProgramsPageMetadata(): Promise<Metadata> {
   const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url, ogImageUrl, storeTitle, keywords } =

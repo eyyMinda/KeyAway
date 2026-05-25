@@ -17,6 +17,8 @@ import { useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvi
 import RichText from "@/src/components/portableText/RichText";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import { useI18n } from "@/src/contexts/i18n";
+import ProgramCommentsJumpLink from "@/src/components/program/comments/ProgramCommentsJumpLink";
+import { countProgramDiscussionPosts } from "@/src/lib/program/countProgramComments";
 
 const PROGRAM_HERO_IMAGE_SIZES = "(max-width: 1023px) 98vw, (max-width: 1450px) 48vw, 680px" as const;
 
@@ -56,6 +58,7 @@ export default function ProgramInformation({
   const heroSubtitle = t.hero.subtitle({ programTitle: program.title });
   const totalLabel = t.stats.totalLabel();
   const workingLabel = t.stats.workingLabel();
+  const commentCount = countProgramDiscussionPosts(program.programComments);
 
   return (
     <section className=" py-6 sm:py-10 relative">
@@ -70,7 +73,10 @@ export default function ProgramInformation({
             ) : null}
 
             <div>
-              <h1 className="section-title h2 mb-3 max-w-[540px]">{formatProgramDisplayTitle(program)}</h1>
+              <div className="mb-3 flex items-center justify-between gap-x-4 gap-y-2">
+                <h1 className="section-title h2 min-w-0 flex-1 max-w-[540px]">{formatProgramDisplayTitle(program)}</h1>
+                <ProgramCommentsJumpLink count={commentCount} className="mt-0.5" />
+              </div>
               <p className="text-base leading-relaxed text-neutral-100 sm:text-lg">{heroSubtitle}</p>
             </div>
           </div>

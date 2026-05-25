@@ -3,6 +3,7 @@
 const EVENT_DISPLAY: Record<string, string> = {
   page_viewed: "View",
   download_click: "Download",
+  affiliate_click: "Affiliate",
   social_click: "Social",
   copy_cdkey: "Copy",
   copy_pro_account: "Copy account",

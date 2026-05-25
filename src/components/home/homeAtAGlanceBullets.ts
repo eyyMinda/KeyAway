@@ -11,7 +11,7 @@ export const homeAtAGlanceBullets: {
   color: HomeAtAGlanceColor;
 }[] = [
   { icon: FaKey, title: "Copy & Activate", description: "One-click key workflow", color: "blue" },
-  { icon: FaShieldAlt, title: "Community Verified", description: "Reports keep keys fresh", color: "green" },
+  { icon: FaShieldAlt, title: "Community Reports", description: "Status bars from real activations", color: "green" },
   { icon: FaDownload, title: "Pro Software Catalog", description: "Browse by popularity", color: "orange" }
 ];
 

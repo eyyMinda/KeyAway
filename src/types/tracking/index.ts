@@ -7,6 +7,7 @@ export type AnalyticsEvent =
   | "copy_pro_account"
   | "click_activation_link"
   | "download_click"
+  | "affiliate_click"
   | "social_click"
   | "page_viewed";
 

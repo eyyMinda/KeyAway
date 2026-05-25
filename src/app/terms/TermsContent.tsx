@@ -121,8 +121,8 @@ export default function TermsContent() {
                   limit reached to help maintain accuracy
                 </li>
                 <li>
-                  <strong className="text-[#66d9ff]">Posting Comments:</strong> Engage with the community through our
-                  commenting system
+                  <strong className="text-[#66d9ff]">Program comments:</strong> Post comments on program pages using a
+                  display name; {storeTitle} may moderate or remove abusive content
                 </li>
               </ul>
               <div className="rounded-sm border border-[#6a5933] bg-[#352d1d] p-4">

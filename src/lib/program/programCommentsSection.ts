@@ -1,0 +1,3 @@
+export const PROGRAM_COMMENTS_SECTION_ID = "program-comments";
+
+export const PROGRAM_COMMENTS_SECTION_SELECTOR = `#${PROGRAM_COMMENTS_SECTION_ID}`;

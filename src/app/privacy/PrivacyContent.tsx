@@ -41,7 +41,9 @@ export default function PrivacyContent() {
                 {storeTitle} does not require account registration. We may collect limited information when you:
               </p>
               <ul className="ml-4 list-inside list-disc space-y-2 text-[#c6d4df]">
-                <li>Post comments (such as your GitHub profile if using Giscus)</li>
+                <li>
+                  Post comments on program pages (display name and comment text stored on the program in our CMS)
+                </li>
                 <li>Make a donation through a third-party service</li>
                 <li>
                   Submit CD key suggestions or contact us (name, email, and message content - stored securely via Sanity
@@ -86,8 +88,8 @@ export default function PrivacyContent() {
             </EnumeratedSectionHeading>
             <div className="space-y-4">
               <p className="leading-relaxed text-[#c6d4df]">
-                Comments and donations are handled by trusted third-party services (e.g., GitHub Discussions, PayPal, or
-                similar). Please refer to their respective privacy policies for details.
+                Donations and some social integrations may use trusted third-party services (e.g., PayPal). Program
+                comments are stored on each program document in our content system.
               </p>
               <p className="leading-relaxed text-[#c6d4df]">
                 When you follow links to <strong className="text-[#66d9ff]">software vendors</strong>

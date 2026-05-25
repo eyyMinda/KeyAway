@@ -16,7 +16,7 @@ export const storeDetails = defineType({
       title: "Support email",
       type: "string",
       description:
-        "Public contact address for help links and the “report error” mailto. Leave empty to use the built-in default (support@keyaway.app).",
+        "Public contact address for help links and trust pages. Leave empty to use the built-in default (support@keyaway.app).",
       validation: Rule => Rule.custom(value => validateOptionalSupportEmail(value))
     }),
     defineField({

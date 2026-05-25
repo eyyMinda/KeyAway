@@ -18,6 +18,7 @@ const ANALYTICS_EVENTS = new Set([
   "copy_pro_account",
   "click_activation_link",
   "download_click",
+  "affiliate_click",
   "social_click",
   "page_viewed"
 ]);
@@ -42,6 +43,7 @@ function buildAnalyticsEventDedupeKey(event: string, body: TrackRequestBody, ipH
     event === "copy_pro_account" ||
     event === "click_activation_link" ||
     event === "download_click" ||
+    event === "affiliate_click" ||
     event === "social_click"
   ) {
     const socialPart =

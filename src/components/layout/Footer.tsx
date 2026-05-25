@@ -14,6 +14,15 @@ import { Socials, FacebookGroupButton } from "@/src/components/social";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
+import { resolveSupportEmail } from "@/src/lib/site/supportEmail";
+
+const TRUST_FOOTER_LINKS = [
+  { href: "/about", label: "About" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/affiliate-disclosure", label: "Affiliate disclosure" },
+  { href: "/verification-policy", label: "Verification policy" },
+  { href: "/partners", label: "Partners" }
+] as const;
 
 export default function Footer({ logoData, socialData }: FooterProps) {
   const storeData = useStoreDetails();
@@ -30,6 +39,8 @@ export default function Footer({ logoData, socialData }: FooterProps) {
 
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const currentYear = new Date().getFullYear();
+  const storeTitle = storeData?.title?.trim() || "KeyAway";
+  const supportEmail = resolveSupportEmail(storeData);
 
   const ol = storeData?.otherLinks;
   const buyMeACoffeeUrl = ol?.find(e => e.kind === "buymeacoffee" && e.url?.trim())?.url?.trim() ?? null;
@@ -39,9 +50,9 @@ export default function Footer({ logoData, socialData }: FooterProps) {
   return (
     <footer className="mt-auto border-t border-[#2a475e] bg-[#0E141B] text-neutral-100">
       <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2 flex flex-col gap-4">
+          <div className="col-span-1 xs:col-span-2 flex flex-col gap-4">
             <Link href="/" className="inline-block">
               {isLogo ? (
                 <IdealImageClient {...logoData} className="h-12 w-auto" />
@@ -52,6 +63,13 @@ export default function Footer({ logoData, socialData }: FooterProps) {
             <p className="mb-2 max-w-md section-text">
               {portableTextToPlainText(storeData.description) ||
                 "Free Giveaway CD Keys for your favorite games and software."}
+            </p>
+            <p className="text-sm text-[#8f98a0]">
+              <span className="font-medium text-[#c6d4df]">{storeTitle}</span>
+              {" · "}
+              <a href={`mailto:${supportEmail}`} className="text-[#66c0f4] hover:text-white hover:underline">
+                {supportEmail}
+              </a>
             </p>
             <Socials socialLinks={socialData?.socialLinks || []} path={pathname} />
 
@@ -67,7 +85,7 @@ export default function Footer({ logoData, socialData }: FooterProps) {
             </div>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation */}
           <div>
             <h4 className="section-label mb-4 text-neutral-50">Navigate</h4>
             <ul className="space-y-2">
@@ -104,14 +122,41 @@ export default function Footer({ logoData, socialData }: FooterProps) {
             )}
           </div>
 
-          {/* Contribute Section */}
+          {/* Trust */}
           <div>
+            <h4 className="section-label mb-4 text-neutral-50">Trust</h4>
+            <ul className="mb-6 space-y-2">
+              {TRUST_FOOTER_LINKS.map(({ href, label }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className={`transition-colors ${
+                      pathname === href ? "font-medium text-white" : "text-neutral-150 hover:text-neutral-50"
+                    }`}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <a
+                  href="/llms.txt"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-neutral-150 transition-colors hover:text-neutral-50">
+                  llms.txt
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contribute Section */}
+          <div className="xs:col-span-2 xl:col-span-1">
             <h4 className="section-label mb-4 text-neutral-50">Contribute</h4>
             <div className="space-y-3">
               {/* Suggest a Key Button */}
               <ContactModalTrigger
                 tab="suggest"
-                className="group w-full cursor-pointer rounded-sm border border-[#4a90c4] bg-[#1a3a5c] px-4 py-4 font-semibold text-[#c6d4df] transition-colors duration-200 hover:border-[#66c0f4] hover:bg-[#213246]">
+                className="group w-full cursor-pointer rounded-sm border border-[#4a90c4] bg-[#1a3a5c] p-2 font-semibold text-[#c6d4df] transition-colors duration-200 hover:border-[#66c0f4] hover:bg-[#213246]">
                 <div className="flex items-center space-x-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-[#213246]">
                     <FaKey className="w-5 h-5" />
@@ -186,12 +231,18 @@ export default function Footer({ logoData, socialData }: FooterProps) {
           <p className="text-sm text-[#8f98a0]">
             © {currentYear} {storeData.title}. All rights reserved.
           </p>
-          <div className="flex space-x-6 mt-4 sm:mt-0">
+          <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 sm:mt-0 sm:justify-end">
+            <Link href="/about" className="text-sm text-[#8f98a0] transition-colors hover:text-white">
+              About
+            </Link>
+            <Link href="/how-it-works" className="text-sm text-[#8f98a0] transition-colors hover:text-white">
+              How it works
+            </Link>
             <Link href="/privacy" className="text-sm text-[#8f98a0] transition-colors hover:text-white">
-              Privacy Policy
+              Privacy
             </Link>
             <Link href="/terms" className="text-sm text-[#8f98a0] transition-colors hover:text-white">
-              Terms of Service
+              Terms
             </Link>
           </div>
         </div>

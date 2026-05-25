@@ -9,6 +9,8 @@ import ContributeBanner from "@/src/components/program/ContributeBanner";
 import ActivationInstructions from "@/src/components/program/ActivationInstructions";
 import RelatedPrograms from "@/src/components/program/RelatedPrograms";
 import CommentsSection from "@/src/components/program/comments/CommentsSection";
+import AffiliateProCta from "@/src/components/program/AffiliateProCta";
+import KeySourcePanel from "@/src/components/program/KeySourcePanel";
 import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
 import {
   formatVersionSummaryLine,
@@ -113,13 +115,15 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             introVersionConfirmation={introVersionConfirmation}
             versionSummaryLine={versionSummaryLine}
           />
+          <KeySourcePanel program={program} totalKeys={totalKeys} />
+          <AffiliateProCta program={program} />
         </ProgramVisitorProvider>
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
         <ProgramAboutSection program={program} />
         <ContributeBanner />
         <ProgramFaqSection programTitle={program.title} items={faqItems} />
         <RelatedPrograms programs={relatedPrograms} />
-        <CommentsSection />
+        <CommentsSection program={program} />
       </I18nShell>
     </>
   );

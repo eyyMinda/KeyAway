@@ -51,6 +51,13 @@ export default function AdminHomePage() {
           icon="📬"
           color="pink"
         />
+        <DashboardCard
+          href="/admin/comments"
+          title="Comments"
+          subtitle="Moderate program comments, delete spam, mark spammers"
+          icon="💬"
+          color="blue"
+        />
       </div>
 
       {/* Quick Overview */}

@@ -44,7 +44,8 @@ export default function HeroSection({ socialData, visitorHint, stats }: HeroSect
                 {" for Professional Software"}
               </h1>
               <p className="section-text">
-                Verified keys for premium Windows software—copy, activate, and report so the vault stays accurate.
+                Community-checked giveaway keys for premium Windows software—copy, activate, and report so listings stay
+                accurate.
               </p>
 
               <div className="flex flex-wrap gap-3 pt-1">
