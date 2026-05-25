@@ -50,22 +50,17 @@ export default function ProgramCommentsList({ comments, onReply }: ProgramCommen
       {visible.map((comment, index) => {
         const date = formatCommentDate(comment.createdAt);
         const commentKey = comment._key ?? `idx-${index}`;
-        const replies =
-          comment.replies?.filter(r => r.authorName?.trim() && hasCommentBody(r.body)) ?? [];
+        const replies = comment.replies?.filter(r => r.authorName?.trim() && hasCommentBody(r.body)) ?? [];
 
         return (
-          <li
-            key={commentKey}
-            className="rounded-sm border border-[#2a475e] bg-[#16202d] p-4 sm:p-5">
+          <li key={commentKey} className="rounded-sm border border-[#2a475e] bg-[#16202d] p-4 sm:p-5">
             <div className="mb-2 flex flex-wrap items-baseline gap-2">
               <span className="font-semibold text-[#c6d4df]">{comment.authorName}</span>
               {comment.authorRole?.trim() ? (
                 <span className={roleBadgeClass(comment.authorRole)}>{comment.authorRole.trim()}</span>
               ) : null}
               {comment.isPinned ? (
-                <span className="rounded-sm bg-[#1a3a5c] px-1.5 py-0.5 text-xs font-medium text-[#66c0f4]">
-                  Pinned
-                </span>
+                <span className="rounded-sm bg-[#1a3a5c] px-1.5 py-0.5 text-xs font-medium text-[#66c0f4]">Pinned</span>
               ) : null}
               {date ? <span className="text-xs text-[#8f98a0]">{date}</span> : null}
             </div>
