@@ -5,10 +5,7 @@ import { FaRegSmile } from "react-icons/fa";
 import EmojiPickerPopover from "@/src/components/program/comments/EmojiPickerPopover";
 import { useAdminAccess } from "@/src/hooks/useAdminAccess";
 import { MAX_COMMENT_AUTHOR, MAX_COMMENT_BODY } from "@/src/lib/program/commentBody";
-import {
-  STAFF_COMMENT_AUTHOR_NAME,
-  STAFF_COMMENT_AUTHOR_ROLE
-} from "@/src/lib/program/staffCommentIdentity";
+import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
 
 type ProgramCommentFormProps = {
   programSlug: string;
@@ -40,22 +37,25 @@ export default function ProgramCommentForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const insertEmoji = useCallback((emoji: string) => {
-    const el = textareaRef.current;
-    if (!el) {
-      setBody(prev => `${prev}${emoji}`.slice(0, MAX_COMMENT_BODY));
-      return;
-    }
-    const start = el.selectionStart ?? body.length;
-    const end = el.selectionEnd ?? body.length;
-    const next = `${body.slice(0, start)}${emoji}${body.slice(end)}`;
-    setBody(next.slice(0, MAX_COMMENT_BODY));
-    requestAnimationFrame(() => {
-      el.focus();
-      const pos = start + emoji.length;
-      el.setSelectionRange(pos, pos);
-    });
-  }, [body]);
+  const insertEmoji = useCallback(
+    (emoji: string) => {
+      const el = textareaRef.current;
+      if (!el) {
+        setBody(prev => `${prev}${emoji}`.slice(0, MAX_COMMENT_BODY));
+        return;
+      }
+      const start = el.selectionStart ?? body.length;
+      const end = el.selectionEnd ?? body.length;
+      const next = `${body.slice(0, start)}${emoji}${body.slice(end)}`;
+      setBody(next.slice(0, MAX_COMMENT_BODY));
+      requestAnimationFrame(() => {
+        el.focus();
+        const pos = start + emoji.length;
+        el.setSelectionRange(pos, pos);
+      });
+    },
+    [body]
+  );
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,9 +84,7 @@ export default function ProgramCommentForm({
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
         const msg =
-          typeof json?.error?.message === "string"
-            ? json.error.message
-            : "Could not post comment. Try again.";
+          typeof json?.error?.message === "string" ? json.error.message : "Could not post comment. Try again.";
         setError(msg);
         return;
       }
@@ -134,8 +132,7 @@ export default function ProgramCommentForm({
 
       {!adminLoading && isAdmin ? (
         <p className="rounded-sm border border-[#4a90c4] bg-[#1a2f45] px-3 py-2 text-sm text-[#c6d4df]">
-          Posting as{" "}
-          <strong className="text-white">{STAFF_COMMENT_AUTHOR_NAME}</strong>
+          Posting as <strong className="text-white">{STAFF_COMMENT_AUTHOR_NAME}</strong>
           <span className="text-[#8f98a0]"> · {STAFF_COMMENT_AUTHOR_ROLE}</span>
         </p>
       ) : (
