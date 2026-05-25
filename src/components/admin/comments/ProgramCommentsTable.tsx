@@ -25,12 +25,7 @@ type ProgramCommentsTableProps = {
   onToggleSpammer: (row: AdminProgramCommentRow, markSpammer: boolean) => Promise<boolean>;
 };
 
-export default function ProgramCommentsTable({
-  rows,
-  busyId,
-  onDelete,
-  onToggleSpammer
-}: ProgramCommentsTableProps) {
+export default function ProgramCommentsTable({ rows, busyId, onDelete, onToggleSpammer }: ProgramCommentsTableProps) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "comments" | "replies" | "spam">("all");
   const [sortColumn, setSortColumn] = useState("createdAt");
@@ -80,8 +75,7 @@ export default function ProgramCommentsTable({
           break;
         case "createdAt":
         default:
-          cmp =
-            new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
+          cmp = new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
           break;
       }
       return sortDirection === "asc" ? cmp : -cmp;
@@ -110,9 +104,7 @@ export default function ProgramCommentsTable({
       map.set(key, list);
     }
     for (const list of map.values()) {
-      list.sort(
-        (a, b) => new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime()
-      );
+      list.sort((a, b) => new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime());
     }
     return map;
   }, [rows]);
@@ -143,9 +135,10 @@ export default function ProgramCommentsTable({
     );
   }
 
-  const detailsParent = detailsRow?.isReply && detailsRow.parentCommentKey
-    ? parentByKey.get(`${detailsRow.programId}:${detailsRow.parentCommentKey}`)
-    : undefined;
+  const detailsParent =
+    detailsRow?.isReply && detailsRow.parentCommentKey
+      ? parentByKey.get(`${detailsRow.programId}:${detailsRow.parentCommentKey}`)
+      : undefined;
 
   const detailsReplies =
     detailsRow && !detailsRow.isReply
@@ -155,7 +148,14 @@ export default function ProgramCommentsTable({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <SearchInput value={search} onChange={v => { setSearch(v); setPage(1); }} placeholder="Search comments…" />
+        <SearchInput
+          value={search}
+          onChange={v => {
+            setSearch(v);
+            setPage(1);
+          }}
+          placeholder="Search comments…"
+        />
         <select
           value={filter}
           onChange={e => {
@@ -211,7 +211,9 @@ export default function ProgramCommentsTable({
                       ) : row.isPinned ? (
                         <div className="mt-1 text-xs text-amber-700">pinned</div>
                       ) : replyCount > 0 ? (
-                        <div className="mt-1 text-xs text-gray-500">{replyCount} repl{replyCount === 1 ? "y" : "ies"}</div>
+                        <div className="mt-1 text-xs text-gray-500">
+                          {replyCount} repl{replyCount === 1 ? "y" : "ies"}
+                        </div>
                       ) : null}
                     </td>
                     <td className="max-w-xs px-4 py-3 align-top">
