@@ -21,8 +21,17 @@ export function useKeyReportAlerts() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 60_000);
-    return () => clearInterval(t);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    const t = setInterval(() => {
+      if (document.visibilityState === "visible") load();
+    }, 300_000);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   return { alerts };
