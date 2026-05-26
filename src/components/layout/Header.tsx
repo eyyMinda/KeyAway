@@ -14,6 +14,8 @@ import type { HeaderProps } from "@/src/types/layout";
 import type { Notification } from "@/src/types/notifications";
 import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
 import { usePathname } from "next/navigation";
+const NOTIFICATIONS_SESSION_KEY = "keyaway:notifications:v1";
+
 export default function Header({ logoData, notifications: notificationsProp, socialData }: HeaderProps) {
   const storeData = useStoreDetails();
   const pathname = usePathname();
@@ -25,11 +27,31 @@ export default function Header({ logoData, notifications: notificationsProp, soc
       return;
     }
     let cancelled = false;
+
+    try {
+      const cached = sessionStorage.getItem(NOTIFICATIONS_SESSION_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached) as Notification[];
+        if (Array.isArray(parsed)) {
+          setNotifications(parsed);
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
+
     void fetch("/api/v1/notifications/recent")
       .then(r => r.json())
       .then((body: { data?: { notifications?: Notification[] } }) => {
         const list = body?.data?.notifications ?? [];
-        if (!cancelled) setNotifications(list);
+        if (cancelled) return;
+        setNotifications(list);
+        try {
+          sessionStorage.setItem(NOTIFICATIONS_SESSION_KEY, JSON.stringify(list));
+        } catch {
+          // ignore
+        }
       })
       .catch(() => {});
     return () => {
