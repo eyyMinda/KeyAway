@@ -2,8 +2,7 @@
 import { client } from "@/src/sanity/lib/client";
 import { programsWithStatsQuery, siteStatsQuery } from "@lib/sanity/queries";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
-import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
-import { sortPrograms } from "@/src/lib/program/programUtils";
+import { mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { generateHomePageJsonLd } from "@/src/lib/seo/jsonLd";
@@ -20,7 +19,7 @@ import { SocialData } from "@/src/types";
 import { TAG_HOMEPAGE_PROGRAMS, TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
 
 /** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 const HOMEPAGE_POPULAR_LIMIT = 8;
 
@@ -33,18 +32,16 @@ export default async function HomePage() {
   weekAgo.setDate(weekAgo.getDate() - 7);
   const weekAgoISO = weekAgo.toISOString();
 
-  const [rawPopularPrograms, bundleCounts, stats, store, featuredProgram] = await Promise.all([
+  const [rawPopularPrograms, stats, store, featuredProgram] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: [TAG_HOMEPAGE_PROGRAMS] } }),
-    getBundleCountsByProgram(),
     client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: [TAG_HOMEPAGE_STATS] } }),
     getCachedStoreDetailsDocument(),
     getFeaturedProgram()
   ]);
 
-  const popularPrograms = sortPrograms(
-    mergeProgramStats((rawPopularPrograms ?? []) as ProgramWithStats[], bundleCounts),
-    "popular"
-  ).slice(0, HOMEPAGE_POPULAR_LIMIT) as ProgramWithStats[];
+  const popularPrograms = mergeProgramStats((rawPopularPrograms ?? []) as ProgramWithStats[])
+    .sort((a, b) => b.popularityScore - a.popularityScore)
+    .slice(0, HOMEPAGE_POPULAR_LIMIT) as ProgramWithStats[];
 
   const normalizedPopularPrograms = popularPrograms.map(program => ({
     ...program,
