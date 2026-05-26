@@ -1,25 +1,17 @@
 import { unstable_cache } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
 import { programsListingProjection } from "@/src/lib/sanity/queries";
-import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
-import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
-import { getBundleCountsByProgram, mergeProgramStats } from "@/src/lib/analytics/eventsApi";
+import { mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
 import type { FilterType, SortType } from "@/src/types/programs";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-import {
-  groqProgramsOrderClause,
-  isStatsBasedProgramsSort,
-  normalizeFilterType,
-  normalizeSortType,
-  sortPrograms
-} from "@/src/lib/program/programUtils";
+import { groqProgramsOrderClause, normalizeFilterType, normalizeSortType } from "@/src/lib/program/programUtils";
 import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 
-const PROGRAMS_PER_PAGE = 16;
+export const PROGRAMS_PER_PAGE = 16;
 
-export type ProgramsPageData = {
+export type ProgramsListData = {
   programs: ProgramWithStats[];
   totalCount: number;
   totalKeys: number;
@@ -28,16 +20,37 @@ export type ProgramsPageData = {
   sortBy: SortType;
   page: number;
   programsPerPage: number;
-  storeRow: Awaited<ReturnType<typeof getCachedStoreDetailsDocument>>;
-  featuredProgram: Awaited<ReturnType<typeof getFeaturedProgram>>;
 };
 
-async function fetchProgramsPageData(
+export type ProgramsHeroTotals = {
+  totalCount: number;
+  totalKeys: number;
+};
+
+async function fetchProgramsHeroTotals(): Promise<ProgramsHeroTotals> {
+  const [totalCount, keyCountRows] = await Promise.all([
+    client.fetch<number>(`count(*[_type == "program"])`, {}, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
+    client.fetch<Array<{ keyCount?: number }>>(
+      `*[_type == "program"]{"keyCount": count(cdKeys[])}`,
+      {},
+      { next: { tags: [TAG_PROGRAM_LISTINGS] } }
+    )
+  ]);
+  const totalKeys = (keyCountRows ?? []).reduce((sum, row) => sum + (row.keyCount ?? 0), 0);
+  return { totalCount: totalCount ?? 0, totalKeys };
+}
+
+export const getCachedProgramsHeroTotals = unstable_cache(fetchProgramsHeroTotals, ["programs-hero-totals"], {
+  revalidate: PUBLIC_ISR_REVALIDATE_SECONDS,
+  tags: [TAG_PROGRAM_LISTINGS]
+});
+
+async function fetchProgramsListData(
   searchTerm: string,
   filter: FilterType,
   sortBy: SortType,
   page: number
-): Promise<ProgramsPageData> {
+): Promise<ProgramsListData> {
   const startIdx = (page - 1) * PROGRAMS_PER_PAGE;
   const endIdx = startIdx + PROGRAMS_PER_PAGE - 1;
   const filterQuery =
@@ -48,24 +61,16 @@ async function fetchProgramsPageData(
   const programsFilter = `*[_type == "program" && ${filterQuery}${searchFilter}]`;
   const countQuery = `count(${programsFilter})`;
   const keyCountQuery = `${programsFilter}{"keyCount": count(cdKeys[])}`;
-  const statsSort = isStatsBasedProgramsSort(sortBy);
-  const listQuery = statsSort
-    ? `${programsFilter} {${programsListingProjection}}`
-    : `${programsFilter} {${programsListingProjection}} ${groqProgramsOrderClause(sortBy)} [${startIdx}...${endIdx}]`;
+  const listQuery = `${programsFilter} {${programsListingProjection}} ${groqProgramsOrderClause(sortBy)} [${startIdx}...${endIdx}]`;
   const queryParams = searchTerm ? { search: `*${searchTerm.toLowerCase()}*` } : {};
 
-  const [totalCount, keyCountRows, rawPrograms, bundleCounts, storeRow, featuredProgram] = await Promise.all([
+  const [totalCount, keyCountRows, rawPrograms] = await Promise.all([
     client.fetch<number>(countQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
     client.fetch<Array<{ keyCount?: number }>>(keyCountQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
-    client.fetch<ProgramWithStats[]>(listQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
-    getBundleCountsByProgram(),
-    getCachedStoreDetailsDocument(),
-    getFeaturedProgram()
+    client.fetch<ProgramWithStats[]>(listQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } })
   ]);
 
-  const mergedAll = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[], bundleCounts);
-  const pageSlice = statsSort ? sortPrograms(mergedAll, sortBy).slice(startIdx, endIdx + 1) : mergedAll;
-  const programs = pageSlice.map(program => ({
+  const programs = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[]).map(program => ({
     ...program,
     descriptionPlain: portableTextToPlainText(program.description)
   })) as ProgramWithStats[];
@@ -74,32 +79,46 @@ async function fetchProgramsPageData(
 
   return {
     programs,
-    totalCount,
+    totalCount: totalCount ?? 0,
     totalKeys,
     searchTerm,
     filter,
     sortBy,
     page,
-    programsPerPage: PROGRAMS_PER_PAGE,
-    storeRow,
-    featuredProgram
+    programsPerPage: PROGRAMS_PER_PAGE
   };
 }
 
-export async function getProgramsPageData(
+export async function getProgramsListData(
   rawSearch: string | undefined,
   rawFilter: string | undefined,
   rawSort: string | undefined,
   rawPage: string | undefined
-): Promise<ProgramsPageData> {
+): Promise<ProgramsListData> {
   const searchTerm = (rawSearch || "").trim();
   const filter = normalizeFilterType(rawFilter);
   const sortBy = normalizeSortType(rawSort);
   const page = Math.max(1, Number.parseInt(rawPage || "1", 10) || 1);
 
   return unstable_cache(
-    () => fetchProgramsPageData(searchTerm, filter, sortBy, page),
-    ["programs-page", searchTerm, filter, sortBy, String(page)],
+    () => fetchProgramsListData(searchTerm, filter, sortBy, page),
+    ["programs-list-v2", searchTerm, filter, sortBy, String(page)],
+    { revalidate: PUBLIC_ISR_REVALIDATE_SECONDS, tags: [TAG_PROGRAM_LISTINGS] }
+  )();
+}
+
+/** Top programs for JSON-LD on static /programs shell. */
+export async function getCachedProgramsForJsonLd(limit = 20): Promise<ProgramWithStats[]> {
+  return unstable_cache(
+    async () => {
+      const rows = await client.fetch<ProgramWithStats[]>(
+        `*[_type == "program"] {${programsListingProjection}} | order(popularityScore desc) [0...$limit]`,
+        { limit: limit - 1 },
+        { next: { tags: [TAG_PROGRAM_LISTINGS] } }
+      );
+      return mergeProgramStats(rows ?? []);
+    },
+    ["programs-jsonld-v2", String(limit)],
     { revalidate: PUBLIC_ISR_REVALIDATE_SECONDS, tags: [TAG_PROGRAM_LISTINGS] }
   )();
 }

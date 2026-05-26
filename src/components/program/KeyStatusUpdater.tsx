@@ -10,7 +10,8 @@ export default function KeyStatusUpdater() {
     setIsUpdating(true);
     try {
       const response = await fetch("/api/v1/cron/update-expired-keys", {
-        method: "POST"
+        method: "POST",
+        credentials: "include"
       });
 
       const result = await response.json();

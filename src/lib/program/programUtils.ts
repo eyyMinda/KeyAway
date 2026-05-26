@@ -54,17 +54,22 @@ export function sortByOldest(programs: ProgramWithStats[]): ProgramWithStats[] {
   return [...programs].sort((a, b) => new Date(a._createdAt).getTime() - new Date(b._createdAt).getTime());
 }
 
-/** Sorts that must run after projection + bundle merge (stats are not stored on program documents). */
-export function isStatsBasedProgramsSort(sortType: SortType): boolean {
-  return sortType === "popular" || sortType === "views" || sortType === "downloads";
+/** Sorts that were merged in JS before stats lived on program documents — now sort in GROQ. */
+export function isStatsBasedProgramsSort(_sortType: SortType): boolean {
+  return false;
 }
 
 /**
- * GROQ `| order(...)` after `{ programsListingProjection }` (projected fields).
- * Do not use for popular/views/downloads — use isStatsBasedProgramsSort + sortPrograms() instead.
+ * GROQ `| order(...)` after `{ programsListingProjection }`.
  */
 export function groqProgramsOrderClause(sortType: SortType): string {
   switch (sortType) {
+    case "popular":
+      return "| order(popularityScore desc)";
+    case "views":
+      return "| order(viewCount desc)";
+    case "downloads":
+      return "| order(downloadCount desc)";
     case "latest":
       return "| order(_createdAt desc)";
     case "oldest":

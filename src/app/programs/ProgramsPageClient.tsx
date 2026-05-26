@@ -1,40 +1,86 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { ProgramsFilter, ProgramsGrid } from "@/src/components/programs";
 import Pagination from "@/src/components/ui/Pagination";
-import { ProgramsPageClientProps, FilterType, SortType } from "@/src/types/programs";
+import type { ProgramsListData } from "@/src/lib/programs/getProgramsPageData";
+import { FilterType, SortType } from "@/src/types/programs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
+import { normalizeFilterType, normalizeSortType } from "@/src/lib/program/programUtils";
+import type { ProgramWithStats } from "@/src/types/home";
 
 const SEARCH_DEBOUNCE_MS = 400;
+const EMPTY_PROGRAMS: ProgramWithStats[] = [];
 
-export default function ProgramsPageClient({
-  programs,
-  searchTerm,
-  filter,
-  sortBy,
-  currentPage,
-  totalPrograms,
-  programsPerPage
-}: ProgramsPageClientProps) {
+function readListParams(searchParams: URLSearchParams) {
+  return {
+    searchTerm: (searchParams.get("search") || "").trim(),
+    filter: normalizeFilterType(searchParams.get("filter") ?? undefined),
+    sortBy: normalizeSortType(searchParams.get("sort") ?? undefined),
+    page: Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1)
+  };
+}
+
+export default function ProgramsPageClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchParamsRef = useRef(searchParams);
   searchParamsRef.current = searchParams;
+
   const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(true);
+  const [listData, setListData] = useState<ProgramsListData | null>(null);
+  const [fetchError, setFetchError] = useState(false);
+
   const wasPending = useRef(false);
   const scrollAfterPaginationRef = useRef(false);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const localSearchRef = useRef(searchTerm);
+  const fetchGenRef = useRef(0);
+
+  const params = readListParams(searchParams);
+  const { searchTerm, filter, sortBy, page } = params;
   const [localSearch, setLocalSearch] = useState(searchTerm);
+  const localSearchRef = useRef(searchTerm);
 
   useEffect(() => {
     setLocalSearch(searchTerm);
+    localSearchRef.current = searchTerm;
   }, [searchTerm]);
 
-  localSearchRef.current = localSearch;
+  const programs = listData?.programs ?? EMPTY_PROGRAMS;
+  const totalPrograms = listData?.totalCount ?? 0;
+  const programsPerPage = listData?.programsPerPage ?? 16;
+  const currentPage = listData?.page ?? page;
+
+  const loadList = useCallback(async (sp: URLSearchParams) => {
+    const gen = ++fetchGenRef.current;
+    setIsLoading(true);
+    setFetchError(false);
+    try {
+      const res = await fetch(`/api/v1/programs/list?${sp.toString()}`);
+      const json = (await res.json()) as { data?: ProgramsListData };
+      if (gen !== fetchGenRef.current) return;
+      if (!res.ok || !json.data) {
+        setFetchError(true);
+        setListData(null);
+        return;
+      }
+      setListData(json.data);
+    } catch {
+      if (gen === fetchGenRef.current) {
+        setFetchError(true);
+        setListData(null);
+      }
+    } finally {
+      if (gen === fetchGenRef.current) setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadList(searchParams);
+  }, [searchParams, loadList]);
 
   const clearSearchDebounce = () => {
     if (searchDebounceRef.current != null) {
@@ -60,10 +106,11 @@ export default function ProgramsPageClient({
   const totalPages = Math.max(1, Math.ceil(totalPrograms / programsPerPage));
   const startIndex = totalPrograms === 0 ? 0 : (currentPage - 1) * programsPerPage + 1;
   const endIndex = Math.min(currentPage * programsPerPage, totalPrograms);
+  const showLoading = isLoading && !listData;
 
   const resolveSearchForUrl = (updates: Partial<{ search: string }>): string => {
     if (updates.search !== undefined) return updates.search.trim();
-    return localSearch.trim();
+    return localSearchRef.current.trim();
   };
 
   const updateQuery = (updates: Partial<{ search: string; filter: FilterType; sort: SortType; page: number }>) => {
@@ -117,14 +164,15 @@ export default function ProgramsPageClient({
   };
 
   const handleSearchInputChange = (value: string) => {
+    localSearchRef.current = value;
     setLocalSearch(value);
     scheduleSearchUrlSync();
   };
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = (nextPage: number) => {
     clearSearchDebounce();
     scrollAfterPaginationRef.current = true;
-    updateQuery({ page });
+    updateQuery({ page: nextPage });
   };
 
   return (
@@ -140,7 +188,11 @@ export default function ProgramsPageClient({
       />
 
       <div className="mb-4 sm:mb-6">
-        {totalPrograms === 0 ? (
+        {fetchError ? (
+          <p className="text-sm text-red-300 sm:text-base">Could not load programs. Try refreshing.</p>
+        ) : showLoading ? (
+          <p className="text-sm text-neutral-100 sm:text-base">Loading programs…</p>
+        ) : totalPrograms === 0 ? (
           <p className="text-sm text-neutral-100 sm:text-base">No results</p>
         ) : (
           <p className="text-sm text-neutral-100 sm:text-base">
@@ -149,9 +201,15 @@ export default function ProgramsPageClient({
         )}
       </div>
 
-      <ProgramsGrid programs={programs} maxViews={maxViews} maxDownloads={maxDownloads} />
+      {!fetchError && (
+        <ProgramsGrid
+          programs={showLoading ? EMPTY_PROGRAMS : programs}
+          maxViews={maxViews}
+          maxDownloads={maxDownloads}
+        />
+      )}
 
-      {totalPrograms > 0 && (
+      {totalPrograms > 0 && !fetchError && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -161,7 +219,7 @@ export default function ProgramsPageClient({
           variant="detailed"
           tone="light"
           showInfo={false}
-          className={`mt-8 sm:mt-10 lg:mt-12 ${isPending ? "opacity-70" : ""}`}
+          className={`mt-8 sm:mt-10 lg:mt-12 ${isPending || isLoading ? "opacity-70" : ""}`}
         />
       )}
     </div>

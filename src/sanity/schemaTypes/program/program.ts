@@ -231,6 +231,38 @@ export const program = defineType({
       }
     }),
     defineField({
+      name: "stats",
+      title: "Analytics stats",
+      type: "object",
+      readOnly: true,
+      options: { collapsible: true, collapsed: true },
+      description: "Synced from analytics by the bundle-events cron. Do not edit manually.",
+      fields: [
+        defineField({
+          name: "viewCount",
+          title: "Page views",
+          type: "number",
+          readOnly: true,
+          initialValue: 0
+        }),
+        defineField({
+          name: "downloadCount",
+          title: "Download clicks",
+          type: "number",
+          readOnly: true,
+          initialValue: 0
+        }),
+        defineField({
+          name: "popularityScore",
+          title: "Popularity score",
+          type: "number",
+          readOnly: true,
+          description: "viewCount + downloadCount × 3",
+          initialValue: 0
+        })
+      ]
+    }),
+    defineField({
       name: "cdKeys",
       title: "Activation entries",
       description: "Keys, accounts, or giveaway links depending on Activation flow above.",

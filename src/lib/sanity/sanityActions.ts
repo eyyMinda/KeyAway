@@ -4,7 +4,7 @@ import { programDetailTag, TAG_FEATURED_PROGRAM } from "@/src/lib/cache/cacheTag
 import { client } from "@/src/sanity/lib/client";
 import { CDKey, Program } from "@/src/types";
 import { programBySlugQuery, featuredProgramSettingsQuery, programsForAutoSelectionQuery } from "./queries";
-import { getBundleCountsByProgram, mergeProgramStats, mergeSingleProgramStats } from "@/src/lib/analytics/eventsApi";
+import { mergeProgramStats, mergeSingleProgramStats } from "@/src/lib/analytics/eventsApi";
 import { applyKeyStatusForDisplay } from "@/src/lib/program/applyKeyStatusForDisplay";
 
 /**
@@ -101,21 +101,15 @@ export async function getProgramBySlug(slug: string) {
 /**
  * Helper: Get program stats (keys, views, downloads) including bundled events
  */
-async function getProgramStats(
-  program: Program,
-  bundleCounts?: Map<string, { page_viewed: number; download_click: number }>
-) {
+async function getProgramStats(program: Program) {
   const sortedCdKeys = program.cdKeys || [];
   const totalKeys = sortedCdKeys.length;
   const workingKeys = sortedCdKeys.filter((cd: CDKey) => cd.status === "active" || cd.status === "new").length;
 
-  const counts = bundleCounts ?? (await getBundleCountsByProgram());
-
-  const { viewCount, downloadCount } = mergeSingleProgramStats(
-    { viewCount: program.viewCount ?? 0, downloadCount: program.downloadCount ?? 0 },
-    program.slug?.current,
-    counts
-  );
+  const { viewCount, downloadCount } = mergeSingleProgramStats({
+    viewCount: program.viewCount ?? 0,
+    downloadCount: program.downloadCount ?? 0
+  });
 
   return { ...program, totalKeys, workingKeys, viewCount, downloadCount };
 }
@@ -169,14 +163,9 @@ export async function getFeaturedProgram(): Promise<
     const settings = await client.fetch(featuredProgramSettingsQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } });
 
     if (!settings) {
-      // No settings: auto-select first program with working keys
-      const [rawPrograms, bundleCounts] = await Promise.all([
-        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } }),
-        getBundleCountsByProgram()
-      ]);
+      const rawPrograms = await client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } });
       const programs = mergeProgramStats(
-        (rawPrograms ?? []) as Array<{ slug: { current: string }; viewCount?: number; downloadCount?: number }>,
-        bundleCounts
+        (rawPrograms ?? []) as Array<{ slug: { current: string }; viewCount?: number; downloadCount?: number }>
       );
       for (const p of programs) {
         const workingKeys = ((p as Program).cdKeys || []).filter(
@@ -205,13 +194,9 @@ export async function getFeaturedProgram(): Promise<
 
     // Auto-select when rotation needed
     if (needsRot) {
-      const [rawPrograms, bundleCounts] = await Promise.all([
-        client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } }),
-        getBundleCountsByProgram()
-      ]);
+      const rawPrograms = await client.fetch(programsForAutoSelectionQuery, {}, { next: { tags: [TAG_FEATURED_PROGRAM] } });
       const programs = mergeProgramStats(
-        (rawPrograms ?? []) as Array<{ slug: { current: string }; viewCount?: number; downloadCount?: number }>,
-        bundleCounts
+        (rawPrograms ?? []) as Array<{ slug: { current: string }; viewCount?: number; downloadCount?: number }>
       );
       const programsWithStats = await Promise.all(
         programs.map(
@@ -253,7 +238,7 @@ export async function getFeaturedProgram(): Promise<
           .catch(err => console.error("Failed to update rotation:", err));
       }
 
-      return await getProgramStats(selected.program, bundleCounts);
+      return await getProgramStats(selected.program);
     }
 
     return null;

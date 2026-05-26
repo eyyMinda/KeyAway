@@ -187,7 +187,8 @@ export default function CDKeyTable({
                     sortColumn={sortColumn}
                     sortDirection={sortDirection}
                     onSort={handleSort}
-                    className="bg-[#212B45] text-white"
+                    tone="light"
+                    className="bg-[#212B45]"
                   />
                   <tbody className="divide-y divide-[#2a475e]">
                     {visibleKeys.map((cdKey: CDKey, i: number) => {

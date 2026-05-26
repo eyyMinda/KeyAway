@@ -35,7 +35,7 @@ import { client } from "@/src/sanity/lib/client";
 import { TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
 
 /** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;
@@ -43,7 +43,7 @@ interface ProgramPageProps {
 
 export async function generateStaticParams() {
   const slugs = await client.fetch<Array<{ slug?: { current?: string } }>>(
-    `*[_type == "program"] | order(coalesce(popularityScore, 0) desc) [0...50]{ slug }`,
+    `*[_type == "program"] | order(coalesce(stats.popularityScore, popularityScore, 0) desc) [0...50]{ slug }`,
     {},
     { next: { tags: [TAG_SITEMAP_URLS] } }
   );

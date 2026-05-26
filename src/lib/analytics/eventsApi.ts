@@ -1,10 +1,9 @@
-/** @fileoverview Fetches merged tracking events for admin ranges, bundle program counts for homepage, visitor tag aggregates. */
+/** @fileoverview Fetches merged tracking events for admin ranges; program stats live on program docs (cron rollup). */
 import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
 import { mergeTrackingEventsForRange } from "@/src/lib/analytics/mergeTrackingEventsForRange";
-import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
+import { calculatePopularityScore } from "@/src/lib/program/programUtils";
 import { client } from "@/src/sanity/lib/client";
-import { bundleCountsQuery, visitorTagAggregatesQuery } from "@/src/lib/sanity/queries";
+import { visitorTagAggregatesQuery } from "@/src/lib/sanity/queries";
 import { AnalyticsEventData } from "@/src/types";
 
 export interface BundleCountsByProgram {
@@ -12,50 +11,27 @@ export interface BundleCountsByProgram {
   download_click: number;
 }
 
-/** Fetches bundle event counts aggregated by programSlug. Cached via Next.js. */
+/** @deprecated Stats are stored on program documents via cron rollup. Returns empty map. */
 export async function getBundleCountsByProgram(): Promise<Map<string, BundleCountsByProgram>> {
-  const bundles = await client.fetch<{ events: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }[]>(
-    bundleCountsQuery,
-    {},
-    { next: { revalidate: PUBLIC_ISR_REVALIDATE_SECONDS, tags: [TAG_BUNDLE_COUNTS] } }
-  );
-  const map = new Map<string, BundleCountsByProgram>();
-  for (const b of bundles || []) {
-    for (const e of b.events || []) {
-      const slug = e.programSlug;
-      if (!slug || !e.event) continue;
-      const curr = map.get(slug) ?? { page_viewed: 0, download_click: 0 };
-      if (e.event === "page_viewed" && !e.notFound) curr.page_viewed++;
-      else if (e.event === "download_click") curr.download_click++;
-      map.set(slug, curr);
-    }
-  }
-  return map;
+  return new Map();
 }
 
-/** Merges singular counts with bundle counts for programs. Preserves all other fields. */
+/** Ensures view/download/popularity fields are numeric (already merged on program by cron). */
 export function mergeProgramStats<
   T extends { slug?: { current?: string }; viewCount?: number; downloadCount?: number; popularityScore?: number }
->(programs: T[], bundleCounts: Map<string, BundleCountsByProgram>): T[] {
+>(programs: T[]): T[] {
   return programs.map(p => {
-    const slug = p.slug?.current;
-    const bc = slug ? bundleCounts.get(slug) : undefined;
-    const v = (p.viewCount ?? 0) + (bc?.page_viewed ?? 0);
-    const d = (p.downloadCount ?? 0) + (bc?.download_click ?? 0);
-    const score = v + d * 3;
-    return { ...p, viewCount: v, downloadCount: d, popularityScore: score } as T;
+    const viewCount = p.viewCount ?? 0;
+    const downloadCount = p.downloadCount ?? 0;
+    const popularityScore = p.popularityScore ?? calculatePopularityScore(viewCount, downloadCount);
+    return { ...p, viewCount, downloadCount, popularityScore } as T;
   });
 }
 
-/** Merges stats for a single program. */
-export function mergeSingleProgramStats(
-  program: { viewCount?: number; downloadCount?: number },
-  slug: string | undefined,
-  bundleCounts: Map<string, BundleCountsByProgram>
-) {
-  const bc = slug ? bundleCounts.get(slug) : undefined;
-  const viewCount = (program.viewCount ?? 0) + (bc?.page_viewed ?? 0);
-  const downloadCount = (program.downloadCount ?? 0) + (bc?.download_click ?? 0);
+/** Merges stats for a single program (fields already on document). */
+export function mergeSingleProgramStats(program: { viewCount?: number; downloadCount?: number }) {
+  const viewCount = program.viewCount ?? 0;
+  const downloadCount = program.downloadCount ?? 0;
   return { viewCount, downloadCount };
 }
 

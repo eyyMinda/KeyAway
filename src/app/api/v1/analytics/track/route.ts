@@ -11,7 +11,7 @@ import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsR
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
-import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
+import { isProgramSlugPublishedCached } from "@/src/lib/sanity/getCachedPublishedProgramSlugs";
 
 const ANALYTICS_EVENTS = new Set([
   "copy_cdkey",
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       const slugFromPath = pathNorm.startsWith("/program/") ? pathNorm.split("/")[2] : undefined;
       const trustedProgramPath = Boolean(slugFromPath && slugFromPath === programSlug.trim());
       if (!trustedProgramPath) {
-        const ok = await isProgramSlugPublished(programSlug);
+        const ok = await isProgramSlugPublishedCached(programSlug);
         if (!ok) programSlug = undefined;
       }
     }
