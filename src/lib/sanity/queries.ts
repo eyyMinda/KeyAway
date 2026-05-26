@@ -40,6 +40,17 @@ featured{
   showcaseGif
 }`;
 
+/** Flattened analytics fields — reads nested `stats` with legacy top-level fallback. */
+export const programStatsProjection = `
+  "viewCount": coalesce(stats.viewCount, viewCount, 0),
+  "downloadCount": coalesce(stats.downloadCount, downloadCount, 0),
+  "popularityScore": coalesce(
+    stats.popularityScore,
+    popularityScore,
+    coalesce(stats.viewCount, viewCount, 0) + coalesce(stats.downloadCount, downloadCount, 0) * 3
+  )
+`;
+
 /* ------------ Programs listing projection (shared: stats + list fields) ------------ */
 export const programsListingProjection = `
   title,
@@ -50,9 +61,7 @@ export const programsListingProjection = `
   _createdAt,
   "keyCount": count(cdKeys[]),
   "hasKeys": count(cdKeys[]) > 0,
-  "viewCount": coalesce(viewCount, 0),
-  "downloadCount": coalesce(downloadCount, 0),
-  "popularityScore": coalesce(popularityScore, 0)
+  ${programStatsProjection}
 `;
 
 /** Related / card rows: no tracking aggregates, no cdKeys[]. */
@@ -181,7 +190,8 @@ export const programBySlugQuery = `
       createdAt
     }
   },
-  cdKeys[]
+  cdKeys[],
+  ${programStatsProjection}
 }
 `;
 
@@ -312,8 +322,7 @@ export const featuredProgramQuery = `*[_type == "program" && slug.current == $sl
   cdKeys[],
   "totalKeys": count(cdKeys[]),
   "workingKeys": count(cdKeys[status == "active" || status == "new"]),
-  "viewCount": coalesce(viewCount, 0),
-  "downloadCount": coalesce(downloadCount, 0)
+  ${programStatsProjection}
 }`;
 
 /* ------------ Programs for Auto-Selection (highest working keys) ------------ */
@@ -329,7 +338,5 @@ export const programsForAutoSelectionQuery = `*[_type == "program"]{
   cdKeys[],
   "totalKeys": count(cdKeys[]),
   "workingKeys": count(cdKeys[status == "active" || status == "new"]),
-  "viewCount": coalesce(viewCount, 0),
-  "downloadCount": coalesce(downloadCount, 0),
-  "popularityScore": coalesce(popularityScore, (coalesce(viewCount, 0) + coalesce(downloadCount, 0) * 3))
+  ${programStatsProjection}
 } | order(workingKeys desc, popularityScore desc)`;
