@@ -7,7 +7,7 @@ import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { Program, CDKey } from "@/src/types";
 
 /** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [store, programs] = await Promise.all([

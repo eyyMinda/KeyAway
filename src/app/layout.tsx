@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 /** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 300;
+export const revalidate = 3600;
 
 type HeadMetaTag = {
   name?: string;
