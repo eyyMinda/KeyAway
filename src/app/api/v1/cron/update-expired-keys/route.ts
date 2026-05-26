@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { updateAllExpiredKeys } from "@/src/lib/sanity/sanityActions";
-import { verifyCronAuth, logCronRun } from "@/src/lib/api/cronUtils";
+import { requireAdminSession } from "@/src/lib/admin/adminAuth";
+import { verifyCronAuth, logCronRun, type CronSource } from "@/src/lib/api/cronUtils";
 import { Errors } from "@/src/lib/api/errors";
-
 /** GET /api/v1/cron/update-expired-keys - Cron: update expired keys (requires cron auth) */
 export async function GET(req: NextRequest) {
   const { ok, source } = verifyCronAuth(req);
@@ -28,11 +28,18 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/** POST /api/v1/cron/update-expired-keys - Manual trigger (no auth; used by admin Key Status) */
+/** POST /api/v1/cron/update-expired-keys - Manual trigger (admin session or cron auth) */
 export async function POST(req: NextRequest) {
-  const source = "manual" as const;
-  try {
-    await updateAllExpiredKeys();
+  let source: CronSource = "manual";
+  const cron = verifyCronAuth(req);
+  if (!cron.ok) {
+    const admin = await requireAdminSession();
+    if (admin instanceof Response) return admin;
+  } else {
+    source = cron.source;
+  }
+
+  try {    await updateAllExpiredKeys();
     await logCronRun(client, { job: "update-expired-keys", source, status: "ok" });
     return NextResponse.json({
       data: { success: true, message: "Expired keys updated successfully" },
