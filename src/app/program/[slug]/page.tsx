@@ -33,9 +33,8 @@ import { loadMessages } from "@/src/lib/i18n/loadMessages";
 import { ProgramVisitorProvider } from "@/src/components/visitors/ProgramVisitorProvider";
 import { client } from "@/src/sanity/lib/client";
 import { TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
-
-/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 3600;
+/** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` in `@/src/lib/cache/constants` (Next.js requires a literal). */
+export const revalidate = 43200;
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;

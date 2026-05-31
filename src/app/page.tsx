@@ -17,9 +17,8 @@ import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
 import { SocialData } from "@/src/types";
 import { TAG_HOMEPAGE_PROGRAMS, TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
-
-/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 3600;
+/** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` in `@/src/lib/cache/constants` (Next.js requires a literal). */
+export const revalidate = 43200;
 
 const HOMEPAGE_POPULAR_LIMIT = 8;
 
