@@ -5,9 +5,10 @@ import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { Program, CDKey } from "@/src/types";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "../lib/cache/constants";
 
-/** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 3600;
+/** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). */
+export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [store, programs] = await Promise.all([
@@ -17,14 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveSiteBaseUrl(store?.seo);
   const currentDate = new Date();
 
-  const trustPaths = [
-    "/about",
-    "/how-it-works",
-    "/affiliate-disclosure",
-    "/verification-policy",
-    "/dmca",
-    "/partners"
-  ];
+  const trustPaths = ["/about", "/how-it-works", "/affiliate-disclosure", "/verification-policy", "/dmca", "/partners"];
 
   // Static routes with proper SEO optimization
   const staticRoutes: MetadataRoute.Sitemap = [

@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
     { data: ctx, meta: {} },
     {
       headers: {
-        "Cache-Control": `private, max-age=${PUBLIC_ISR_REVALIDATE_SECONDS}, stale-while-revalidate=60`
+        "Cache-Control": `private, max-age=${PUBLIC_ISR_REVALIDATE_SECONDS}, stale-while-revalidate=${PUBLIC_ISR_REVALIDATE_SECONDS}`
       }
     }
   );

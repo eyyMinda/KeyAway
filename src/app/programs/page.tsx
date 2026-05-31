@@ -9,14 +9,11 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import { FacebookGroupButton } from "@/src/components/social";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
-import {
-  getCachedProgramsForJsonLd,
-  getCachedProgramsHeroTotals
-} from "@/src/lib/programs/getProgramsPageData";
+import { getCachedProgramsForJsonLd, getCachedProgramsHeroTotals } from "@/src/lib/programs/getProgramsPageData";
 import type { SocialData } from "@/src/types";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "../../lib/cache/constants";
 
-/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 3600;
+export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
 
 export async function generateMetadata() {
   return await generateProgramsPageMetadata();

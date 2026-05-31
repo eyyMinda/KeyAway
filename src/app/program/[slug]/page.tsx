@@ -33,9 +33,9 @@ import { loadMessages } from "@/src/lib/i18n/loadMessages";
 import { ProgramVisitorProvider } from "@/src/components/visitors/ProgramVisitorProvider";
 import { client } from "@/src/sanity/lib/client";
 import { TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "../../../lib/cache/constants";
 
-/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 3600;
+export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
 
 interface ProgramPageProps {
   params: Promise<{ slug: string }>;

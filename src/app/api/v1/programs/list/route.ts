@@ -12,13 +12,18 @@ export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
 
   try {
-    const data = await getProgramsListData(sp.get("search") ?? undefined, sp.get("filter") ?? undefined, sp.get("sort") ?? undefined, sp.get("page") ?? undefined);
+    const data = await getProgramsListData(
+      sp.get("search") ?? undefined,
+      sp.get("filter") ?? undefined,
+      sp.get("sort") ?? undefined,
+      sp.get("page") ?? undefined
+    );
 
     return NextResponse.json(
       { data, meta: {} },
       {
         headers: {
-          "Cache-Control": `public, s-maxage=${PUBLIC_ISR_REVALIDATE_SECONDS}, stale-while-revalidate=120`
+          "Cache-Control": `public, s-maxage=${PUBLIC_ISR_REVALIDATE_SECONDS}, stale-while-revalidate=${PUBLIC_ISR_REVALIDATE_SECONDS}`
         }
       }
     );

@@ -13,6 +13,7 @@ import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
+import { PUBLIC_ISR_REVALIDATE_SECONDS } from "../lib/cache/constants";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"]
@@ -23,8 +24,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"]
 });
 
-/** Keep in sync with `PUBLIC_ISR_REVALIDATE_SECONDS`. */
-export const revalidate = 3600;
+export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
 
 type HeadMetaTag = {
   name?: string;
