@@ -13,7 +13,6 @@ import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "../lib/cache/constants";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"]
@@ -24,7 +23,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"]
 });
 
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` in `@/src/lib/cache/constants` (Next.js requires a literal). */
+export const revalidate = 43200;
 
 type HeadMetaTag = {
   name?: string;

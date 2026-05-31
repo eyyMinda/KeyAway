@@ -5,10 +5,9 @@ import { client } from "@/src/sanity/lib/client";
 import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { Program, CDKey } from "@/src/types";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "../lib/cache/constants";
-
 /** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). */
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` in `@/src/lib/cache/constants` (Next.js requires a literal). */
+export const revalidate = 43200;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [store, programs] = await Promise.all([

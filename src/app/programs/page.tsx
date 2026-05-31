@@ -11,9 +11,8 @@ import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDe
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 import { getCachedProgramsForJsonLd, getCachedProgramsHeroTotals } from "@/src/lib/programs/getProgramsPageData";
 import type { SocialData } from "@/src/types";
-import { PUBLIC_ISR_REVALIDATE_SECONDS } from "../../lib/cache/constants";
-
-export const revalidate = PUBLIC_ISR_REVALIDATE_SECONDS;
+/** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` in `@/src/lib/cache/constants` (Next.js requires a literal). */
+export const revalidate = 43200;
 
 export async function generateMetadata() {
   return await generateProgramsPageMetadata();
