@@ -81,7 +81,7 @@ export function Social({
   return (
     <Link href={url} target="_blank" rel="noreferrer" onClick={handleClick} className={className} title={displayName}>
       <span className="sr-only">{displayName}</span>
-      <IconComponent className={iconSize} />
+      <IconComponent className={iconSize} aria-hidden focusable={false} />
       {showLabel && <span className="ml-2 text-sm">{displayName}</span>}
     </Link>
   );

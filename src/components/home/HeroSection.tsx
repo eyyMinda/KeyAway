@@ -86,6 +86,7 @@ export default function HeroSection({ socialData, visitorHint, stats }: HeroSect
                 className="object-cover object-[56%_40%]"
                 sizes="(max-width: 1023px) 90vw, (max-width: 1536px) 50vw, 560px"
                 priority
+                fetchPriority="high"
               />
               <div
                 className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,#1b2838_0%,transparent_28%)] opacity-45"

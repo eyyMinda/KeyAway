@@ -93,7 +93,13 @@ export default function Header({ logoData, notifications: notificationsProp, soc
           title={storeData.title}
           className="flex items-center text-xl font-bold text-[#c6d4df] transition-colors hover:text-[#66c0f4]">
           {isLogo ? (
-            <IdealImageClient {...logoData} priority className="max-w-3xs max-h-10 xs:max-h-12 w-auto h-auto" />
+            <IdealImageClient
+              {...logoData}
+              width={120}
+              height={48}
+              priority
+              className="max-w-3xs max-h-10 xs:max-h-12 w-auto h-auto"
+            />
           ) : (
             <span className="text-xl font-bold text-[#c6d4df] transition-colors hover:text-[#66c0f4]">
               {storeData.title || "KeyAway"}
