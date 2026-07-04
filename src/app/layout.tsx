@@ -77,10 +77,9 @@ export default async function RootLayout({
   const currentLogo = storeData?.logoLight;
   /** Match header/footer slot (~104×48 CSS px); keeps `/_next/image` width near 128–256 instead of 384+. */
   const LOGO_WIDTH_HINT = 120;
-  const LOGO_HEIGHT_HINT = 48;
   const logoDims = currentLogo ? getImageDimensions(currentLogo) : { width: 120, height: 48 };
   const logoData: LogoData = {
-    src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).height(LOGO_HEIGHT_HINT).quality(70).auto("format").url(),
+    src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).quality(70).auto("format").url(),
     alt: `${storeData?.title ?? "KeyAway"} logo`,
     width: logoDims.width,
     height: logoDims.height,
