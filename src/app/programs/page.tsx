@@ -9,7 +9,11 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import { FacebookGroupButton } from "@/src/components/social";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
-import { getCachedProgramsForJsonLd, getCachedProgramsHeroTotals } from "@/src/lib/programs/getProgramsPageData";
+import {
+  getCachedProgramsForJsonLd,
+  getCachedProgramsHeroTotals,
+  getProgramsListData
+} from "@/src/lib/programs/getProgramsPageData";
 import type { SocialData } from "@/src/types";
 /** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` in `@/src/lib/cache/constants` (Next.js requires a literal). */
 export const revalidate = 43200;
@@ -18,13 +22,19 @@ export async function generateMetadata() {
   return await generateProgramsPageMetadata();
 }
 
-/** Static shell — list/filter/sort/pagination via cached `/api/v1/programs/list`. */
-export default async function ProgramsPage() {
-  const [storeRow, featuredProgram, heroTotals, jsonLdPrograms] = await Promise.all([
+interface ProgramsPageProps {
+  searchParams: Promise<{ search?: string; filter?: string; sort?: string; page?: string }>;
+}
+
+/** SSR first page for crawlers; client hydrates for filter/sort/pagination via cached `/api/v1/programs/list`. */
+export default async function ProgramsPage({ searchParams }: ProgramsPageProps) {
+  const sp = await searchParams;
+  const [storeRow, featuredProgram, heroTotals, jsonLdPrograms, initialListData] = await Promise.all([
     getCachedStoreDetailsDocument(),
     getFeaturedProgram(),
     getCachedProgramsHeroTotals(),
-    getCachedProgramsForJsonLd()
+    getCachedProgramsForJsonLd(),
+    getProgramsListData(sp.search, sp.filter, sp.sort, sp.page)
   ]);
 
   const socialData: SocialData = {
@@ -50,7 +60,7 @@ export default async function ProgramsPage() {
             <p className="text-sm text-neutral-100">Loading programs…</p>
           </div>
         }>
-        <ProgramsPageClient />
+        <ProgramsPageClient initialListData={initialListData} />
       </Suspense>
 
       <ContributeSection />

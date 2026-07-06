@@ -22,7 +22,11 @@ function readListParams(searchParams: URLSearchParams) {
   };
 }
 
-export default function ProgramsPageClient() {
+function listParamsKey(p: { searchTerm: string; filter: FilterType; sortBy: SortType; page: number }): string {
+  return `${p.searchTerm}|${p.filter}|${p.sortBy}|${p.page}`;
+}
+
+export default function ProgramsPageClient({ initialListData }: { initialListData: ProgramsListData }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -30,14 +34,24 @@ export default function ProgramsPageClient() {
   searchParamsRef.current = searchParams;
 
   const [isPending, startTransition] = useTransition();
-  const [isLoading, setIsLoading] = useState(true);
-  const [listData, setListData] = useState<ProgramsListData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [listData, setListData] = useState<ProgramsListData | null>(initialListData);
   const [fetchError, setFetchError] = useState(false);
 
   const wasPending = useRef(false);
   const scrollAfterPaginationRef = useRef(false);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fetchGenRef = useRef(0);
+  /** First effect run reuses server data when URL params match what was rendered. */
+  const initialParamsKey = useRef(
+    listParamsKey({
+      searchTerm: initialListData.searchTerm,
+      filter: initialListData.filter,
+      sortBy: initialListData.sortBy,
+      page: initialListData.page
+    })
+  );
+  const skipInitialFetchRef = useRef(true);
 
   const params = readListParams(searchParams);
   const { searchTerm, filter, sortBy, page } = params;
@@ -79,6 +93,10 @@ export default function ProgramsPageClient() {
   }, []);
 
   useEffect(() => {
+    if (skipInitialFetchRef.current) {
+      skipInitialFetchRef.current = false;
+      if (listParamsKey(readListParams(searchParams)) === initialParamsKey.current) return;
+    }
     void loadList(searchParams);
   }, [searchParams, loadList]);
 
