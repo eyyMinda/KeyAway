@@ -42,7 +42,7 @@ export function generateHomePageJsonLd(storeData: {
       url: base,
       logo: {
         "@type": "ImageObject",
-        url: `${base}/images/KeyAway_Logo.png`,
+        url: `${base}/images/KeyAway_Icon_White.png`,
         width: 400,
         height: 400
       }
@@ -116,9 +116,10 @@ export function generateProgramsPageJsonLd(programs: Program[], totalCount: numb
 // JSON-LD for Individual Program Page - SoftwareApplication schema (+ optional FAQPage)
 export function generateProgramPageJsonLd(
   program: Program,
-  workingKeys: number,
+  _workingKeys: number,
   _totalKeys: number,
-  storeData: { title: string; seo?: StoreSeo }
+  storeData: { title: string; seo?: StoreSeo },
+  rating?: { ratingValue: number; ratingCount: number } | null
 ) {
   const base = resolveSiteBaseUrl(storeData.seo).replace(/\/$/, "");
   // Extract brand from title (e.g., "IOBIT Malware Fighter" -> "IOBIT")
@@ -171,7 +172,7 @@ export function generateProgramPageJsonLd(
       url: base,
       logo: {
         "@type": "ImageObject",
-        url: `${base}/images/KeyAway_Logo.png`,
+        url: `${base}/images/KeyAway_Icon_White.png`,
         width: 400,
         height: 400
       }
@@ -186,13 +187,6 @@ export function generateProgramPageJsonLd(
             availability: "https://schema.org/InStock",
             description: offerDescGeneric
           },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.5",
-      ratingCount: workingKeys || 1,
-      bestRating: "5",
-      worstRating: "1"
-    },
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [
@@ -220,6 +214,16 @@ export function generateProgramPageJsonLd(
 
   if (softwareVersion) {
     softwareApp.softwareVersion = softwareVersion;
+  }
+
+  if (rating && rating.ratingCount > 0) {
+    softwareApp.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: String(rating.ratingValue),
+      ratingCount: rating.ratingCount,
+      bestRating: "5",
+      worstRating: "1"
+    };
   }
 
   // Add image if available

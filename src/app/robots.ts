@@ -1,6 +1,11 @@
 import { MetadataRoute } from "next";
+import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const store = await getCachedStoreDetailsDocument();
+  const baseUrl = resolveSiteBaseUrl(store?.seo);
+
   return {
     rules: [
       {
@@ -14,7 +19,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/studio/", "/api/", "/admin/"]
       }
     ],
-    sitemap: "https://www.keyaway.app/sitemap.xml",
-    host: "https://www.keyaway.app"
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl
   };
 }

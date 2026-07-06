@@ -7,6 +7,7 @@ import {
   DEFAULT_STORE_NAME,
   buildStoreSeoVariableMap,
   resolveHomePageSeo,
+  resolveDefaultOgImageUrl,
   resolveMetaKeywordList,
   resolvePrivacyPageSeo,
   resolveProgramsPageSeo,
@@ -106,6 +107,9 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
     const baseUrl = resolveSiteBaseUrl(storeData?.seo);
     const url = `${baseUrl}/program/${slug}`;
     const programKeywords = resolveMetaKeywordList(program.seo?.metaKeywords, buildStoreSeoVariableMap(storeData));
+    const ogImageUrl = program.image
+      ? urlFor(program.image).width(1200).height(630).url()
+      : resolveDefaultOgImageUrl(storeData?.seo);
 
     return {
       title,
@@ -116,22 +120,20 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
         description,
         type: "website",
         url,
-        images: program.image
-          ? [
-              {
-                url: urlFor(program.image).width(1200).height(630).url(),
-                width: 1200,
-                height: 630,
-                alt: program.title
-              }
-            ]
-          : []
+        images: [
+          {
+            url: ogImageUrl,
+            width: 1200,
+            height: 630,
+            alt: program.title
+          }
+        ]
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: program.image ? [urlFor(program.image).width(1200).height(630).url()] : []
+        images: [ogImageUrl]
       },
       alternates: {
         canonical: url

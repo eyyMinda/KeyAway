@@ -49,7 +49,8 @@ export default function ProgramInformation({
   totalKeys,
   workingKeys,
   socialData,
-  visitorHint: visitorHintProp
+  visitorHint: visitorHintProp,
+  communityRating
 }: ProgramInformationProps) {
   const { visitorHint: visitorHintCtx } = useProgramVisitor();
   const visitorHint = visitorHintProp ?? visitorHintCtx;
@@ -137,6 +138,14 @@ export default function ProgramInformation({
                 </div>
               ))}
             </div>
+
+            {communityRating ? (
+              <p className="text-xs text-neutral-100 sm:text-sm">
+                <span className="font-semibold text-[#5ba32b]">{communityRating.successPercent}%</span> community
+                success · {communityRating.ratingCount}{" "}
+                {communityRating.ratingCount === 1 ? "report" : "reports"}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>

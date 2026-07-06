@@ -169,6 +169,7 @@ export interface ProgramInformationProps {
   workingKeys: number;
   socialData?: SocialData;
   visitorHint?: VisitorHintData | null;
+  communityRating?: { ratingValue: number; ratingCount: number; successPercent: number } | null;
 }
 
 export interface ProgramPageProps {

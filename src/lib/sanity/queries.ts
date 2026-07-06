@@ -252,6 +252,13 @@ export const keyReportsQuery = `*[_type=="keyReport" && _createdAt >= $since]{
       label
     } | order(_createdAt desc)`;
 
+/* ------------ Program key report counts (community aggregateRating) ------------ */
+export const programKeyReportCountsQuery = `{
+  "working": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_working"]),
+  "expired": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_expired"]),
+  "limitReached": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_limit_reached"])
+}`;
+
 /* ------------ Cron Runs ------------ */
 export const cronRunsQuery = `*[_type == "cronRun" && ranAt >= $since]{
   _id, job, source, status, details, ranAt

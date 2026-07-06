@@ -21,6 +21,7 @@ import {
 import { getProgramBySlug } from "@/src/lib/sanity/sanityActions";
 import { getCachedRelatedPrograms } from "@/src/lib/sanity/getCachedRelatedPrograms";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
+import { getProgramAggregateRating } from "@/src/lib/program/programAggregateRating";
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
@@ -75,7 +76,11 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, store] = await Promise.all([getCachedRelatedPrograms(), getCachedStoreDetailsDocument()]);
+  const [allPrograms, store, communityRating] = await Promise.all([
+    getCachedRelatedPrograms(),
+    getCachedStoreDetailsDocument(),
+    getProgramAggregateRating(slug)
+  ]);
 
   const socialData: SocialData = {
     socialLinks: store?.socialLinks ?? []
@@ -90,7 +95,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     program.faq?.filter((f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)) ?? [];
 
   const storeInfo = store || { title: "KeyAway" };
-  const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
+  const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo, communityRating);
   const i18n = await loadMessages({ locale: "en", namespaces: ["common", "program"], programFlow });
 
   return (
@@ -103,6 +108,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             totalKeys={totalKeys}
             workingKeys={workingKeys}
             socialData={socialData}
+            communityRating={communityRating}
           />
           <CDKeyTable
             cdKeys={sortedCdKeys}
