@@ -8,6 +8,7 @@ import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo
 import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 import type { KeyReportEvent } from "@/src/types";
+import { getAdminSession } from "@/src/lib/admin/adminAuth";
 
 const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
@@ -24,6 +25,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    if (await getAdminSession()) {
+      return NextResponse.json({ data: { skipped: true, reason: "admin" }, meta: {} });
+    }
+
     const body = await req.json().catch(() => ({}));
     if (!body || typeof body !== "object") return Errors.badRequest("Request body required");
 

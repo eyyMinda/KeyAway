@@ -12,6 +12,7 @@ import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { isProgramSlugPublishedCached } from "@/src/lib/sanity/getCachedPublishedProgramSlugs";
+import { getAdminSession } from "@/src/lib/admin/adminAuth";
 
 const ANALYTICS_EVENTS = new Set([
   "copy_cdkey",
@@ -94,6 +95,10 @@ export async function POST(req: NextRequest) {
     const host = req.headers.get("host") || "";
     if (host.startsWith("localhost") || host.includes("127.0.0.1")) {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
+    }
+
+    if (await getAdminSession()) {
+      return NextResponse.json({ data: { accepted: true, skipped: true, reason: "admin" }, meta: {} });
     }
 
     const ua = req.headers.get("user-agent") || undefined;
