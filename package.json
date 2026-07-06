@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "backfill:vendors": "node --env-file=.env.local scripts/backfillVendors.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^6.2.0",

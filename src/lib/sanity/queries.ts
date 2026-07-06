@@ -59,6 +59,7 @@ export const programsListingProjection = `
   description,
   image,
   _createdAt,
+  "vendor": vendor->{ name, "slug": slug.current },
   "keyCount": count(cdKeys[]),
   "hasKeys": count(cdKeys[]) > 0,
   ${programStatsProjection}
@@ -95,6 +96,7 @@ export const adminProgramsQuery = `
   description,
   ${featuredBlockProjection},
   latestOfficialVersion,
+  "vendor": vendor->{ name, "slug": slug.current, "freeVsProDefaults": freeVsProDefaults },
   seo,
   aboutSections,
   faq,
@@ -161,6 +163,7 @@ export const programBySlugQuery = `
   description,
   ${featuredBlockProjection},
   latestOfficialVersion,
+  "vendor": vendor->{ name, "slug": slug.current, "freeVsProDefaults": freeVsProDefaults },
   seo,
   aboutSections,
   faq,
@@ -257,6 +260,35 @@ export const programKeyReportCountsQuery = `{
   "working": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_working"]),
   "expired": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_expired"]),
   "limitReached": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_limit_reached"])
+}`;
+
+/* ------------ Vendors ------------ */
+/** /vendors index + homepage chips: vendors that have at least one program, with counts. */
+export const vendorsWithCountsQuery = `*[_type == "vendor" && count(*[_type == "program" && references(^._id)]) > 0]{
+  _id,
+  name,
+  "slug": slug.current,
+  logo,
+  "programCount": count(*[_type == "program" && references(^._id)])
+} | order(programCount desc, name asc)`;
+
+/** Slugs for generateStaticParams + sitemap (only vendors with programs are worth indexing). */
+export const vendorSlugsQuery = `*[_type == "vendor" && defined(slug.current) && count(*[_type == "program" && references(^._id)]) > 0]{
+  "slug": slug.current
+}`;
+
+/** /vendors/{slug} hub: vendor doc + its programs (listing projection, popularity-sorted). */
+export const vendorBySlugQuery = `*[_type == "vendor" && slug.current == $slug][0]{
+  _id,
+  name,
+  "slug": slug.current,
+  description,
+  logo,
+  seo,
+  freeVsProDefaults,
+  "programs": *[_type == "program" && references(^._id)]{
+    ${programsListingProjection}
+  } | order(popularityScore desc, _createdAt desc)
 }`;
 
 /* ------------ Cron Runs ------------ */

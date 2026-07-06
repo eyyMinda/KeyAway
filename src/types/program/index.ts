@@ -83,6 +83,20 @@ export interface ProgramFeatured {
   showcaseGif?: SanityImageField;
 }
 
+/** One Free-vs-PRO comparison row (vendor default or program override). */
+export interface FreeVsProRow {
+  feature: string;
+  free?: string;
+  pro?: string;
+}
+
+/** Vendor reference resolved on a program (name + slug, plus optional inherited comparison rows). */
+export interface VendorRef {
+  name: string;
+  slug: string;
+  freeVsProDefaults?: FreeVsProRow[] | null;
+}
+
 export interface Program {
   _id: string;
   title: string;
@@ -91,6 +105,8 @@ export interface Program {
   programFlow?: ProgramFlow;
   description: PortableTextBlock[] | string;
   featured?: ProgramFeatured;
+  /** Resolved software publisher/brand. Null on legacy docs not yet backfilled. */
+  vendor?: VendorRef | null;
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;
   seo?: {

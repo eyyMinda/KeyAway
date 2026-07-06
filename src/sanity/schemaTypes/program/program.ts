@@ -65,6 +65,14 @@ export const program = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: "vendor",
+      title: "Vendor",
+      type: "reference",
+      to: [{ type: "vendor" }],
+      description: "Software publisher/brand. Powers /vendors/{slug} hubs, breadcrumbs, brand structured data, and vendor filtering.",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
       name: "programFlow",
       title: "Activation flow",
       type: "string",
