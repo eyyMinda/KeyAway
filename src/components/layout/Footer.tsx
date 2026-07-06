@@ -89,6 +89,15 @@ export default function Footer({ logoData, socialData }: FooterProps) {
           <div>
             <h4 className="section-label mb-4 text-neutral-50">Navigate</h4>
             <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/vendors"
+                  className={`transition-colors ${
+                    pathname === "/vendors" ? "font-medium text-white" : "text-neutral-150 hover:text-neutral-50"
+                  }`}>
+                  Vendors
+                </Link>
+              </li>
               {footerLinks &&
                 footerLinks.map((link, i) => {
                   let isActive = false;

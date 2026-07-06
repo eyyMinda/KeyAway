@@ -122,9 +122,8 @@ export function generateProgramPageJsonLd(
   rating?: { ratingValue: number; ratingCount: number } | null
 ) {
   const base = resolveSiteBaseUrl(storeData.seo).replace(/\/$/, "");
-  // Extract brand from title (e.g., "IOBIT Malware Fighter" -> "IOBIT")
-  const brandMatch = program.title.match(/^([A-Za-z]+)/);
-  const brand = brandMatch ? brandMatch[1] : "Unknown";
+  // Prefer the linked vendor brand; fall back to the first word of the title for legacy docs.
+  const brand = program.vendor?.name || program.title.match(/^([A-Za-z]+)/)?.[1] || "Unknown";
 
   const pageUrl = `${base}/program/${program.slug.current}`;
   const appDescription = buildSoftwareApplicationDescription(program);
@@ -190,21 +189,21 @@ export function generateProgramPageJsonLd(
     breadcrumb: {
       "@type": "BreadcrumbList",
       itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: base },
+        { "@type": "ListItem", position: 2, name: "Programs", item: `${base}/programs` },
+        ...(program.vendor
+          ? [
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: program.vendor.name,
+                item: `${base}/vendors/${program.vendor.slug}`
+              }
+            ]
+          : []),
         {
           "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: base
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Programs",
-          item: `${base}/programs`
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
+          position: program.vendor ? 4 : 3,
           name: program.title,
           item: pageUrl
         }
@@ -266,6 +265,98 @@ export function generateProgramPageJsonLd(
   return {
     "@context": "https://schema.org",
     ...softwareApp
+  };
+}
+
+interface VendorLd {
+  name: string;
+  slug: string;
+  programCount?: number;
+}
+
+// JSON-LD for /vendors index — CollectionPage listing every vendor hub.
+export function generateVendorsPageJsonLd(
+  vendors: VendorLd[],
+  siteBaseUrl?: string
+) {
+  const base = (siteBaseUrl || BASE_URL).replace(/\/$/, "");
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Software Vendors",
+    description: "Browse software publishers with free promotional CD keys and giveaways.",
+    url: `${base}/vendors`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: vendors.length,
+      itemListElement: vendors.map((v, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: v.name,
+        item: `${base}/vendors/${v.slug}`
+      }))
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: base },
+        { "@type": "ListItem", position: 2, name: "Vendors", item: `${base}/vendors` }
+      ]
+    }
+  };
+}
+
+// JSON-LD for /vendors/{slug} hub — CollectionPage of the vendor's programs.
+export function generateVendorPageJsonLd(
+  vendor: { name: string; slug: string; description?: string },
+  programs: Program[],
+  siteBaseUrl?: string
+) {
+  const base = (siteBaseUrl || BASE_URL).replace(/\/$/, "");
+  const vendorUrl = `${base}/vendors/${vendor.slug}`;
+  const items = programs.slice(0, 30).map((program, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "SoftwareApplication",
+      name: program.title,
+      url: `${base}/program/${program.slug.current}`,
+      image: program.image ? urlFor(program.image).width(400).height(400).url() : undefined,
+      applicationCategory: "SoftwareApplication",
+      operatingSystem: "Windows",
+      author: { "@type": "Organization", name: vendor.name },
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        description: "Free CD Key"
+      }
+    }
+  }));
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${vendor.name} — Free CD Keys & Giveaways`,
+    description:
+      vendor.description || `Free promotional CD keys and giveaways for ${vendor.name} software.`,
+    url: vendorUrl,
+    about: { "@type": "Organization", name: vendor.name },
+    mainEntity: {
+      "@type": "ItemList",
+      name: `${vendor.name} programs`,
+      numberOfItems: programs.length,
+      itemListElement: items
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: base },
+        { "@type": "ListItem", position: 2, name: "Vendors", item: `${base}/vendors` },
+        { "@type": "ListItem", position: 3, name: vendor.name, item: vendorUrl }
+      ]
+    }
   };
 }
 

@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { TAG_SITEMAP_URLS } from "@/src/lib/cache/cacheTags";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { client } from "@/src/sanity/lib/client";
-import { allProgramsQuery } from "@/src/lib/sanity/queries";
+import { allProgramsQuery, vendorSlugsQuery } from "@/src/lib/sanity/queries";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { Program, CDKey } from "@/src/types";
 /** ISR fallback; URL set busts use `TAG_SITEMAP_URLS` (admin + selective webhook). */
@@ -10,9 +10,10 @@ import { Program, CDKey } from "@/src/types";
 export const revalidate = 43200;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [store, programs] = await Promise.all([
+  const [store, programs, vendorSlugs] = await Promise.all([
     getCachedStoreDetailsDocument(),
-    client.fetch(allProgramsQuery, {}, { next: { tags: [TAG_SITEMAP_URLS] } })
+    client.fetch(allProgramsQuery, {}, { next: { tags: [TAG_SITEMAP_URLS] } }),
+    client.fetch<{ slug: string }[]>(vendorSlugsQuery, {}, { next: { tags: [TAG_SITEMAP_URLS] } })
   ]);
   const baseUrl = resolveSiteBaseUrl(store?.seo);
   const currentDate = new Date();
@@ -32,6 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: currentDate,
       changeFrequency: "daily",
       priority: 0.9
+    },
+    {
+      url: `${baseUrl}/vendors`,
+      lastModified: currentDate,
+      changeFrequency: "weekly",
+      priority: 0.7
     },
     ...trustPaths.map(path => ({
       url: `${baseUrl}${path}`,
@@ -94,5 +101,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Sort programs by priority (highest first) for better crawling order
   const sortedProgramRoutes = programRoutes.sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
-  return [...staticRoutes, ...sortedProgramRoutes];
+  const vendorRoutes: MetadataRoute.Sitemap = (vendorSlugs ?? [])
+    .map(v => v.slug)
+    .filter(Boolean)
+    .map(slug => ({
+      url: `${baseUrl}/vendors/${slug}`,
+      lastModified: currentDate,
+      changeFrequency: "weekly" as const,
+      priority: 0.6
+    }));
+
+  return [...staticRoutes, ...sortedProgramRoutes, ...vendorRoutes];
 }
