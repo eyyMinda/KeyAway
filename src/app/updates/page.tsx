@@ -5,6 +5,10 @@ export async function generateMetadata() {
   return generateUpdatesMetadata();
 }
 
-export default function UpdatesPage() {
-  return <UpdatesContent />;
+interface UpdatesPageProps {
+  searchParams: Promise<{ days?: string }>;
+}
+
+export default function UpdatesPage({ searchParams }: UpdatesPageProps) {
+  return <UpdatesContent searchParams={searchParams} />;
 }

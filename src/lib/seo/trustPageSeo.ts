@@ -75,6 +75,6 @@ export function resolveUpdatesPageSeo(store: StoreDetailsForSeo | null | undefin
     store,
     "/updates",
     "Latest Updates | [title]",
-    "New programs and fresh giveaway keys added to [title] in the last 30 days — auto-updated from our catalog."
+    "New programs and fresh giveaway keys added to [title] in the last 90 days — auto-updated from our catalog."
   );
 }

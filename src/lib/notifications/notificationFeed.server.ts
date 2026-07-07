@@ -5,14 +5,25 @@ import { client } from "@/src/sanity/lib/client";
 import { urlFor } from "@/src/sanity/lib/image";
 import type { Notification, NotificationType } from "@/src/types/notifications";
 
-/** Fixed `_id` so only one feed document exists in the dataset. */
+/** Legacy singleton `_id` (migrated to append-only feed documents). */
 export const SITE_NOTIFICATION_FEED_DOCUMENT_ID = "siteNotificationFeed";
 
-/** Max rows stored on the singleton feed (after global sort by activity time). */
-const MAX_ITEMS = 15;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** ~1 month: program must be touched in Sanity in this window to appear; same window for “new listing” / key dates. */
-const FEED_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+/** Activity window when building each snapshot (header + new feed rows). */
+export const NOTIFICATION_SNAPSHOT_WINDOW_DAYS = 30;
+const SNAPSHOT_WINDOW_MS = NOTIFICATION_SNAPSHOT_WINDOW_DAYS * DAY_MS;
+
+/** Max rows per snapshot document (after global sort by activity time). */
+const MAX_ITEMS_PER_SNAPSHOT = 15;
+
+/** Default /updates page window; extended via `?days=` query param. */
+export const UPDATES_PAGE_DEFAULT_DAYS = 90;
+export const UPDATES_PAGE_DAYS_INCREMENT = 90;
+export const UPDATES_PAGE_MAX_DAYS = 365 * 2;
+
+/** Cap stored feed documents so the dataset stays bounded. */
+const MAX_FEED_DOCUMENTS = 120;
 
 const NOTIFICATION_ID_PREFIX = "program-notify-";
 
@@ -24,6 +35,13 @@ type FeedRow = {
   message?: string;
   createdAt?: string;
   imageUrl?: string;
+};
+
+type FeedDocument = {
+  _id: string;
+  _createdAt?: string;
+  generatedAt?: string;
+  items?: FeedRow[];
 };
 
 function programImageUrl(image: unknown): string | undefined {
@@ -54,12 +72,89 @@ function stableItemKey(id: string): string {
   return id.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 120) || "item";
 }
 
-/** Recompute feed from all programs (heavy — call only from webhook/admin/cron, not per GET). */
+function parseFeedRow(raw: FeedRow): Notification | null {
+  if (
+    typeof raw?.id !== "string" ||
+    typeof raw.programSlug !== "string" ||
+    typeof raw.programTitle !== "string" ||
+    typeof raw.createdAt !== "string" ||
+    typeof raw.type !== "string"
+  ) {
+    return null;
+  }
+  const t = raw.type as NotificationType;
+  if (t !== "new_program" && t !== "new_program_with_keys" && t !== "new_keys") return null;
+  return {
+    id: raw.id,
+    type: t,
+    programSlug: raw.programSlug,
+    programTitle: raw.programTitle,
+    ...(typeof raw.message === "string" && raw.message.length ? { message: raw.message } : {}),
+    createdAt: raw.createdAt,
+    ...(typeof raw.imageUrl === "string" && raw.imageUrl.length ? { imageUrl: raw.imageUrl } : {})
+  };
+}
+
+function snapshotSignature(items: FeedRow[]): string {
+  return JSON.stringify(
+    items.map(i => ({
+      id: i.id,
+      type: i.type,
+      createdAt: i.createdAt,
+      message: i.message
+    }))
+  );
+}
+
+function mergeNotificationsFromDocuments(docs: FeedDocument[]): Notification[] {
+  const byId = new Map<string, Notification>();
+
+  for (const doc of docs) {
+    for (const raw of doc.items ?? []) {
+      const parsed = parseFeedRow(raw);
+      if (!parsed) continue;
+      const existing = byId.get(parsed.id);
+      if (!existing || new Date(parsed.createdAt).getTime() > new Date(existing.createdAt).getTime()) {
+        byId.set(parsed.id, parsed);
+      }
+    }
+  }
+
+  return [...byId.values()].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+async function fetchFeedDocuments(cached = false): Promise<FeedDocument[]> {
+  const docs = await client.fetch<FeedDocument[]>(
+    `*[_type == "siteNotificationFeed"] | order(coalesce(generatedAt, _createdAt) desc) {
+      _id,
+      _createdAt,
+      generatedAt,
+      items
+    }`,
+    {},
+    cached ? { next: { tags: [TAG_NOTIFICATION_FEED] } } : undefined
+  );
+  return docs ?? [];
+}
+
+async function pruneOldFeedDocuments(docs: FeedDocument[]): Promise<void> {
+  if (docs.length <= MAX_FEED_DOCUMENTS) return;
+  const excess = docs.slice(MAX_FEED_DOCUMENTS);
+  for (const doc of excess) {
+    if (doc._id === SITE_NOTIFICATION_FEED_DOCUMENT_ID) continue;
+    try {
+      await client.delete(doc._id);
+    } catch {
+      // non-fatal
+    }
+  }
+}
+
+/** Recompute snapshot from programs and append a new feed document (does not rewrite history). */
 export async function rebuildSiteNotificationFeed(): Promise<void> {
   const now = Date.now();
-  const windowStartMs = now - FEED_WINDOW_MS;
+  const windowStartMs = now - SNAPSHOT_WINDOW_MS;
 
-  /** Every program is scanned; only rows with `_updatedAt` in the window qualify (embedding key edits bumps this). */
   const programs = await client.fetch<
     Array<{
       _id: string;
@@ -104,13 +199,11 @@ export async function rebuildSiteNotificationFeed(): Promise<void> {
           })
         : [];
 
-    /** Skip meaningless bumps (e.g. title-only) with no listing/key signal in-window. */
     if (!isNewListing && newlyAddedKeys.length === 0) continue;
 
     const canonicalId = `${NOTIFICATION_ID_PREFIX}${program._id}`;
     const imageUrl = programImageUrl(program.image);
 
-    // Exactly one notification per program: pick a single merged row (prefer “new listing + keys”, else listing, else keys).
     if (isNewListing && newlyAddedKeys.length > 0) {
       const mostRecentKey = newlyAddedKeys.reduce((latest, key) => {
         const keyDate = new Date(key.createdAt || key.validFrom);
@@ -163,7 +256,7 @@ export async function rebuildSiteNotificationFeed(): Promise<void> {
 
   const sorted = notifications
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, MAX_ITEMS);
+    .slice(0, MAX_ITEMS_PER_SNAPSHOT);
 
   const items = sorted.map(n => ({
     _key: stableItemKey(n.id),
@@ -176,47 +269,71 @@ export async function rebuildSiteNotificationFeed(): Promise<void> {
     ...(n.imageUrl ? { imageUrl: n.imageUrl } : {})
   }));
 
-  await client.createOrReplace({
-    _id: SITE_NOTIFICATION_FEED_DOCUMENT_ID,
-    _type: "siteNotificationFeed",
-    items
-  });
+  const existingDocs = await fetchFeedDocuments();
+  const latestDoc = existingDocs[0];
+
+  if (items.length > 0) {
+    const nextSignature = snapshotSignature(items);
+    const latestSignature = latestDoc?.items ? snapshotSignature(latestDoc.items) : null;
+
+    if (nextSignature !== latestSignature) {
+      await client.create({
+        _type: "siteNotificationFeed",
+        generatedAt: new Date().toISOString(),
+        windowDays: NOTIFICATION_SNAPSHOT_WINDOW_DAYS,
+        items
+      });
+    }
+  }
+
+  const refreshedDocs = await fetchFeedDocuments();
+  await pruneOldFeedDocuments(refreshedDocs);
 
   revalidateTag(TAG_NOTIFICATION_FEED, "max");
   revalidatePath("/api/v1/notifications/recent");
   revalidatePath("/updates");
 }
 
+/** Latest snapshot — used by header bell API. */
 export async function readSiteNotificationFeed(): Promise<Notification[]> {
-  const row = await client.fetch<{ items?: FeedRow[] } | null>(
-    `*[_id == $id][0]{ items }`,
-    { id: SITE_NOTIFICATION_FEED_DOCUMENT_ID },
-    { next: { tags: [TAG_NOTIFICATION_FEED] } }
-  );
+  const docs = await fetchFeedDocuments(true);
+  const latest = docs[0];
+  if (!latest?.items?.length) return [];
 
-  const list = row?.items ?? [];
   const out: Notification[] = [];
-  for (const raw of list) {
-    if (
-      typeof raw?.id !== "string" ||
-      typeof raw.programSlug !== "string" ||
-      typeof raw.programTitle !== "string" ||
-      typeof raw.createdAt !== "string" ||
-      typeof raw.type !== "string"
-    ) {
-      continue;
-    }
-    const t = raw.type as NotificationType;
-    if (t !== "new_program" && t !== "new_program_with_keys" && t !== "new_keys") continue;
-    out.push({
-      id: raw.id,
-      type: t,
-      programSlug: raw.programSlug,
-      programTitle: raw.programTitle,
-      ...(typeof raw.message === "string" && raw.message.length ? { message: raw.message } : {}),
-      createdAt: raw.createdAt,
-      ...(typeof raw.imageUrl === "string" && raw.imageUrl.length ? { imageUrl: raw.imageUrl } : {})
-    });
+  for (const raw of latest.items) {
+    const parsed = parseFeedRow(raw);
+    if (parsed) out.push(parsed);
   }
   return out;
+}
+
+/** Merged history across all feed snapshots (deduped by notification id). */
+export async function readSiteNotificationHistory(): Promise<Notification[]> {
+  const docs = await fetchFeedDocuments(true);
+  return mergeNotificationsFromDocuments(docs);
+}
+
+export function filterNotificationsByDays(notifications: Notification[], days: number): Notification[] {
+  const cutoffMs = Date.now() - days * DAY_MS;
+  return notifications.filter(n => {
+    const ts = new Date(n.createdAt).getTime();
+    return Number.isFinite(ts) && ts >= cutoffMs;
+  });
+}
+
+export function hasOlderNotifications(notifications: Notification[], days: number): boolean {
+  const cutoffMs = Date.now() - days * DAY_MS;
+  return notifications.some(n => {
+    const ts = new Date(n.createdAt).getTime();
+    return Number.isFinite(ts) && ts < cutoffMs;
+  });
+}
+
+export function resolveUpdatesPageDays(raw?: string): number {
+  const parsed = Number.parseInt(raw ?? "", 10);
+  if (!Number.isFinite(parsed) || parsed < UPDATES_PAGE_DEFAULT_DAYS) {
+    return UPDATES_PAGE_DEFAULT_DAYS;
+  }
+  return Math.min(parsed, UPDATES_PAGE_MAX_DAYS);
 }
