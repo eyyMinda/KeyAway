@@ -264,6 +264,25 @@ export const programKeyReportCountsQuery = `{
   "limitReached": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_limit_reached"])
 }`;
 
+/* ------------ Program share counts (social_click per network) ------------ */
+export const programShareCountsQuery = `{
+  "facebook": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-facebook"]),
+  "twitter": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-twitter"]),
+  "telegram": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-telegram"]),
+  "pinterest": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-pinterest"]),
+  "tumblr": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-tumblr"]),
+  "linkedin": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-linkedin"])
+}`;
+
+export const pageShareCountsQuery = `{
+  "facebook": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-facebook"]),
+  "twitter": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-twitter"]),
+  "telegram": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-telegram"]),
+  "pinterest": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-pinterest"]),
+  "tumblr": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-tumblr"]),
+  "linkedin": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-linkedin"])
+}`;
+
 /* ------------ Vendors ------------ */
 /** /vendors index + homepage chips: vendors that have at least one program, with counts. */
 export const vendorsWithCountsQuery = `*[_type == "vendor" && count(*[_type == "program" && references(^._id)]) > 0]{
