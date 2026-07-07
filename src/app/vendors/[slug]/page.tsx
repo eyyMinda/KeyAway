@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import JsonLd from "@/src/components/JsonLd";
-import Breadcrumbs from "@/src/components/layout/Breadcrumbs";
+import VendorBreadcrumbs from "@/src/components/vendors/VendorBreadcrumbs";
 import RichText from "@/src/components/portableText/RichText";
 import ProgramsGrid from "@/src/components/programs/ProgramsGrid";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
@@ -79,14 +79,7 @@ export default async function VendorPage({ params }: VendorPageProps) {
 
       <section className="border-b border-[#2a475e]">
         <div className="mx-auto w-full max-w-360 px-4 pb-8 pt-10 sm:px-6 sm:pb-10 sm:pt-12 lg:px-8">
-          <Breadcrumbs
-            className="mb-4"
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Vendors", href: "/vendors" },
-              { label: vendor.name }
-            ]}
-          />
+          <VendorBreadcrumbs className="mb-4" vendor={vendor} />
 
           <div className="flex items-center gap-4">
             {vendor.logo && (

@@ -26,7 +26,7 @@ import { getProgramAggregateRating } from "@/src/lib/program/programAggregateRat
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
-import Breadcrumbs from "@/src/components/layout/Breadcrumbs";
+import ProgramBreadcrumbs from "@/src/components/program/ProgramBreadcrumbs";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import type { Program, ProgramFaqItem } from "@/src/types/program";
 import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
@@ -105,16 +105,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
       <JsonLd data={jsonLd} />
       <I18nShell locale={i18n.locale} messages={i18n.messages}>
         <div className="mx-auto max-w-3xl px-4 pt-6 sm:px-6 lg:max-w-360 lg:px-8">
-          <Breadcrumbs
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Programs", href: "/programs" },
-              ...(program.vendor
-                ? [{ label: program.vendor.name, href: `/vendors/${program.vendor.slug}` }]
-                : []),
-              { label: program.title }
-            ]}
-          />
+          <ProgramBreadcrumbs program={program} />
         </div>
         <ProgramVisitorProvider>
           <ProgramInformation

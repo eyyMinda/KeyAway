@@ -10,6 +10,7 @@ import { urlFor } from "@/src/sanity/lib/image";
 import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
 import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
+import { buildProgramBreadcrumbJsonLd } from "@/src/lib/seo/breadcrumbs";
 import type { StoreSeo } from "@/src/types/layout";
 
 const BASE_URL = "https://www.keyaway.app";
@@ -186,29 +187,7 @@ export function generateProgramPageJsonLd(
             availability: "https://schema.org/InStock",
             description: offerDescGeneric
           },
-    breadcrumb: {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Home", item: base },
-        { "@type": "ListItem", position: 2, name: "Programs", item: `${base}/programs` },
-        ...(program.vendor
-          ? [
-              {
-                "@type": "ListItem",
-                position: 3,
-                name: program.vendor.name,
-                item: `${base}/vendors/${program.vendor.slug}`
-              }
-            ]
-          : []),
-        {
-          "@type": "ListItem",
-          position: program.vendor ? 4 : 3,
-          name: program.title,
-          item: pageUrl
-        }
-      ]
-    }
+    breadcrumb: buildProgramBreadcrumbJsonLd(program, base, pageUrl)
   };
 
   if (softwareVersion) {
@@ -355,6 +334,38 @@ export function generateVendorPageJsonLd(
         { "@type": "ListItem", position: 1, name: "Home", item: base },
         { "@type": "ListItem", position: 2, name: "Vendors", item: `${base}/vendors` },
         { "@type": "ListItem", position: 3, name: vendor.name, item: vendorUrl }
+      ]
+    }
+  };
+}
+
+// JSON-LD for /updates — ItemList of recent catalog changes (feeds from siteNotificationFeed).
+export function generateUpdatesPageJsonLd(
+  updates: Array<{ programTitle: string; programSlug: string; createdAt: string }>,
+  siteBaseUrl?: string
+) {
+  const base = (siteBaseUrl || BASE_URL).replace(/\/$/, "");
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Latest giveaway updates",
+    description: "Recently added programs and fresh CD keys on KeyAway.",
+    url: `${base}/updates`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: updates.length,
+      itemListElement: updates.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.programTitle,
+        item: `${base}/program/${item.programSlug}`
+      }))
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: base },
+        { "@type": "ListItem", position: 2, name: "Updates", item: `${base}/updates` }
       ]
     }
   };
