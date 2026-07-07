@@ -10,6 +10,7 @@ import ActivationInstructions from "@/src/components/program/ActivationInstructi
 import RelatedPrograms from "@/src/components/program/RelatedPrograms";
 import CommentsSection from "@/src/components/program/comments/CommentsSection";
 import AffiliateProCta from "@/src/components/program/AffiliateProCta";
+import FreeVsProComparison from "@/src/components/program/FreeVsProComparison";
 import KeySourcePanel from "@/src/components/program/KeySourcePanel";
 import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
 import {
@@ -134,6 +135,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             versionSummaryLine={versionSummaryLine}
           />
           <KeySourcePanel program={program} totalKeys={totalKeys} />
+          <FreeVsProComparison program={program} />
           <AffiliateProCta program={program} />
         </ProgramVisitorProvider>
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />

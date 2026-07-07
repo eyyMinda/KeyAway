@@ -123,6 +123,8 @@ export interface Program {
     affiliateProUrl?: string;
     affiliateProLabel?: string;
   };
+  /** Per-program Free vs PRO rows; falls back to vendor.freeVsProDefaults when empty. */
+  freeVsProComparison?: FreeVsProRow[] | null;
   programComments?: ProgramComment[];
   cdKeys: CDKey[];
   keyCount?: number;

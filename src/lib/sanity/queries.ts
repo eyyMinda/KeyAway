@@ -109,6 +109,7 @@ export const adminProgramsQuery = `
       "affiliateProLabel": affiliateProLabel
     })
   ),
+  freeVsProComparison,
   programComments[]{
     _key,
     authorName,
@@ -176,6 +177,7 @@ export const programBySlugQuery = `
       "affiliateProLabel": affiliateProLabel
     })
   ),
+  freeVsProComparison,
   programComments[]{
     _key,
     authorName,

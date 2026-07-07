@@ -135,6 +135,14 @@ export const program = defineType({
       ]
     }),
     defineField({
+      name: "freeVsProComparison",
+      title: "Free vs PRO comparison",
+      type: "array",
+      of: [{ type: "freeVsProRow" }],
+      description:
+        "Optional per-program comparison table. When empty, rows from the linked vendor's Free vs PRO defaults are used instead."
+    }),
+    defineField({
       name: "seo",
       title: "SEO",
       type: "object",
