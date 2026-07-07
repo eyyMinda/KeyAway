@@ -9,6 +9,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 import { normalizeFilterType, normalizeSortType } from "@/src/lib/program/programUtils";
 import type { ProgramWithStats } from "@/src/types/home";
+import HomeVendorBrowse from "@/src/components/home/HomeVendorBrowse";
+import type { VendorListItem } from "@/src/lib/vendors/getVendors";
 
 const SEARCH_DEBOUNCE_MS = 400;
 const EMPTY_PROGRAMS: ProgramWithStats[] = [];
@@ -26,7 +28,13 @@ function listParamsKey(p: { searchTerm: string; filter: FilterType; sortBy: Sort
   return `${p.searchTerm}|${p.filter}|${p.sortBy}|${p.page}`;
 }
 
-export default function ProgramsPageClient({ initialListData }: { initialListData: ProgramsListData }) {
+export default function ProgramsPageClient({
+  initialListData,
+  vendors = []
+}: {
+  initialListData: ProgramsListData;
+  vendors?: VendorListItem[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -195,6 +203,8 @@ export default function ProgramsPageClient({ initialListData }: { initialListDat
 
   return (
     <div id="programs-grid" className="mx-auto max-w-360 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      {!fetchError && !showLoading && <HomeVendorBrowse vendors={vendors} position="top" />}
+
       <ProgramsFilter
         searchTerm={localSearch}
         filter={filter}

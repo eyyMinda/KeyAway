@@ -9,6 +9,7 @@ import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection
 import { FacebookGroupButton } from "@/src/components/social";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
+import { getCachedVendorsWithCounts } from "@/src/lib/vendors/getVendors";
 import {
   getCachedProgramsForJsonLd,
   getCachedProgramsHeroTotals,
@@ -29,12 +30,13 @@ interface ProgramsPageProps {
 /** SSR first page for crawlers; client hydrates for filter/sort/pagination via cached `/api/v1/programs/list`. */
 export default async function ProgramsPage({ searchParams }: ProgramsPageProps) {
   const sp = await searchParams;
-  const [storeRow, featuredProgram, heroTotals, jsonLdPrograms, initialListData] = await Promise.all([
+  const [storeRow, featuredProgram, heroTotals, jsonLdPrograms, initialListData, vendors] = await Promise.all([
     getCachedStoreDetailsDocument(),
     getFeaturedProgram(),
     getCachedProgramsHeroTotals(),
     getCachedProgramsForJsonLd(),
-    getProgramsListData(sp.search, sp.filter, sp.sort, sp.page)
+    getProgramsListData(sp.search, sp.filter, sp.sort, sp.page),
+    getCachedVendorsWithCounts()
   ]);
 
   const socialData: SocialData = {
@@ -60,7 +62,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
             <p className="text-sm text-neutral-100">Loading programs…</p>
           </div>
         }>
-        <ProgramsPageClient initialListData={initialListData} />
+        <ProgramsPageClient initialListData={initialListData} vendors={vendors} />
       </Suspense>
 
       <ContributeSection />
