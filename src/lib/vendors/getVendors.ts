@@ -4,9 +4,9 @@ import { client } from "@/src/sanity/lib/client";
 import { vendorBySlugQuery, vendorSlugsQuery, vendorsWithCountsQuery } from "@/src/lib/sanity/queries";
 import { mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
-import type { FreeVsProRow } from "@/src/types/program";
+import type { FreeVsProRow, SanityImageField } from "@/src/types/program";
 import type { PortableTextBlock } from "@portabletext/types";
-import type { SanityImageField } from "@/src/types/program";
+import type { VendorLogoBackgroundColor } from "@/src/lib/vendors/resolveVendorLogoBackgroundColor";
 
 const VENDOR_TAGS = { next: { tags: [TAG_VENDORS, TAG_PROGRAM_LISTINGS] } };
 
@@ -15,6 +15,7 @@ export interface VendorListItem {
   name: string;
   slug: string;
   logo?: SanityImageField;
+  logoBackgroundColor?: VendorLogoBackgroundColor | null;
   programCount: number;
 }
 
@@ -24,6 +25,7 @@ export interface VendorHub {
   slug: string;
   description?: PortableTextBlock[] | string | null;
   logo?: SanityImageField;
+  logoBackgroundColor?: VendorLogoBackgroundColor | null;
   seo?: { metaTitle?: string; metaDescription?: string };
   freeVsProDefaults?: FreeVsProRow[] | null;
   programs: ProgramWithStats[];

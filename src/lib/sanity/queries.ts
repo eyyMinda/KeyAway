@@ -290,6 +290,7 @@ export const vendorsWithCountsQuery = `*[_type == "vendor" && count(*[_type == "
   name,
   "slug": slug.current,
   logo,
+  logoBackgroundColor,
   "programCount": count(*[_type == "program" && references(^._id)])
 } | order(programCount desc, name asc)`;
 
@@ -305,6 +306,7 @@ export const vendorBySlugQuery = `*[_type == "vendor" && slug.current == $slug][
   "slug": slug.current,
   description,
   logo,
+  logoBackgroundColor,
   seo,
   freeVsProDefaults,
   "programs": *[_type == "program" && references(^._id)]{

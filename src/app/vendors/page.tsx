@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import JsonLd from "@/src/components/JsonLd";
+import VendorLogoFrame from "@/src/components/vendors/VendorLogoFrame";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getCachedVendorsWithCounts } from "@/src/lib/vendors/getVendors";
 import { generateVendorsPageJsonLd } from "@/src/lib/seo/jsonLd";
 import { resolveVendorsIndexSeo } from "@/src/lib/seo/vendorSeo";
-import { urlFor } from "@/src/sanity/lib/image";
 
 /** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` (Next.js requires a literal). */
 export const revalidate = 43200;
@@ -62,19 +61,16 @@ export default async function VendorsPage() {
                 <Link
                   href={`/vendors/${vendor.slug}`}
                   className="group flex h-full items-center gap-4 rounded-sm border border-[#2a475e] bg-[#16202d] p-4 transition-colors hover:border-[#4a90c4]">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-[#2a475e] bg-[#0e1621]">
-                    {vendor.logo ? (
-                      <Image
-                        src={urlFor(vendor.logo).width(112).height(112).fit("max").url()}
-                        alt={`${vendor.name} logo`}
-                        width={56}
-                        height={56}
-                        className="h-full w-full object-contain p-1"
-                      />
-                    ) : (
-                      <span className="text-lg font-bold text-[#66c0f4]">{vendor.name.charAt(0)}</span>
-                    )}
-                  </div>
+                  <VendorLogoFrame
+                    name={vendor.name}
+                    logo={vendor.logo}
+                    logoBackgroundColor={vendor.logoBackgroundColor}
+                    imageSize={112}
+                    displayMaxSize={56}
+                    frameClassName="flex h-14 w-14 shrink-0 items-center justify-center rounded-sm border border-[#2a475e]"
+                    alt={`${vendor.name} logo`}
+                    fallbackClassName="text-lg font-bold text-[#66c0f4]"
+                  />
                   <div className="min-w-0">
                     <div className="truncate font-semibold text-[#c6d4df] group-hover:text-white">{vendor.name}</div>
                     <div className="mt-0.5 text-xs text-neutral-100">

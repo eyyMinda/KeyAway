@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import JsonLd from "@/src/components/JsonLd";
 import VendorBreadcrumbs from "@/src/components/vendors/VendorBreadcrumbs";
+import VendorLogoFrame from "@/src/components/vendors/VendorLogoFrame";
 import RichText from "@/src/components/portableText/RichText";
 import ProgramsGrid from "@/src/components/programs/ProgramsGrid";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
@@ -10,7 +10,6 @@ import { getCachedVendorSlugs, getVendorBySlug } from "@/src/lib/vendors/getVend
 import { generateVendorPageJsonLd } from "@/src/lib/seo/jsonLd";
 import { resolveVendorHubSeo } from "@/src/lib/seo/vendorSeo";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-import { urlFor } from "@/src/sanity/lib/image";
 
 /** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` (Next.js requires a literal). */
 export const revalidate = 43200;
@@ -83,15 +82,15 @@ export default async function VendorPage({ params }: VendorPageProps) {
 
           <div className="flex items-center gap-4">
             {vendor.logo && (
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-sm border border-[#2a475e] bg-[#0e1621]">
-                <Image
-                  src={urlFor(vendor.logo).width(128).height(128).fit("max").url()}
-                  alt={`${vendor.name} logo`}
-                  width={64}
-                  height={64}
-                  className="h-full w-full object-contain p-1.5"
-                />
-              </div>
+              <VendorLogoFrame
+                name={vendor.name}
+                logo={vendor.logo}
+                logoBackgroundColor={vendor.logoBackgroundColor}
+                imageSize={128}
+                displayMaxSize={64}
+                frameClassName="flex h-16 w-16 shrink-0 items-center justify-center rounded-sm border border-[#2a475e]"
+                alt={`${vendor.name} logo`}
+              />
             )}
             <div>
               <div className="section-label">Vendor</div>

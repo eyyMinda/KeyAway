@@ -1,4 +1,5 @@
 import { defineField, defineType } from "sanity";
+import { VendorProgramsInput } from "@/src/sanity/inputs/VendorProgramsInput";
 
 const MAX_META_TITLE = 70;
 const MAX_META_DESC = 160;
@@ -35,6 +36,22 @@ export const vendor = defineType({
       title: "Logo",
       type: "image",
       options: { hotspot: true }
+    }),
+    defineField({
+      name: "logoBackgroundColor",
+      title: "Logo background color",
+      type: "color",
+      description: "Optional tile background behind transparent logos. Leave unset for a transparent background.",
+      options: { disableAlpha: false },
+      hidden: ({ document }) => !document?.logo
+    }),
+    defineField({
+      name: "assignedProgramsUi",
+      title: "Programs",
+      type: "string",
+      description: "Manage which programs belong to this vendor. Changes update each program's Vendor reference.",
+      components: { input: VendorProgramsInput },
+      hidden: ({ document }) => !document?._id
     }),
     defineField({
       name: "seo",
