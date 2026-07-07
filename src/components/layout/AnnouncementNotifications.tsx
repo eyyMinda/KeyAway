@@ -93,7 +93,10 @@ export default function AnnouncementNotifications({ notifications, socialData }:
           onClick={handleMiniPopupClick}
           className="absolute right-0 top-full z-110 mt-2 cursor-pointer whitespace-nowrap rounded-sm border border-[#2a475e] bg-[#1b2838] px-3 py-2 text-left text-xs font-medium text-[#c6d4df] shadow-[0_8px_24px_rgba(0,0,0,0.55)] animate-[fadeIn_0.5s_ease-out]"
           aria-label="New announcements — open list">
-          <span className="pointer-events-none absolute -top-1 right-4 h-2 w-2 rotate-45 border-l border-t border-[#2a475e] bg-[#1b2838]" aria-hidden />
+          <span
+            className="pointer-events-none absolute -top-1 right-4 h-2 w-2 rotate-45 border-l border-t border-[#2a475e] bg-[#1b2838]"
+            aria-hidden
+          />
           <span className="relative flex items-center gap-2">
             <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[#5ba32b]" aria-hidden />
             <span>New updates available!</span>
@@ -138,12 +141,18 @@ export default function AnnouncementNotifications({ notifications, socialData }:
             ) : null}
           </div>
 
-          <div className="border-t border-[#2a475e] bg-[#16202d] px-4 py-2.5">
+          <div className="border-t border-[#2a475e] bg-[#16202d] px-4 py-2.5 flex flex-wrap justify-between items-center gap-x-4 gap-y-1">
+            <Link
+              href="/updates"
+              onClick={() => setIsOpen(false)}
+              className="text-xs font-medium text-[#66d9ff] underline-offset-2 hover:text-white hover:underline">
+              View all updates →
+            </Link>
             <Link
               href="/programs"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-medium text-[#66d9ff] underline-offset-2 hover:text-white hover:underline">
-              View all programs →
+              className="text-xs font-medium text-[#8f98a0] underline-offset-2 hover:text-[#c6d4df] hover:underline">
+              Browse programs →
             </Link>
           </div>
         </div>

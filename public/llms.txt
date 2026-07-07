@@ -10,7 +10,7 @@
 ## What visitors can do
 
 - Browse a **home** page with featured and popular programs.
-- Open **program detail pages** (`/program/{slug}`) with: program description, download link to the official vendor when configured, a **table of CD keys** with status (e.g. active, expired, limit reached), **activation guidance**, related programs, and **Giscus** (GitHub Discussions–based) comments.
+- Open **program detail pages** (`/program/{slug}`) with: program description, download link to the official vendor when configured, a **table of CD keys** with status (e.g. active, expired, limit reached), **activation guidance**, **social share buttons** (Facebook, X, Telegram, Pinterest, Tumblr, LinkedIn), related programs, and a **comments** section.
 - **Report key status** (working / expired / limit reached) to help keep listings accurate; reports are tied to a hashed visitor identifier, not named accounts.
 - Use **contact / suggest** flows to send messages or suggest new keys or programs (rate-limited APIs).
 
@@ -54,6 +54,9 @@ Base path: `https://www.keyaway.app/api/v1/`
 
 - https://www.keyaway.app/ — Home
 - https://www.keyaway.app/programs — All programs
+- https://www.keyaway.app/vendors — Software vendors index
+- https://www.keyaway.app/vendors/{slug} — Vendor hub (programs by vendor)
+- https://www.keyaway.app/updates — Recent program and key activity feed
 - https://www.keyaway.app/program/{slug} — Program detail (replace `{slug}` with the program slug)
 - https://www.keyaway.app/about — About KeyAway
 - https://www.keyaway.app/how-it-works — How listings and community reports work
