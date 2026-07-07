@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveSiteBaseUrl(store?.seo);
   const currentDate = new Date();
 
-  const trustPaths = ["/about", "/how-it-works", "/affiliate-disclosure", "/verification-policy", "/dmca", "/partners"];
+  const trustPaths = ["/about", "/how-it-works", "/affiliate-disclosure", "/verification-policy", "/dmca", "/partners", "/updates"];
 
   // Static routes with proper SEO optimization
   const staticRoutes: MetadataRoute.Sitemap = [

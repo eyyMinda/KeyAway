@@ -247,6 +247,11 @@ export async function generatePartnersMetadata(): Promise<Metadata> {
   return generateTrustRouteMetadata(resolvePartnersPageSeo);
 }
 
+export async function generateUpdatesMetadata(): Promise<Metadata> {
+  const { resolveUpdatesPageSeo } = await import("@/src/lib/seo/trustPageSeo");
+  return generateTrustRouteMetadata(resolveUpdatesPageSeo);
+}
+
 export async function generateProgramsPageMetadata(): Promise<Metadata> {
   const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url, ogImageUrl, storeTitle, keywords } =

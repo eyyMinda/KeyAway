@@ -184,6 +184,7 @@ export async function rebuildSiteNotificationFeed(): Promise<void> {
 
   revalidateTag(TAG_NOTIFICATION_FEED, "max");
   revalidatePath("/api/v1/notifications/recent");
+  revalidatePath("/updates");
 }
 
 export async function readSiteNotificationFeed(): Promise<Notification[]> {

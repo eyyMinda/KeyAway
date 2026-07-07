@@ -69,3 +69,12 @@ export function resolvePartnersPageSeo(store: StoreDetailsForSeo | null | undefi
     "Work with [title] on official software giveaways and promotional listings."
   );
 }
+
+export function resolveUpdatesPageSeo(store: StoreDetailsForSeo | null | undefined) {
+  return resolveTrustPageSeo(
+    store,
+    "/updates",
+    "Latest Updates | [title]",
+    "New programs and fresh giveaway keys added to [title] in the last 30 days — auto-updated from our catalog."
+  );
+}
