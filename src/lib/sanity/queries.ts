@@ -96,7 +96,7 @@ export const adminProgramsQuery = `
   description,
   ${featuredBlockProjection},
   latestOfficialVersion,
-  "vendor": vendor->{ name, "slug": slug.current, "freeVsProDefaults": freeVsProDefaults },
+  "vendor": vendor->{ name, "slug": slug.current },
   seo,
   aboutSections,
   faq,
@@ -164,7 +164,7 @@ export const programBySlugQuery = `
   description,
   ${featuredBlockProjection},
   latestOfficialVersion,
-  "vendor": vendor->{ name, "slug": slug.current, "freeVsProDefaults": freeVsProDefaults },
+  "vendor": vendor->{ name, "slug": slug.current },
   seo,
   aboutSections,
   faq,
@@ -308,7 +308,7 @@ export const vendorBySlugQuery = `*[_type == "vendor" && slug.current == $slug][
   logo,
   logoBackgroundColor,
   seo,
-  freeVsProDefaults,
+  giveawayVsOfficial,
   "programs": *[_type == "program" && references(^._id)]{
     ${programsListingProjection}
   } | order(popularityScore desc, _createdAt desc)

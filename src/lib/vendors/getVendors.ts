@@ -4,9 +4,10 @@ import { client } from "@/src/sanity/lib/client";
 import { vendorBySlugQuery, vendorSlugsQuery, vendorsWithCountsQuery } from "@/src/lib/sanity/queries";
 import { mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
-import type { FreeVsProRow, SanityImageField } from "@/src/types/program";
+import type { GiveawayComparisonRow } from "@/src/types/program";
 import type { PortableTextBlock } from "@portabletext/types";
 import type { VendorLogoBackgroundColor } from "@/src/lib/vendors/resolveVendorLogoBackgroundColor";
+import { SanityImageSource } from "@sanity/asset-utils";
 
 const VENDOR_TAGS = { next: { tags: [TAG_VENDORS, TAG_PROGRAM_LISTINGS] } };
 
@@ -14,7 +15,7 @@ export interface VendorListItem {
   _id: string;
   name: string;
   slug: string;
-  logo?: SanityImageField;
+  logo?: SanityImageSource;
   logoBackgroundColor?: VendorLogoBackgroundColor | null;
   programCount: number;
 }
@@ -24,10 +25,10 @@ export interface VendorHub {
   name: string;
   slug: string;
   description?: PortableTextBlock[] | string | null;
-  logo?: SanityImageField;
+  logo?: SanityImageSource;
   logoBackgroundColor?: VendorLogoBackgroundColor | null;
   seo?: { metaTitle?: string; metaDescription?: string };
-  freeVsProDefaults?: FreeVsProRow[] | null;
+  giveawayVsOfficial?: GiveawayComparisonRow[] | null;
   programs: ProgramWithStats[];
 }
 

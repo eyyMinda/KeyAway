@@ -1,9 +1,17 @@
 import { defineField, defineType } from "sanity";
 
-/** Shared comparison row used by `vendor.freeVsProDefaults` and `program.freeVsProComparison`. */
+/**
+ * Per-program "Free vs Official PRO" feature comparison row.
+ * Used by `program.freeVsProComparison` to show what the free edition offers
+ * versus the paid official PRO license (an SEO-friendly feature table).
+ *
+ * NOTE: this is the classic feature comparison. The giveaway-key caveats
+ * (temporary, version-locked, activation-capped) live separately on the
+ * vendor as `giveawayVsOfficial` (see `giveawayComparisonRow`).
+ */
 export const freeVsProRow = defineType({
   name: "freeVsProRow",
-  title: "Free vs PRO row",
+  title: "Free vs Official PRO row",
   type: "object",
   fields: [
     defineField({
@@ -15,15 +23,15 @@ export const freeVsProRow = defineType({
     }),
     defineField({
       name: "free",
-      title: "Free / Giveaway",
+      title: "Free",
       type: "string",
-      description: 'e.g. "Manual only".'
+      description: 'What the free edition offers, e.g. "Manual only".'
     }),
     defineField({
       name: "pro",
-      title: "PRO",
+      title: "Official PRO",
       type: "string",
-      description: 'e.g. "Automatic & background".'
+      description: 'What the paid PRO license adds, e.g. "Automatic & background".'
     })
   ],
   preview: {

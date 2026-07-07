@@ -14,17 +14,15 @@ export default function FreeVsProComparison({ program }: FreeVsProComparisonProp
   const vendorName = program.vendor?.name;
 
   return (
-    <section
-      className="mx-auto max-w-360 px-4 pb-6 pt-2 sm:px-6 sm:pb-8 lg:px-8"
-      aria-labelledby="free-vs-pro-heading">
+    <section className="mx-auto max-w-360 px-4 pb-6 pt-2 sm:px-6 sm:pb-8 lg:px-8" aria-labelledby="free-vs-pro-heading">
       <div className="overflow-hidden rounded-sm border border-[#2a475e] bg-[#16202d]">
         <div className="border-b border-[#2a475e] px-4 py-4 sm:px-6">
-          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#66c0f4]">Free vs PRO</p>
+          <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#66c0f4]">Free vs Official PRO</p>
           <h2 id="free-vs-pro-heading" className="text-lg font-bold text-white sm:text-xl">
-            Why upgrade{vendorName ? ` to ${vendorName} PRO` : ""}?
+            What you get with{vendorName ? ` ${vendorName} PRO` : " PRO"}
           </h2>
           <p className="mt-2 text-sm text-neutral-100">
-            Giveaway keys are great for trying the software. PRO keeps updates, support, and features running long-term.
+            The free edition covers the basics. Official PRO unlocks the full feature set, with updates and support.
           </p>
         </div>
 
@@ -35,19 +33,17 @@ export default function FreeVsProComparison({ program }: FreeVsProComparisonProp
                 <th scope="col" className="px-4 py-3 font-semibold text-[#c6d4df] sm:px-6">
                   Feature
                 </th>
-                <th scope="col" className="px-4 py-3 font-semibold text-[#8f98a0] sm:px-6">
-                  Free / Giveaway
+                <th scope="col" className="px-4 py-3 font-semibold text-[#66c0f4] sm:px-6">
+                  Free
                 </th>
                 <th scope="col" className="px-4 py-3 font-semibold text-[#5ba32b] sm:px-6">
-                  PRO
+                  Official PRO
                 </th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr
-                  key={`${row.feature}-${i}`}
-                  className={i % 2 === 0 ? "bg-[#16202d]" : "bg-[#1b2838]/60"}>
+                <tr key={`${row.feature}-${i}`} className={i % 2 === 0 ? "bg-[#16202d]" : "bg-[#1b2838]/60"}>
                   <th scope="row" className="px-4 py-3 font-medium text-[#c6d4df] sm:px-6">
                     {row.feature}
                   </th>
@@ -62,8 +58,8 @@ export default function FreeVsProComparison({ program }: FreeVsProComparisonProp
         {affiliateUrl ? (
           <div className="border-t border-[#2a475e] bg-[#1b2838]/80 px-4 py-3 sm:px-6">
             <p className="text-xs leading-relaxed text-[#8f98a0] sm:text-sm">
-              <span className="font-semibold text-[#c6d4df]">Pro tip:</span> Giveaway keys usually lack auto-updates.
-              Grab the official PRO license via the button below.{" "}
+              <span className="font-semibold text-[#c6d4df]">Pro tip:</span> want every feature above, permanently, with
+              updates and support? Grab the official PRO license via the button below.{" "}
               <Link href="/affiliate-disclosure" className="text-[#66c0f4] underline hover:text-white">
                 Affiliate disclosure
               </Link>

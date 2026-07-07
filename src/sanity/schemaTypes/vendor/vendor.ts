@@ -78,12 +78,12 @@ export const vendor = defineType({
       ]
     }),
     defineField({
-      name: "freeVsProDefaults",
-      title: "Free vs PRO defaults",
+      name: "giveawayVsOfficial",
+      title: "Giveaway key vs Official PRO",
       type: "array",
-      of: [{ type: "freeVsProRow" }],
+      of: [{ type: "giveawayComparisonRow" }],
       description:
-        "Reusable comparison rows applied to this vendor's programs when a program has no rows of its own (e.g. Updates: Manual → Automatic)."
+        "Honest comparison of a community giveaway key (temporary, version-locked, activation-capped) vs an official PRO license. Shown on this vendor's hub page. Applies to every program from this vendor — no per-program overrides."
     })
   ],
   preview: {

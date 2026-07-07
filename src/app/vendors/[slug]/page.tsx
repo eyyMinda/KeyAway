@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import JsonLd from "@/src/components/JsonLd";
 import VendorBreadcrumbs from "@/src/components/vendors/VendorBreadcrumbs";
 import VendorLogoFrame from "@/src/components/vendors/VendorLogoFrame";
+import GiveawayVsOfficial from "@/src/components/vendors/GiveawayVsOfficial";
 import RichText from "@/src/components/portableText/RichText";
 import ProgramsGrid from "@/src/components/programs/ProgramsGrid";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
@@ -114,6 +115,8 @@ export default async function VendorPage({ params }: VendorPageProps) {
         </h2>
         <ProgramsGrid programs={vendor.programs} maxViews={maxViews} maxDownloads={maxDownloads} />
       </section>
+
+      <GiveawayVsOfficial rows={vendor.giveawayVsOfficial} vendorName={vendor.name} />
     </>
   );
 }

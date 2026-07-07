@@ -83,18 +83,30 @@ export interface ProgramFeatured {
   showcaseGif?: SanityImageField;
 }
 
-/** One Free-vs-PRO comparison row (vendor default or program override). */
+/** One per-program "Free vs Official PRO" feature-comparison row. */
 export interface FreeVsProRow {
+  /** The feature being compared, e.g. "Updates". */
   feature: string;
+  /** What the free edition offers. */
   free?: string;
+  /** What the paid official PRO license adds. */
   pro?: string;
 }
 
-/** Vendor reference resolved on a program (name + slug, plus optional inherited comparison rows). */
+/** One vendor-level "Giveaway key vs Official PRO license" row. */
+export interface GiveawayComparisonRow {
+  /** The aspect being compared, e.g. "Auto-updates". */
+  feature: string;
+  /** The community giveaway-key route. */
+  giveaway?: string;
+  /** The paid official PRO license route. */
+  officialPro?: string;
+}
+
+/** Vendor reference resolved on a program (name + slug). */
 export interface VendorRef {
   name: string;
   slug: string;
-  freeVsProDefaults?: FreeVsProRow[] | null;
 }
 
 export interface Program {
@@ -123,7 +135,7 @@ export interface Program {
     affiliateProUrl?: string;
     affiliateProLabel?: string;
   };
-  /** Per-program Free vs PRO rows; falls back to vendor.freeVsProDefaults when empty. */
+  /** Per-program Free vs Official PRO feature-comparison rows. */
   freeVsProComparison?: FreeVsProRow[] | null;
   programComments?: ProgramComment[];
   cdKeys: CDKey[];
