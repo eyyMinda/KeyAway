@@ -1,13 +1,12 @@
 import Image from "next/image";
-import { getImageDimensions } from "@sanity/asset-utils";
+import { getImageDimensions, SanityImageSource } from "@sanity/asset-utils";
 import { urlFor } from "@/src/sanity/lib/image";
 import { resolveVendorLogoBackgroundColor } from "@/src/lib/vendors/resolveVendorLogoBackgroundColor";
 import type { VendorLogoBackgroundColor } from "@/src/lib/vendors/resolveVendorLogoBackgroundColor";
-import type { SanityImageField } from "@/src/types/program";
 
 type VendorLogoFrameProps = {
   name: string;
-  logo?: SanityImageField;
+  logo?: SanityImageSource;
   logoBackgroundColor?: VendorLogoBackgroundColor | null;
   /** Max edge length (px) for the logo box and Sanity CDN width hint. */
   imageSize: number;
@@ -58,7 +57,7 @@ export default function VendorLogoFrame({
     );
   }
 
-  const intrinsic = getImageDimensions(logo);
+  const intrinsic = getImageDimensions(logo as SanityImageSource);
   const boxMax = displayMaxSize ?? Math.round(imageSize / 2);
   const display = fitInsideBox(intrinsic.width, intrinsic.height, boxMax, boxMax);
 
