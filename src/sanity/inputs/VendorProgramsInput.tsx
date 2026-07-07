@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AddIcon, TrashIcon } from "@sanity/icons";
 import { Box, Button, Card, Flex, Select, Spinner, Stack, Text } from "@sanity/ui";
-import { useClient } from "sanity";
+import { useClient, useFormValue } from "sanity";
 import type { StringInputProps } from "sanity";
 import { apiVersion } from "@/src/sanity/env";
 
@@ -17,8 +17,9 @@ function canonicalDocumentId(id: string | undefined): string | null {
   return id.replace(/^drafts\./, "");
 }
 
-export function VendorProgramsInput(props: StringInputProps) {
-  const vendorRefId = canonicalDocumentId(props.document?._id as string | undefined);
+export function VendorProgramsInput(_props: StringInputProps) {
+  const documentId = useFormValue(["_id"]) as string | undefined;
+  const vendorRefId = canonicalDocumentId(documentId);
   const client = useClient({ apiVersion });
 
   const [assigned, setAssigned] = useState<ProgramRow[]>([]);
