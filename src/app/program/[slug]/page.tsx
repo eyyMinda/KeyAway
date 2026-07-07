@@ -27,6 +27,10 @@ import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramBreadcrumbs from "@/src/components/program/ProgramBreadcrumbs";
+import ProgramSocialShare from "@/src/components/program/social-share/ProgramSocialShare";
+import { getProgramShareCounts } from "@/src/lib/program/getProgramShareCounts";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
+import { urlFor } from "@/src/sanity/lib/image";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import type { Program, ProgramFaqItem } from "@/src/types/program";
 import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
@@ -78,11 +82,15 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, store, communityRating] = await Promise.all([
+  const [allPrograms, store, communityRating, shareCounts] = await Promise.all([
     getCachedRelatedPrograms(),
     getCachedStoreDetailsDocument(),
-    getProgramAggregateRating(slug)
+    getProgramAggregateRating(slug),
+    getProgramShareCounts(slug)
   ]);
+
+  const pageUrl = `${resolveSiteBaseUrl(store?.seo)}/program/${slug}`;
+  const shareImageUrl = program.image ? urlFor(program.image).width(1200).height(630).url() : undefined;
 
   const socialData: SocialData = {
     socialLinks: store?.socialLinks ?? []
@@ -114,6 +122,14 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             workingKeys={workingKeys}
             socialData={socialData}
             communityRating={communityRating}
+          />
+          <ProgramSocialShare
+            programTitle={program.title}
+            programSlug={slug}
+            pageUrl={pageUrl}
+            workingKeys={workingKeys}
+            imageUrl={shareImageUrl}
+            shareCounts={shareCounts}
           />
           <CDKeyTable
             cdKeys={sortedCdKeys}
