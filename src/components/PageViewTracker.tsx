@@ -7,6 +7,7 @@ import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { getUTMParameters } from "@/src/lib/analytics/utmUtils";
 import { pageViewSkipKey } from "@/src/lib/analytics/pageViewSkip";
 import { primaryReferrerForPageView } from "@/src/lib/analytics/referrerResolve";
+import { isAdminSession } from "@/src/lib/admin/isAdminSession";
 import { shouldSkipClientPageView, waitForPageViewEngagement } from "@/src/lib/analytics/shouldSendPageView";
 
 const log = (...args: unknown[]) => {
@@ -40,6 +41,8 @@ export default function PageViewTracker() {
 
     const trackPageView = async () => {
       try {
+        if (await isAdminSession()) return log("skipped admin session", pathname);
+
         try {
           await waitForPageViewEngagement(controller.signal);
         } catch {

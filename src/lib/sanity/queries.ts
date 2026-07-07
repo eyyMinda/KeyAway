@@ -59,6 +59,7 @@ export const programsListingProjection = `
   description,
   image,
   _createdAt,
+  "vendor": vendor->{ name, "slug": slug.current },
   "keyCount": count(cdKeys[]),
   "hasKeys": count(cdKeys[]) > 0,
   ${programStatsProjection}
@@ -95,6 +96,7 @@ export const adminProgramsQuery = `
   description,
   ${featuredBlockProjection},
   latestOfficialVersion,
+  "vendor": vendor->{ name, "slug": slug.current },
   seo,
   aboutSections,
   faq,
@@ -107,6 +109,7 @@ export const adminProgramsQuery = `
       "affiliateProLabel": affiliateProLabel
     })
   ),
+  freeVsProComparison,
   programComments[]{
     _key,
     authorName,
@@ -161,6 +164,7 @@ export const programBySlugQuery = `
   description,
   ${featuredBlockProjection},
   latestOfficialVersion,
+  "vendor": vendor->{ name, "slug": slug.current },
   seo,
   aboutSections,
   faq,
@@ -173,6 +177,7 @@ export const programBySlugQuery = `
       "affiliateProLabel": affiliateProLabel
     })
   ),
+  freeVsProComparison,
   programComments[]{
     _key,
     authorName,
@@ -251,6 +256,63 @@ export const keyReportsQuery = `*[_type=="keyReport" && _createdAt >= $since]{
       key,
       label
     } | order(_createdAt desc)`;
+
+/* ------------ Program key report counts (community aggregateRating) ------------ */
+export const programKeyReportCountsQuery = `{
+  "working": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_working"]),
+  "expired": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_expired"]),
+  "limitReached": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_limit_reached"])
+}`;
+
+/* ------------ Program share counts (social_click per network) ------------ */
+export const programShareCountsQuery = `{
+  "facebook": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-facebook"]),
+  "twitter": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-twitter"]),
+  "telegram": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-telegram"]),
+  "pinterest": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-pinterest"]),
+  "tumblr": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-tumblr"]),
+  "linkedin": count(*[_type == "trackingEvent" && event == "social_click" && programSlug == $slug && social == "share-linkedin"])
+}`;
+
+export const pageShareCountsQuery = `{
+  "facebook": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-facebook"]),
+  "twitter": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-twitter"]),
+  "telegram": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-telegram"]),
+  "pinterest": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-pinterest"]),
+  "tumblr": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-tumblr"]),
+  "linkedin": count(*[_type == "trackingEvent" && event == "social_click" && path == $path && social == "share-linkedin"])
+}`;
+
+/* ------------ Vendors ------------ */
+/** /vendors index + homepage chips: vendors that have at least one program, with counts. */
+export const vendorsWithCountsQuery = `*[_type == "vendor" && count(*[_type == "program" && references(^._id)]) > 0]{
+  _id,
+  name,
+  "slug": slug.current,
+  logo,
+  logoBackgroundColor,
+  "programCount": count(*[_type == "program" && references(^._id)])
+} | order(programCount desc, name asc)`;
+
+/** Slugs for generateStaticParams + sitemap (only vendors with programs are worth indexing). */
+export const vendorSlugsQuery = `*[_type == "vendor" && defined(slug.current) && count(*[_type == "program" && references(^._id)]) > 0]{
+  "slug": slug.current
+}`;
+
+/** /vendors/{slug} hub: vendor doc + its programs (listing projection, popularity-sorted). */
+export const vendorBySlugQuery = `*[_type == "vendor" && slug.current == $slug][0]{
+  _id,
+  name,
+  "slug": slug.current,
+  description,
+  logo,
+  logoBackgroundColor,
+  seo,
+  giveawayVsOfficial,
+  "programs": *[_type == "program" && references(^._id)]{
+    ${programsListingProjection}
+  } | order(popularityScore desc, _createdAt desc)
+}`;
 
 /* ------------ Cron Runs ------------ */
 export const cronRunsQuery = `*[_type == "cronRun" && ranAt >= $since]{

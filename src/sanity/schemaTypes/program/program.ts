@@ -65,6 +65,14 @@ export const program = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: "vendor",
+      title: "Vendor",
+      type: "reference",
+      to: [{ type: "vendor" }],
+      description: "Software publisher/brand. Powers /vendors/{slug} hubs, breadcrumbs, brand structured data, and vendor filtering.",
+      validation: Rule => Rule.required()
+    }),
+    defineField({
       name: "programFlow",
       title: "Activation flow",
       type: "string",
@@ -125,6 +133,14 @@ export const program = defineType({
           validation: Rule => Rule.max(120)
         })
       ]
+    }),
+    defineField({
+      name: "freeVsProComparison",
+      title: "Free vs Official PRO comparison",
+      type: "array",
+      of: [{ type: "freeVsProRow" }],
+      description:
+        "Per-program feature table: what the free edition offers vs the paid official PRO license. Shown on the program page as an SEO section."
     }),
     defineField({
       name: "seo",

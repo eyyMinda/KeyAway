@@ -5,6 +5,7 @@ import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { pageViewSkipKey } from "@/src/lib/analytics/pageViewSkip";
+import { isAdminSession } from "@/src/lib/admin/isAdminSession";
 import { shouldSkipClientPageView } from "@/src/lib/analytics/shouldSendPageView";
 
 const EXCLUDED_HOSTNAMES = new Set(["localhost"]);
@@ -16,12 +17,16 @@ export default function NotFoundTracker() {
     if (typeof window === "undefined") return;
     if (EXCLUDED_HOSTNAMES.has(window.location.hostname)) return;
     if (shouldSkipClientPageView()) return;
-    try {
-      sessionStorage.setItem(pageViewSkipKey(pathname), "1");
-    } catch {
-      // sessionStorage unavailable (e.g. private mode)
-    }
-    void trackEvent("page_viewed", { path: pathname, notFound: true });
+
+    void (async () => {
+      if (await isAdminSession()) return;
+      try {
+        sessionStorage.setItem(pageViewSkipKey(pathname), "1");
+      } catch {
+        // sessionStorage unavailable (e.g. private mode)
+      }
+      void trackEvent("page_viewed", { path: pathname, notFound: true });
+    })();
   }, [pathname]);
 
   return null;

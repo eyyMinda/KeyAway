@@ -23,6 +23,10 @@ import { programComment, programCommentReply } from "./program/programComment";
 import { faqItem, program } from "./program/program";
 import { cdKey } from "./program/cdKey";
 import { featuredProgramSettings } from "./program/featuredProgramSettings";
+import { freeVsProRow } from "./program/freeVsProRow";
+
+import { vendor } from "./vendor/vendor";
+import { giveawayComparisonRow } from "./vendor/giveawayComparisonRow";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -48,6 +52,9 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     program,
     cdKey,
     featuredProgramSettings,
+    freeVsProRow,
+    giveawayComparisonRow,
+    vendor,
     visitor
   ]
 };

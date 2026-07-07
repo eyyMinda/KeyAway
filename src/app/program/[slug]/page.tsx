@@ -10,6 +10,7 @@ import ActivationInstructions from "@/src/components/program/ActivationInstructi
 import RelatedPrograms from "@/src/components/program/RelatedPrograms";
 import CommentsSection from "@/src/components/program/comments/CommentsSection";
 import AffiliateProCta from "@/src/components/program/AffiliateProCta";
+import FreeVsProComparison from "@/src/components/program/FreeVsProComparison";
 import KeySourcePanel from "@/src/components/program/KeySourcePanel";
 import { sortCdKeysByStatus } from "@/src/lib/program/cdKeyUtils";
 import {
@@ -21,9 +22,15 @@ import {
 import { getProgramBySlug } from "@/src/lib/sanity/sanityActions";
 import { getCachedRelatedPrograms } from "@/src/lib/sanity/getCachedRelatedPrograms";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
+import { getProgramAggregateRating } from "@/src/lib/program/programAggregateRating";
 import { generateProgramMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
+import ProgramBreadcrumbs from "@/src/components/program/ProgramBreadcrumbs";
+import ProgramSocialShare from "@/src/components/program/social-share/ProgramSocialShare";
+import { getProgramShareCounts } from "@/src/lib/program/getProgramShareCounts";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
+import { urlFor } from "@/src/sanity/lib/image";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import type { Program, ProgramFaqItem } from "@/src/types/program";
 import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
@@ -75,7 +82,15 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, store] = await Promise.all([getCachedRelatedPrograms(), getCachedStoreDetailsDocument()]);
+  const [allPrograms, store, communityRating, shareCounts] = await Promise.all([
+    getCachedRelatedPrograms(),
+    getCachedStoreDetailsDocument(),
+    getProgramAggregateRating(slug),
+    getProgramShareCounts(slug)
+  ]);
+
+  const pageUrl = `${resolveSiteBaseUrl(store?.seo)}/program/${slug}`;
+  const shareImageUrl = program.image ? urlFor(program.image).width(1200).height(630).url() : undefined;
 
   const socialData: SocialData = {
     socialLinks: store?.socialLinks ?? []
@@ -90,19 +105,31 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     program.faq?.filter((f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)) ?? [];
 
   const storeInfo = store || { title: "KeyAway" };
-  const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo);
+  const jsonLd = generateProgramPageJsonLd(program, workingKeys, totalKeys, storeInfo, communityRating);
   const i18n = await loadMessages({ locale: "en", namespaces: ["common", "program"], programFlow });
 
   return (
     <>
       <JsonLd data={jsonLd} />
       <I18nShell locale={i18n.locale} messages={i18n.messages}>
+        <div className="mx-auto max-w-3xl px-4 pt-6 sm:px-6 lg:max-w-360 lg:px-8">
+          <ProgramBreadcrumbs program={program} />
+        </div>
         <ProgramVisitorProvider>
           <ProgramInformation
             program={program}
             totalKeys={totalKeys}
             workingKeys={workingKeys}
             socialData={socialData}
+            communityRating={communityRating}
+          />
+          <ProgramSocialShare
+            programTitle={program.title}
+            programSlug={slug}
+            pageUrl={pageUrl}
+            workingKeys={workingKeys}
+            imageUrl={shareImageUrl}
+            shareCounts={shareCounts}
           />
           <CDKeyTable
             cdKeys={sortedCdKeys}
@@ -115,6 +142,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             versionSummaryLine={versionSummaryLine}
           />
           <KeySourcePanel program={program} totalKeys={totalKeys} />
+          <FreeVsProComparison program={program} />
           <AffiliateProCta program={program} />
         </ProgramVisitorProvider>
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />

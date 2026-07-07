@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 import { FaKey, FaEnvelope, FaChevronRight } from "react-icons/fa";
 import { ContactModal, ContactModalTrigger } from "@/src/components/contact";
 import { Socials, FacebookGroupButton } from "@/src/components/social";
+import FooterMiniSocialShare from "@/src/components/social-share/FooterMiniSocialShare";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
@@ -21,10 +22,11 @@ const TRUST_FOOTER_LINKS = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/affiliate-disclosure", label: "Affiliate disclosure" },
   { href: "/verification-policy", label: "Verification policy" },
-  { href: "/partners", label: "Partners" }
+  { href: "/partners", label: "Partners" },
+  { href: "/updates", label: "Updates" }
 ] as const;
 
-export default function Footer({ logoData, socialData }: FooterProps) {
+export default function Footer({ logoData, socialData, siteBaseUrl }: FooterProps) {
   const storeData = useStoreDetails();
   const pathname = usePathname();
   const trustpilotUrl = getTrustpilotReviewUrl(socialData);
@@ -50,10 +52,10 @@ export default function Footer({ logoData, socialData }: FooterProps) {
   return (
     <footer className="mt-auto border-t border-[#2a475e] bg-[#0E141B] text-neutral-100">
       <div className="mx-auto w-full max-w-360 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-8 gap-x-2">
           {/* Brand Section */}
           <div className="col-span-1 xs:col-span-2 flex flex-col gap-4">
-            <Link href="/" className="inline-block">
+            <Link href="/" className="inline-block w-fit pr-4">
               {isLogo ? (
                 <IdealImageClient {...logoData} className="h-12 w-auto" />
               ) : (
@@ -89,6 +91,15 @@ export default function Footer({ logoData, socialData }: FooterProps) {
           <div>
             <h4 className="section-label mb-4 text-neutral-50">Navigate</h4>
             <ul className="space-y-2">
+              <li>
+                <Link
+                  href="/vendors"
+                  className={`transition-colors ${
+                    pathname === "/vendors" ? "font-medium text-white" : "text-neutral-150 hover:text-neutral-50"
+                  }`}>
+                  Vendors
+                </Link>
+              </li>
               {footerLinks &&
                 footerLinks.map((link, i) => {
                   let isActive = false;
@@ -137,15 +148,6 @@ export default function Footer({ logoData, socialData }: FooterProps) {
                   </Link>
                 </li>
               ))}
-              <li>
-                <a
-                  href="/llms.txt"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-neutral-150 transition-colors hover:text-neutral-50">
-                  llms.txt
-                </a>
-              </li>
             </ul>
           </div>
 
@@ -182,47 +184,51 @@ export default function Footer({ logoData, socialData }: FooterProps) {
               </ContactModalTrigger>
             </div>
 
-            {hasSupportLinks ? (
-              <div className="mt-6 border-t border-[#2a475e] pt-6">
-                <p className="mb-3 text-xs">Support the Project</p>
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {buyMeACoffeeUrl ? (
-                      <Link
-                        href={buyMeACoffeeUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        onClick={() => {
-                          trackEvent("social_click", {
-                            social: "buymeacoffee",
-                            path: window.location.pathname
-                          });
-                        }}
-                        className="inline-flex items-center gap-2 rounded-sm bg-[#7d3315] px-3 py-2 text-xs font-semibold text-neutral-50 transition-colors hover:bg-[#a3421b] hover:text-white">
-                        🥕 Carrot Juice
-                      </Link>
-                    ) : null}
-                    {githubRepoUrl ? (
-                      <Link
-                        href={githubRepoUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label="Open KeyAway source code on GitHub"
-                        title="KeyAway repository on GitHub"
-                        onClick={() => {
-                          trackEvent("social_click", {
-                            social: "github keyaway",
-                            path: window.location.pathname
-                          });
-                        }}
-                        className="inline-flex items-center gap-2 rounded-sm bg-[#213246] px-3 py-2 text-xs font-semibold text-neutral-50 hover:text-white transition-colors hover:bg-[#2a475e]">
-                        ⭐ KeyAway repo
-                      </Link>
-                    ) : null}
+            <div className="mt-6 border-t border-[#2a475e] pt-6">
+              <FooterMiniSocialShare siteBaseUrl={siteBaseUrl} />
+
+              {hasSupportLinks ? (
+                <>
+                  <p className="mb-3 mt-6 text-xs">Support the Project</p>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {buyMeACoffeeUrl ? (
+                        <Link
+                          href={buyMeACoffeeUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={() => {
+                            trackEvent("social_click", {
+                              social: "buymeacoffee",
+                              path: window.location.pathname
+                            });
+                          }}
+                          className="inline-flex items-center gap-2 rounded-sm bg-[#7d3315] px-3 py-2 text-xs font-semibold text-neutral-50 transition-colors hover:bg-[#a3421b] hover:text-white">
+                          🥕 Carrot Juice
+                        </Link>
+                      ) : null}
+                      {githubRepoUrl ? (
+                        <Link
+                          href={githubRepoUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label="Open KeyAway source code on GitHub"
+                          title="KeyAway repository on GitHub"
+                          onClick={() => {
+                            trackEvent("social_click", {
+                              social: "github keyaway",
+                              path: window.location.pathname
+                            });
+                          }}
+                          className="inline-flex items-center gap-2 rounded-sm bg-[#213246] px-3 py-2 text-xs font-semibold text-neutral-50 hover:text-white transition-colors hover:bg-[#2a475e]">
+                          ⭐ KeyAway repo
+                        </Link>
+                      ) : null}
+                    </div>
                   </div>
-                </div>
-              </div>
-            ) : null}
+                </>
+              ) : null}
+            </div>
           </div>
         </div>
 
@@ -244,6 +250,13 @@ export default function Footer({ logoData, socialData }: FooterProps) {
             <Link href="/terms" className="text-sm text-[#8f98a0] transition-colors hover:text-white">
               Terms
             </Link>
+            <a
+              href="/llms.txt"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm text-[#8f98a0] transition-colors hover:text-white">
+              llms.txt
+            </a>
           </div>
         </div>
       </div>

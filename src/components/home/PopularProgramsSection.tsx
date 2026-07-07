@@ -2,8 +2,10 @@
 
 import { FaFire } from "react-icons/fa";
 import { ProgramsGrid } from "@/src/components/programs";
+import HomeVendorBrowse from "@/src/components/home/HomeVendorBrowse";
 import { PopularProgramsSectionProps } from "@/src/types/home";
-export default function PopularProgramsSection({ programs }: PopularProgramsSectionProps) {
+
+export default function PopularProgramsSection({ programs, vendors = [] }: PopularProgramsSectionProps) {
   const maxViews = Math.max(...programs.map(p => p.viewCount), 0);
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
 
@@ -24,7 +26,6 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
           </p>
         </div>
 
-        {/* Programs Grid with CTAs */}
         <ProgramsGrid
           programs={programs}
           maxViews={maxViews}
@@ -32,6 +33,8 @@ export default function PopularProgramsSection({ programs }: PopularProgramsSect
           showBrowseAllCTA={true}
           limit={8}
         />
+
+        <HomeVendorBrowse vendors={vendors} position="bottom" />
       </div>
     </section>
   );

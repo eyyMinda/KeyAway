@@ -1,7 +1,10 @@
 import { AnalyticsEvent, KeyReportEvent, TrackEventMeta } from "@/src/types";
+import { isAdminSession } from "@/src/lib/admin/isAdminSession";
 
 export async function trackEvent(event: AnalyticsEvent | KeyReportEvent, meta?: TrackEventMeta) {
   try {
+    if (await isAdminSession()) return;
+
     await fetch("/api/v1/analytics/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

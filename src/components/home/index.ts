@@ -2,6 +2,7 @@ export { default as HeroSection } from "./HeroSection";
 export { default as HeroVisual } from "./HeroVisual";
 export { default as FeaturesSection } from "./FeaturesSection";
 export { default as PopularProgramsSection } from "./PopularProgramsSection";
+export { default as HomeVendorBrowse } from "./HomeVendorBrowse";
 export { default as AllProgramsSection } from "./AllProgramsSection";
 export { default as StatsSection } from "./StatsSection";
 export { default as CTASection } from "./CTASection";

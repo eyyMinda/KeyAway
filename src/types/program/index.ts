@@ -83,6 +83,32 @@ export interface ProgramFeatured {
   showcaseGif?: SanityImageField;
 }
 
+/** One per-program "Free vs Official PRO" feature-comparison row. */
+export interface FreeVsProRow {
+  /** The feature being compared, e.g. "Updates". */
+  feature: string;
+  /** What the free edition offers. */
+  free?: string;
+  /** What the paid official PRO license adds. */
+  pro?: string;
+}
+
+/** One vendor-level "Giveaway key vs Official PRO license" row. */
+export interface GiveawayComparisonRow {
+  /** The aspect being compared, e.g. "Auto-updates". */
+  feature: string;
+  /** The community giveaway-key route. */
+  giveaway?: string;
+  /** The paid official PRO license route. */
+  officialPro?: string;
+}
+
+/** Vendor reference resolved on a program (name + slug). */
+export interface VendorRef {
+  name: string;
+  slug: string;
+}
+
 export interface Program {
   _id: string;
   title: string;
@@ -91,6 +117,8 @@ export interface Program {
   programFlow?: ProgramFlow;
   description: PortableTextBlock[] | string;
   featured?: ProgramFeatured;
+  /** Resolved software publisher/brand. Null on legacy docs not yet backfilled. */
+  vendor?: VendorRef | null;
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;
   seo?: {
@@ -107,6 +135,8 @@ export interface Program {
     affiliateProUrl?: string;
     affiliateProLabel?: string;
   };
+  /** Per-program Free vs Official PRO feature-comparison rows. */
+  freeVsProComparison?: FreeVsProRow[] | null;
   programComments?: ProgramComment[];
   cdKeys: CDKey[];
   keyCount?: number;
@@ -169,6 +199,7 @@ export interface ProgramInformationProps {
   workingKeys: number;
   socialData?: SocialData;
   visitorHint?: VisitorHintData | null;
+  communityRating?: { ratingValue: number; ratingCount: number; successPercent: number } | null;
 }
 
 export interface ProgramPageProps {

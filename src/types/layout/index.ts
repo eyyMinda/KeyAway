@@ -94,6 +94,7 @@ export interface HeaderProps {
 export interface FooterProps {
   logoData: LogoData;
   socialData: SocialData;
+  siteBaseUrl: string;
 }
 
 export interface MobileMenuProps {

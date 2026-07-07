@@ -22,8 +22,11 @@ export interface ProgramCardProps {
   showStats?: boolean;
 }
 
+import type { VendorListItem } from "@/src/lib/vendors/getVendors";
+
 export interface PopularProgramsSectionProps {
   programs: ProgramWithStats[];
+  vendors?: VendorListItem[];
 }
 
 // Section props can be added here when needed

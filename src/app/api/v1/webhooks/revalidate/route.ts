@@ -10,6 +10,7 @@ import {
   TAG_PROGRAMS_FULL,
   TAG_SITEMAP_URLS,
   TAG_STORE_DETAILS,
+  TAG_VENDORS,
   programDetailTag
 } from "@/src/lib/cache/cacheTags";
 import { rebuildSiteNotificationFeed } from "@/src/lib/notifications/notificationFeed.server";
@@ -78,12 +79,20 @@ export async function POST(req: NextRequest) {
       revalidateTag(TAG_HOMEPAGE_STATS, "max");
     } else if (t === "featuredProgramSettings") {
       revalidateTag(TAG_FEATURED_PROGRAM, "max");
+    } else if (t === "vendor") {
+      // Vendor edits change hub copy/metadata and program-card brand labels.
+      revalidateTag(TAG_VENDORS, "max");
+      revalidateTag(TAG_PROGRAM_LISTINGS, "max");
+      revalidateTag(TAG_SITEMAP_URLS, "max");
+      revalidatePath("/sitemap.xml");
     } else if (t === "program" || t === "cdKey") {
       revalidateTag(TAG_PROGRAMS_FULL, "max");
       revalidateTag(TAG_PROGRAM_LISTINGS, "max");
       revalidateTag(TAG_HOMEPAGE_PROGRAMS, "max");
       revalidateTag(TAG_HOMEPAGE_STATS, "max");
       revalidateTag(TAG_FEATURED_PROGRAM, "max");
+      // Vendor→program assignment changes vendor hub membership and counts.
+      revalidateTag(TAG_VENDORS, "max");
 
       const slug = await resolveProgramSlugForWebhook(body);
       if (slug) revalidateTag(programDetailTag(slug), "max");

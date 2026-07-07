@@ -6,7 +6,7 @@ import type { StoreDetails } from "@/src/types/layout";
 
 export const DEFAULT_STORE_NAME = "KeyAway";
 export const DEFAULT_SITE_URL = "https://www.keyaway.app";
-export const DEFAULT_OG_IMAGE_URL = "https://www.keyaway.app/images/KeyAway_Card.png";
+export const DEFAULT_OG_IMAGE_URL = "https://www.keyaway.app/images/KeyAway_Showcase_Card.png";
 
 export type StoreDetailsForSeo = Partial<StoreDetails> & {
   title?: string;

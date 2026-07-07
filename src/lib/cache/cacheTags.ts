@@ -8,6 +8,9 @@ export const TAG_PROGRAMS_FULL = "programs";
 /** Card/list projections: homepage popular strip, /programs grid, program page sidebar list. */
 export const TAG_PROGRAM_LISTINGS = "program-listings";
 
+/** Vendor docs + vendor hubs (/vendors, /vendors/[slug]) and vendor program counts. */
+export const TAG_VENDORS = "vendors";
+
 /** Homepage popular programs query (not site-wide stats). */
 export const TAG_HOMEPAGE_PROGRAMS = "homepage-programs";
 

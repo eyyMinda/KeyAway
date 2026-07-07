@@ -9,6 +9,7 @@ import { generateHomePageJsonLd } from "@/src/lib/seo/jsonLd";
 import { resolveHomePageSeo } from "@/src/lib/seo/storeSeoResolve";
 import JsonLd from "@/src/components/JsonLd";
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
+import { getCachedVendorsWithCounts } from "@/src/lib/vendors/getVendors";
 import HeroSection from "@/src/components/home/HeroSection";
 import FeaturesSection from "@/src/components/home/FeaturesSection";
 import PopularProgramsSection from "@/src/components/home/PopularProgramsSection";
@@ -31,11 +32,12 @@ export default async function HomePage() {
   weekAgo.setDate(weekAgo.getDate() - 7);
   const weekAgoISO = weekAgo.toISOString();
 
-  const [rawPopularPrograms, stats, store, featuredProgram] = await Promise.all([
+  const [rawPopularPrograms, stats, store, featuredProgram, vendors] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: [TAG_HOMEPAGE_PROGRAMS] } }),
     client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: [TAG_HOMEPAGE_STATS] } }),
     getCachedStoreDetailsDocument(),
-    getFeaturedProgram()
+    getFeaturedProgram(),
+    getCachedVendorsWithCounts()
   ]);
 
   const popularPrograms = mergeProgramStats((rawPopularPrograms ?? []) as ProgramWithStats[])
@@ -63,7 +65,7 @@ export default async function HomePage() {
       <JsonLd data={jsonLd} />
       <HeroSection socialData={socialData} stats={stats} />
       <FeaturedProgramSection program={featuredProgram} />
-      <PopularProgramsSection programs={normalizedPopularPrograms} />
+      <PopularProgramsSection programs={normalizedPopularPrograms} vendors={vendors} />
       <FeaturesSection />
       <StatsSection stats={stats} />
       <CTASection otherLinks={store?.otherLinks ?? []} />

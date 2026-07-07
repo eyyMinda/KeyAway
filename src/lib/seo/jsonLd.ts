@@ -10,6 +10,7 @@ import { urlFor } from "@/src/sanity/lib/image";
 import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
 import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
+import { buildProgramBreadcrumbJsonLd } from "@/src/lib/seo/breadcrumbs";
 import type { StoreSeo } from "@/src/types/layout";
 
 const BASE_URL = "https://www.keyaway.app";
@@ -42,7 +43,7 @@ export function generateHomePageJsonLd(storeData: {
       url: base,
       logo: {
         "@type": "ImageObject",
-        url: `${base}/images/KeyAway_Logo.png`,
+        url: `${base}/images/KeyAway_Icon_White.png`,
         width: 400,
         height: 400
       }
@@ -116,14 +117,14 @@ export function generateProgramsPageJsonLd(programs: Program[], totalCount: numb
 // JSON-LD for Individual Program Page - SoftwareApplication schema (+ optional FAQPage)
 export function generateProgramPageJsonLd(
   program: Program,
-  workingKeys: number,
+  _workingKeys: number,
   _totalKeys: number,
-  storeData: { title: string; seo?: StoreSeo }
+  storeData: { title: string; seo?: StoreSeo },
+  rating?: { ratingValue: number; ratingCount: number } | null
 ) {
   const base = resolveSiteBaseUrl(storeData.seo).replace(/\/$/, "");
-  // Extract brand from title (e.g., "IOBIT Malware Fighter" -> "IOBIT")
-  const brandMatch = program.title.match(/^([A-Za-z]+)/);
-  const brand = brandMatch ? brandMatch[1] : "Unknown";
+  // Prefer the linked vendor brand; fall back to the first word of the title for legacy docs.
+  const brand = program.vendor?.name || program.title.match(/^([A-Za-z]+)/)?.[1] || "Unknown";
 
   const pageUrl = `${base}/program/${program.slug.current}`;
   const appDescription = buildSoftwareApplicationDescription(program);
@@ -171,7 +172,7 @@ export function generateProgramPageJsonLd(
       url: base,
       logo: {
         "@type": "ImageObject",
-        url: `${base}/images/KeyAway_Logo.png`,
+        url: `${base}/images/KeyAway_Icon_White.png`,
         width: 400,
         height: 400
       }
@@ -186,40 +187,21 @@ export function generateProgramPageJsonLd(
             availability: "https://schema.org/InStock",
             description: offerDescGeneric
           },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.5",
-      ratingCount: workingKeys || 1,
-      bestRating: "5",
-      worstRating: "1"
-    },
-    breadcrumb: {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: base
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Programs",
-          item: `${base}/programs`
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: program.title,
-          item: pageUrl
-        }
-      ]
-    }
+    breadcrumb: buildProgramBreadcrumbJsonLd(program, base, pageUrl)
   };
 
   if (softwareVersion) {
     softwareApp.softwareVersion = softwareVersion;
+  }
+
+  if (rating && rating.ratingCount > 0) {
+    softwareApp.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: String(rating.ratingValue),
+      ratingCount: rating.ratingCount,
+      bestRating: "5",
+      worstRating: "1"
+    };
   }
 
   // Add image if available
@@ -262,6 +244,130 @@ export function generateProgramPageJsonLd(
   return {
     "@context": "https://schema.org",
     ...softwareApp
+  };
+}
+
+interface VendorLd {
+  name: string;
+  slug: string;
+  programCount?: number;
+}
+
+// JSON-LD for /vendors index — CollectionPage listing every vendor hub.
+export function generateVendorsPageJsonLd(
+  vendors: VendorLd[],
+  siteBaseUrl?: string
+) {
+  const base = (siteBaseUrl || BASE_URL).replace(/\/$/, "");
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Software Vendors",
+    description: "Browse software publishers with free promotional CD keys and giveaways.",
+    url: `${base}/vendors`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: vendors.length,
+      itemListElement: vendors.map((v, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: v.name,
+        item: `${base}/vendors/${v.slug}`
+      }))
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: base },
+        { "@type": "ListItem", position: 2, name: "Vendors", item: `${base}/vendors` }
+      ]
+    }
+  };
+}
+
+// JSON-LD for /vendors/{slug} hub — CollectionPage of the vendor's programs.
+export function generateVendorPageJsonLd(
+  vendor: { name: string; slug: string; description?: string },
+  programs: Program[],
+  siteBaseUrl?: string
+) {
+  const base = (siteBaseUrl || BASE_URL).replace(/\/$/, "");
+  const vendorUrl = `${base}/vendors/${vendor.slug}`;
+  const items = programs.slice(0, 30).map((program, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "SoftwareApplication",
+      name: program.title,
+      url: `${base}/program/${program.slug.current}`,
+      image: program.image ? urlFor(program.image).width(400).height(400).url() : undefined,
+      applicationCategory: "SoftwareApplication",
+      operatingSystem: "Windows",
+      author: { "@type": "Organization", name: vendor.name },
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        description: "Free CD Key"
+      }
+    }
+  }));
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${vendor.name} — Free CD Keys & Giveaways`,
+    description:
+      vendor.description || `Free promotional CD keys and giveaways for ${vendor.name} software.`,
+    url: vendorUrl,
+    about: { "@type": "Organization", name: vendor.name },
+    mainEntity: {
+      "@type": "ItemList",
+      name: `${vendor.name} programs`,
+      numberOfItems: programs.length,
+      itemListElement: items
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: base },
+        { "@type": "ListItem", position: 2, name: "Vendors", item: `${base}/vendors` },
+        { "@type": "ListItem", position: 3, name: vendor.name, item: vendorUrl }
+      ]
+    }
+  };
+}
+
+// JSON-LD for /updates — ItemList of recent catalog changes (feeds from siteNotificationFeed).
+export function generateUpdatesPageJsonLd(
+  updates: Array<{ programTitle: string; programSlug: string; createdAt: string }>,
+  siteBaseUrl?: string
+) {
+  const base = (siteBaseUrl || BASE_URL).replace(/\/$/, "");
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Latest giveaway updates",
+    description: "Recently added programs and fresh CD keys on KeyAway.",
+    url: `${base}/updates`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: updates.length,
+      itemListElement: updates.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.programTitle,
+        item: `${base}/program/${item.programSlug}`
+      }))
+    },
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: base },
+        { "@type": "ListItem", position: 2, name: "Updates", item: `${base}/updates` }
+      ]
+    }
   };
 }
 

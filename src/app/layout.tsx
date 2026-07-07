@@ -13,6 +13,7 @@ import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { getImageDimensions } from "@sanity/asset-utils";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
+import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"]
@@ -92,6 +93,7 @@ export default async function RootLayout({
   const socialData: SocialData = {
     socialLinks: storeData?.socialLinks ?? []
   };
+  const siteBaseUrl = resolveSiteBaseUrl(storeData?.seo);
   const renderedHeadMetaTags = Object.entries(HEAD_METADATA_GROUPS).flatMap(([groupName, tags]) =>
     tags
       .filter(tag => tag.condition !== false)
@@ -114,7 +116,7 @@ export default async function RootLayout({
             <div className="mainContent flex min-h-screen flex-col bg-[#0f1923] text-[#c6d4df]">
               <Header logoData={logoData} socialData={socialData} />
               <main className="w-full page-bg">{children}</main>
-              <Footer logoData={logoData} socialData={socialData} />
+              <Footer logoData={logoData} socialData={socialData} siteBaseUrl={siteBaseUrl} />
             </div>
           </StoreDetailsProvider>
         </SessionProvider>
