@@ -34,6 +34,7 @@ export default function KeySuggestionsPage() {
           email,
           message,
           status,
+          ipHash,
           createdAt
         }`
       );

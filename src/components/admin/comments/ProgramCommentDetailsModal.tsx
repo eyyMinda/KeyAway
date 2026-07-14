@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
+import AdminVisitorSection from "@/src/components/admin/AdminVisitorSection";
 import ModalSection from "@/src/components/admin/ModalSection";
-import CommentVisitorPanel from "@/src/components/admin/comments/CommentVisitorPanel";
 import type { AdminProgramCommentRow } from "@/src/types/admin/programComments";
 
 type ProgramCommentDetailsModalProps = {
@@ -14,7 +14,7 @@ type ProgramCommentDetailsModalProps = {
   busyId: string | null;
   onClose: () => void;
   onRequestDelete: (row: AdminProgramCommentRow) => void;
-  onToggleSpammer: (row: AdminProgramCommentRow, markSpammer: boolean) => void | Promise<boolean>;
+  onSpammerChanged?: () => void | Promise<void>;
 };
 
 function formatDate(iso?: string) {
@@ -57,11 +57,10 @@ export default function ProgramCommentDetailsModal({
   busyId,
   onClose,
   onRequestDelete,
-  onToggleSpammer
+  onSpammerChanged
 }: ProgramCommentDetailsModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const busy = busyId === row.id;
-  const isSpam = row.visitor?.isSpammer === true;
   const displayRow = row.isReply && parentComment ? parentComment : row;
 
   useEffect(() => {
@@ -108,10 +107,6 @@ export default function ProgramCommentDetailsModal({
         </div>
 
         <div className="flex-1 space-y-6 overflow-y-auto p-6">
-          <ModalSection title="Visitor" color="green">
-            <CommentVisitorPanel ipHash={row.ipHash} visitor={row.visitor} />
-          </ModalSection>
-
           {row.isReply && parentComment ? (
             <ModalSection title="Parent comment" color="gray">
               <CommentBlock
@@ -158,6 +153,8 @@ export default function ProgramCommentDetailsModal({
           {!row.isReply && threadReplies.length === 0 ? (
             <p className="text-sm text-gray-500">No replies on this comment.</p>
           ) : null}
+
+          <AdminVisitorSection ipHash={row.ipHash} onSpammerChanged={onSpammerChanged} />
         </div>
 
         <div className="flex flex-wrap justify-end gap-2 border-t border-gray-200 bg-gray-50 px-6 py-4">
@@ -168,15 +165,6 @@ export default function ProgramCommentDetailsModal({
             className="cursor-pointer rounded border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
             Delete {row.isReply ? "reply" : "comment"}
           </button>
-          {row.ipHash ? (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => onToggleSpammer(row, !isSpam)}
-              className="cursor-pointer rounded border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50">
-              {busy ? "…" : isSpam ? "Unmark spammer" : "Mark spammer"}
-            </button>
-          ) : null}
         </div>
       </div>
     </div>
