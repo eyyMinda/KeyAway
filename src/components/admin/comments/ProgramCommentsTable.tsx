@@ -22,10 +22,10 @@ type ProgramCommentsTableProps = {
   rows: AdminProgramCommentRow[];
   busyId: string | null;
   onDelete: (row: AdminProgramCommentRow) => Promise<boolean>;
-  onToggleSpammer: (row: AdminProgramCommentRow, markSpammer: boolean) => Promise<boolean>;
+  onSpammerChanged?: () => void | Promise<void>;
 };
 
-export default function ProgramCommentsTable({ rows, busyId, onDelete, onToggleSpammer }: ProgramCommentsTableProps) {
+export default function ProgramCommentsTable({ rows, busyId, onDelete, onSpammerChanged }: ProgramCommentsTableProps) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "comments" | "replies" | "spam">("all");
   const [sortColumn, setSortColumn] = useState("createdAt");
@@ -270,15 +270,6 @@ export default function ProgramCommentsTable({ rows, busyId, onDelete, onToggleS
                             <FaTrash className="h-4 w-4" />
                           </button>
                         </div>
-                        {row.ipHash ? (
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => onToggleSpammer(row, !isSpam)}
-                            className="cursor-pointer rounded border border-gray-300 bg-white px-2 py-1 text-xs font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
-                            {busy ? "…" : isSpam ? "Unmark spammer" : "Mark spammer"}
-                          </button>
-                        ) : null}
                       </div>
                     </td>
                   </tr>
@@ -306,7 +297,7 @@ export default function ProgramCommentsTable({ rows, busyId, onDelete, onToggleS
           busyId={busyId}
           onClose={() => setDetailsRow(null)}
           onRequestDelete={row => setDeleteTarget(row)}
-          onToggleSpammer={onToggleSpammer}
+          onSpammerChanged={onSpammerChanged}
         />
       ) : null}
 
