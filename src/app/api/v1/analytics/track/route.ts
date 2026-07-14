@@ -10,6 +10,7 @@ import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
 import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
+import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { isProgramSlugPublishedCached } from "@/src/lib/sanity/getCachedPublishedProgramSlugs";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
@@ -224,6 +225,14 @@ export async function POST(req: NextRequest) {
     if (location?.city) eventData.city = location.city;
 
     await client.create(eventData as { _type: string } & Record<string, unknown>);
+
+    if (isReportEvent && ipHash) {
+      try {
+        await upsertVisitorContribution(ipHash, "report");
+      } catch (e) {
+        console.error("[track] visitor contribution upsert (report)", e);
+      }
+    }
 
     if (body.event === "page_viewed") {
       try {

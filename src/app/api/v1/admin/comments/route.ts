@@ -10,7 +10,7 @@ import { adminProgramsWithCommentsQuery } from "@/src/lib/sanity/queries";
 import type { AdminCommentVisitor } from "@/src/types/admin/programComments";
 import type { Program } from "@/src/types/program";
 
-const VISITOR_FIELDS = `visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, contributionScore, country, city, lastActivityAt`;
+const VISITOR_FIELDS = `visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt`;
 
 /** GET /api/v1/admin/comments — flattened comment rows */
 export async function GET(req: NextRequest) {

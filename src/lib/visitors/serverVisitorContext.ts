@@ -29,7 +29,9 @@ export async function getVisitorContextForPublicPage(headersList: Headers): Prom
     visitTier: doc.visitTier as VisitTier,
     visitCount: doc.visitCount ?? 0,
     reportCount: doc.reportCount ?? 0,
-    suggestionCount: doc.suggestionCount ?? 0
+    suggestionCount: doc.suggestionCount ?? 0,
+    commentCount: doc.commentCount ?? 0,
+    contributionScore: doc.contributionScore ?? 0
   });
 
   return {

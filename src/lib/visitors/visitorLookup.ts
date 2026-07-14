@@ -10,6 +10,7 @@ export type ResolvedVisitor = {
   visitCount?: number;
   reportCount?: number;
   suggestionCount?: number;
+  commentCount?: number;
   contributionScore?: number;
   country?: string;
   city?: string;
@@ -43,10 +44,10 @@ export async function fetchVisitorByHash(visitorHash: string): Promise<ResolvedV
   }>(
     `{
       "live": *[_type == "visitor" && visitorHash == $h][0]{
-        _id, visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, contributionScore, country, city, lastActivityAt
+        _id, visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       },
       "archived": *[_type == "visitorBundle"].visitors[visitorHash == $h]{
-        visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, contributionScore, country, city, lastActivityAt
+        visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       }
     }`,
     { h: visitorHash }
@@ -67,10 +68,10 @@ export async function fetchVisitorsByHashes(
   }>(
     `{
       "live": *[_type == "visitor" && visitorHash in $hashes]{
-        _id, visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, contributionScore, country, city, lastActivityAt
+        _id, visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       },
       "archived": *[_type == "visitorBundle"].visitors[visitorHash in $hashes]{
-        visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, contributionScore, country, city, lastActivityAt
+        visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       }
     }`,
     { hashes: unique }

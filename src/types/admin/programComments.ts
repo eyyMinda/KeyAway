@@ -4,6 +4,7 @@ export type AdminCommentVisitor = {
   visitCount?: number;
   reportCount?: number;
   suggestionCount?: number;
+  commentCount?: number;
   contributionScore?: number;
   country?: string;
   city?: string;

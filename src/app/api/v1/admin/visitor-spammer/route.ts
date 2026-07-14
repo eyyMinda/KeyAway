@@ -40,6 +40,7 @@ export async function PATCH(req: NextRequest) {
         isSpammer,
         reportCount: resolved?.reportCount ?? 0,
         suggestionCount: resolved?.suggestionCount ?? 0,
+        commentCount: resolved?.commentCount ?? 0,
         contributionScore,
         ...(isSpammer ? { spamMarkedAt: now } : {}),
         ...(resolved?.country ? { country: resolved.country } : {}),
