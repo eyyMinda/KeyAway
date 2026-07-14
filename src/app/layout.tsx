@@ -107,9 +107,11 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>{renderedHeadMetaTags}</head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f1923] text-[#c6d4df]`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f1923] text-[#c6d4df]`}
+        suppressHydrationWarning>
         <SessionProvider>
           <PageViewTracker />
           <StoreDetailsProvider value={storeData}>
