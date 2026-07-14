@@ -20,5 +20,7 @@ export const Errors = {
   validation: (message: string, details?: ApiError["details"]) =>
     errorResponse({ code: "VALIDATION_ERROR", message, details }, 422),
   tooManyRequests: (message = "Too many requests") => errorResponse({ code: "RATE_LIMIT_EXCEEDED", message }, 429),
+  serviceUnavailable: (message = "Service unavailable", code = "SERVICE_UNAVAILABLE") =>
+    errorResponse({ code, message }, 503),
   internal: (message = "Internal server error") => errorResponse({ code: "INTERNAL_ERROR", message }, 500)
 } as const;
