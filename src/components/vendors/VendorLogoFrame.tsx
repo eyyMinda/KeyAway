@@ -60,6 +60,7 @@ export default function VendorLogoFrame({
   const intrinsic = getImageDimensions(logo as SanityImageSource);
   const boxMax = displayMaxSize ?? Math.round(imageSize / 2);
   const display = fitInsideBox(intrinsic.width, intrinsic.height, boxMax, boxMax);
+  const imageAlt = alt ?? name;
 
   return (
     <div className={frameClassName} style={backgroundColor ? { backgroundColor } : undefined}>
@@ -70,12 +71,12 @@ export default function VendorLogoFrame({
             .fit("max")
             .auto("format")
             .url()}
-          alt={alt ?? ""}
+          alt={imageAlt ?? ""}
           width={display.width}
           height={display.height}
           className={imageClassName}
           sizes={`${imageSize}px`}
-          aria-hidden={alt === "" || alt === undefined}
+          aria-hidden={imageAlt === "" || imageAlt === undefined}
         />
       </div>
     </div>
