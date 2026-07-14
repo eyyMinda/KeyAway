@@ -3,6 +3,7 @@ import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
+import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 
 const MAX_FIELD = 500;
@@ -37,6 +38,12 @@ export async function POST(req: NextRequest) {
 
     if (cdKey.length > MAX_FIELD || programName.length > MAX_FIELD || programVersion.length > MAX_FIELD)
       return Errors.validation("Field too long");
+
+    if (visitorHash && (await isVisitorSpammerByHash(visitorHash))) {
+      return Errors.validation("Key suggestions are disabled for your network.", [
+        { field: "cdKey", message: "Submission disabled" }
+      ]);
+    }
 
     const result = await client.create({
       _type: "keySuggestion",

@@ -18,10 +18,7 @@ export function buildStoreSeoVariableMap(store: StoreDetailsForSeo): Record<stri
   return { title };
 }
 
-export function applyStoreSeoTemplate(
-  template: string | undefined | null,
-  vars: Record<string, string>
-): string {
+export function applyStoreSeoTemplate(template: string | undefined | null, vars: Record<string, string>): string {
   if (template == null) return "";
   return String(template).replace(/\[([a-zA-Z0-9_]+)\]/g, (_, key: string) =>
     Object.prototype.hasOwnProperty.call(vars, key) ? vars[key]! : `[${key}]`
@@ -101,7 +98,7 @@ export function resolveProgramsPageSeo(store: StoreDetailsForSeo | null | undefi
   const storeTitle = vars.title;
 
   const titleFromTemplate = trimmedNonEmpty(applyStoreSeoTemplate(s.seo?.programsMetaTitle, vars));
-  const title = titleFromTemplate ?? `All Programs - ${storeTitle}`;
+  const title = titleFromTemplate ?? `All Giveaway Programs - Free PRO Software CD Keys | ${storeTitle}`;
 
   const descFromTemplate = trimmedNonEmpty(applyStoreSeoTemplate(s.seo?.programsMetaDescription, vars));
   const description =
@@ -122,7 +119,7 @@ export function resolvePrivacyPageSeo(store: StoreDetailsForSeo | null | undefin
   const storeTitle = vars.title;
 
   const titleFromTemplate = trimmedNonEmpty(applyStoreSeoTemplate(s.seo?.privacyMetaTitle, vars));
-  const title = titleFromTemplate ?? `Privacy Policy | ${storeTitle}`;
+  const title = titleFromTemplate ?? `Privacy Policy & Data Practices | ${storeTitle}`;
 
   const descFromTemplate = trimmedNonEmpty(applyStoreSeoTemplate(s.seo?.privacyMetaDescription, vars));
   const description =
@@ -142,7 +139,7 @@ export function resolveTermsPageSeo(store: StoreDetailsForSeo | null | undefined
   const storeTitle = vars.title;
 
   const titleFromTemplate = trimmedNonEmpty(applyStoreSeoTemplate(s.seo?.termsMetaTitle, vars));
-  const title = titleFromTemplate ?? `Terms of Service | ${storeTitle}`;
+  const title = titleFromTemplate ?? `Terms of Service & Site Usage | ${storeTitle}`;
 
   const descFromTemplate = trimmedNonEmpty(applyStoreSeoTemplate(s.seo?.termsMetaDescription, vars));
   const description =

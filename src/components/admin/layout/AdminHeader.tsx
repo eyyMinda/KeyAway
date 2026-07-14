@@ -49,12 +49,9 @@ export default function AdminHeader() {
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">A</span>
               </div>
-              <div className="hidden sm:block">
+              <div className="block">
                 <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
                 <p className="text-sm text-gray-500">KeyAway Analytics</p>
-              </div>
-              <div className="sm:hidden">
-                <h1 className="text-lg font-bold text-gray-900">Admin</h1>
               </div>
             </Link>
           </div>

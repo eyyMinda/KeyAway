@@ -20,13 +20,13 @@ export default function EnumeratedSectionHeading({
   const Heading = Tag as ElementType;
 
   return (
-    <Heading className={`section-title mb-4 flex items-center gap-3 ${className}`.trim()}>
+    <div className={`section-title mb-4 flex items-center gap-3 ${className}`.trim()}>
       <span
         aria-hidden
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm border border-[#4a90c4] bg-[#1a2f45] text-sm font-bold text-[#66c0f4]">
         {index}
       </span>
-      <span className="flex min-w-0 flex-wrap items-baseline gap-x-2">{children}</span>
-    </Heading>
+      <Heading className="section-title flex min-w-0 flex-wrap items-baseline gap-x-2">{children}</Heading>
+    </div>
   );
 }

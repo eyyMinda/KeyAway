@@ -6,6 +6,7 @@ import {
   FaCheckCircle,
   FaCircle,
   FaClock,
+  FaComment,
   FaKey,
   FaMedal,
   FaStar,
@@ -63,9 +64,10 @@ export default function VisitorTierHint({ hint, variant = "pill" }: VisitorTierH
     () => [
       { icon: <FaClock size={11} aria-hidden="true" />, label: "visits", value: hint.visitCount },
       { icon: <FaCheckCircle size={11} aria-hidden="true" />, label: "reports", value: hint.reportCount },
+      { icon: <FaComment size={11} aria-hidden="true" />, label: "comments", value: hint.commentCount },
       { icon: <FaKey size={11} aria-hidden="true" />, label: "suggestions", value: hint.suggestionCount }
     ],
-    [hint.reportCount, hint.suggestionCount, hint.visitCount]
+    [hint.commentCount, hint.reportCount, hint.suggestionCount, hint.visitCount]
   );
 
   const shell = variant === "feature" ? tierFeatureShell(hint.tier) : null;

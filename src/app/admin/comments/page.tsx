@@ -57,34 +57,6 @@ export default function AdminCommentsPage() {
     }
   }
 
-  async function handleToggleSpammer(
-    row: AdminProgramCommentRow,
-    markSpammer: boolean
-  ): Promise<boolean> {
-    if (!row.ipHash) return false;
-    const msg = markSpammer
-      ? `Mark visitor ${row.ipHash.slice(0, 10)}… as spammer? They will not be able to post comments or negative key reports.`
-      : `Unmark spammer for ${row.ipHash.slice(0, 10)}…?`;
-    if (!confirm(msg)) return false;
-
-    setBusyId(row.id);
-    try {
-      const res = await fetch("/api/v1/admin/visitor-spammer", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitorHash: row.ipHash, isSpammer: markSpammer })
-      });
-      if (res.ok) {
-        await fetchRows();
-        return true;
-      }
-      console.error(await res.text());
-      return false;
-    } finally {
-      setBusyId(null);
-    }
-  }
-
   if (loading) {
     return (
       <ProtectedAdminLayout title="Comments" subtitle="Moderate program page comments">
@@ -101,7 +73,7 @@ export default function AdminCommentsPage() {
         rows={rows}
         busyId={busyId}
         onDelete={handleDelete}
-        onToggleSpammer={handleToggleSpammer}
+        onSpammerChanged={fetchRows}
       />
     </ProtectedAdminLayout>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import AdminLayout from "./AdminLayout";
 import type { ProtectedAdminLayoutProps } from "@/src/types";
@@ -14,19 +13,18 @@ export default function ProtectedAdminLayout({
 }: ProtectedAdminLayoutProps) {
   const { data: session, status } = useSession();
   const [isChecking, setIsChecking] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     if (status === "loading") return;
 
     const isAdmin = (session?.user as { isAdmin?: boolean })?.isAdmin === true;
     if (!isAdmin) {
-      router.push("/api/auth/signin?callbackUrl=/admin");
+      window.location.assign("/admin/signin?callbackUrl=/admin");
       return;
     }
 
     setIsChecking(false);
-  }, [session, status, router]);
+  }, [session, status]);
 
   if (status === "loading" || isChecking) {
     return (

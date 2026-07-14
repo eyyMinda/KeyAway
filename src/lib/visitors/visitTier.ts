@@ -1,5 +1,5 @@
 export type VisitTier = "new" | "returning" | "regular" | "star";
-export type ContributionType = "none" | "reports_only" | "suggestions_only" | "mixed";
+export type ContributionType = "none" | "reports_only" | "suggestions_only" | "comments_only" | "mixed";
 
 /** Maps session count to baseline tier: ≤1 new, ≤5 returning, else regular. */
 export function visitTierFromSessionCount(n: number): VisitTier {
@@ -15,11 +15,19 @@ export function resolveVisitTier(visitCount: number, contributionScore: number, 
 }
 
 /** Derives contribution type for accurate, evidence-based messaging. */
-export function contributionTypeFromCounts(reportCount: number, suggestionCount: number): ContributionType {
-  const hasReports = reportCount > 0;
-  const hasSuggestions = suggestionCount > 0;
-  if (hasReports && hasSuggestions) return "mixed";
-  if (hasReports) return "reports_only";
-  if (hasSuggestions) return "suggestions_only";
-  return "none";
+export function contributionTypeFromCounts(
+  reportCount: number,
+  suggestionCount: number,
+  commentCount = 0
+): ContributionType {
+  const kinds = [
+    reportCount > 0,
+    suggestionCount > 0,
+    commentCount > 0
+  ].filter(Boolean).length;
+  if (kinds === 0) return "none";
+  if (kinds > 1) return "mixed";
+  if (reportCount > 0) return "reports_only";
+  if (suggestionCount > 0) return "suggestions_only";
+  return "comments_only";
 }

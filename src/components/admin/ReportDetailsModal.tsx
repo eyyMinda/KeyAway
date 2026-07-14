@@ -10,6 +10,7 @@ import { client } from "@/src/sanity/lib/client";
 import { fetchVisitorsByHashes } from "@/src/lib/visitors/visitorLookup";
 import { effectiveReferrerHref, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
 import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
+import MarkSpammerButton from "@/src/components/admin/MarkSpammerButton";
 import {
   isAccountFlow,
   isKeyLikeFlow,
@@ -105,7 +106,6 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
   const [mounted, setMounted] = useState(false);
   const [rowEventTypes, setRowEventTypes] = useState<Record<string, KeyReportEvent>>({});
   const [savingReportId, setSavingReportId] = useState<string | null>(null);
-  const [spamBusyHash, setSpamBusyHash] = useState<string | null>(null);
   const [visitorByHash, setVisitorByHash] = useState<Record<string, { visitTier?: string; isSpammer?: boolean }>>({});
 
   useEffect(() => {
@@ -181,35 +181,6 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
     },
     [rowEventTypes]
   );
-
-  const patchVisitorSpam = useCallback(async (visitorHash: string, isSpammer: boolean) => {
-    const ok = window.confirm(
-      isSpammer
-        ? "Mark this visitor as spammer? They can still report keys as working, but not expired or limit reached."
-        : "Unmark spammer for this visitor?"
-    );
-    if (!ok) return;
-    setSpamBusyHash(visitorHash);
-    try {
-      const res = await fetch("/api/v1/admin/visitor-spammer", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ visitorHash, isSpammer })
-      });
-      if (res.ok) {
-        setVisitorByHash(prev => ({
-          ...prev,
-          [visitorHash]: {
-            visitTier: prev[visitorHash]?.visitTier ?? "new",
-            isSpammer
-          }
-        }));
-      } else console.error("PATCH visitor-spammer", await res.text());
-    } finally {
-      setSpamBusyHash(null);
-    }
-  }, []);
 
   if (!mounted || !isOpen || !report) return null;
 
@@ -464,17 +435,20 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                         {reportItem.city}, {reportItem.country}
                       </span>
                       {hash ? (
-                        <button
-                          type="button"
-                          disabled={spamBusyHash === hash}
-                          onClick={() => void patchVisitorSpam(hash, !isSpam)}
-                          className={`h-7 px-2.5 rounded border text-xs font-medium transition-colors disabled:opacity-50 ${
-                            isSpam
-                              ? "border-gray-300 bg-white text-gray-800 hover:bg-gray-50"
-                              : "border-red-300 bg-red-50 text-red-800 hover:bg-red-100"
-                          }`}>
-                          {spamBusyHash === hash ? "…" : isSpam ? "Unmark spammer" : "Mark spammer"}
-                        </button>
+                        <MarkSpammerButton
+                          visitorHash={hash}
+                          isSpammer={isSpam}
+                          variant="report"
+                          onSuccess={nextIsSpammer =>
+                            setVisitorByHash(prev => ({
+                              ...prev,
+                              [hash]: {
+                                visitTier: prev[hash]?.visitTier ?? "new",
+                                isSpammer: nextIsSpammer
+                              }
+                            }))
+                          }
+                        />
                       ) : null}
                     </div>
                   </div>

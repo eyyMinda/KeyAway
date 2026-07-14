@@ -48,6 +48,19 @@ export default defineType({
       initialValue: () => new Date().toISOString()
     }),
     defineField({
+      name: "lastRepliedAt",
+      title: "Last replied at",
+      type: "datetime",
+      readOnly: true
+    }),
+    defineField({
+      name: "replies",
+      title: "Replies",
+      type: "array",
+      of: [{ type: "contactMessageReply" }],
+      readOnly: true
+    }),
+    defineField({
       name: "ipHash",
       title: "Visitor Hash",
       type: "string",
@@ -58,12 +71,25 @@ export default defineType({
     select: {
       title: "title",
       subtitle: "message",
-      status: "status"
+      status: "status",
+      replyCount: "replies"
     },
-    prepare({ title, subtitle, status }: { title?: string; subtitle?: string; status?: string }) {
+    prepare({
+      title,
+      subtitle,
+      status,
+      replyCount
+    }: {
+      title?: string;
+      subtitle?: string;
+      status?: string;
+      replyCount?: unknown[];
+    }) {
+      const replies = Array.isArray(replyCount) ? replyCount.length : 0;
+      const replyLabel = replies > 0 ? ` · ${replies} repl${replies === 1 ? "y" : "ies"}` : "";
       return {
         title: title || "Untitled Message",
-        subtitle: `${status} - ${subtitle?.slice(0, 60)}...`
+        subtitle: `${status}${replyLabel} - ${subtitle?.slice(0, 60)}...`
       };
     }
   }

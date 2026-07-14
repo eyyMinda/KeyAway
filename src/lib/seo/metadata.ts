@@ -16,13 +16,13 @@ import {
 } from "@/src/lib/seo/storeSeoResolve";
 import { programT } from "@/src/lib/program/programCopy";
 import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
+import { buildOpenGraphWebsite } from "@/src/lib/seo/openGraph";
 
 const defaultData = {
   store: DEFAULT_STORE_NAME,
   description:
     "Get free CD keys for popular software like IOBIT, iTop and more. Download premium programs with working activation keys from our giveaway collection.",
-  programTitle: (displayName: string, storeTitle: string) =>
-    `${displayName}: free CD keys & giveaway activation | ${storeTitle}`,
+  programTitle: (displayName: string, storeTitle: string) => `${displayName} CD Keys & Giveaways | ${storeTitle}`,
   programDescription: (programTitle: string, workingKeys: number, totalKeys: number) =>
     `Free ${programTitle} giveaway CD keys for Windows. ${workingKeys} working keys out of ${totalKeys} — copy a license and activate in-app. Official download recommended.`
 };
@@ -45,20 +45,14 @@ export async function generateHomePageMetadata(): Promise<Metadata> {
     title,
     description,
     ...(keywords ? { keywords } : {}),
-    openGraph: {
+    openGraph: buildOpenGraphWebsite({
       title,
       description,
-      type: "website",
       url: siteUrl,
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: storeTitle
-        }
-      ]
-    },
+      siteName: storeTitle,
+      ogImageUrl,
+      ogImageAlt: storeTitle
+    }),
     twitter: {
       card: "summary_large_image",
       title,
@@ -90,7 +84,7 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
 
     if (!program) {
       return {
-        title: `Program Not Found - ${storeTitle}`,
+        title: `Program Not Found — Browse All Giveaways | ${storeTitle}`,
         description: "The requested program could not be found."
       };
     }
@@ -115,20 +109,14 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
       title,
       description,
       ...(programKeywords ? { keywords: programKeywords } : {}),
-      openGraph: {
+      openGraph: buildOpenGraphWebsite({
         title,
         description,
-        type: "website",
         url,
-        images: [
-          {
-            url: ogImageUrl,
-            width: 1200,
-            height: 630,
-            alt: program.title
-          }
-        ]
-      },
+        siteName: storeTitle,
+        ogImageUrl,
+        ogImageAlt: program.title
+      }),
       twitter: {
         card: "summary_large_image",
         title,
@@ -151,17 +139,21 @@ export async function generateProgramMetadata(slug: string): Promise<Metadata> {
 export async function generatePrivacyMetadata(): Promise<Metadata> {
   const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url, keywords } = resolvePrivacyPageSeo(storeData);
+  const storeTitle = storeData?.title?.trim() || DEFAULT_STORE_NAME;
+  const ogImageUrl = resolveDefaultOgImageUrl(storeData?.seo);
 
   return {
     title,
     description,
     ...(keywords ? { keywords } : {}),
-    openGraph: {
+    openGraph: buildOpenGraphWebsite({
       title,
       description,
-      type: "website",
-      url
-    },
+      url,
+      siteName: storeTitle,
+      ogImageUrl,
+      ogImageAlt: title
+    }),
     twitter: {
       card: "summary",
       title,
@@ -176,17 +168,21 @@ export async function generatePrivacyMetadata(): Promise<Metadata> {
 export async function generateTermsMetadata(): Promise<Metadata> {
   const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url, keywords } = resolveTermsPageSeo(storeData);
+  const storeTitle = storeData?.title?.trim() || DEFAULT_STORE_NAME;
+  const ogImageUrl = resolveDefaultOgImageUrl(storeData?.seo);
 
   return {
     title,
     description,
     ...(keywords ? { keywords } : {}),
-    openGraph: {
+    openGraph: buildOpenGraphWebsite({
       title,
       description,
-      type: "website",
-      url
-    },
+      url,
+      siteName: storeTitle,
+      ogImageUrl,
+      ogImageAlt: title
+    }),
     twitter: {
       card: "summary",
       title,
@@ -207,11 +203,20 @@ async function generateTrustRouteMetadata(
 ): Promise<Metadata> {
   const storeData = await getCachedStoreDetailsDocument();
   const { title, description, pageUrl: url } = resolve(storeData);
+  const storeTitle = storeData?.title?.trim() || DEFAULT_STORE_NAME;
+  const ogImageUrl = resolveDefaultOgImageUrl(storeData?.seo);
 
   return {
     title,
     description,
-    openGraph: { title, description, type: "website", url },
+    openGraph: buildOpenGraphWebsite({
+      title,
+      description,
+      url,
+      siteName: storeTitle,
+      ogImageUrl,
+      ogImageAlt: title
+    }),
     twitter: { card: "summary", title, description },
     alternates: { canonical: url }
   };
@@ -254,28 +259,20 @@ export async function generateUpdatesMetadata(): Promise<Metadata> {
 
 export async function generateProgramsPageMetadata(): Promise<Metadata> {
   const storeData = await getCachedStoreDetailsDocument();
-  const { title, description, pageUrl: url, ogImageUrl, storeTitle, keywords } =
-    resolveProgramsPageSeo(storeData);
+  const { title, description, pageUrl: url, ogImageUrl, storeTitle, keywords } = resolveProgramsPageSeo(storeData);
 
   return {
     title,
     description,
     keywords: keywords ?? defaultProgramsKeywords,
-    openGraph: {
+    openGraph: buildOpenGraphWebsite({
       title,
       description,
       url,
       siteName: storeTitle,
-      type: "website",
-      images: [
-        {
-          url: ogImageUrl,
-          width: 1200,
-          height: 630,
-          alt: `${storeTitle} - All Programs`
-        }
-      ]
-    },
+      ogImageUrl,
+      ogImageAlt: `${storeTitle} - All Programs`
+    }),
     twitter: {
       card: "summary_large_image",
       title,

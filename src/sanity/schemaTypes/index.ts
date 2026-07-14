@@ -11,6 +11,7 @@ import { visitor } from "./analytics/visitor";
 import { cronRun } from "./system/cronRun";
 import { siteNotificationFeed } from "./system/siteNotificationFeed";
 import contactMessage from "./contact/contactMessage";
+import { contactMessageReply } from "./contact/contactMessageReply";
 import keySuggestion from "./contact/keySuggestion";
 
 import { storeDetails } from "./store/storeDetails";
@@ -39,6 +40,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     cronRun,
     siteNotificationFeed,
     contactMessage,
+    contactMessageReply,
     keySuggestion,
     link,
     storeSocialEntry,

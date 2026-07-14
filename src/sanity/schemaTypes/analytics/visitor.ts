@@ -62,10 +62,17 @@ export const visitor = defineType({
       validation: Rule => Rule.required().min(0)
     }),
     defineField({
+      name: "commentCount",
+      title: "Program comments posted",
+      type: "number",
+      initialValue: 0,
+      validation: Rule => Rule.required().min(0)
+    }),
+    defineField({
       name: "contributionScore",
       title: "Contribution score",
       type: "number",
-      description: "Incremented for each valid key report and key suggestion.",
+      description: "Incremented for each valid key report, key suggestion, and program comment.",
       initialValue: 0,
       validation: Rule => Rule.required().min(0)
     }),

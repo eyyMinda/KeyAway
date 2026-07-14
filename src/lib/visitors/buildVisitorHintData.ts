@@ -29,8 +29,11 @@ export function lineForTier(tier: VisitTier, contributionType: ContributionType)
       if (contributionType === "suggestions_only") {
         return "Your suggestions shaped the list — thank you.";
       }
+      if (contributionType === "comments_only") {
+        return "Your comments help the community — thank you.";
+      }
       if (contributionType === "mixed") {
-        return "Your reports and suggestions both helped — thank you.";
+        return "Your contributions helped the community — thank you.";
       }
       return "Thanks for sticking with the community.";
     case "star":
@@ -40,7 +43,10 @@ export function lineForTier(tier: VisitTier, contributionType: ContributionType)
       if (contributionType === "suggestions_only") {
         return "Your suggestions mattered — thank you.";
       }
-      return "Thanks for both reports and suggestions.";
+      if (contributionType === "comments_only") {
+        return "Your comments made a real difference — thank you.";
+      }
+      return "Thanks for supporting the community.";
     default:
       return null;
   }
@@ -52,12 +58,16 @@ export function buildVisitorHintData(doc: {
   visitCount: number;
   reportCount: number;
   suggestionCount: number;
+  commentCount?: number;
+  contributionScore?: number;
 }): VisitorHintData | null {
   const { visitTier: tier } = doc;
   const visitCount = Math.max(0, doc.visitCount ?? 0);
   const reportCount = Math.max(0, doc.reportCount ?? 0);
   const suggestionCount = Math.max(0, doc.suggestionCount ?? 0);
-  const contributionType = contributionTypeFromCounts(reportCount, suggestionCount);
+  const commentCount = Math.max(0, doc.commentCount ?? 0);
+  const contributionScore = Math.max(0, doc.contributionScore ?? reportCount + suggestionCount + commentCount);
+  const contributionType = contributionTypeFromCounts(reportCount, suggestionCount, commentCount);
   const message = lineForTier(tier, contributionType);
   if (!message) return null;
   return {
@@ -67,6 +77,8 @@ export function buildVisitorHintData(doc: {
     contributionType,
     visitCount,
     reportCount,
-    suggestionCount
+    suggestionCount,
+    commentCount,
+    contributionScore
   };
 }

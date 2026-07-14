@@ -16,6 +16,7 @@ import {
 } from "@/src/lib/program/commentBody";
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
+import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 import { isDevelopmentEnv } from "@/src/lib/env/isDevelopment";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
@@ -129,6 +130,14 @@ export async function POST(req: NextRequest) {
       ipHash,
       parentCommentKey
     });
+
+    if (!isStaffComment) {
+      try {
+        await upsertVisitorContribution(ipHash, "comment");
+      } catch (e) {
+        console.error("[POST /api/v1/program-comments] visitor contribution upsert failed", e);
+      }
+    }
 
     revalidateAfterProgramContentWrite({ slug: programSlug });
 

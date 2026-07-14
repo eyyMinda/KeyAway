@@ -80,7 +80,7 @@ export const storeDetails = defineType({
           name: "programsMetaTitle",
           title: "Programs listing meta title",
           type: "string",
-          description: 'Example: "All Programs - [title]"'
+          description: 'Example: "All Giveaway Programs - Free PRO Software CD Keys | [title]"'
         }),
         defineField({
           name: "programsMetaDescription",

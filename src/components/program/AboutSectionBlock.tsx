@@ -37,7 +37,7 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
                       .width(64)
                       .height(64)
                       .url()}
-                    alt=""
+                    alt={sectionTitle + " - bullet point icon"}
                     width={28}
                     height={28}
                     className="h-full w-full object-contain p-0.5"

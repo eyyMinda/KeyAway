@@ -229,6 +229,8 @@ export default function ProgramsPageClient({
         )}
       </div>
 
+      <h2 className="sr-only">All Giveaway Programs</h2>
+
       {!fetchError && (
         <ProgramsGrid
           programs={showLoading ? EMPTY_PROGRAMS : programs}

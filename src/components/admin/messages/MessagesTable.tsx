@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ContactMessage } from "@/src/types/contact";
+import { messageHasNoEmail, messageNeedsReply } from "@/src/lib/admin/contactMessages";
 import MessageDetailsModal from "./MessageDetailsModal";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 
@@ -31,6 +32,7 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
     { key: "title", label: "Title", sortable: true, className: "text-left" },
     { key: "contact", label: "Contact", sortable: false, className: "text-left" },
     { key: "status", label: "Status", sortable: true, className: "text-center" },
+    { key: "replies", label: "Replies", sortable: false, className: "text-center" },
     { key: "createdAt", label: "Date", sortable: true, className: "text-center" },
     { key: "actions", label: "Actions", sortable: false, className: "text-center" }
   ];
@@ -90,11 +92,12 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
         <div className="overflow-x-auto">
           <table className="w-full table-fixed">
             <colgroup>
-              <col className="w-[28%]" />
-              <col className="w-[22%]" />
+              <col className="w-[24%]" />
+              <col className="w-[20%]" />
+              <col className="w-[12%]" />
+              <col className="w-[10%]" />
               <col className="w-[14%]" />
-              <col className="w-[14%]" />
-              <col className="w-[22%]" />
+              <col className="w-[20%]" />
             </colgroup>
             <SortableTableHead
               columns={tableColumns}
@@ -112,7 +115,13 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
                 const contactName = message.name ?? "-";
                 const contactEmail = message.email ?? "-";
                 const hasContact = (message.name ?? "").trim() || (message.email ?? "").trim();
+                const replyCount = message.replies?.length ?? 0;
+                const needsReply = messageNeedsReply(message);
+                const noEmail = messageHasNoEmail(message);
                 const dateStr = message.createdAt ? new Date(message.createdAt).toLocaleDateString() : "-";
+                const lastReplyStr = message.lastRepliedAt
+                  ? new Date(message.lastRepliedAt).toLocaleDateString()
+                  : null;
                 return (
                   <tr key={message._id} className={`hover:bg-gray-50 ${isArchived ? "bg-gray-50 opacity-75" : ""}`}>
                     <td className="px-6 py-4 align-top text-left">
@@ -126,7 +135,19 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
                     <td className="px-6 py-4 align-top text-left">
                       {hasContact ? (
                         <div className="text-sm">
-                          <div className={isArchived ? "text-gray-500" : "text-gray-900"}>{contactName}</div>
+                          <div className={`flex flex-wrap items-center gap-2 ${isArchived ? "text-gray-500" : "text-gray-900"}`}>
+                            <span>{contactName}</span>
+                            {needsReply ? (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
+                                Needs reply
+                              </span>
+                            ) : null}
+                            {noEmail ? (
+                              <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-700">
+                                No email
+                              </span>
+                            ) : null}
+                          </div>
                           <div className={isArchived ? "text-gray-400" : "text-gray-500"}>{contactEmail}</div>
                         </div>
                       ) : (
@@ -148,6 +169,16 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
                           <option value="archived">Archived</option>
                         </select>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 align-top text-center text-sm text-gray-500">
+                      {replyCount > 0 ? (
+                        <div>
+                          <div className="font-medium text-gray-900">{replyCount}</div>
+                          {lastReplyStr ? <div className="text-xs text-gray-400">{lastReplyStr}</div> : null}
+                        </div>
+                      ) : (
+                        "-"
+                      )}
                     </td>
                     <td className="px-6 py-4 align-top text-center text-sm text-gray-500">{dateStr}</td>
                     <td className="px-6 py-4 align-top text-center">
@@ -173,6 +204,7 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
           message={selectedMessage}
           onClose={() => setSelectedMessage(null)}
           onUpdateMessage={updates => handleUpdateMessage(selectedMessage._id, updates)}
+          onReplySent={onUpdate}
           updating={updating === selectedMessage._id}
         />
       )}

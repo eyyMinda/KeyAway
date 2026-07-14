@@ -25,6 +25,7 @@ export const bundledVisitor = defineType({
     defineField({ name: "isSpammer", title: "Spammer", type: "boolean" }),
     defineField({ name: "reportCount", title: "Key reports", type: "number" }),
     defineField({ name: "suggestionCount", title: "Key suggestions", type: "number" }),
+    defineField({ name: "commentCount", title: "Program comments", type: "number" }),
     defineField({ name: "contributionScore", title: "Contribution score", type: "number" }),
     defineField({ name: "spamMarkedAt", title: "Marked spam at", type: "datetime" }),
     defineField({ name: "country", title: "Country", type: "string" }),

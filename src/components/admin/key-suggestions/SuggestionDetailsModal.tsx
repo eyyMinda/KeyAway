@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { FaExternalLinkAlt, FaCopy } from "react-icons/fa";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
+import AdminVisitorSection from "@/src/components/admin/AdminVisitorSection";
 import { KeySuggestion } from "@/src/types/contact";
 import type { SuggestionUpdatePayload } from "./KeySuggestionsTable";
 
@@ -217,6 +218,8 @@ export default function SuggestionDetailsModal({
               </select>
             </div>
           </div>
+
+          <AdminVisitorSection ipHash={suggestion.ipHash} />
         </div>
 
         {/* Footer */}

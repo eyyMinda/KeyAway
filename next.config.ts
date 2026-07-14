@@ -73,7 +73,7 @@ const nextConfig: NextConfig = {
               "media-src 'self'",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",
-              "form-action 'self'",
+              "form-action 'self' https://www.keyaway.app https://keyaway.app",
               "frame-ancestors 'none'",
               "upgrade-insecure-requests"
             ].join("; ")

@@ -40,6 +40,7 @@ export async function upsertVisitorOnPageView(
       isSpammer,
       reportCount: archived?.reportCount ?? 0,
       suggestionCount: archived?.suggestionCount ?? 0,
+      commentCount: archived?.commentCount ?? 0,
       contributionScore,
       ...(location?.country ? { country: location.country } : {}),
       ...(location?.city ? { city: location.city } : {}),

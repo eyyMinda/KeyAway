@@ -8,6 +8,8 @@ export interface VisitorHintData {
   visitCount: number;
   reportCount: number;
   suggestionCount: number;
+  commentCount: number;
+  contributionScore: number;
 }
 
 export interface PublicVisitorContext {

@@ -8,7 +8,7 @@ import {
 import { client } from "@/src/sanity/lib/client";
 
 const VISITOR_FIELDS =
-  "visitorHash, visitCount, lastActivityAt, visitTier, isSpammer, reportCount, suggestionCount, contributionScore, spamMarkedAt, country, city, geoUpdatedAt, createdAt, updatedAt";
+  "visitorHash, visitCount, lastActivityAt, visitTier, isSpammer, reportCount, suggestionCount, commentCount, contributionScore, spamMarkedAt, country, city, geoUpdatedAt, createdAt, updatedAt";
 
 function toBundledVisitor(doc: Record<string, unknown> & { _id?: string }) {
   return {
@@ -21,6 +21,7 @@ function toBundledVisitor(doc: Record<string, unknown> & { _id?: string }) {
     isSpammer: doc.isSpammer,
     reportCount: doc.reportCount,
     suggestionCount: doc.suggestionCount,
+    commentCount: doc.commentCount,
     contributionScore: doc.contributionScore,
     spamMarkedAt: doc.spamMarkedAt,
     country: doc.country,
