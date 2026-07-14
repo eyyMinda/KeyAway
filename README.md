@@ -120,6 +120,11 @@ ADMIN_ALLOWED_EMAILS=you@example.com        # Or use Sanity Access (SANITY_ACCES
 # Optional
 CRON_SECRET=yourCronSecret                   # Cron routes (e.g. update-expired-keys)
 ANALYTICS_SALT=yourRandomSalt                # IP hashing for analytics
+
+# Outbound email (admin message replies via Resend)
+RESEND_API_KEY=re_xxxxxxxx                   # https://resend.com — verify keyaway.app domain first
+RESEND_FROM="KeyAway <support@keyaway.app>"  # Must use a verified domain
+RESEND_REPLY_TO=support@keyaway.app          # Optional — where visitor replies land
 ```
 
 **Google login (optional):** Set `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET`, then in `auth.ts` uncomment the Google provider import and the `Google({ ... })` block in the `providers` array.
