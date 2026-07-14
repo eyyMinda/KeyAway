@@ -16,9 +16,9 @@ export default function HomeVendorBrowse({ vendors, position = "bottom" }: HomeV
 
   return (
     <div className={`text-center ${position === "top" ? "mb-10" : "mt-10"}`}>
-      <h3 className="mb-5 text-xl font-semibold text-[#c6d4df] sm:mb-6 sm:text-2xl">
+      <h2 className="mb-5 text-xl font-semibold text-[#c6d4df] sm:mb-6 sm:text-2xl">
         Browse by <span className="text-gradient-pro">Vendor</span>
-      </h3>
+      </h2>
 
       <ul className="flex flex-wrap items-stretch justify-center gap-2.5 sm:gap-3">
         {items.map(vendor => (
@@ -34,9 +34,9 @@ export default function HomeVendorBrowse({ vendors, position = "bottom" }: HomeV
                 displayMaxSize={64}
                 frameClassName="mb-2 flex h-12 w-12 shrink-0 items-center justify-center rounded-sm border border-[#2a475e] sm:h-16 sm:w-16"
               />
-              <span className="line-clamp-2 min-h-8 text-center text-xs font-semibold leading-tight text-[#c6d4df] group-hover:text-white sm:min-h-9 sm:text-xs">
+              <h3 className="line-clamp-2 min-h-8 text-center text-xs font-semibold leading-tight text-[#c6d4df] group-hover:text-white sm:min-h-9 sm:text-xs">
                 {vendor.name}
-              </span>
+              </h3>
               <span className="mt-0.5 text-xs text-[#8f98a0] group-hover:text-neutral-100">
                 {vendor.programCount} {vendor.programCount === 1 ? "program" : "programs"}
               </span>

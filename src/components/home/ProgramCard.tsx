@@ -57,9 +57,9 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
       </Link>
 
       <div className="flex grow flex-col p-4 pt-0">
-        <h2 className="mb-1 line-clamp-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-white sm:text-lg lg:text-xl">
+        <h3 className="mb-1 line-clamp-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-white sm:text-lg lg:text-xl">
           {program.title}
-        </h2>
+        </h3>
 
         {program.descriptionPlain ? (
           <p className="mb-2 line-clamp-3 text-xs leading-relaxed text-neutral-100 sm:line-clamp-4 sm:text-sm">
