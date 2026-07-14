@@ -10,6 +10,7 @@ import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDe
 import { getCachedVendorSlugs, getVendorBySlug } from "@/src/lib/vendors/getVendors";
 import { generateVendorPageJsonLd } from "@/src/lib/seo/jsonLd";
 import { resolveVendorHubSeo } from "@/src/lib/seo/vendorSeo";
+import { buildOpenGraphWebsite } from "@/src/lib/seo/openGraph";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 
 /** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` (Next.js requires a literal). */
@@ -39,14 +40,14 @@ export async function generateMetadata({ params }: VendorPageProps): Promise<Met
   return {
     title,
     description,
-    openGraph: {
+    openGraph: buildOpenGraphWebsite({
       title,
       description,
       url,
       siteName: storeTitle,
-      type: "website",
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: `${vendor.name} on ${storeTitle}` }]
-    },
+      ogImageUrl,
+      ogImageAlt: `${vendor.name} on ${storeTitle}`
+    }),
     twitter: { card: "summary_large_image", title, description, images: [ogImageUrl] },
     alternates: { canonical: url }
   };

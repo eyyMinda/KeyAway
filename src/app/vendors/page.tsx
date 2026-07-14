@@ -6,6 +6,7 @@ import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDe
 import { getCachedVendorsWithCounts } from "@/src/lib/vendors/getVendors";
 import { generateVendorsPageJsonLd } from "@/src/lib/seo/jsonLd";
 import { resolveVendorsIndexSeo } from "@/src/lib/seo/vendorSeo";
+import { buildOpenGraphWebsite } from "@/src/lib/seo/openGraph";
 
 /** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` (Next.js requires a literal). */
 export const revalidate = 43200;
@@ -16,14 +17,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    openGraph: {
+    openGraph: buildOpenGraphWebsite({
       title,
       description,
       url,
       siteName: storeTitle,
-      type: "website",
-      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: `${storeTitle} — Vendors` }]
-    },
+      ogImageUrl,
+      ogImageAlt: `${storeTitle} — Vendors`
+    }),
     twitter: { card: "summary_large_image", title, description, images: [ogImageUrl] },
     alternates: { canonical: url }
   };
