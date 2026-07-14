@@ -3,7 +3,13 @@ import type { Metadata } from "next";
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
 
-type OpenGraphImage = NonNullable<NonNullable<Metadata["openGraph"]>["images"]>[number];
+type OpenGraphImage = {
+  url: string;
+  secureUrl?: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+};
 
 export function buildOpenGraphImage(url: string, alt: string): OpenGraphImage {
   return {
