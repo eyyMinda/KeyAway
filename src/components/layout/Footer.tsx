@@ -57,9 +57,12 @@ export default function Footer({ logoData, socialData, siteBaseUrl }: FooterProp
           <div className="col-span-1 xs:col-span-2 flex flex-col gap-4">
             <Link href="/" className="inline-block w-fit pr-4">
               {isLogo ? (
-                <IdealImageClient {...logoData} className="h-12 w-auto" />
+                <>
+                  <h2 className="sr-only">{storeData.title}</h2>
+                  <IdealImageClient {...logoData} className="h-12 w-auto" />
+                </>
               ) : (
-                <h3 className="text-2xl font-bold text-white">{storeData.title}</h3>
+                <h2 className="text-2xl font-bold text-white">{storeData.title}</h2>
               )}
             </Link>
             <p className="mb-2 max-w-md section-text">
@@ -89,7 +92,7 @@ export default function Footer({ logoData, socialData, siteBaseUrl }: FooterProp
 
           {/* Navigation */}
           <div>
-            <h4 className="section-label mb-4 text-neutral-50">Navigate</h4>
+            <h3 className="section-label mb-4 text-neutral-50">Navigate</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -135,7 +138,7 @@ export default function Footer({ logoData, socialData, siteBaseUrl }: FooterProp
 
           {/* Trust */}
           <div>
-            <h4 className="section-label mb-4 text-neutral-50">Trust</h4>
+            <h3 className="section-label mb-4 text-neutral-50">Trust</h3>
             <ul className="mb-6 space-y-2">
               {TRUST_FOOTER_LINKS.map(({ href, label }) => (
                 <li key={href}>
@@ -153,7 +156,7 @@ export default function Footer({ logoData, socialData, siteBaseUrl }: FooterProp
 
           {/* Contribute Section */}
           <div className="xs:col-span-2 xl:col-span-1">
-            <h4 className="section-label mb-4 text-neutral-50">Contribute</h4>
+            <h3 className="section-label mb-4 text-neutral-50">Contribute</h3>
             <div className="space-y-3">
               {/* Suggest a Key Button */}
               <ContactModalTrigger
