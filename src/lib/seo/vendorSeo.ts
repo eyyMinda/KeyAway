@@ -14,7 +14,7 @@ export function resolveVendorsIndexSeo(store: StoreDetailsForSeo | null | undefi
   const vars = buildStoreSeoVariableMap(s);
   const siteUrl = resolveSiteBaseUrl(s.seo);
   return {
-    title: `Software Vendors | ${vars.title}`,
+    title: `Software Vendors & Publishers | ${vars.title}`,
     description: `Browse software publishers on ${vars.title} — free promotional CD keys, giveaways, and PRO upgrade deals grouped by vendor.`,
     pageUrl: `${siteUrl}/vendors`,
     ogImageUrl: resolveDefaultOgImageUrl(s.seo),
@@ -31,7 +31,7 @@ export function resolveVendorHubSeo(store: StoreDetailsForSeo | null | undefined
   const count = vendor.programCount ?? 0;
   const countLabel = count > 0 ? `${count} program${count === 1 ? "" : "s"}` : "programs";
 
-  const title = vendor.seo?.metaTitle?.trim() || `${vendor.name} — Free CD Keys & Giveaways | ${vars.title}`;
+  const title = vendor.seo?.metaTitle?.trim() || `${vendor.name} CD Keys & Giveaways | ${vars.title}`;
   const description =
     vendor.seo?.metaDescription?.trim() ||
     `Free ${vendor.name} promotional CD keys and giveaways on ${vars.title}. Browse ${countLabel}, verified community reports, and official PRO upgrade deals.`;

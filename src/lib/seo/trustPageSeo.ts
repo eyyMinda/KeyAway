@@ -20,7 +20,7 @@ export function resolveHowItWorksPageSeo(store: StoreDetailsForSeo | null | unde
   return resolveTrustPageSeo(
     store,
     "/how-it-works",
-    "How It Works | [title]",
+    "How Giveaway Keys & Reports Work | [title]",
     "Learn how [title] lists official promotional CD keys, how community reports work, and what we never host."
   );
 }
@@ -29,7 +29,7 @@ export function resolveAboutPageSeo(store: StoreDetailsForSeo | null | undefined
   return resolveTrustPageSeo(
     store,
     "/about",
-    "About | [title]",
+    "About & Our Story | Who We Are at [title]",
     "What [title] is, how we help you find legal software giveaway keys, and how to reach us."
   );
 }
@@ -38,7 +38,7 @@ export function resolveAffiliateDisclosurePageSeo(store: StoreDetailsForSeo | nu
   return resolveTrustPageSeo(
     store,
     "/affiliate-disclosure",
-    "Affiliate Disclosure | [title]",
+    "Affiliate Links & Disclosure Policy | [title]",
     "How [title] uses affiliate links, outbound vendor links, and how that supports free giveaway listings."
   );
 }
@@ -47,7 +47,7 @@ export function resolveVerificationPolicyPageSeo(store: StoreDetailsForSeo | nul
   return resolveTrustPageSeo(
     store,
     "/verification-policy",
-    "Verification Policy | [title]",
+    "Key Verification & Listing Policy | [title]",
     "How [title] handles community key reports, listings review, and giveaway accuracy."
   );
 }
@@ -56,7 +56,7 @@ export function resolveDmcaPageSeo(store: StoreDetailsForSeo | null | undefined)
   return resolveTrustPageSeo(
     store,
     "/dmca",
-    "Report Content | [title]",
+    "Report Content or Copyright Issues | [title]",
     "How to report copyright or content issues on [title]."
   );
 }
@@ -65,7 +65,7 @@ export function resolvePartnersPageSeo(store: StoreDetailsForSeo | null | undefi
   return resolveTrustPageSeo(
     store,
     "/partners",
-    "Partners & Vendors | [title]",
+    "Software Partners & Vendor Deals | [title]",
     "Work with [title] on official software giveaways and promotional listings."
   );
 }
@@ -74,7 +74,7 @@ export function resolveUpdatesPageSeo(store: StoreDetailsForSeo | null | undefin
   return resolveTrustPageSeo(
     store,
     "/updates",
-    "Latest Updates | [title]",
+    "Latest Giveaway Keys & New Programs | [title]",
     "New programs and fresh giveaway keys added to [title] in the last 90 days — auto-updated from our catalog."
   );
 }
