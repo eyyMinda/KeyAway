@@ -3,6 +3,8 @@ import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
+import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
+import { touchVisitorActivity } from "@/src/lib/visitors/upsertVisitorContribution";
 
 const MAX_TITLE = 200;
 const MAX_MESSAGE = 5000;
@@ -36,6 +38,12 @@ export async function POST(req: NextRequest) {
     if (email && email.length > MAX_EMAIL)
       return Errors.validation(`Email too long (max ${MAX_EMAIL})`, [{ field: "email", message: "Too long" }]);
 
+    if (ipHash && (await isVisitorSpammerByHash(ipHash))) {
+      return Errors.validation("Contact submissions are disabled for your network.", [
+        { field: "message", message: "Submission disabled" }
+      ]);
+    }
+
     const result = await client.create({
       _type: "contactMessage",
       title,
@@ -46,6 +54,12 @@ export async function POST(req: NextRequest) {
       status: "new",
       createdAt: new Date().toISOString()
     });
+
+    try {
+      await touchVisitorActivity(ipHash);
+    } catch (e) {
+      console.error("[POST /api/v1/contact] visitor activity touch failed", e);
+    }
 
     return NextResponse.json({ data: { id: result._id }, meta: {} }, { status: 201 });
   } catch (err) {
