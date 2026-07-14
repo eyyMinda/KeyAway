@@ -5,6 +5,9 @@ import { verifyAdminMembership } from "@/src/lib/admin/verifyAdminMembership";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  pages: {
+    signIn: "/admin/signin"
+  },
   providers: [
     // Google({
     //   clientId: process.env.AUTH_GOOGLE_ID!,
@@ -54,7 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const { pathname } = request.nextUrl;
       if (pathname.startsWith("/admin")) {
         if (auth) return true;
-        const signInUrl = new URL("/api/auth/signin", request.url);
+        const signInUrl = new URL("/admin/signin", request.url);
         signInUrl.searchParams.set("callbackUrl", pathname || "/admin");
         return Response.redirect(signInUrl);
       }
