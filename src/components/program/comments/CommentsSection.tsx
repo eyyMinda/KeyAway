@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import type { Program } from "@/src/types/program";
+import { useEffect, useMemo, useState } from "react";
+import type { Program, ProgramCommentReactionSummary } from "@/src/types/program";
 import ProgramCommentsList from "@/src/components/program/comments/ProgramCommentsList";
 import ProgramCommentForm from "@/src/components/program/comments/ProgramCommentForm";
 import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
@@ -10,6 +10,9 @@ import {
   PROGRAM_COMMENTS_SECTION_ID,
   PROGRAM_COMMENTS_SECTION_SELECTOR
 } from "@/src/lib/program/programCommentsSection";
+import { useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvider";
+import type { ProgramCommentOwnership } from "@/src/lib/program/programCommentOwnership";
+import { replyOwnershipKey } from "@/src/lib/program/programCommentOwnership";
 
 type CommentsSectionProps = {
   program: Program;
@@ -18,7 +21,21 @@ type CommentsSectionProps = {
 export default function CommentsSection({ program }: CommentsSectionProps) {
   const router = useRouter();
   const slug = program.slug?.current ?? "";
+  const { isSpammer } = useProgramVisitor();
   const [replyTo, setReplyTo] = useState<{ commentKey: string; authorName: string } | null>(null);
+  const [reactionSummaries, setReactionSummaries] = useState<
+    Record<string, ProgramCommentReactionSummary[]> | undefined
+  >(undefined);
+  const [ownership, setOwnership] = useState<ProgramCommentOwnership | null>(null);
+
+  const ownedCommentKeys = useMemo(
+    () => new Set(ownership?.commentKeys ?? []),
+    [ownership?.commentKeys]
+  );
+  const ownedReplyKeys = useMemo(
+    () => new Set((ownership?.replies ?? []).map(r => replyOwnershipKey(r.commentKey, r.replyKey))),
+    [ownership?.replies]
+  );
 
   const comments = program.programComments ?? [];
 
@@ -29,6 +46,41 @@ export default function CommentsSection({ program }: CommentsSectionProps) {
       scrollToSectionWithHeaderOffset(PROGRAM_COMMENTS_SECTION_SELECTOR);
     });
   }, []);
+
+  useEffect(() => {
+    if (!slug) return;
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const [reactionsRes, ownershipRes] = await Promise.all([
+          fetch(`/api/v1/program-comments/reactions?programSlug=${encodeURIComponent(slug)}`, {
+            credentials: "same-origin"
+          }),
+          fetch(`/api/v1/program-comments/ownership?programSlug=${encodeURIComponent(slug)}`, {
+            credentials: "same-origin"
+          })
+        ]);
+
+        if (!cancelled && reactionsRes.ok) {
+          const json = (await reactionsRes.json()) as { data?: Record<string, ProgramCommentReactionSummary[]> };
+          if (json.data) setReactionSummaries(json.data);
+        }
+
+        if (!cancelled && ownershipRes.ok) {
+          const json = (await ownershipRes.json()) as { data?: ProgramCommentOwnership };
+          if (json.data) setOwnership(json.data);
+        }
+      } catch {
+        /* keep count-only fallback from program payload */
+      }
+    };
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
 
   function handlePosted() {
     router.refresh();
@@ -49,9 +101,16 @@ export default function CommentsSection({ program }: CommentsSectionProps) {
           </p>
         </div>
 
-        <div className="card-base overflow-visible rounded-sm p-4 sm:p-5 lg:p-6 space-y-8">
+        <div className="card-base no-hover overflow-visible rounded-sm p-4 sm:p-5 lg:p-6 space-y-8">
           <ProgramCommentsList
             comments={comments}
+            programSlug={slug}
+            reactionSummaries={reactionSummaries}
+            reactionsDisabled={isSpammer}
+            ownedCommentKeys={ownedCommentKeys}
+            ownedReplyKeys={ownedReplyKeys}
+            editDisabled={isSpammer}
+            onEdited={handlePosted}
             onReply={c => (c._key ? setReplyTo({ commentKey: c._key, authorName: c.authorName }) : undefined)}
           />
 

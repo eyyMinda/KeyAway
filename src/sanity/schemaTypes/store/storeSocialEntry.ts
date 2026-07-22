@@ -17,6 +17,7 @@ export const storeSocialEntry = defineType({
           { title: "X (Twitter)", value: "x" },
           { title: "YouTube", value: "youtube" },
           { title: "Facebook", value: "facebook" },
+          { title: "Telegram", value: "telegram" },
           { title: "Trustpilot", value: "trustpilot" },
           { title: "Website/Portfolio", value: "website" }
         ],

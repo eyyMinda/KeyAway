@@ -13,6 +13,7 @@ import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDe
 import { getFeaturedProgram } from "@/src/lib/sanity/sanityActions";
 import { getCachedVendorsWithCounts } from "@/src/lib/vendors/getVendors";
 import {
+  getCachedProgramCategoryOptions,
   getCachedProgramsForJsonLd,
   getCachedProgramsHeroTotals,
   getProgramsListData
@@ -26,20 +27,28 @@ export async function generateMetadata() {
 }
 
 interface ProgramsPageProps {
-  searchParams: Promise<{ search?: string; filter?: string; sort?: string; page?: string }>;
+  searchParams: Promise<{
+    search?: string;
+    filter?: string;
+    sort?: string;
+    page?: string;
+    category?: string;
+    platform?: string;
+  }>;
 }
 
 /** SSR first page for crawlers; client hydrates for filter/sort/pagination via cached `/api/v1/programs/list`. */
 export default async function ProgramsPage({ searchParams }: ProgramsPageProps) {
   const sp = await searchParams;
-  const [storeRow, featuredProgram, heroTotals, jsonLdPrograms, initialListData, vendors, shareCounts] =
+  const [storeRow, featuredProgram, heroTotals, jsonLdPrograms, initialListData, vendors, categoryOptions, shareCounts] =
     await Promise.all([
       getCachedStoreDetailsDocument(),
       getFeaturedProgram(),
       getCachedProgramsHeroTotals(),
       getCachedProgramsForJsonLd(),
-      getProgramsListData(sp.search, sp.filter, sp.sort, sp.page),
+      getProgramsListData(sp.search, sp.filter, sp.sort, sp.page, sp.category, sp.platform),
       getCachedVendorsWithCounts(),
+      getCachedProgramCategoryOptions(),
       getPageShareCounts("/programs")
     ]);
 
@@ -76,7 +85,11 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
             <p className="text-sm text-neutral-100">Loading programs…</p>
           </div>
         }>
-        <ProgramsPageClient initialListData={initialListData} vendors={vendors} />
+        <ProgramsPageClient
+          initialListData={initialListData}
+          vendors={vendors}
+          categoryOptions={categoryOptions}
+        />
       </Suspense>
 
       <ContributeSection />

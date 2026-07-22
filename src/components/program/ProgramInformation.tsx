@@ -18,6 +18,7 @@ import RichText from "@/src/components/portableText/RichText";
 import { portableTextHasContent } from "@/src/lib/portableText/toPlainText";
 import { useI18n } from "@/src/contexts/i18n";
 import ProgramCommentsJumpLink from "@/src/components/program/comments/ProgramCommentsJumpLink";
+import ProgramCategoryChips from "@/src/components/program/ProgramCategoryChips";
 import { countProgramDiscussionPosts } from "@/src/lib/program/countProgramComments";
 
 const PROGRAM_HERO_IMAGE_SIZES = "(max-width: 1023px) 98vw, (max-width: 1450px) 48vw, 680px" as const;
@@ -78,6 +79,7 @@ export default function ProgramInformation({
                 <h1 className="section-title h2 min-w-0 flex-1 max-w-[540px]">{formatProgramDisplayTitle(program)}</h1>
                 <ProgramCommentsJumpLink count={commentCount} className="mt-0.5" />
               </div>
+              <ProgramCategoryChips categories={program.categories} className="mb-3" />
               <p className="text-base leading-relaxed text-neutral-100 sm:text-lg">{heroSubtitle}</p>
             </div>
           </div>

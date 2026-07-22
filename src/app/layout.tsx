@@ -108,7 +108,15 @@ export default async function RootLayout({
 
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
-      <head>{renderedHeadMetaTags}</head>
+      <head>
+        {renderedHeadMetaTags}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f1923] text-[#c6d4df]`}
         suppressHydrationWarning>

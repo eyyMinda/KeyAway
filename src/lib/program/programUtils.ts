@@ -1,6 +1,6 @@
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import type { ProgramWithStats } from "@/src/types/home";
-import type { FilterType, SortType } from "@/src/types/programs";
+import type { FilterType, PlatformFilterType, SortType } from "@/src/types/programs";
 
 /**
  * Calculate popularity score for a program
@@ -107,6 +107,17 @@ export function normalizeFilterType(value?: string): FilterType {
     default:
       return "all";
   }
+}
+
+export function normalizePlatformFilter(value?: string | null): PlatformFilterType {
+  if (value === "windows" || value === "mac") return value;
+  return "all";
+}
+
+export function normalizeCategoryFilter(value?: string | null): string {
+  const slug = (value ?? "").trim().toLowerCase();
+  if (!slug || slug === "all") return "all";
+  return slug.replace(/[^a-z0-9-]/g, "");
 }
 
 /**

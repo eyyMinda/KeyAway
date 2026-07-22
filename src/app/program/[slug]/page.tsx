@@ -82,8 +82,12 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
   const introVersionConfirmation = getCdKeyTableIntroVersionConfirmation(program, highestKeyVersion);
   const versionSummaryLine = formatVersionSummaryLine(program, highestKeyVersion);
 
-  const [allPrograms, store, communityRating, shareCounts] = await Promise.all([
-    getCachedRelatedPrograms(),
+  const [relatedPrograms, store, communityRating, shareCounts] = await Promise.all([
+    getCachedRelatedPrograms({
+      slug,
+      categories: program.categories,
+      vendor: program.vendor
+    }),
     getCachedStoreDetailsDocument(),
     getProgramAggregateRating(slug),
     getProgramShareCounts(slug)
@@ -96,10 +100,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     socialLinks: store?.socialLinks ?? []
   };
 
-  const relatedPrograms = allPrograms
-    .filter(p => p.slug.current !== slug)
-    .slice(0, 5)
-    .map(p => ({ ...p, cdKeys: p.cdKeys ?? [] }));
+  const relatedProgramsWithKeys = relatedPrograms.map(p => ({ ...p, cdKeys: p.cdKeys ?? [] }));
 
   const faqItems =
     program.faq?.filter((f: ProgramFaqItem) => f.question?.trim() && portableTextHasContent(f.answer)) ?? [];
@@ -149,7 +150,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
         <ProgramAboutSection program={program} />
         <ContributeBanner />
         <ProgramFaqSection programTitle={program.title} items={faqItems} />
-        <RelatedPrograms programs={relatedPrograms} />
+        <RelatedPrograms programs={relatedProgramsWithKeys} />
         <CommentsSection program={program} />
       </I18nShell>
     </>

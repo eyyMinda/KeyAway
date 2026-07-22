@@ -1,5 +1,36 @@
 import { defineField, defineType } from "sanity";
 
+export const programCommentReaction = defineType({
+  name: "programCommentReaction",
+  title: "Comment reaction",
+  type: "object",
+  fields: [
+    defineField({
+      name: "emoji",
+      title: "Emoji",
+      type: "string",
+      validation: Rule => Rule.required().min(1).max(16)
+    }),
+    defineField({
+      name: "ipHash",
+      title: "Visitor hash",
+      type: "string",
+      description: "Hashed IP of reactor (toggle / spam review).",
+      readOnly: true
+    }),
+    defineField({
+      name: "createdAt",
+      title: "Date",
+      type: "datetime",
+      initialValue: () => new Date().toISOString(),
+      validation: Rule => Rule.required()
+    })
+  ],
+  preview: {
+    select: { title: "emoji", subtitle: "createdAt" }
+  }
+});
+
 export const programCommentReply = defineType({
   name: "programCommentReply",
   title: "Comment reply",
@@ -38,6 +69,19 @@ export const programCommentReply = defineType({
       type: "datetime",
       initialValue: () => new Date().toISOString(),
       validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "editedAt",
+      title: "Last edited",
+      type: "datetime",
+      readOnly: true
+    }),
+    defineField({
+      name: "reactions",
+      title: "Reactions",
+      type: "array",
+      of: [{ type: "programCommentReaction" }],
+      description: "Emoji reactions from visitors (one entry per visitor + emoji)."
     })
   ],
   preview: {
@@ -98,10 +142,23 @@ export const programComment = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: "editedAt",
+      title: "Last edited",
+      type: "datetime",
+      readOnly: true
+    }),
+    defineField({
       name: "isPinned",
       title: "Pin to top",
       type: "boolean",
       initialValue: false
+    }),
+    defineField({
+      name: "reactions",
+      title: "Reactions",
+      type: "array",
+      of: [{ type: "programCommentReaction" }],
+      description: "Emoji reactions from visitors (one entry per visitor + emoji)."
     }),
     defineField({
       name: "replies",

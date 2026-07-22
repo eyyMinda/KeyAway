@@ -16,7 +16,9 @@ export async function GET(req: NextRequest) {
       sp.get("search") ?? undefined,
       sp.get("filter") ?? undefined,
       sp.get("sort") ?? undefined,
-      sp.get("page") ?? undefined
+      sp.get("page") ?? undefined,
+      sp.get("category") ?? undefined,
+      sp.get("platform") ?? undefined
     );
 
     return NextResponse.json(

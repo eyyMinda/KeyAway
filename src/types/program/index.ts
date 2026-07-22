@@ -10,6 +10,16 @@ export type CDKeyStatus = "new" | "active" | "expired" | "limit";
 /** How activation is delivered for this program (Sanity `program.programFlow`). */
 export type ProgramFlow = "cd_key" | "link_based_cdkey" | "account" | "link_based_account";
 
+/** Supported OS targets for a program (`program.platforms` in Sanity). */
+export type ProgramPlatform = "windows" | "mac";
+
+/** Resolved category reference on a program. */
+export interface ProgramCategoryRef {
+  _id: string;
+  title: string;
+  slug: string;
+}
+
 export interface GiveawayLink {
   title?: string;
   url?: string;
@@ -57,6 +67,21 @@ export interface ProgramAboutSectionBlock {
   points?: ProgramAboutPoint[];
 }
 
+export interface ProgramCommentReaction {
+  _key?: string;
+  emoji: string;
+  /** Present in CMS / admin; omitted from public program queries. */
+  ipHash?: string;
+  createdAt?: string;
+}
+
+export interface ProgramCommentReactionSummary {
+  emoji: string;
+  count: number;
+  /** True when the current visitor already reacted with this emoji. */
+  reacted: boolean;
+}
+
 export interface ProgramCommentReply {
   _key?: string;
   authorName: string;
@@ -64,6 +89,8 @@ export interface ProgramCommentReply {
   ipHash?: string;
   body: string;
   createdAt?: string;
+  editedAt?: string;
+  reactions?: ProgramCommentReaction[];
 }
 
 export interface ProgramComment {
@@ -73,7 +100,9 @@ export interface ProgramComment {
   ipHash?: string;
   body: string;
   createdAt?: string;
+  editedAt?: string;
   isPinned?: boolean;
+  reactions?: ProgramCommentReaction[];
   replies?: ProgramCommentReply[];
 }
 
@@ -119,6 +148,10 @@ export interface Program {
   featured?: ProgramFeatured;
   /** Resolved software publisher/brand. Null on legacy docs not yet backfilled. */
   vendor?: VendorRef | null;
+  /** Content categories for related-program matching. Empty on legacy docs. */
+  categories?: ProgramCategoryRef[];
+  /** Defaults to Windows-only when omitted in CMS or API. */
+  platforms?: ProgramPlatform[];
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;
   seo?: {

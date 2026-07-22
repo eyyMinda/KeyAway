@@ -73,6 +73,29 @@ export const program = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: "categories",
+      title: "Categories",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "programCategory" }] }],
+      description:
+        "Pick existing program categories or create a new category document. Used for related program recommendations on the program page."
+    }),
+    defineField({
+      name: "platforms",
+      title: "Platforms",
+      type: "array",
+      of: [{ type: "string" }],
+      options: {
+        list: [
+          { title: "Windows", value: "windows" },
+          { title: "Mac", value: "mac" }
+        ],
+        layout: "grid"
+      },
+      initialValue: ["windows"],
+      validation: Rule => Rule.required().min(1)
+    }),
+    defineField({
       name: "programFlow",
       title: "Activation flow",
       type: "string",
