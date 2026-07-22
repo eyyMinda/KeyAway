@@ -20,7 +20,7 @@ import { storeSocialEntry } from "./store/storeSocialEntry";
 import { link } from "./store/link";
 
 import { aboutPoint, aboutSection } from "./program/aboutSection";
-import { programComment, programCommentReply } from "./program/programComment";
+import { programComment, programCommentReaction, programCommentReply } from "./program/programComment";
 import { faqItem, program } from "./program/program";
 import { cdKey } from "./program/cdKey";
 import { featuredProgramSettings } from "./program/featuredProgramSettings";
@@ -50,6 +50,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     aboutSection,
     programComment,
     programCommentReply,
+    programCommentReaction,
     faqItem,
     program,
     cdKey,

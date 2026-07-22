@@ -57,6 +57,21 @@ export interface ProgramAboutSectionBlock {
   points?: ProgramAboutPoint[];
 }
 
+export interface ProgramCommentReaction {
+  _key?: string;
+  emoji: string;
+  /** Present in CMS / admin; omitted from public program queries. */
+  ipHash?: string;
+  createdAt?: string;
+}
+
+export interface ProgramCommentReactionSummary {
+  emoji: string;
+  count: number;
+  /** True when the current visitor already reacted with this emoji. */
+  reacted: boolean;
+}
+
 export interface ProgramCommentReply {
   _key?: string;
   authorName: string;
@@ -64,6 +79,7 @@ export interface ProgramCommentReply {
   ipHash?: string;
   body: string;
   createdAt?: string;
+  reactions?: ProgramCommentReaction[];
 }
 
 export interface ProgramComment {
@@ -74,6 +90,7 @@ export interface ProgramComment {
   body: string;
   createdAt?: string;
   isPinned?: boolean;
+  reactions?: ProgramCommentReaction[];
   replies?: ProgramCommentReply[];
 }
 
