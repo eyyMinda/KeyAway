@@ -62,6 +62,8 @@ export const programsListingProjection = `
   "vendor": vendor->{ name, "slug": slug.current },
   "keyCount": count(cdKeys[]),
   "hasKeys": count(cdKeys[]) > 0,
+  "categories": categories[]->{ _id, title, "slug": slug.current },
+  "platforms": coalesce(platforms, ["windows"]),
   ${programStatsProjection}
 `;
 
@@ -73,8 +75,12 @@ export const relatedProgramsCardProjection = `
   description,
   image,
   _createdAt,
+  "vendor": vendor->{ name, "slug": slug.current },
+  "categories": categories[]->{ _id, title, "slug": slug.current },
+  "platforms": coalesce(platforms, ["windows"]),
   "keyCount": count(cdKeys[]),
-  "hasKeys": count(cdKeys[]) > 0
+  "hasKeys": count(cdKeys[]) > 0,
+  ${programStatsProjection}
 `;
 
 export const allProgramsQuery = `
@@ -97,6 +103,8 @@ export const adminProgramsQuery = `
   ${featuredBlockProjection},
   latestOfficialVersion,
   "vendor": vendor->{ name, "slug": slug.current },
+  "categories": categories[]->{ _id, title, "slug": slug.current },
+  "platforms": coalesce(platforms, ["windows"]),
   seo,
   aboutSections,
   faq,
@@ -173,6 +181,8 @@ export const programBySlugQuery = `
   ${featuredBlockProjection},
   latestOfficialVersion,
   "vendor": vendor->{ name, "slug": slug.current },
+  "categories": categories[]->{ _id, title, "slug": slug.current },
+  "platforms": coalesce(platforms, ["windows"]),
   seo,
   aboutSections,
   faq,
@@ -342,6 +352,9 @@ export const duplicateKeyReportQuery = `*[_type=="keyReport" && ipHash == $ipHas
 
 /* ------------ Popular Programs (related / light cards — no per-program stats) ------------ */
 export const popularProgramsQuery = `*[_type == "program"] | order(_createdAt desc) [0...6]{ ${relatedProgramsCardProjection} }`;
+
+/** Full candidate pool for related-program scoring (excludes current slug at fetch time). */
+export const relatedProgramsCandidatesQuery = `*[_type == "program" && slug.current != $slug]{ ${relatedProgramsCardProjection} }`;
 
 /* @deprecated Use programsWithStatsQuery + mergeProgramStats + sortPrograms("popular") — GROQ order uses stored scores only. */
 export const popularProgramsByViewsQuery = `*[_type == "program"]{ ${programsListingProjection}, ${featuredBlockProjection} } | order(popularityScore desc) [0...6]`;
