@@ -3,6 +3,7 @@ import { IdealImage } from "@/src/components/general/IdealImage";
 import { FaEye, FaDownload, FaKey, FaChevronRight } from "react-icons/fa";
 import { ProgramCardProps } from "@/src/types/home";
 import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
+import ProgramCategoryChips from "@/src/components/program/ProgramCategoryChips";
 
 export default function ProgramCard({ program, stats, badges, showStats = true }: ProgramCardProps) {
   const viewKeysLabel = `View keys for ${program.title}`;
@@ -60,6 +61,8 @@ export default function ProgramCard({ program, stats, badges, showStats = true }
         <h3 className="mb-1 line-clamp-2 text-base font-bold leading-tight text-white transition-colors group-hover:text-white sm:text-lg lg:text-xl">
           {program.title}
         </h3>
+
+        <ProgramCategoryChips categories={program.categories} maxVisible={2} className="mb-2" />
 
         {program.descriptionPlain ? (
           <p className="mb-2 line-clamp-3 text-xs leading-relaxed text-neutral-100 sm:line-clamp-4 sm:text-sm">
