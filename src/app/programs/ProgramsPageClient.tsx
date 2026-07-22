@@ -7,8 +7,9 @@ import type { ProgramsListData } from "@/src/lib/programs/getProgramsPageData";
 import { FilterType, SortType } from "@/src/types/programs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
-import { normalizeFilterType, normalizeSortType } from "@/src/lib/program/programUtils";
+import { normalizeFilterType, normalizeSortType, normalizeCategoryFilter, normalizePlatformFilter } from "@/src/lib/program/programUtils";
 import type { ProgramWithStats } from "@/src/types/home";
+import type { PlatformFilterType, ProgramCategoryOption } from "@/src/types/programs";
 import HomeVendorBrowse from "@/src/components/home/HomeVendorBrowse";
 import type { VendorListItem } from "@/src/lib/vendors/getVendors";
 
@@ -20,20 +21,31 @@ function readListParams(searchParams: URLSearchParams) {
     searchTerm: (searchParams.get("search") || "").trim(),
     filter: normalizeFilterType(searchParams.get("filter") ?? undefined),
     sortBy: normalizeSortType(searchParams.get("sort") ?? undefined),
+    category: normalizeCategoryFilter(searchParams.get("category")),
+    platform: normalizePlatformFilter(searchParams.get("platform")),
     page: Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1)
   };
 }
 
-function listParamsKey(p: { searchTerm: string; filter: FilterType; sortBy: SortType; page: number }): string {
-  return `${p.searchTerm}|${p.filter}|${p.sortBy}|${p.page}`;
+function listParamsKey(p: {
+  searchTerm: string;
+  filter: FilterType;
+  sortBy: SortType;
+  category: string;
+  platform: PlatformFilterType;
+  page: number;
+}): string {
+  return `${p.searchTerm}|${p.filter}|${p.sortBy}|${p.category}|${p.platform}|${p.page}`;
 }
 
 export default function ProgramsPageClient({
   initialListData,
-  vendors = []
+  vendors = [],
+  categoryOptions = []
 }: {
   initialListData: ProgramsListData;
   vendors?: VendorListItem[];
+  categoryOptions?: ProgramCategoryOption[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -56,13 +68,15 @@ export default function ProgramsPageClient({
       searchTerm: initialListData.searchTerm,
       filter: initialListData.filter,
       sortBy: initialListData.sortBy,
+      category: initialListData.category,
+      platform: initialListData.platform,
       page: initialListData.page
     })
   );
   const skipInitialFetchRef = useRef(true);
 
   const params = readListParams(searchParams);
-  const { searchTerm, filter, sortBy, page } = params;
+  const { searchTerm, filter, sortBy, category, platform, page } = params;
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const localSearchRef = useRef(searchTerm);
 
@@ -139,11 +153,22 @@ export default function ProgramsPageClient({
     return localSearchRef.current.trim();
   };
 
-  const updateQuery = (updates: Partial<{ search: string; filter: FilterType; sort: SortType; page: number }>) => {
+  const updateQuery = (
+    updates: Partial<{
+      search: string;
+      filter: FilterType;
+      sort: SortType;
+      category: string;
+      platform: PlatformFilterType;
+      page: number;
+    }>
+  ) => {
     const next = new URLSearchParams(searchParamsRef.current.toString());
     const nextSearch = resolveSearchForUrl(updates);
     const nextFilter = updates.filter ?? filter;
     const nextSort = updates.sort ?? sortBy;
+    const nextCategory = updates.category ?? category;
+    const nextPlatform = updates.platform ?? platform;
     const nextPage = updates.page ?? currentPage;
 
     if (nextSearch) next.set("search", nextSearch);
@@ -152,6 +177,10 @@ export default function ProgramsPageClient({
     else next.delete("filter");
     if (nextSort !== "popular") next.set("sort", nextSort);
     else next.delete("sort");
+    if (nextCategory !== "all") next.set("category", nextCategory);
+    else next.delete("category");
+    if (nextPlatform !== "all") next.set("platform", nextPlatform);
+    else next.delete("platform");
     if (nextPage > 1) next.set("page", String(nextPage));
     else next.delete("page");
 
@@ -189,6 +218,16 @@ export default function ProgramsPageClient({
     updateQuery({ sort: newSort, page: 1 });
   };
 
+  const handleCategoryChange = (categorySlug: string) => {
+    clearSearchDebounce();
+    updateQuery({ category: normalizeCategoryFilter(categorySlug), page: 1 });
+  };
+
+  const handlePlatformChange = (newPlatform: PlatformFilterType) => {
+    clearSearchDebounce();
+    updateQuery({ platform: newPlatform, page: 1 });
+  };
+
   const handleSearchInputChange = (value: string) => {
     localSearchRef.current = value;
     setLocalSearch(value);
@@ -209,10 +248,15 @@ export default function ProgramsPageClient({
         searchTerm={localSearch}
         filter={filter}
         sortBy={sortBy}
+        category={category}
+        platform={platform}
+        categories={categoryOptions}
         onSearchChange={handleSearchInputChange}
         onSearchCommit={commitSearchNow}
         onFilterChange={handleFilterChange}
         onSortChange={handleSortChange}
+        onCategoryChange={handleCategoryChange}
+        onPlatformChange={handlePlatformChange}
       />
 
       <div className="mb-4 sm:mb-6">
