@@ -3,9 +3,16 @@ import { client } from "@/src/sanity/lib/client";
 import { programsListingProjection } from "@/src/lib/sanity/queries";
 import { mergeProgramStats } from "@/src/lib/analytics/eventsApi";
 import type { ProgramWithStats } from "@/src/types/home";
-import type { FilterType, SortType } from "@/src/types/programs";
+import type { FilterType, PlatformFilterType, SortType } from "@/src/types/programs";
+import type { ProgramCategoryOption } from "@/src/types/programs";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-import { groqProgramsOrderClause, normalizeFilterType, normalizeSortType } from "@/src/lib/program/programUtils";
+import {
+  groqProgramsOrderClause,
+  normalizeCategoryFilter,
+  normalizeFilterType,
+  normalizePlatformFilter,
+  normalizeSortType
+} from "@/src/lib/program/programUtils";
 import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 
@@ -18,6 +25,8 @@ export type ProgramsListData = {
   searchTerm: string;
   filter: FilterType;
   sortBy: SortType;
+  category: string;
+  platform: PlatformFilterType;
   page: number;
   programsPerPage: number;
 };
@@ -45,29 +54,68 @@ export const getCachedProgramsHeroTotals = unstable_cache(fetchProgramsHeroTotal
   tags: [TAG_PROGRAM_LISTINGS]
 });
 
-async function fetchProgramsListData(
-  searchTerm: string,
+async function fetchProgramCategoryOptions(): Promise<ProgramCategoryOption[]> {
+  const rows = await client.fetch<Array<{ _id: string; title?: string; slug?: string }>>(
+    `*[_type == "programCategory"] | order(title asc) { _id, title, "slug": slug.current }`,
+    {},
+    { next: { tags: [TAG_PROGRAM_LISTINGS] } }
+  );
+  return (rows ?? [])
+    .filter(r => r._id && r.title?.trim() && r.slug?.trim())
+    .map(r => ({ _id: r._id, title: r.title!.trim(), slug: r.slug!.trim() }));
+}
+
+export const getCachedProgramCategoryOptions = unstable_cache(fetchProgramCategoryOptions, ["program-category-options"], {
+  revalidate: PUBLIC_ISR_REVALIDATE_SECONDS,
+  tags: [TAG_PROGRAM_LISTINGS]
+});
+
+function buildProgramsFilterGroq(
   filter: FilterType,
-  sortBy: SortType,
-  page: number
-): Promise<ProgramsListData> {
-  const startIdx = (page - 1) * PROGRAMS_PER_PAGE;
-  const endIdx = startIdx + PROGRAMS_PER_PAGE - 1;
-  const filterQuery =
+  searchTerm: string,
+  category: string,
+  platform: PlatformFilterType
+): { filterExpr: string; params: Record<string, unknown> } {
+  const keyFilter =
     filter === "hasKeys" ? "count(cdKeys[]) > 0" : filter === "noKeys" ? "count(cdKeys[]) == 0" : "true";
   const searchFilter = searchTerm
     ? " && (title match $search || string::lower(pt::text(description)) match $search)"
     : "";
-  const programsFilter = `*[_type == "program" && ${filterQuery}${searchFilter}]`;
-  const countQuery = `count(${programsFilter})`;
-  const keyCountQuery = `${programsFilter}{"keyCount": count(cdKeys[])}`;
-  const listQuery = `${programsFilter} {${programsListingProjection}} ${groqProgramsOrderClause(sortBy)} [${startIdx}...${endIdx}]`;
-  const queryParams = searchTerm ? { search: `*${searchTerm.toLowerCase()}*` } : {};
+  const categoryFilter =
+    category !== "all" ? " && $categorySlug in categories[]->slug.current" : "";
+  const platformFilter =
+    platform !== "all" ? " && $platform in coalesce(platforms, [\"windows\"])" : "";
+
+  const params: Record<string, unknown> = {};
+  if (searchTerm) params.search = `*${searchTerm.toLowerCase()}*`;
+  if (category !== "all") params.categorySlug = category;
+  if (platform !== "all") params.platform = platform;
+
+  return {
+    filterExpr: `*[_type == "program" && ${keyFilter}${searchFilter}${categoryFilter}${platformFilter}]`,
+    params
+  };
+}
+
+async function fetchProgramsListData(
+  searchTerm: string,
+  filter: FilterType,
+  sortBy: SortType,
+  category: string,
+  platform: PlatformFilterType,
+  page: number
+): Promise<ProgramsListData> {
+  const startIdx = (page - 1) * PROGRAMS_PER_PAGE;
+  const endIdx = startIdx + PROGRAMS_PER_PAGE - 1;
+  const { filterExpr, params } = buildProgramsFilterGroq(filter, searchTerm, category, platform);
+  const countQuery = `count(${filterExpr})`;
+  const keyCountQuery = `${filterExpr}{"keyCount": count(cdKeys[])}`;
+  const listQuery = `${filterExpr} {${programsListingProjection}} ${groqProgramsOrderClause(sortBy)} [${startIdx}...${endIdx}]`;
 
   const [totalCount, keyCountRows, rawPrograms] = await Promise.all([
-    client.fetch<number>(countQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
-    client.fetch<Array<{ keyCount?: number }>>(keyCountQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
-    client.fetch<ProgramWithStats[]>(listQuery, queryParams, { next: { tags: [TAG_PROGRAM_LISTINGS] } })
+    client.fetch<number>(countQuery, params, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
+    client.fetch<Array<{ keyCount?: number }>>(keyCountQuery, params, { next: { tags: [TAG_PROGRAM_LISTINGS] } }),
+    client.fetch<ProgramWithStats[]>(listQuery, params, { next: { tags: [TAG_PROGRAM_LISTINGS] } })
   ]);
 
   const programs = mergeProgramStats((rawPrograms ?? []) as ProgramWithStats[]).map(program => ({
@@ -84,6 +132,8 @@ async function fetchProgramsListData(
     searchTerm,
     filter,
     sortBy,
+    category,
+    platform,
     page,
     programsPerPage: PROGRAMS_PER_PAGE
   };
@@ -93,16 +143,20 @@ export async function getProgramsListData(
   rawSearch: string | undefined,
   rawFilter: string | undefined,
   rawSort: string | undefined,
-  rawPage: string | undefined
+  rawPage: string | undefined,
+  rawCategory?: string | undefined,
+  rawPlatform?: string | undefined
 ): Promise<ProgramsListData> {
   const searchTerm = (rawSearch || "").trim();
   const filter = normalizeFilterType(rawFilter);
   const sortBy = normalizeSortType(rawSort);
+  const category = normalizeCategoryFilter(rawCategory);
+  const platform = normalizePlatformFilter(rawPlatform);
   const page = Math.max(1, Number.parseInt(rawPage || "1", 10) || 1);
 
   return unstable_cache(
-    () => fetchProgramsListData(searchTerm, filter, sortBy, page),
-    ["programs-list-v2", searchTerm, filter, sortBy, String(page)],
+    () => fetchProgramsListData(searchTerm, filter, sortBy, category, platform, page),
+    ["programs-list-v3", searchTerm, filter, sortBy, category, platform, String(page)],
     { revalidate: PUBLIC_ISR_REVALIDATE_SECONDS, tags: [TAG_PROGRAM_LISTINGS] }
   )();
 }
