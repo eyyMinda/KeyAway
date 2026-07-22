@@ -118,13 +118,15 @@ export const adminProgramsQuery = `
     body,
     createdAt,
     isPinned,
+    reactions[]{ emoji },
     replies[]{
       _key,
       authorName,
       authorRole,
       ipHash,
       body,
-      createdAt
+      createdAt,
+      reactions[]{ emoji }
     }
   },
   cdKeys[]
@@ -143,13 +145,15 @@ export const adminProgramsWithCommentsQuery = `
     body,
     createdAt,
     isPinned,
+    reactions[]{ emoji, ipHash, createdAt },
     replies[]{
       _key,
       authorName,
       authorRole,
       ipHash,
       body,
-      createdAt
+      createdAt,
+      reactions[]{ emoji }
     }
   }
 }`;
@@ -186,13 +190,15 @@ export const programBySlugQuery = `
     body,
     createdAt,
     isPinned,
+    reactions[]{ emoji },
     replies[]{
       _key,
       authorName,
       authorRole,
       ipHash,
       body,
-      createdAt
+      createdAt,
+      reactions[]{ emoji }
     }
   },
   cdKeys[],
