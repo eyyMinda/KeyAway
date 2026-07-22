@@ -128,7 +128,7 @@
 body {
   background: var(--background);
   color: var(--text-primary);
-  font-family: var(--font-geist-sans), "Noto Sans", Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), "Noto Color Emoji", "Noto Sans", Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
@@ -137,6 +137,13 @@ body {
   }
   .static-bg {
     background: #0f1923;
+  }
+  /** Color emoji stack — avoids Geist/Noto Sans empty glyphs on pictographs (e.g. 🫡). */
+  .font-emoji {
+    font-family: "Noto Color Emoji", emoji, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
   }
   /* Eyebrow / kicker above section titles — matches Featured + Hero chips */
   .section-label {
@@ -213,7 +220,7 @@ body {
       transform 0.15s;
   }
 
-  .card-base:hover {
+  .card-base:not(.no-hover):hover {
     background: var(--surface-raised);
     border-color: var(--border-strong);
     transform: translateY(-2px);

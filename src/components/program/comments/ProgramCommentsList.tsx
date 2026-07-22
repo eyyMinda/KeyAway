@@ -1,8 +1,10 @@
 "use client";
 
 import CommentBodyText from "@/src/components/program/comments/CommentBodyText";
+import CommentReactions from "@/src/components/program/comments/CommentReactions";
 import { hasCommentBody } from "@/src/lib/program/commentBody";
-import type { ProgramComment } from "@/src/types/program";
+import { reactionStorageKey } from "@/src/lib/program/commentReactions";
+import type { ProgramComment, ProgramCommentReactionSummary } from "@/src/types/program";
 import { STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
 
 function roleBadgeClass(role: string): string {
@@ -31,10 +33,19 @@ function sortComments(comments: ProgramComment[]): ProgramComment[] {
 
 type ProgramCommentsListProps = {
   comments: ProgramComment[];
+  programSlug: string;
+  reactionSummaries?: Record<string, ProgramCommentReactionSummary[]>;
+  reactionsDisabled?: boolean;
   onReply?: (comment: ProgramComment) => void;
 };
 
-export default function ProgramCommentsList({ comments, onReply }: ProgramCommentsListProps) {
+export default function ProgramCommentsList({
+  comments,
+  programSlug,
+  reactionSummaries,
+  reactionsDisabled = false,
+  onReply
+}: ProgramCommentsListProps) {
   const visible = sortComments(comments.filter(c => c.authorName?.trim() && hasCommentBody(c.body)));
 
   if (visible.length === 0) {
@@ -65,13 +76,24 @@ export default function ProgramCommentsList({ comments, onReply }: ProgramCommen
               {date ? <span className="text-xs text-[#8f98a0]">{date}</span> : null}
             </div>
             <CommentBodyText body={comment.body} className="text-sm leading-relaxed text-[#c6d4df]" />
-            {onReply && comment._key ? (
-              <button
-                type="button"
-                onClick={() => onReply(comment)}
-                className="mt-3 text-xs font-semibold text-[#66c0f4] hover:text-white">
-                Reply
-              </button>
+            {comment._key ? (
+              <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <CommentReactions
+                  programSlug={programSlug}
+                  commentKey={comment._key}
+                  initialReactions={comment.reactions}
+                  summaries={reactionSummaries?.[comment._key]}
+                  disabled={reactionsDisabled}
+                />
+                {onReply ? (
+                  <button
+                    type="button"
+                    onClick={() => onReply(comment)}
+                    className="text-xs font-semibold text-[#66c0f4] hover:text-white cursor-pointer">
+                    Reply
+                  </button>
+                ) : null}
+              </div>
             ) : null}
             {replies.length > 0 ? (
               <ul className="mt-4 space-y-3 border-l-2 border-[#2a475e] pl-4">
@@ -87,6 +109,18 @@ export default function ProgramCommentsList({ comments, onReply }: ProgramCommen
                         {replyDate ? <span className="text-xs text-[#8f98a0]">{replyDate}</span> : null}
                       </div>
                       <CommentBodyText body={reply.body} className="text-sm leading-relaxed text-[#8f98a0]" />
+                      {comment._key && reply._key ? (
+                        <div className="mt-2">
+                          <CommentReactions
+                            programSlug={programSlug}
+                            commentKey={comment._key}
+                            replyKey={reply._key}
+                            initialReactions={reply.reactions}
+                            summaries={reactionSummaries?.[reactionStorageKey(comment._key, reply._key)]}
+                            disabled={reactionsDisabled}
+                          />
+                        </div>
+                      ) : null}
                     </li>
                   );
                 })}

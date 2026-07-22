@@ -172,7 +172,7 @@ export default function ProgramCommentForm({
             ref={emojiButtonRef}
             type="button"
             onClick={() => setShowEmoji(v => !v)}
-            className="inline-flex items-center gap-2 rounded-sm border border-[#2a475e] bg-[#1b2838] px-3 py-1.5 text-xs font-medium text-[#c6d4df] hover:border-[#4a90c4]"
+            className="inline-flex items-center gap-2 rounded-sm border border-[#2a475e] bg-[#1b2838] px-3 py-1.5 text-xs font-medium text-[#c6d4df] hover:border-[#4a90c4] cursor-pointer"
             aria-expanded={showEmoji}
             aria-label="Insert emoji">
             <FaRegSmile className="text-[#66c0f4]" />
@@ -195,7 +195,7 @@ export default function ProgramCommentForm({
       <button
         type="submit"
         disabled={submitting}
-        className="inline-flex items-center justify-center rounded-sm border border-[#5c8529] bg-[#4c6b22] px-5 py-2.5 text-sm font-bold text-[#c6d4df] transition-colors hover:bg-[#5c8529] hover:text-white disabled:opacity-60">
+        className="inline-flex items-center justify-center rounded-sm border border-[#5c8529] bg-[#4c6b22] px-5 py-2.5 text-sm font-bold text-[#c6d4df] transition-colors hover:bg-[#5c8529] hover:text-white disabled:opacity-60 cursor-pointer">
         {submitting ? "Posting…" : replyTo ? "Post reply" : "Post comment"}
       </button>
 
