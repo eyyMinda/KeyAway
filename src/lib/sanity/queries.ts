@@ -117,6 +117,7 @@ export const adminProgramsQuery = `
     ipHash,
     body,
     createdAt,
+    editedAt,
     isPinned,
     reactions[]{ emoji },
     replies[]{
@@ -126,6 +127,7 @@ export const adminProgramsQuery = `
       ipHash,
       body,
       createdAt,
+      editedAt,
       reactions[]{ emoji }
     }
   },
@@ -144,6 +146,7 @@ export const adminProgramsWithCommentsQuery = `
     ipHash,
     body,
     createdAt,
+    editedAt,
     isPinned,
     reactions[]{ emoji, ipHash, createdAt },
     replies[]{
@@ -153,6 +156,7 @@ export const adminProgramsWithCommentsQuery = `
       ipHash,
       body,
       createdAt,
+      editedAt,
       reactions[]{ emoji }
     }
   }
@@ -189,6 +193,7 @@ export const programBySlugQuery = `
     ipHash,
     body,
     createdAt,
+    editedAt,
     isPinned,
     reactions[]{ emoji },
     replies[]{
@@ -198,6 +203,7 @@ export const programBySlugQuery = `
       ipHash,
       body,
       createdAt,
+      editedAt,
       reactions[]{ emoji }
     }
   },

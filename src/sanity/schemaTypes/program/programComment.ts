@@ -71,6 +71,12 @@ export const programCommentReply = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: "editedAt",
+      title: "Last edited",
+      type: "datetime",
+      readOnly: true
+    }),
+    defineField({
       name: "reactions",
       title: "Reactions",
       type: "array",
@@ -134,6 +140,12 @@ export const programComment = defineType({
       type: "datetime",
       initialValue: () => new Date().toISOString(),
       validation: Rule => Rule.required()
+    }),
+    defineField({
+      name: "editedAt",
+      title: "Last edited",
+      type: "datetime",
+      readOnly: true
     }),
     defineField({
       name: "isPinned",

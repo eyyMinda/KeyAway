@@ -79,6 +79,7 @@ export interface ProgramCommentReply {
   ipHash?: string;
   body: string;
   createdAt?: string;
+  editedAt?: string;
   reactions?: ProgramCommentReaction[];
 }
 
@@ -89,6 +90,7 @@ export interface ProgramComment {
   ipHash?: string;
   body: string;
   createdAt?: string;
+  editedAt?: string;
   isPinned?: boolean;
   reactions?: ProgramCommentReaction[];
   replies?: ProgramCommentReply[];
