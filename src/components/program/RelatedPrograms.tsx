@@ -4,7 +4,7 @@ import { useState, useLayoutEffect, useMemo } from "react";
 import Link from "next/link";
 import { FaChevronLeft, FaChevronRight, FaDesktop } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
-import { Program } from "@/src/types";
+import { Program, ProgramPlatform } from "@/src/types";
 
 interface RelatedProgramsProps {
   programs: Program[];
@@ -53,6 +53,28 @@ function WindowsGlyph({ className }: { className?: string }) {
   );
 }
 
+/** Apple mark for macOS platform row. */
+function MacGlyph({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden>
+      <path
+        fill="currentColor"
+        d="M12.07 8.44c-.03-1.86 1.52-2.75 1.59-2.8-0.87-1.27-2.22-1.44-2.7-1.46-1.15-.12-2.25.68-2.83.68-.59 0-1.5-.66-2.47-.64-1.27.02-2.44.74-3.09 1.88-1.32 2.29-.34 5.68.95 7.54.63.91 1.38 1.93 2.37 1.89.95-.04 1.31-.61 2.46-.61 1.15 0 1.47.61 2.48.59 1.03-.02 1.68-.93 2.3-1.84.72-1.05 1.02-2.07 1.04-2.12-.02-.01-2-.77-2.02-3.05zm-1.9-5.5c.53-.64.89-1.53.79-2.42-.76.03-1.68.51-2.22 1.15-.49.57-.92 1.48-.8 2.35.85.07 1.71-.43 2.23-1.08z"
+      />
+    </svg>
+  );
+}
+
+const glyphClass = "h-3.5 w-3.5 shrink-0 text-[#7a8799] sm:h-4 sm:w-4";
+
+function programPlatforms(program: Program): ProgramPlatform[] {
+  const raw = program.platforms;
+  if (Array.isArray(raw) && raw.length > 0) {
+    return raw.filter((p): p is ProgramPlatform => p === "windows" || p === "mac");
+  }
+  return ["windows"];
+}
+
 const navBtn =
   "flex shrink-0 cursor-pointer items-center justify-center self-center border-0 bg-transparent p-2 text-xl leading-none text-[#8fa3b8] transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1D2634] disabled:cursor-pointer disabled:opacity-35 sm:p-2.5 sm:text-2xl";
 
@@ -63,6 +85,8 @@ const paginationBtn =
   "flex min-h-11 min-w-9 cursor-pointer items-center justify-center rounded-sm py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#66c0f4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#202B3B]";
 
 function ProgramTile({ program }: { program: Program }) {
+  const platforms = programPlatforms(program);
+
   return (
     <Link href={`/program/${program.slug.current}`} className="group block h-full min-w-0 cursor-pointer">
       <article className="flex h-full flex-col gap-3 overflow-hidden rounded-sm bg-[#0E141B] ring-1 ring-black/25 transition-shadow duration-200 hover:shadow-[0_6px_20px_rgba(0,0,0,0.35)] p-4">
@@ -83,7 +107,10 @@ function ProgramTile({ program }: { program: Program }) {
         <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-white">{program.title}</h3>
 
         <div className="flex items-center gap-2">
-          <WindowsGlyph className="h-3.5 w-3.5 shrink-0 text-[#7a8799] sm:h-4 sm:w-4" />
+          <span className="flex shrink-0 items-center gap-1">
+            {platforms.includes("windows") ? <WindowsGlyph className={glyphClass} /> : null}
+            {platforms.includes("mac") ? <MacGlyph className={glyphClass} /> : null}
+          </span>
           <span className="grow text-sm text-[#8b9aad]">Free</span>
           <span className="shrink-0 rounded-sm bg-[#bef571] px-3 py-1.5 text-center text-xs font-bold text-black sm:px-3.5 sm:text-sm">
             Get keys
