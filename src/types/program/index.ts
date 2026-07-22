@@ -10,6 +10,16 @@ export type CDKeyStatus = "new" | "active" | "expired" | "limit";
 /** How activation is delivered for this program (Sanity `program.programFlow`). */
 export type ProgramFlow = "cd_key" | "link_based_cdkey" | "account" | "link_based_account";
 
+/** Supported OS targets for a program (`program.platforms` in Sanity). */
+export type ProgramPlatform = "windows" | "mac";
+
+/** Resolved category reference on a program. */
+export interface ProgramCategoryRef {
+  _id: string;
+  title: string;
+  slug: string;
+}
+
 export interface GiveawayLink {
   title?: string;
   url?: string;
@@ -138,6 +148,10 @@ export interface Program {
   featured?: ProgramFeatured;
   /** Resolved software publisher/brand. Null on legacy docs not yet backfilled. */
   vendor?: VendorRef | null;
+  /** Content categories for related-program matching. Empty on legacy docs. */
+  categories?: ProgramCategoryRef[];
+  /** Defaults to Windows-only when omitted in CMS or API. */
+  platforms?: ProgramPlatform[];
   /** Vendor-reported current version (e.g. from product page). */
   latestOfficialVersion?: string;
   seo?: {

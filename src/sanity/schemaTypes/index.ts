@@ -22,6 +22,7 @@ import { link } from "./store/link";
 import { aboutPoint, aboutSection } from "./program/aboutSection";
 import { programComment, programCommentReaction, programCommentReply } from "./program/programComment";
 import { faqItem, program } from "./program/program";
+import { programCategory } from "./program/programCategory";
 import { cdKey } from "./program/cdKey";
 import { featuredProgramSettings } from "./program/featuredProgramSettings";
 import { freeVsProRow } from "./program/freeVsProRow";
@@ -52,6 +53,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     programCommentReply,
     programCommentReaction,
     faqItem,
+    programCategory,
     program,
     cdKey,
     featuredProgramSettings,
