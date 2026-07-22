@@ -8,6 +8,7 @@ import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
 import { revalidateAfterProgramContentWrite } from "@/src/lib/cache/revalidateProgramContent";
 import { appendProgramComment } from "@/src/lib/program/appendProgramComment";
 import { moderateCommentInput } from "@/src/lib/program/moderateComment";
+import { updateProgramCommentBody, type CommentTarget } from "@/src/lib/program/updateProgramComment";
 import {
   MAX_COMMENT_AUTHOR,
   MAX_COMMENT_BODY,
@@ -147,6 +148,110 @@ export async function POST(req: NextRequest) {
       return Errors.validation("This program has reached the maximum number of comments.");
     }
     console.error("[POST /api/v1/program-comments]", err);
+    return Errors.internal();
+  }
+}
+
+/** PATCH /api/v1/program-comments — edit own comment or reply body */
+export async function PATCH(req: NextRequest) {
+  const isDev = isDevelopmentEnv();
+
+  if (!isDev && isLikelyBotUserAgent(req.headers.get("user-agent"))) {
+    return Errors.badRequest("Automated requests are not allowed");
+  }
+
+  const { ok: rateOk } = rateLimitMiddleware(req);
+  if (!rateOk) return Errors.tooManyRequests();
+
+  try {
+    const ipHash = hashIp(getClientIp(req)) ?? (isDev ? "dev-local" : undefined);
+    if (!ipHash) return Errors.badRequest("Unable to process request");
+
+    const body = await req.json().catch(() => ({}));
+    if (!body || typeof body !== "object") return Errors.badRequest("Request body is required");
+
+    const b = body as Record<string, unknown>;
+    const programSlug = typeof b.programSlug === "string" ? b.programSlug.trim() : "";
+    const commentKey = typeof b.commentKey === "string" ? b.commentKey.trim() : "";
+    const replyKeyRaw = typeof b.replyKey === "string" ? b.replyKey.trim() : "";
+    const replyKey = replyKeyRaw || undefined;
+    const commentBody = sanitizeCommentBody(typeof b.body === "string" ? b.body : "");
+
+    if (!programSlug) {
+      return Errors.validation("programSlug is required", [{ field: "programSlug", message: "Required" }]);
+    }
+    if (!commentKey) {
+      return Errors.validation("commentKey is required", [{ field: "commentKey", message: "Required" }]);
+    }
+    if (!commentBody) {
+      return Errors.validation("body is required", [{ field: "body", message: "Required" }]);
+    }
+
+    const moderation = moderateCommentInput({ authorName: "edit", body: commentBody, honeypot: "" });
+    if (!moderation.ok) {
+      return Errors.validation(moderation.message, [
+        { field: moderation.field ?? "body", message: moderation.message }
+      ]);
+    }
+
+    if (!isDev) {
+      const visitor = await fetchVisitorByHash(ipHash);
+      if (visitor?.isSpammer) {
+        return Errors.validation("Editing is disabled for your network.", [
+          { field: "body", message: "Editing disabled" }
+        ]);
+      }
+    }
+
+    const published = await isProgramSlugPublished(programSlug);
+    if (!published) return Errors.notFound("Program not found");
+
+    const program = await client.fetch<{ _id: string } | null>(
+      `*[_type == "program" && slug.current == $slug][0]{ _id }`,
+      { slug: programSlug }
+    );
+    if (!program?._id) return Errors.notFound("Program not found");
+
+    if (replyKey) {
+      const replyExists = await client.fetch<boolean>(
+        `defined(*[_id == $id][0].programComments[_key == $commentKey][0].replies[_key == $replyKey][0])`,
+        { id: program._id, commentKey, replyKey }
+      );
+      if (!replyExists) {
+        return Errors.validation("replyKey is invalid", [{ field: "replyKey", message: "Reply not found" }]);
+      }
+    } else {
+      const commentExists = await client.fetch<boolean>(
+        `defined(*[_id == $id][0].programComments[_key == $key][0])`,
+        { id: program._id, key: commentKey }
+      );
+      if (!commentExists) {
+        return Errors.validation("commentKey is invalid", [{ field: "commentKey", message: "Comment not found" }]);
+      }
+    }
+
+    const target: CommentTarget = replyKey
+      ? { kind: "reply", commentKey, replyKey }
+      : { kind: "comment", commentKey };
+
+    const result = await updateProgramCommentBody({
+      programId: program._id,
+      target,
+      body: commentBody,
+      ipHash
+    });
+
+    revalidateAfterProgramContentWrite({ slug: programSlug });
+
+    return NextResponse.json({
+      data: { commentKey, replyKey: replyKey ?? null, body: commentBody, editedAt: result.editedAt },
+      meta: {}
+    });
+  } catch (err) {
+    if (err instanceof Error && err.message === "FORBIDDEN") {
+      return Errors.forbidden("You can only edit your own comments.");
+    }
+    console.error("[PATCH /api/v1/program-comments]", err);
     return Errors.internal();
   }
 }
