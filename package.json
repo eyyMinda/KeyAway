@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "backfill:vendors": "node --env-file=.env.local scripts/backfillVendors.mjs"
+    "backfill:vendors": "node --env-file=.env.local scripts/backfillVendors.mjs",
+    "backfill:changelog": "node --env-file=.env.local scripts/backfillChangelogToSanity.mjs",
+    "sync:changelog-pr": "node --env-file=.env.local scripts/syncChangelogPrToSanity.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^6.2.0",
