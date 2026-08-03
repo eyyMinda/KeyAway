@@ -75,6 +75,15 @@ export function resolveUpdatesPageSeo(store: StoreDetailsForSeo | null | undefin
     store,
     "/updates",
     "Latest Giveaway Keys & New Programs | [title]",
-    "New programs and fresh giveaway keys added to [title] in the last 90 days — auto-updated from our catalog."
+    "New programs and fresh giveaway keys added to [title] — updated automatically from our catalog."
+  );
+}
+
+export function resolveChangelogPageSeo(store: StoreDetailsForSeo | null | undefined) {
+  return resolveTrustPageSeo(
+    store,
+    "/changelog",
+    "Changelog & Release Notes | [title]",
+    "Structured release notes for major [title] improvements — features, fixes, and platform updates."
   );
 }
