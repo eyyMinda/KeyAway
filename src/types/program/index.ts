@@ -49,7 +49,18 @@ export interface ProgramFaqItem {
 }
 
 /** Sanity image field shape (asset ref for urlFor). */
-export type SanityImageField = { asset?: { _ref?: string; url?: string } };
+export type SanityImageField = {
+  preserveAnimation?: boolean;
+  asset?: {
+    _ref?: string;
+    url?: string;
+    mimeType?: string;
+    metadata?: {
+      dimensions?: { width: number; height: number; aspectRatio?: number };
+      lqip?: string;
+    };
+  };
+};
 
 export interface ProgramAboutPoint {
   text: PortableTextBlock[] | string;
