@@ -95,8 +95,6 @@ export default function Header({ logoData, notifications: notificationsProp, soc
           {isLogo ? (
             <IdealImageClient
               {...logoData}
-              width={120}
-              height={48}
               priority
               className="max-w-3xs max-h-10 xs:max-h-12 w-auto h-auto"
             />
