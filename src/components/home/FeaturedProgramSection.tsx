@@ -31,7 +31,8 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
   const fd = program.featured?.description;
   const useFeatured = portableTextHasContent(fd ?? null);
   const introBody = useFeatured ? fd : program.description;
-  const imageSource = program.featured?.showcaseGif || program.image;
+  const showcase = program.featured?.showcaseGif;
+  const imageSource = showcase || program.image;
 
   return (
     <section id="featured-program" className="border-y border-[#2a475e] py-8 sm:py-12 lg:py-16">
@@ -54,9 +55,10 @@ export default function FeaturedProgramSection({ program }: FeaturedProgramSecti
                 <IdealImage
                   image={imageSource}
                   alt={program.title}
-                  widthHint={960}
+                  widthHint={720}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="rounded-sm object-contain"
+                  mayAnimate={Boolean(showcase)}
                 />
               ) : (
                 <div className="flex h-80 w-full items-center justify-center rounded-sm border border-[#2a475e] bg-[#213246] sm:h-96 lg:h-[500px]">

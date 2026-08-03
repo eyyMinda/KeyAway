@@ -13,7 +13,7 @@ export default function ProgramAboutSection({ program }: { program: Program }) {
         <h2 className="section-title mb-10 sm:mb-12">
           <span className="text-gradient-pro">About</span> {formatProgramDisplayTitle(program)}
         </h2>
-        <div className="max-w-2xl lg:max-w-5xl mx-auto space-y-14 sm:space-y-16 lg:space-y-20">
+        <div className="max-w-2xl lg:max-w-6xl mx-auto space-y-14 sm:space-y-16">
           {blocks.map((section, index) => (
             <AboutSectionBlock key={`about-${index}`} section={section} />
           ))}
