@@ -34,10 +34,34 @@ export const storeDetailsQuery = `*[_type=="storeDetails"]{
 }`;
 
 /* ------------ Programs ------------ */
+/** GROQ fragment: image field with asset metadata for IdealImage (dimensions, lqip, animation flag). */
+export const sanityImageFieldProjection = `
+  ...,
+  preserveAnimation,
+  asset->{ url, mimeType, metadata { dimensions, lqip } }
+`;
+
 export const featuredBlockProjection = `
 featured{
   description,
-  showcaseGif
+  showcaseGif{
+    ${sanityImageFieldProjection}
+  }
+}`;
+
+/** About sections with dereferenced image assets for IdealImage. */
+export const programAboutSectionsProjection = `
+aboutSections[]{
+  ...,
+  image{
+    ${sanityImageFieldProjection}
+  },
+  points[]{
+    ...,
+    icon{
+      ${sanityImageFieldProjection}
+    }
+  }
 }`;
 
 /** Flattened analytics fields — reads nested `stats` with legacy top-level fallback. */
@@ -184,7 +208,7 @@ export const programBySlugQuery = `
   "categories": categories[]->{ _id, title, "slug": slug.current },
   "platforms": coalesce(platforms, ["windows"]),
   seo,
-  aboutSections,
+  ${programAboutSectionsProjection},
   faq,
   image,
   downloadLink,

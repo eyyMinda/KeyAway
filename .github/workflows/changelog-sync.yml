@@ -1,0 +1,32 @@
+name: Sync changelog to Sanity
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  sync:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Upsert changelog draft in Sanity
+        run: node scripts/syncChangelogPrToSanity.mjs ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SANITY_API_TOKEN: ${{ secrets.SANITY_API_TOKEN }}
+          NEXT_PUBLIC_SANITY_STUDIO_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_SANITY_STUDIO_PROJECT_ID }}
+          NEXT_PUBLIC_SANITY_STUDIO_DATASET: ${{ secrets.NEXT_PUBLIC_SANITY_STUDIO_DATASET }}
+          NEXT_PUBLIC_SANITY_STUDIO_API_VERSION: ${{ secrets.NEXT_PUBLIC_SANITY_STUDIO_API_VERSION }}

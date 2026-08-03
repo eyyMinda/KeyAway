@@ -6,7 +6,7 @@ export async function generateMetadata() {
 }
 
 interface UpdatesPageProps {
-  searchParams: Promise<{ days?: string }>;
+  searchParams: Promise<{ month?: string; limit?: string }>;
 }
 
 export default function UpdatesPage({ searchParams }: UpdatesPageProps) {

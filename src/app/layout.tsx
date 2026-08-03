@@ -78,12 +78,13 @@ export default async function RootLayout({
   const currentLogo = storeData?.logoLight;
   /** Match header/footer slot (~104×48 CSS px); keeps `/_next/image` width near 128–256 instead of 384+. */
   const LOGO_WIDTH_HINT = 120;
-  const logoDims = currentLogo ? getImageDimensions(currentLogo) : { width: 120, height: 48 };
+  const logoIntrinsic = currentLogo ? getImageDimensions(currentLogo) : { width: 120, height: 48 };
+  const logoHeight = Math.max(1, Math.round((logoIntrinsic.height / logoIntrinsic.width) * LOGO_WIDTH_HINT));
   const logoData: LogoData = {
     src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).quality(70).auto("format").url(),
     alt: `${storeData?.title ?? "KeyAway"} logo`,
-    width: logoDims.width,
-    height: logoDims.height,
+    width: LOGO_WIDTH_HINT,
+    height: logoHeight,
     blurDataURL: urlFor(currentLogo).width(24).height(24).blur(10).url(),
     widthHint: LOGO_WIDTH_HINT,
     sizes: "120px",
@@ -112,10 +113,7 @@ export default async function RootLayout({
         {renderedHeadMetaTags}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
-          rel="stylesheet"
-        />
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0f1923] text-[#c6d4df]`}

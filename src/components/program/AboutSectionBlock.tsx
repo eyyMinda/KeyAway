@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { IdealImage } from "@/src/components/general/IdealImage";
+import { ABOUT_SECTION_IMAGE_MAX_PX } from "@/src/lib/sanity/imageDelivery";
 import RichText from "@/src/components/portableText/RichText";
 import { urlFor } from "@/src/sanity/lib/image";
 import type { ProgramAboutSectionBlock } from "@/src/types";
@@ -20,12 +21,12 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
       {sectionTitle ? (
         <h3 className="mb-3 text-lg font-bold text-white sm:text-xl lg:text-2xl">{sectionTitle}</h3>
       ) : null}
-      <div className="text-sm leading-snug text-neutral-100 [&_a]:text-[#66d9ff] [&_p]:my-2 [&_p]:leading-relaxed sm:text-base">
+      <div className="text-sm leading-snug text-neutral-100 [&_a]:text-[#66d9ff] [&_p]:my-3 sm:[&_p]:my-5 [&_p]:leading-relaxed sm:text-base">
         <RichText value={description} className="[&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal" />
       </div>
       {points && points.length > 0 ? (
         <ul
-          className={`mt-4 space-y-2.5 text-sm text-neutral-100 sm:text-base ${
+          className={`mt-4 sm:mt-6 space-y-2.5 text-sm text-neutral-100 sm:text-base ${
             hasImage ? "text-left" : "inline-block text-left mx-auto max-w-lg"
           }`}>
           {points.map((p, i) => (
@@ -61,9 +62,16 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
   }
 
   const imageEl = (
-    <div className="w-full max-w-md lg:w-2/5 shrink-0 mx-auto lg:mx-0">
+    <div className="w-full max-w-160 lg:w-4/9 shrink-0 mx-auto lg:mx-0">
       <div className="overflow-hidden rounded-sm border border-[#2a475e] bg-[#1b2838]">
-        <IdealImage image={image} alt={sectionTitle || "About"} className="w-full h-auto object-cover" />
+        <IdealImage
+          image={image}
+          alt={sectionTitle || "About"}
+          className="w-full h-auto object-cover"
+          widthHint={ABOUT_SECTION_IMAGE_MAX_PX}
+          sizes={`(max-width: 640px) 90vw, ${ABOUT_SECTION_IMAGE_MAX_PX}px`}
+          mayAnimate
+        />
       </div>
     </div>
   );
@@ -74,7 +82,7 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
         invertMobile ? "flex-col-reverse" : ""
       } ${invertDesktop ? "lg:flex-row-reverse" : ""}`}>
       {imageEl}
-      <div className="w-full min-w-0 lg:w-3/5">{content}</div>
+      <div className="w-full min-w-0 lg:w-5/9">{content}</div>
     </div>
   );
 }

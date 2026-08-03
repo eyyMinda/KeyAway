@@ -1,5 +1,14 @@
+import { MacGlyph, WindowsGlyph } from "@/src/components/program/PlatformGlyphs";
 import SearchInput from "@/src/components/ui/SearchInput";
 import type { PlatformFilterType, ProgramsFilterProps } from "@/src/types/programs";
+
+const platformGlyphClass = "h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4";
+
+function PlatformGlyph({ platform }: { platform: PlatformFilterType }) {
+  if (platform === "windows") return <WindowsGlyph className={platformGlyphClass} />;
+  if (platform === "mac") return <MacGlyph className={platformGlyphClass} />;
+  return null;
+}
 
 const SELECT_CLASS =
   "w-full min-w-[8.5rem] rounded-sm border border-[#3d6e8c] bg-[#32465a] px-2.5 py-2 text-xs text-[#c6d4df] focus:border-[#66c0f4] focus:outline-none focus:ring-2 focus:ring-[#1a9fff]/30 sm:min-w-[9.5rem] sm:px-3 sm:text-sm cursor-pointer";
@@ -37,11 +46,12 @@ function PlatformPills({
             type="button"
             disabled={disabled}
             onClick={() => onChange(opt.value)}
-            className={`rounded-sm border px-2.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50 sm:px-3 ${
+            className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1.5 text-sm sm:py-2 font-semibold transition-colors cursor-pointer disabled:opacity-50 sm:px-3 ${
               active
                 ? "border-[#4a90c4] bg-[#1a3a5c] text-[#66c0f4]"
                 : "border-[#2a475e] bg-[#1b2838] text-[#c6d4df] hover:border-[#4a90c4]"
             }`}>
+            <PlatformGlyph platform={opt.value} />
             {opt.label}
           </button>
         );

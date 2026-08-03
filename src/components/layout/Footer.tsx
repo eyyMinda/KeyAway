@@ -23,7 +23,8 @@ const TRUST_FOOTER_LINKS = [
   { href: "/affiliate-disclosure", label: "Affiliate disclosure" },
   { href: "/verification-policy", label: "Verification policy" },
   { href: "/partners", label: "Partners" },
-  { href: "/updates", label: "Updates" }
+  { href: "/updates", label: "Updates" },
+  { href: "/changelog", label: "Changelog" }
 ] as const;
 
 export default function Footer({ logoData, socialData, siteBaseUrl }: FooterProps) {

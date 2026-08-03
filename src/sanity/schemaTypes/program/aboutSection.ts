@@ -60,7 +60,16 @@ export const aboutSection = defineType({
       title: "Image (optional)",
       type: "image",
       options: { hotspot: true },
-      description: "If set, shows side-by-side with text on large screens. If empty, text is centered."
+      description: "If set, shows side-by-side with text on large screens. If empty, text is centered.",
+      fields: [
+        defineField({
+          name: "preserveAnimation",
+          title: "Animated (GIF / animated WebP)",
+          type: "boolean",
+          initialValue: false,
+          description: "Enable when the file should play motion on the site (animated WebP or GIF)."
+        })
+      ]
     }),
     defineField({
       name: "invertDesktop",

@@ -27,6 +27,9 @@ export const TAG_FEATURED_PROGRAM = "featured-program";
 
 export const TAG_BUNDLE_COUNTS = "bundle-counts";
 
+/** Published changelogRelease documents for /changelog. */
+export const TAG_CHANGELOG = "changelog";
+
 export function programDetailTag(slug: string): string {
   return `program-${slug}`;
 }

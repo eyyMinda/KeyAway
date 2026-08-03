@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import {
+  TAG_CHANGELOG,
   TAG_FEATURED_PROGRAM,
   TAG_HOMEPAGE_PROGRAMS,
   TAG_HOMEPAGE_STATS,
@@ -79,6 +80,9 @@ export async function POST(req: NextRequest) {
       revalidateTag(TAG_HOMEPAGE_STATS, "max");
     } else if (t === "featuredProgramSettings") {
       revalidateTag(TAG_FEATURED_PROGRAM, "max");
+    } else if (t === "changelogRelease") {
+      revalidateTag(TAG_CHANGELOG, "max");
+      revalidatePath("/changelog");
     } else if (t === "vendor") {
       // Vendor edits change hub copy/metadata and program-card brand labels.
       revalidateTag(TAG_VENDORS, "max");

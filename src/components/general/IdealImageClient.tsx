@@ -32,6 +32,7 @@ export const IdealImageClient = ({
       sizes={sizes}
       quality={quality}
       priority={priority}
+      style={{ width: "auto", height: "auto" }}
       {...(priority ? { fetchPriority: "high" as const } : {})}
       {...(className ? { className } : {})}
     />

@@ -1,18 +1,13 @@
 // General utility types
-import { SanityAsset } from "@sanity/image-url";
+import type { IdealImageProps } from "@/src/components/general/IdealImage";
+
+export type { IdealImageProps };
 
 export interface User {
   id: string;
   name: string;
   email: string;
   image?: string;
-}
-
-// Image component props
-export interface IdealImageProps {
-  image?: SanityAsset;
-  alt?: string;
-  className?: string;
 }
 
 export interface IdealImageClientProps {
