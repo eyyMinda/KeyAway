@@ -296,9 +296,18 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                 <div className="text-xs font-semibold text-orange-700">Limit Reached</div>
               </div>
             </div>
+            {report.reportData.otherVersion > 0 ? (
+              <p className="mt-2 text-xs text-gray-600">
+                {report.reportData.otherVersion} report{report.reportData.otherVersion === 1 ? "" : "s"} on a different
+                version (not in the bar)
+              </p>
+            ) : null}
 
             {/* Recommended Status */}
-            {report.reportCount > 10 && report.reportData.working / report.reportCount <= 0.2 && (
+            {report.reportData.working + report.reportData.expired + report.reportData.limit_reached > 10 &&
+              report.reportData.working /
+                (report.reportData.working + report.reportData.expired + report.reportData.limit_reached) <=
+                0.2 && (
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <div className="flex items-center">
                   <FiAlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
@@ -309,7 +318,11 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                       <span className="ml-1 text-xs">
                         (
                         {Math.round(
-                          ((report.reportData.expired + report.reportData.limit_reached) / report.reportCount) * 100
+                          ((report.reportData.expired + report.reportData.limit_reached) /
+                            (report.reportData.working +
+                              report.reportData.expired +
+                              report.reportData.limit_reached)) *
+                            100
                         )}
                         % of reports)
                       </span>
@@ -422,6 +435,16 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                       ) : (
                         <div className="text-[10px] text-gray-400">Referrer: —</div>
                       )}
+                      {reportItem.triedVersionFit === "other" ? (
+                        <div className="text-[10px] text-amber-800">
+                          Tried v{reportItem.triedVersion || "?"}
+                          {reportItem.listedVersion ? ` (key is ${reportItem.listedVersion})` : ""}
+                        </div>
+                      ) : reportItem.triedVersionFit === "listed" ? (
+                        <div className="text-[10px] text-gray-500">
+                          Listed version{reportItem.listedVersion ? ` ${reportItem.listedVersion}` : ""} or older
+                        </div>
+                      ) : null}
                     </div>
                     <div className="flex flex-col gap-1.5 sm:items-end sm:text-right text-xs text-gray-600 shrink-0">
                       <div className="flex flex-wrap items-center justify-end gap-1.5 w-full sm:max-w-[20rem]">

@@ -19,6 +19,7 @@ interface KeyReportEvent {
   label?: string;
   _createdAt?: string;
   createdAt?: string;
+  triedVersionFit?: string;
 }
 
 interface Group {
@@ -104,8 +105,11 @@ async function buildKeyReportNotifications(): Promise<KeyReportNotificationItem[
       g.lastEventType = eventType;
     }
     if (eventType === "report_key_working") g.working++;
-    else if (eventType === "report_key_expired") g.expired++;
-    else if (eventType === "report_key_limit_reached") g.limit_reached++;
+    else if (eventType === "report_key_expired" || eventType === "report_key_limit_reached") {
+      if (report.triedVersionFit === "other") continue;
+      if (eventType === "report_key_expired") g.expired++;
+      else g.limit_reached++;
+    }
   }
 
   const negativeFiltered: Array<Group & { negativeCount: number; total: number }> = [];
