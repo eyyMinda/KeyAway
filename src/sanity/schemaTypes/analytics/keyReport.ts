@@ -93,6 +93,30 @@ export const keyReport = defineType({
       description: "Hashed IP + salt. Used for deduping without storing raw IP."
     }),
     defineField({
+      name: "listedVersion",
+      title: "Key version",
+      type: "string",
+      description: "Program row version at report time (expired / limit reports)."
+    }),
+    defineField({
+      name: "triedVersionFit",
+      title: "Version fit",
+      type: "string",
+      options: {
+        list: [
+          { title: "Listed version or older", value: "listed" },
+          { title: "Different / newer version", value: "other" }
+        ]
+      },
+      description: "Negative reports: whether the visitor tried the listed key version (or older)."
+    }),
+    defineField({
+      name: "triedVersion",
+      title: "Tried version",
+      type: "string",
+      description: "Version the visitor actually tried, when different from the listed key version."
+    }),
+    defineField({
       name: "createdAt",
       title: "Created At",
       type: "datetime",

@@ -39,6 +39,8 @@ export interface AnalyticsEventData {
   createdAt: string;
 }
 
+export type TriedVersionFit = "listed" | "other";
+
 export interface KeyReportData {
   _id: string;
   eventType: KeyReportEvent;
@@ -54,6 +56,9 @@ export interface KeyReportData {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
+  listedVersion?: string;
+  triedVersionFit?: TriedVersionFit;
+  triedVersion?: string;
   createdAt: string;
 }
 
@@ -73,6 +78,12 @@ export interface TrackEventMeta {
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
+  /** CD key row version shown to the visitor (expired / limit reports). */
+  listedVersion?: string;
+  /** `listed` = same version or older; `other` = different version (not counted on the bar). */
+  triedVersionFit?: TriedVersionFit;
+  /** Version the visitor typed when `triedVersionFit` is `other`. */
+  triedVersion?: string;
 }
 
 export interface TrackRequestBody {
@@ -106,6 +117,9 @@ export interface RenewReportRequest {
   newEventType: KeyReportEvent;
   programSlug: string;
   key: string | Record<string, unknown>;
+  listedVersion?: string;
+  triedVersionFit?: TriedVersionFit;
+  triedVersion?: string;
 }
 
 export interface RenewReportResponse {
