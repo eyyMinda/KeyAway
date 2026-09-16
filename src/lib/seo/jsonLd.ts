@@ -8,6 +8,7 @@ import { programT } from "@/src/lib/program/programCopy";
 import { portableTextHasContent, portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
 import { urlFor } from "@/src/sanity/lib/image";
 import { cdKeyHasExpiry } from "@/src/lib/program/cdKeyUtils";
+import { sanitizeAggregateRatingForJsonLd } from "@/src/lib/program/programAggregateRating";
 import { buildSoftwareApplicationDescription, getSoftwareVersionForSchema } from "@/src/lib/program/versionSummary";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { buildProgramBreadcrumbJsonLd } from "@/src/lib/seo/breadcrumbs";
@@ -194,13 +195,14 @@ export function generateProgramPageJsonLd(
     softwareApp.softwareVersion = softwareVersion;
   }
 
-  if (rating && rating.ratingCount > 0) {
+  const aggregateRating = sanitizeAggregateRatingForJsonLd(rating);
+  if (aggregateRating) {
     softwareApp.aggregateRating = {
       "@type": "AggregateRating",
-      ratingValue: String(rating.ratingValue),
-      ratingCount: rating.ratingCount,
-      bestRating: "5",
-      worstRating: "1"
+      ratingValue: aggregateRating.ratingValue,
+      ratingCount: aggregateRating.ratingCount,
+      bestRating: aggregateRating.bestRating,
+      worstRating: aggregateRating.worstRating
     };
   }
 

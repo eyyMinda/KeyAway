@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { sanityPublicReadClient } from "@/src/sanity/lib/publicReadClient";
-import { keyReportsQuery } from "@/src/lib/sanity/queries";
+import { programPageKeyReportsQuery } from "@/src/lib/sanity/queries";
 import { ReportData } from "@/src/types/program";
 import { logger } from "@/src/lib/logger";
+import { applyKeyReportEvent, emptyReportData } from "@/src/lib/program/keyReportVersionFit";
 
 type KeyReportFetched = {
   eventType?: string;
-  programSlug?: string;
   key?: string;
+  triedVersionFit?: string | null;
+  triedVersion?: string | null;
 };
 
 /** `rowStorageIds[i]` aligns with `cdKeys[i]` (plaintext key, username, or link digest — same as server `getRowStorageHash`). */
@@ -22,40 +24,31 @@ export function useKeyReportData(programSlug: string, rowStorageIds: string[]) {
     const fetchReportData = async () => {
       try {
         setLoading(true);
-        const since = "1970-01-01T00:00:00.000Z";
-        const events = await sanityPublicReadClient.fetch<KeyReportFetched[]>(keyReportsQuery, { since });
-
-        const keyReportEvents = events.filter(e => e.programSlug === programSlug);
+        const events = await sanityPublicReadClient.fetch<KeyReportFetched[]>(programPageKeyReportsQuery, {
+          programSlug
+        });
 
         const keyReportData = new Map<string, ReportData>();
 
         for (const id of rowStorageIds) {
           if (!id) continue;
-          keyReportData.set(id, { working: 0, expired: 0, limit_reached: 0 });
+          keyReportData.set(id, emptyReportData());
         }
 
-        for (const event of keyReportEvents) {
+        for (const event of events ?? []) {
           const storageKey = String(event.key ?? "").trim();
           if (!storageKey) continue;
           const eventType = event.eventType as string;
 
           if (!keyReportData.has(storageKey)) {
-            keyReportData.set(storageKey, { working: 0, expired: 0, limit_reached: 0 });
+            keyReportData.set(storageKey, emptyReportData());
           }
 
           const currentData = keyReportData.get(storageKey)!;
-
-          switch (eventType) {
-            case "report_key_working":
-              keyReportData.set(storageKey, { ...currentData, working: currentData.working + 1 });
-              break;
-            case "report_key_expired":
-              keyReportData.set(storageKey, { ...currentData, expired: currentData.expired + 1 });
-              break;
-            case "report_key_limit_reached":
-              keyReportData.set(storageKey, { ...currentData, limit_reached: currentData.limit_reached + 1 });
-              break;
-          }
+          keyReportData.set(
+            storageKey,
+            applyKeyReportEvent(currentData, eventType, event.triedVersionFit, event.triedVersion)
+          );
         }
 
         setReportData(keyReportData);

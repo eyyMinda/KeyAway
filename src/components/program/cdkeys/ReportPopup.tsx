@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import type { CDKey, ProgramFlow } from "@/src/types/program";
+import type { CDKey, ProgramFlow, ReportSubmitResult } from "@/src/types/program";
 import { getActivationEntryDisplayLabel } from "@/src/lib/program/activationEntry";
 import { DuplicateCheckRequest, DuplicateCheckResponse } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import RenewalModal from "./RenewalModal";
+import VersionFitPrompt from "./VersionFitPrompt";
 import { FiCheck, FiX, FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
 import {
   EVENT_TYPE_MAP,
@@ -21,7 +22,8 @@ import {
   getErrorMessage,
   getInfoMessage,
   SPAMMER_REPORT_RESTRICTION_NOTICE,
-  SPAMMER_REPORT_DISABLED_OPTION_TITLE
+  SPAMMER_REPORT_DISABLED_OPTION_TITLE,
+  ADMIN_REPORT_SKIPPED_NOTICE
 } from "@/src/lib/notifications/notificationUtils";
 import { prefetchProgramVisitorContext, useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvider";
 import SpammerReportAlert from "@/src/components/program/cdkeys/SpammerReportAlert";
@@ -35,7 +37,7 @@ interface ReportPopupProps {
   programFlow: ProgramFlow;
   /** Row storage key aligned with `getRowStorageHash` / key reports map. */
   rowStorageId: string;
-  onReportSubmitted?: () => void;
+  onReportSubmitted?: (result?: ReportSubmitResult) => void;
   /** Negative statuses disabled in UI; API enforces the same. */
   isSpammerVisitor?: boolean;
 }
@@ -101,6 +103,8 @@ export default function ReportPopup({
   const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
   const [duplicateReport, setDuplicateReport] = useState<DuplicateCheckResponse["existingReport"] | null>(null);
   const [showRenewalModal, setShowRenewalModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<CDKeyStatus | null>(null);
+  const [otherTriedVersion, setOtherTriedVersion] = useState("");
 
   const checkForDuplicate = useCallback(async () => {
     setDuplicateReport(null);
@@ -138,7 +142,10 @@ export default function ReportPopup({
     if (isOpen) prefetchProgramVisitorContext();
   }, [isOpen]);
 
-  const handleReport = async (status: CDKeyStatus) => {
+  const submitReport = async (
+    status: CDKeyStatus,
+    version?: { triedVersionFit: "listed" | "other"; triedVersion?: string }
+  ) => {
     if (isSubmitting || isVisitorLoading) return;
 
     if (isSpammerVisitor && status !== "working") {
@@ -154,12 +161,21 @@ export default function ReportPopup({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event: EVENT_TYPE_MAP[status],
-          meta: { programSlug: slug, key: { ...cdKey, programFlow }, programFlow, path: window.location.pathname }
+          meta: {
+            programSlug: slug,
+            key: { ...cdKey, programFlow },
+            programFlow,
+            path: window.location.pathname,
+            listedVersion: cdKey.version,
+            ...(version ?? {})
+          }
         })
       });
 
       const payload = await res.json().catch(() => ({}));
       if (res.ok && payload?.data?.skipped) {
+        const reason = payload?.data?.reason === "admin" ? ADMIN_REPORT_SKIPPED_NOTICE : "Report was not saved.";
+        onReportSubmitted?.({ message: reason, type: "info", refresh: false });
         onClose();
         return;
       }
@@ -176,8 +192,7 @@ export default function ReportPopup({
         return;
       }
 
-      setNotification(getReportStatusMessage(status));
-      onReportSubmitted?.();
+      onReportSubmitted?.({ message: getReportStatusMessage(status), type: "success" });
       onClose();
     } catch (error) {
       console.error("Failed to report key status:", error);
@@ -187,20 +202,31 @@ export default function ReportPopup({
     }
   };
 
+  const handleReport = (status: CDKeyStatus) => {
+    if (status === "working") {
+      void submitReport(status);
+      return;
+    }
+    setPendingStatus(status);
+    setOtherTriedVersion("");
+  };
+
   const handleRenewReport = () => {
     setShowRenewalModal(true);
   };
 
-  const handleRenewalComplete = () => {
+  const handleRenewalComplete = (result?: ReportSubmitResult) => {
     setShowRenewalModal(false);
     setDuplicateReport(null);
-    onReportSubmitted?.();
+    if (result) onReportSubmitted?.(result);
     onClose();
   };
 
   const handleClose = () => {
     setDuplicateReport(null);
     setShowRenewalModal(false);
+    setPendingStatus(null);
+    setOtherTriedVersion("");
     onClose();
   };
 
@@ -297,7 +323,7 @@ export default function ReportPopup({
             )}
 
             {/* Normal report interface */}
-            {!duplicateReport && !isCheckingDuplicate && (
+            {!duplicateReport && !isCheckingDuplicate && !pendingStatus && (
               <>
                 {isVisitorLoading ? (
                   <p className="text-sm text-[#8f98a0]">{getInfoMessage("CHECKING_REPORTING_PERMISSIONS")}</p>
@@ -309,7 +335,26 @@ export default function ReportPopup({
           </div>
 
           {/* Report buttons - only show if no duplicate found */}
-          {!duplicateReport && !isCheckingDuplicate && (
+          {!duplicateReport && !isCheckingDuplicate && pendingStatus && (
+            <VersionFitPrompt
+              listedVersion={cdKey.version}
+              disabled={isSubmitting || isVisitorLoading}
+              otherVersion={otherTriedVersion}
+              onOtherVersionChange={setOtherTriedVersion}
+              onConfirmListed={() => void submitReport(pendingStatus, { triedVersionFit: "listed" })}
+              onSubmitOther={() =>
+                void submitReport(pendingStatus, {
+                  triedVersionFit: "other",
+                  triedVersion: otherTriedVersion.trim()
+                })
+              }
+              onBack={() => {
+                setPendingStatus(null);
+                setOtherTriedVersion("");
+              }}
+            />
+          )}
+          {!duplicateReport && !isCheckingDuplicate && !pendingStatus && (
             <div className="space-y-3">
               <ReportButton
                 status="working"

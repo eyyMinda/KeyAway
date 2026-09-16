@@ -2,12 +2,16 @@
 
 /** @fileoverview Program activation table: report counts, sort, mobile cards (flow-aware). */
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { CDKey, CDKeyTableProps, ReportData } from "@/src/types";
+import { createPortal } from "react-dom";
+import { CDKey, CDKeyTableProps, ReportData, ReportSubmitResult } from "@/src/types";
+import Toast from "@/src/components/ui/Toast";
+import { NOTIFICATION_DURATION } from "@/src/lib/notifications/notificationUtils";
 import CDKeyItem from "@/src/components/program/cdkeys/CDKeyItem";
 import CDKeyMobileCard from "@/src/components/program/cdkeys/CDKeyMobileCard";
 import KeyStatusTooltip from "@/src/components/program/KeyStatusTooltip";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 import { getExpiringKeysMessage, sortCdKeysByScore, sortCdKeysByColumn } from "@/src/lib/program/cdKeyUtils";
+import { emptyReportData } from "@/src/lib/program/keyReportVersionFit";
 import { useKeyReportData } from "@/src/hooks/useKeyReportData";
 import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
 import { useI18n } from "@/src/contexts/i18n";
@@ -35,6 +39,7 @@ export default function CDKeyTable({
   const [sortColumn, setSortColumn] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [reportFeedback, setReportFeedback] = useState<ReportSubmitResult | null>(null);
 
   const idForCdKey = useMemo(() => {
     const m = new WeakMap<CDKey, string>();
@@ -46,10 +51,11 @@ export default function CDKeyTable({
 
   const storageKeyOf = useCallback((k: CDKey) => idForCdKey.get(k) ?? "", [idForCdKey]);
 
-  const emptyReport: ReportData = { working: 0, expired: 0, limit_reached: 0 };
+  const emptyReport: ReportData = emptyReportData();
 
-  const handleReportSubmitted = () => {
-    refreshReportData();
+  const handleReportSubmitted = (result?: ReportSubmitResult) => {
+    if (result?.refresh !== false) refreshReportData();
+    if (result?.message) setReportFeedback(result);
   };
 
   const columnKeyLabel = t.keyTable.columnKey();
@@ -100,6 +106,17 @@ export default function CDKeyTable({
 
   return (
     <section className="py-6 sm:py-10">
+      {reportFeedback && typeof document !== "undefined"
+        ? createPortal(
+            <Toast
+              message={reportFeedback.message}
+              type={reportFeedback.type ?? "success"}
+              duration={NOTIFICATION_DURATION.MEDIUM}
+              onClose={() => setReportFeedback(null)}
+            />,
+            document.body
+          )
+        : null}
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="overflow-visible rounded-sm border border-[#2a475e] bg-[#1b2838] shadow-[0_8px_24px_rgba(0,0,0,0.6)]">
           <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 lg:py-6 border-b border-white/10">

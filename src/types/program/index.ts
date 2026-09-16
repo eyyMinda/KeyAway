@@ -214,7 +214,18 @@ export interface ReportData {
   working: number;
   expired: number;
   limit_reached: number;
+  /** Expired/limit reports where the visitor tried a different (usually newer) version — not in the bar. */
+  otherVersion: number;
+  /** Distinct visitor-reported versions when `triedVersionFit` is `other`. */
+  otherVersionLabels: string[];
 }
+
+export type ReportSubmitResult = {
+  message: string;
+  type?: "success" | "error" | "info";
+  /** When false, skip refetching report aggregates (e.g. admin-skipped writes). Default true. */
+  refresh?: boolean;
+};
 
 export interface CDKeyItemProps {
   cdKey: CDKey;
@@ -223,7 +234,7 @@ export interface CDKeyItemProps {
   slug: string;
   programFlow: ProgramFlow;
   reportData: ReportData;
-  onReportSubmitted?: () => void;
+  onReportSubmitted?: (result?: ReportSubmitResult) => void;
   isSpammerVisitor?: boolean;
 }
 
@@ -233,7 +244,7 @@ export interface CDKeyActionsProps {
   isDisabled: boolean;
   slug: string;
   programFlow: ProgramFlow;
-  onReportSubmitted?: () => void;
+  onReportSubmitted?: (result?: ReportSubmitResult) => void;
   isSpammerVisitor?: boolean;
 }
 

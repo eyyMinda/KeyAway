@@ -1,4 +1,4 @@
-import { BUNDLING_RETENTION_MS } from "@/src/lib/analytics/bundlingConstants";
+import { EVENT_BUNDLING_RETENTION_MS } from "@/src/lib/analytics/bundlingConstants";
 import { client } from "@/src/sanity/lib/client";
 import {
   trackingEventsWithRangeSlimQuery,
@@ -17,7 +17,7 @@ export async function mergeTrackingEventsForRange(
   until: string
 ): Promise<AnalyticsEventData[]> {
   const now = Date.now();
-  const retentionCutoff = new Date(now - BUNDLING_RETENTION_MS).toISOString();
+  const retentionCutoff = new Date(now - EVENT_BUNDLING_RETENTION_MS).toISOString();
   const needBundles = since < retentionCutoff;
 
   const [singular, bundles] = await Promise.all([

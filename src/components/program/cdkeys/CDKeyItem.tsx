@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { CDKeyItemProps } from "@/src/types";
 import CDKeyActions from "@/src/components/program/cdkeys/CDKeyActions";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
+import OtherVersionReportHint from "@/src/components/program/cdkeys/OtherVersionReportHint";
 import Toast from "@/src/components/ui/Toast";
 import { formatValidUntilDisplay, getStatusColor } from "@/src/lib/program/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
@@ -135,7 +136,13 @@ export default function CDKeyItem({
           <ReportProgressBar reportData={reportData} />
         </td>
         <td className={`p-4 text-center text-sm ${isDisabled ? "text-gray-400" : "text-neutral-100"}`}>
-          {cdKey.version}
+          <span className="inline-flex items-center justify-center gap-1.5">
+            {cdKey.version}
+            <OtherVersionReportHint
+              versions={reportData.otherVersionLabels ?? []}
+              listedVersion={cdKey.version}
+            />
+          </span>
         </td>
         <td className={`p-4 text-center text-sm ${isDisabled ? "text-gray-400" : "text-neutral-100"}`}>
           {cdKey.validFrom?.split("T")[0]}

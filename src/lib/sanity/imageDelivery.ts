@@ -1,5 +1,4 @@
 import type { SanityImageSource } from "@sanity/image-url";
-import { getImageDimensions } from "@sanity/asset-utils";
 import { urlFor } from "@/src/sanity/lib/image";
 
 /** Max CSS px width for about-section side images (matches AboutSectionBlock layout). */
@@ -94,11 +93,7 @@ export function resolveSanityImageDimensions(
     return { width: fromMeta.width, height: fromMeta.height };
   }
 
-  try {
-    return getImageDimensions(source as Parameters<typeof getImageDimensions>[0]);
-  } catch {
-    return { width: fallbackWidth, height: Math.round(fallbackWidth * 0.5625) };
-  }
+  return { width: fallbackWidth, height: Math.round(fallbackWidth * 0.5625) };
 }
 
 /** Intrinsic dimensions scaled to `maxWidth` for HTML width/height hints and aspect-ratio box. */

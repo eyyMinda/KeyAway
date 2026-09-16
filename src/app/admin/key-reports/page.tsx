@@ -23,6 +23,7 @@ import { logger } from "@/src/lib/logger";
 import { useStatusChange } from "@/src/hooks/useStatusChange";
 import { I18nProvider } from "@/src/contexts/i18n";
 import adminKeyReportsEn from "@/src/locales/admin/key-reports/en.json";
+import { applyKeyReportEvent, emptyReportData } from "@/src/lib/program/keyReportVersionFit";
 
 /** `?key=` filter: row storage is plaintext CD key, lowercase username, or link digest — not CD-key SHA. */
 function keyQueryMatchesRowStorage(
@@ -145,11 +146,7 @@ function KeyReportsPageContent() {
               status: actualKey?.status || "active",
               validFrom: actualKey?.validFrom,
               validTo: actualKey?.validUntil,
-              reportData: {
-                working: 0,
-                expired: 0,
-                limit_reached: 0
-              },
+              reportData: emptyReportData(),
               reports: []
             };
 
@@ -159,18 +156,13 @@ function KeyReportsPageContent() {
           const keyReport = keyReports.get(groupKey)!;
 
           const eventType = report.eventType as string;
-
-          switch (eventType) {
-            case "report_key_working":
-              keyReport.reportData.working++;
-              break;
-            case "report_key_expired":
-              keyReport.reportData.expired++;
-              break;
-            case "report_key_limit_reached":
-              keyReport.reportData.limit_reached++;
-              break;
-          }
+          const triedVersionFit = (report as { triedVersionFit?: string }).triedVersionFit;
+          keyReport.reportData = applyKeyReportEvent(
+            keyReport.reportData,
+            eventType,
+            triedVersionFit,
+            (report as { triedVersion?: string }).triedVersion
+          );
 
           keyReport.reportCount++;
           keyReport.lastReported = report.createdAt as string;
@@ -195,7 +187,10 @@ function KeyReportsPageContent() {
             createdAt: report.createdAt as string,
             country: (report.country as string) || "Unknown",
             city: (report.city as string) || "Unknown",
-            eventType: eventType as "report_key_working" | "report_key_expired" | "report_key_limit_reached"
+            eventType: eventType as "report_key_working" | "report_key_expired" | "report_key_limit_reached",
+            listedVersion: (report as { listedVersion?: string }).listedVersion,
+            triedVersionFit: triedVersionFit === "listed" || triedVersionFit === "other" ? triedVersionFit : undefined,
+            triedVersion: (report as { triedVersion?: string }).triedVersion
           });
 
           if (new Date(report.createdAt as string) < new Date(keyReport.firstReported)) {

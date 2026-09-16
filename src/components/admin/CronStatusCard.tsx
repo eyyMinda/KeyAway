@@ -143,7 +143,7 @@ export default function CronStatusCard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-0 min-w-0 lg:pr-8">
-          <JobStatusRow job="bundle-events" schedule="Daily at 21:00 UTC" label="Bundle Events" />
+          <JobStatusRow job="bundle-events" schedule="Every 6h (12h live window)" label="Bundle Events" />
           <JobStatusRow job="bundle-visitors" schedule="Daily at 21:30 UTC" label="Bundle Visitors" />
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
           <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (60d)" />

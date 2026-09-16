@@ -14,6 +14,7 @@ import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContr
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { isProgramSlugPublishedCached } from "@/src/lib/sanity/getCachedPublishedProgramSlugs";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
+import { parseVersionFitInput } from "@/src/lib/program/keyReportVersionFit";
 
 const ANALYTICS_EVENTS = new Set([
   "copy_cdkey",
@@ -223,6 +224,16 @@ export async function POST(req: NextRequest) {
     if (utmCampaign) eventData.utm_campaign = utmCampaign;
     if (location?.country) eventData.country = location.country;
     if (location?.city) eventData.city = location.city;
+
+    if (isReportEvent) {
+      const version = parseVersionFitInput(body.event, {
+        triedVersionFit: body.meta?.triedVersionFit,
+        listedVersion: body.meta?.listedVersion,
+        triedVersion: body.meta?.triedVersion
+      });
+      if (!version.ok) return Errors.validation(version.error);
+      Object.assign(eventData, version.fields);
+    }
 
     await client.create(eventData as { _type: string } & Record<string, unknown>);
 

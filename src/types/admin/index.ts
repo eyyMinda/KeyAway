@@ -84,6 +84,8 @@ export interface KeyReport {
     working: number;
     expired: number;
     limit_reached: number;
+    otherVersion: number;
+    otherVersionLabels: string[];
   };
   reports: Array<{
     _id: string;
@@ -93,6 +95,9 @@ export interface KeyReport {
     country?: string;
     city?: string;
     eventType: "report_key_working" | "report_key_expired" | "report_key_limit_reached";
+    listedVersion?: string;
+    triedVersionFit?: "listed" | "other";
+    triedVersion?: string;
   }>;
 }
 

@@ -56,6 +56,9 @@ export const SPAMMER_REPORT_RESTRICTION_NOTICE =
 /** `title` on disabled Expired / Limit reached actions (keep short). */
 export const SPAMMER_REPORT_DISABLED_OPTION_TITLE = "Not available — your recent reports were flagged as spam.";
 
+export const ADMIN_REPORT_SKIPPED_NOTICE =
+  "Report not saved — admin sessions do not write visitor key reports. Sign out of admin to test reporting.";
+
 // Get report status message
 export function getReportStatusMessage(status: CDKeyStatus): string {
   return REPORT_STATUS_MESSAGES[status];
