@@ -37,6 +37,14 @@ export const trackingEventBundle = defineType({
       description: "Number of events in this bundle"
     }),
     defineField({
+      name: "capacity",
+      title: "Capacity",
+      type: "number",
+      description:
+        "Max events this bundle will hold. New bundles use 5000. Legacy docs without this field stay capped at 1000.",
+      readOnly: true
+    }),
+    defineField({
       name: "events",
       title: "Events",
       type: "array",

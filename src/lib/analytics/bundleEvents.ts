@@ -2,8 +2,10 @@
 import { randomUUID } from "node:crypto";
 import {
   BUNDLE_MAX_ITERATIONS,
-  BUNDLE_SIZE,
-  BUNDLING_RETENTION_DAYS
+  EVENT_BUNDLE_BATCH,
+  EVENT_BUNDLE_CAPACITY,
+  EVENT_BUNDLING_RETENTION_HOURS,
+  LEGACY_EVENT_BUNDLE_SIZE
 } from "@/src/lib/analytics/bundlingConstants";
 import { TAG_BUNDLE_COUNTS } from "@/src/lib/cache/cacheTags";
 import { revalidateTag } from "next/cache";
@@ -11,6 +13,17 @@ import { client } from "@/src/sanity/lib/client";
 
 const EVENT_FIELDS =
   "event, programSlug, notFound, path, referrer, country, city, social, key, activationUrl, programFlow, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt";
+
+type IncompleteBundle = {
+  _id: string;
+  eventCount: number;
+  timeRangeEnd: string;
+  capacity?: number;
+};
+
+function bundleCapacity(doc: { capacity?: number; eventCount: number }): number {
+  return typeof doc.capacity === "number" && doc.capacity > 0 ? doc.capacity : LEGACY_EVENT_BUNDLE_SIZE;
+}
 
 /** Each array row needs a unique `_key`; deriving only from `_id` can collide after truncation or duplicate appends. */
 function toBundleEvent(doc: Record<string, unknown> & { _id?: string }) {
@@ -44,63 +57,71 @@ export interface BundleEventsResult {
   error?: string;
 }
 
-/** Runs the event bundling process. Uses retention cutoff (2 days) by default. Set skipRetention=true for one-time migration. */
+async function fetchEventsToBundle(
+  cutoff: string,
+  after: string,
+  limit: number
+): Promise<Array<Record<string, unknown> & { _id: string }>> {
+  return client.fetch<Array<Record<string, unknown> & { _id: string }>>(
+    after
+      ? `*[_type == "trackingEvent" && createdAt < $cutoff && createdAt > $after] | order(createdAt asc) [0...$limit]{ _id, ${EVENT_FIELDS} }`
+      : `*[_type == "trackingEvent" && createdAt < $cutoff] | order(createdAt asc) [0...$limit]{ _id, ${EVENT_FIELDS} }`,
+    after ? { cutoff, after, limit } : { cutoff, limit }
+  );
+}
+
+/** Runs the event bundling process. Uses retention cutoff (12h) by default. Set skipRetention=true for one-time migration. */
 export async function runBundleEvents(skipRetention = false): Promise<BundleEventsResult> {
   const cutoff = skipRetention
     ? new Date(Date.now() + 864e5).toISOString() // future = bundle all
-    : new Date(Date.now() - BUNDLING_RETENTION_DAYS * 864e5).toISOString();
+    : new Date(Date.now() - EVENT_BUNDLING_RETENTION_HOURS * 3600e3).toISOString();
   let created = 0;
   let appended = 0;
 
   try {
-    while (true) {
-      const incomplete = await client.fetch<{ _id: string; eventCount: number; timeRangeEnd: string } | null>(
-        `*[_type == "trackingEventBundle" && eventCount < $limit] | order(timeRangeEnd desc) [0]{ _id, eventCount, timeRangeEnd }`,
-        { limit: BUNDLE_SIZE }
-      );
-      if (!incomplete) break;
-
-      const limit = BUNDLE_SIZE - incomplete.eventCount;
-      const toAdd = await client.fetch<Array<Record<string, unknown> & { _id: string }>>(
-        `*[_type == "trackingEvent" && createdAt < $cutoff && createdAt > $after] | order(createdAt asc) [0...$limit]{ _id, ${EVENT_FIELDS} }`,
-        { cutoff, after: incomplete.timeRangeEnd, limit }
-      );
-      if (!toAdd.length) break;
-
-      const newEvents = toAdd.map(d => toBundleEvent(d));
-      const lastEvent = toAdd[toAdd.length - 1];
-      const newTimeRangeEnd = (lastEvent.createdAt as string) ?? incomplete.timeRangeEnd;
-      const newEventCount = incomplete.eventCount + toAdd.length;
-      const idsToDelete = toAdd.map(e => e._id);
-      const tx = client.transaction();
-      const now = new Date().toISOString();
-      tx.patch(incomplete._id, p =>
-        p
-          .append("events", newEvents)
-          .set({ timeRangeEnd: newTimeRangeEnd, eventCount: newEventCount, updatedAt: now })
-      );
-      idsToDelete.forEach(id => tx.delete(id));
-      await tx.commit();
-      appended += toAdd.length;
-    }
-
-    const latestBundle = await client.fetch<{ timeRangeEnd: string } | null>(
-      `*[_type == "trackingEventBundle"] | order(timeRangeEnd desc) [0]{ timeRangeEnd }`
-    );
-    let after = latestBundle?.timeRangeEnd ?? "";
     for (let i = 0; i < BUNDLE_MAX_ITERATIONS; i++) {
-      const batch = await client.fetch<Array<Record<string, unknown> & { _id: string }>>(
-        after
-          ? `*[_type == "trackingEvent" && createdAt < $cutoff && createdAt > $after] | order(createdAt asc) [0...$limit]{ _id, ${EVENT_FIELDS} }`
-          : `*[_type == "trackingEvent" && createdAt < $cutoff] | order(createdAt asc) [0...$limit]{ _id, ${EVENT_FIELDS} }`,
-        after ? { cutoff, after, limit: BUNDLE_SIZE } : { cutoff, limit: BUNDLE_SIZE }
+      const incomplete = await client.fetch<IncompleteBundle | null>(
+        `*[_type == "trackingEventBundle" && eventCount < coalesce(capacity, $legacy)] | order(timeRangeEnd desc) [0]{ _id, eventCount, timeRangeEnd, capacity }`,
+        { legacy: LEGACY_EVENT_BUNDLE_SIZE }
       );
+
+      if (incomplete) {
+        const cap = bundleCapacity(incomplete);
+        const room = cap - incomplete.eventCount;
+        const limit = Math.min(EVENT_BUNDLE_BATCH, room);
+        if (limit <= 0) break;
+
+        const toAdd = await fetchEventsToBundle(cutoff, incomplete.timeRangeEnd, limit);
+        if (!toAdd.length) break;
+
+        const newEvents = toAdd.map(d => toBundleEvent(d));
+        const lastEvent = toAdd[toAdd.length - 1];
+        const newTimeRangeEnd = (lastEvent.createdAt as string) ?? incomplete.timeRangeEnd;
+        const newEventCount = incomplete.eventCount + toAdd.length;
+        const idsToDelete = toAdd.map(e => e._id);
+        const tx = client.transaction();
+        const now = new Date().toISOString();
+        tx.patch(incomplete._id, p =>
+          p
+            .append("events", newEvents)
+            .set({ timeRangeEnd: newTimeRangeEnd, eventCount: newEventCount, updatedAt: now })
+        );
+        idsToDelete.forEach(id => tx.delete(id));
+        await tx.commit();
+        appended += toAdd.length;
+        continue;
+      }
+
+      const latestBundle = await client.fetch<{ timeRangeEnd: string } | null>(
+        `*[_type == "trackingEventBundle"] | order(timeRangeEnd desc) [0]{ timeRangeEnd }`
+      );
+      const after = latestBundle?.timeRangeEnd ?? "";
+      const batch = await fetchEventsToBundle(cutoff, after, EVENT_BUNDLE_BATCH);
       if (!batch.length) break;
 
       const events = batch.map(d => toBundleEvent(d));
       const timeRangeStart = (events[0].createdAt as string) ?? cutoff;
       const timeRangeEnd = (events[events.length - 1].createdAt as string) ?? cutoff;
-      after = timeRangeEnd;
       const idsToDelete = batch.map(e => e._id);
       const tx = client.transaction();
       const now = new Date().toISOString();
@@ -111,6 +132,7 @@ export async function runBundleEvents(skipRetention = false): Promise<BundleEven
         timeRangeStart,
         timeRangeEnd,
         eventCount: events.length,
+        capacity: EVENT_BUNDLE_CAPACITY,
         events
       });
       idsToDelete.forEach(id => tx.delete(id));
