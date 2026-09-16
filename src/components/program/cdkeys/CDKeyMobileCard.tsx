@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { CDKey, ProgramFlow, ReportData } from "@/src/types/program";
+import { CDKey, ProgramFlow, ReportData, ReportSubmitResult } from "@/src/types/program";
 import CDKeyActions from "./CDKeyActions";
 import ReportProgressBar from "./ReportProgressBar";
+import OtherVersionReportHint from "./OtherVersionReportHint";
 import Toast from "@/src/components/ui/Toast";
 import { formatValidUntilDisplay, getStatusColor } from "@/src/lib/program/cdKeyUtils";
 import { useCopyTracking } from "@/src/hooks/useCopyTracking";
@@ -24,7 +25,7 @@ interface CDKeyMobileCardProps {
   slug: string;
   programFlow: ProgramFlow;
   reportData: ReportData;
-  onReportSubmitted?: () => void;
+  onReportSubmitted?: (result?: ReportSubmitResult) => void;
   isSpammerVisitor?: boolean;
 }
 
@@ -105,7 +106,13 @@ export default function CDKeyMobileCard({
         <div className="grid grid-cols-2 gap-3">
           <div>
             <span className="text-[#556772]">Program Version:</span>
-            <div className="font-medium text-[#c6d4df]">{cdKey.version}</div>
+            <div className="inline-flex items-center gap-1.5 font-medium text-[#c6d4df]">
+              {cdKey.version}
+              <OtherVersionReportHint
+                versions={reportData.otherVersionLabels ?? []}
+                listedVersion={cdKey.version}
+              />
+            </div>
           </div>
           <div>
             <span className="text-[#556772]">Status:</span>
