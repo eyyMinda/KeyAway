@@ -2,26 +2,28 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { KeyReportEvent, RenewReportRequest, RenewReportResponse } from "@/src/types";
+import { KeyReportEvent, RenewReportRequest } from "@/src/types";
 import Toast from "@/src/components/ui/Toast";
 import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { EVENT_TYPE_MAP, getStatusTextFromEventType, CDKeyStatus } from "@/src/lib/program/cdKeyUtils";
+import VersionFitPrompt from "./VersionFitPrompt";
 import {
   NOTIFICATION_DURATION,
   getRenewalStatusMessage,
   getErrorMessage,
   SPAMMER_REPORT_RESTRICTION_NOTICE,
-  SPAMMER_REPORT_DISABLED_OPTION_TITLE
+  SPAMMER_REPORT_DISABLED_OPTION_TITLE,
+  ADMIN_REPORT_SKIPPED_NOTICE
 } from "@/src/lib/notifications/notificationUtils";
 import { formatDate } from "@/src/lib/dateUtils";
-import type { CDKey, ProgramFlow } from "@/src/types/program";
+import type { CDKey, ProgramFlow, ReportSubmitResult } from "@/src/types/program";
 import { useProgramVisitor } from "@/src/components/visitors/ProgramVisitorProvider";
 import SpammerReportAlert from "@/src/components/program/cdkeys/SpammerReportAlert";
 
 interface RenewalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onRenew: () => void;
+  onRenew: (result?: ReportSubmitResult) => void;
   cdKey: CDKey;
   programFlow: ProgramFlow;
   /** Human-readable row label for the modal. */
@@ -100,8 +102,13 @@ export default function RenewalModal({
   const isSpammerVisitor = isSpammerVisitorProp || isSpammerCtx;
   const [notification, setNotification] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<CDKeyStatus | null>(null);
+  const [otherTriedVersion, setOtherTriedVersion] = useState("");
 
-  const handleRenew = async (status: CDKeyStatus) => {
+  const submitRenew = async (
+    status: CDKeyStatus,
+    version?: { triedVersionFit: "listed" | "other"; triedVersion?: string }
+  ) => {
     if (isSubmitting || isVisitorLoading) return;
 
     if (isSpammerVisitor && status !== "working") {
@@ -116,7 +123,9 @@ export default function RenewalModal({
         reportId: existingReport._id,
         newEventType: EVENT_TYPE_MAP[status],
         programSlug: slug,
-        key: { ...cdKey, programFlow }
+        key: { ...cdKey, programFlow },
+        listedVersion: cdKey.version,
+        ...(version ?? {})
       };
 
       const response = await fetch("/api/v1/key-reports", {
@@ -129,9 +138,15 @@ export default function RenewalModal({
       const data = res?.data;
       const err = res?.error;
 
-      if (response.ok && (data?.updatedReport || data?.skipped)) {
-        if (!data?.skipped) setNotification(getRenewalStatusMessage(status));
-        onRenew();
+      if (response.ok && data?.skipped) {
+        const reason = data?.reason === "admin" ? ADMIN_REPORT_SKIPPED_NOTICE : "Report was not saved.";
+        onRenew({ message: reason, type: "info", refresh: false });
+        onClose();
+        return;
+      }
+
+      if (response.ok && data?.updatedReport) {
+        onRenew({ message: getRenewalStatusMessage(status), type: "success" });
         onClose();
       } else {
         if (response.status === 403 && err?.code === "FORBIDDEN") {
@@ -147,6 +162,15 @@ export default function RenewalModal({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleRenew = (status: CDKeyStatus) => {
+    if (status === "working") {
+      void submitRenew(status);
+      return;
+    }
+    setPendingStatus(status);
+    setOtherTriedVersion("");
   };
 
   const handleNotificationClose = () => {
@@ -199,9 +223,28 @@ export default function RenewalModal({
               </p>
               <p className="text-neutral-400 text-xs mt-1">Last reported: {formatDate(existingReport.createdAt)}</p>
             </div>
-            <p className="text-neutral-400 text-sm">Update the status of this key:</p>
+            <p className="text-neutral-400 text-sm">{pendingStatus ? null : "Update the status of this key:"}</p>
           </div>
 
+          {pendingStatus ? (
+            <VersionFitPrompt
+              listedVersion={cdKey.version}
+              disabled={isSubmitting || isVisitorLoading}
+              otherVersion={otherTriedVersion}
+              onOtherVersionChange={setOtherTriedVersion}
+              onConfirmListed={() => void submitRenew(pendingStatus, { triedVersionFit: "listed" })}
+              onSubmitOther={() =>
+                void submitRenew(pendingStatus, {
+                  triedVersionFit: "other",
+                  triedVersion: otherTriedVersion.trim()
+                })
+              }
+              onBack={() => {
+                setPendingStatus(null);
+                setOtherTriedVersion("");
+              }}
+            />
+          ) : (
           <div className="space-y-3">
             <RenewButton
               status="working"
@@ -224,6 +267,7 @@ export default function RenewalModal({
               blockedBySpammer={isSpammerVisitor}
             />
           </div>
+          )}
 
           <div className="mt-4 pt-4 border-t border-neutral-700">
             <p className="text-neutral-500 text-xs text-center">
