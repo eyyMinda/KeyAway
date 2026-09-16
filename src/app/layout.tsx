@@ -11,7 +11,7 @@ import { SessionProvider } from "@components/providers/SessionProvider";
 import { StoreDetailsProvider } from "@components/providers/StoreDetailsProvider";
 import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
-import { getImageDimensions } from "@sanity/asset-utils";
+import { resolveSanityImageDimensions } from "@/src/lib/sanity/imageDelivery";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 const geistSans = Geist({
@@ -78,7 +78,7 @@ export default async function RootLayout({
   const currentLogo = storeData?.logoLight;
   /** Match header/footer slot (~104×48 CSS px); keeps `/_next/image` width near 128–256 instead of 384+. */
   const LOGO_WIDTH_HINT = 120;
-  const logoIntrinsic = currentLogo ? getImageDimensions(currentLogo) : { width: 120, height: 48 };
+  const logoIntrinsic = currentLogo ? resolveSanityImageDimensions(currentLogo, LOGO_WIDTH_HINT) : { width: 120, height: 48 };
   const logoHeight = Math.max(1, Math.round((logoIntrinsic.height / logoIntrinsic.width) * LOGO_WIDTH_HINT));
   const logoData: LogoData = {
     src: urlFor(currentLogo).width(LOGO_WIDTH_HINT).quality(70).auto("format").url(),

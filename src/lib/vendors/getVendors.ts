@@ -7,7 +7,7 @@ import type { ProgramWithStats } from "@/src/types/home";
 import type { GiveawayComparisonRow } from "@/src/types/program";
 import type { PortableTextBlock } from "@portabletext/types";
 import type { VendorLogoBackgroundColor } from "@/src/lib/vendors/resolveVendorLogoBackgroundColor";
-import { SanityImageSource } from "@sanity/asset-utils";
+import type { SanityImageSource } from "@sanity/image-url";
 
 const VENDOR_TAGS = { next: { tags: [TAG_VENDORS, TAG_PROGRAM_LISTINGS] } };
 

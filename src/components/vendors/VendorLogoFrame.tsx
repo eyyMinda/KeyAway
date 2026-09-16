@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { getImageDimensions, SanityImageSource } from "@sanity/asset-utils";
+import type { SanityImageSource } from "@sanity/image-url";
 import { urlFor } from "@/src/sanity/lib/image";
+import { resolveSanityImageDimensions } from "@/src/lib/sanity/imageDelivery";
 import { resolveVendorLogoBackgroundColor } from "@/src/lib/vendors/resolveVendorLogoBackgroundColor";
 import type { VendorLogoBackgroundColor } from "@/src/lib/vendors/resolveVendorLogoBackgroundColor";
 
@@ -57,7 +58,7 @@ export default function VendorLogoFrame({
     );
   }
 
-  const intrinsic = getImageDimensions(logo as SanityImageSource);
+  const intrinsic = resolveSanityImageDimensions(logo as SanityImageSource, imageSize);
   const boxMax = displayMaxSize ?? Math.round(imageSize / 2);
   const display = fitInsideBox(intrinsic.width, intrinsic.height, boxMax, boxMax);
   const imageAlt = alt ?? name;
