@@ -9,6 +9,7 @@ import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHas
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 import type { KeyReportEvent } from "@/src/types";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
+import { parseVersionFitInput } from "@/src/lib/program/keyReportVersionFit";
 
 const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
@@ -61,10 +62,17 @@ export async function POST(req: NextRequest) {
         { reportId, ipHash }
       );
       if (!existingReport) return Errors.notFound("Report not found or access denied");
-      const updated = await client
-        .patch(reportId)
-        .set({ eventType: newEventType, createdAt: new Date().toISOString() })
-        .commit();
+      const version = parseVersionFitInput(newEventType, b);
+      if (!version.ok) return Errors.validation(version.error);
+      const patch = client.patch(reportId).set({
+        eventType: newEventType,
+        createdAt: new Date().toISOString(),
+        ...version.fields
+      });
+      if (newEventType === "report_key_working") {
+        patch.unset(["triedVersionFit", "triedVersion", "listedVersion"]);
+      }
+      const updated = await patch.commit();
       try {
         await upsertVisitorContribution(ipHash, "report");
       } catch (e) {
@@ -109,6 +117,10 @@ export async function POST(req: NextRequest) {
       ipHash,
       createdAt: new Date().toISOString()
     };
+    const version = parseVersionFitInput(event, { ...b, ...(meta ?? {}) });
+    if (!version.ok) return Errors.validation(version.error);
+    Object.assign(eventData, version.fields);
+
     if (path) eventData.path = path;
     if (location?.country) eventData.country = location.country;
     if (location?.city) eventData.city = location.city;

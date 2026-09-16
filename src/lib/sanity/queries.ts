@@ -300,14 +300,22 @@ export const visitorTagAggregatesQuery = `{
 export const keyReportsQuery = `*[_type=="keyReport" && _createdAt >= $since]{
       _id, eventType, programSlug, path, referrer, country, city, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _createdAt,
       key,
-      label
+      label,
+      listedVersion,
+      triedVersionFit,
+      triedVersion
     } | order(_createdAt desc)`;
+
+/** Program table progress bars — slug-scoped, no PII projection. */
+export const programPageKeyReportsQuery = `*[_type=="keyReport" && programSlug == $programSlug]{
+  eventType, key, triedVersionFit, triedVersion
+}`;
 
 /* ------------ Program key report counts (community aggregateRating) ------------ */
 export const programKeyReportCountsQuery = `{
   "working": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_working"]),
-  "expired": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_expired"]),
-  "limitReached": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_limit_reached"])
+  "expired": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_expired" && triedVersionFit != "other"]),
+  "limitReached": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_limit_reached" && triedVersionFit != "other"])
 }`;
 
 /* ------------ Program share counts (social_click per network) ------------ */
