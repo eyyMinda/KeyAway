@@ -20,7 +20,7 @@ export const TAG_HOMEPAGE_STATS = "homepage-stats";
 /** Sitemap.xml + `generateStaticParams` slug list — bust only when URL set changes. */
 export const TAG_SITEMAP_URLS = "sitemap-urls";
 
-/** Singleton `siteNotificationFeed` document read by notifications API. */
+/** Bell snapshot (`siteNotificationFeed`) + bundled history (`siteNotificationBundle`). */
 export const TAG_NOTIFICATION_FEED = "notification-feed";
 
 export const TAG_FEATURED_PROGRAM = "featured-program";

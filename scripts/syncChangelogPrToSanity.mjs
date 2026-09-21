@@ -1,5 +1,5 @@
 /**
- * Sync a single merged PR to Sanity as a changelogRelease draft.
+ * Sync a single merged PR to Sanity as a published changelogRelease.
  *
  *   npm run sync:changelog-pr -- 112
  *   node scripts/syncChangelogPrToSanity.mjs 112
@@ -49,12 +49,12 @@ async function main() {
 
   const client = createSanityClientFromEnv();
   const id = await upsertChangelogRelease(client, release, {
-    published: false,
+    published: true,
     preservePublished: true,
     rawPrBody: pull.body ?? undefined
   });
 
-  console.log(`Upserted draft ${id} for PR #${prNumber}.`);
+  console.log(`Upserted published ${id} for PR #${prNumber}.`);
 }
 
 main().catch(err => {

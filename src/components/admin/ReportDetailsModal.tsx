@@ -17,6 +17,12 @@ import {
   isLinkAccountFlow,
   normalizeProgramFlow
 } from "@/src/lib/program/activationEntry";
+import {
+  filterTriedVersionInput,
+  formatVersionLabelDisplay,
+  isValidTriedVersionInput,
+  normalizeTriedVersionForStorage
+} from "@/src/lib/program/versionFitLabel";
 
 const EVENT_OPTIONS: { value: KeyReportEvent; label: string }[] = [
   { value: "report_key_working", label: "Working" },
@@ -99,13 +105,16 @@ interface ReportDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   report: KeyReport | null;
+  onReportPatched?: () => void;
 }
 
-export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDetailsModalProps) {
+export default function ReportDetailsModal({ isOpen, onClose, report, onReportPatched }: ReportDetailsModalProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [rowEventTypes, setRowEventTypes] = useState<Record<string, KeyReportEvent>>({});
+  const [rowTriedVersions, setRowTriedVersions] = useState<Record<string, string>>({});
   const [savingReportId, setSavingReportId] = useState<string | null>(null);
+  const [savingTriedVersionId, setSavingTriedVersionId] = useState<string | null>(null);
   const [visitorByHash, setVisitorByHash] = useState<Record<string, { visitTier?: string; isSpammer?: boolean }>>({});
 
   useEffect(() => {
@@ -115,10 +124,15 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
   useEffect(() => {
     if (!report) return;
     const next: Record<string, KeyReportEvent> = {};
+    const versions: Record<string, string> = {};
     for (const r of report.reports) {
       if (r._id) next[r._id] = r.eventType;
+      if (r._id && r.triedVersionFit === "other") {
+        versions[r._id] = r.triedVersion ?? "";
+      }
     }
     setRowEventTypes(next);
+    setRowTriedVersions(versions);
   }, [report]);
 
   useEffect(() => {
@@ -174,12 +188,38 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
         });
         if (!res.ok) {
           console.error("PATCH key-report-event", await res.text());
+          return;
         }
+        onReportPatched?.();
       } finally {
         setSavingReportId(null);
       }
     },
-    [rowEventTypes]
+    [rowEventTypes, onReportPatched]
+  );
+
+  const saveTriedVersion = useCallback(
+    async (reportId: string) => {
+      const triedVersion = rowTriedVersions[reportId]?.trim() ?? "";
+      if (!isValidTriedVersionInput(triedVersion)) return;
+      setSavingTriedVersionId(reportId);
+      try {
+        const res = await fetch("/api/v1/admin/key-report-event", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ reportId, triedVersion })
+        });
+        if (!res.ok) {
+          console.error("PATCH key-report-event triedVersion", await res.text());
+          return;
+        }
+        onReportPatched?.();
+      } finally {
+        setSavingTriedVersionId(null);
+      }
+    },
+    [rowTriedVersions, onReportPatched]
   );
 
   if (!mounted || !isOpen || !report) return null;
@@ -436,9 +476,52 @@ export default function ReportDetailsModal({ isOpen, onClose, report }: ReportDe
                         <div className="text-[10px] text-gray-400">Referrer: —</div>
                       )}
                       {reportItem.triedVersionFit === "other" ? (
-                        <div className="text-[10px] text-amber-800">
-                          Tried v{reportItem.triedVersion || "?"}
-                          {reportItem.listedVersion ? ` (key is ${reportItem.listedVersion})` : ""}
+                        <div className="space-y-1">
+                          <div className="text-[10px] text-amber-800">
+                            Tried v{formatVersionLabelDisplay(reportItem.triedVersion || "?")}
+                            {reportItem.listedVersion ? ` (key is ${reportItem.listedVersion})` : ""}
+                          </div>
+                          {reportItem._id ? (
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <label className="sr-only" htmlFor={`tried-v-${reportItem._id}`}>
+                                Edit tried version
+                              </label>
+                              <input
+                                id={`tried-v-${reportItem._id}`}
+                                type="text"
+                                maxLength={4}
+                                value={rowTriedVersions[reportItem._id] ?? reportItem.triedVersion ?? ""}
+                                onChange={e =>
+                                  setRowTriedVersions(prev => ({
+                                    ...prev,
+                                    [reportItem._id!]: filterTriedVersionInput(e.target.value)
+                                  }))
+                                }
+                                className="h-7 w-20 rounded border border-amber-300 bg-white px-2 text-xs text-gray-900"
+                                placeholder="16.0"
+                              />
+                              <button
+                                type="button"
+                                disabled={(() => {
+                                  const draft = (rowTriedVersions[reportItem._id] ?? "").trim();
+                                  const stored = (reportItem.triedVersion ?? "").trim();
+                                  const draftNorm = normalizeTriedVersionForStorage(draft);
+                                  const storedNorm =
+                                    stored && isValidTriedVersionInput(stored)
+                                      ? normalizeTriedVersionForStorage(stored)
+                                      : stored;
+                                  return (
+                                    savingTriedVersionId === reportItem._id ||
+                                    !draftNorm ||
+                                    draftNorm === storedNorm
+                                  );
+                                })()}
+                                onClick={() => void saveTriedVersion(reportItem._id!)}
+                                className="h-7 px-2 rounded bg-amber-700 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
+                                {savingTriedVersionId === reportItem._id ? "Saving…" : "Save version"}
+                              </button>
+                            </div>
+                          ) : null}
                         </div>
                       ) : reportItem.triedVersionFit === "listed" ? (
                         <div className="text-[10px] text-gray-500">

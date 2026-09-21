@@ -6,6 +6,7 @@ import { programPageKeyReportsQuery } from "@/src/lib/sanity/queries";
 import { ReportData } from "@/src/types/program";
 import { logger } from "@/src/lib/logger";
 import { applyKeyReportEvent, emptyReportData } from "@/src/lib/program/keyReportVersionFit";
+import { mergeUniqueVersionLabels } from "@/src/lib/program/versionFitLabel";
 
 type KeyReportFetched = {
   eventType?: string;
@@ -49,6 +50,13 @@ export function useKeyReportData(programSlug: string, rowStorageIds: string[]) {
             storageKey,
             applyKeyReportEvent(currentData, eventType, event.triedVersionFit, event.triedVersion)
           );
+        }
+
+        for (const [storageKey, data] of keyReportData) {
+          keyReportData.set(storageKey, {
+            ...data,
+            otherVersionLabels: mergeUniqueVersionLabels(data.otherVersionLabels)
+          });
         }
 
         setReportData(keyReportData);

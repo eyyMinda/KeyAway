@@ -1,5 +1,13 @@
 import type { ReportData } from "@/src/types/program";
 import type { KeyReportEvent } from "@/src/types/tracking";
+import {
+  formatVersionLabelDisplay,
+  mergeUniqueVersionLabels,
+  normalizeTriedVersionForStorage,
+  versionLabelCanonicalKey,
+  isValidTriedVersionInput,
+  isOtherTriedVersionNewerThanListed
+} from "@/src/lib/program/versionFitLabel";
 
 export type TriedVersionFit = "listed" | "other";
 
@@ -30,11 +38,14 @@ export function applyKeyReportEvent(
   if (eventType === "report_key_working") return { ...data, working: data.working + 1 };
   if (!isNegativeKeyReport(eventType)) return data;
   if (triedVersionFit === "other") {
-    const label = typeof triedVersion === "string" ? triedVersion.trim() : "";
+    const raw = typeof triedVersion === "string" ? triedVersion.trim() : "";
+    const display = raw ? formatVersionLabelDisplay(raw) : "";
+    const key = raw ? versionLabelCanonicalKey(raw) : null;
+    const hasKey =
+      key &&
+      data.otherVersionLabels.some(existing => versionLabelCanonicalKey(existing) === key);
     const otherVersionLabels =
-      label && !data.otherVersionLabels.includes(label)
-        ? [...data.otherVersionLabels, label]
-        : data.otherVersionLabels;
+      display && key && !hasKey ? [...data.otherVersionLabels, display] : data.otherVersionLabels;
     return { ...data, otherVersion: data.otherVersion + 1, otherVersionLabels };
   }
   if (eventType === "report_key_expired") return { ...data, expired: data.expired + 1 };
@@ -42,8 +53,8 @@ export function applyKeyReportEvent(
 }
 
 export function formatOtherVersionHint(versions: string[], listedVersion?: string): string {
-  if (!versions.length) return "";
-  const labels = [...versions].sort();
+  const labels = mergeUniqueVersionLabels(versions);
+  if (!labels.length) return "";
   if (labels.length === 1) {
     return listedVersion
       ? `Other visitors reported this key not working on version ${labels[0]} (listed: ${listedVersion}).`
@@ -82,7 +93,18 @@ export function parseVersionFitInput(
         ? raw.triedVersion.trim().slice(0, MAX_VERSION_LEN)
         : "";
     if (!tried) return { ok: false, error: "triedVersion required when reporting a different version" };
-    fields.triedVersion = tried;
+    if (!isValidTriedVersionInput(tried)) {
+      return { ok: false, error: "triedVersion must match format 16 or 16.0 (up to 2 digits, optional . and 1 digit)" };
+    }
+    const normalized = normalizeTriedVersionForStorage(tried);
+    if (!normalized) return { ok: false, error: "Invalid triedVersion" };
+    if (listedVersion && !isOtherTriedVersionNewerThanListed(tried, listedVersion)) {
+      return {
+        ok: false,
+        error: "triedVersion must be at least 0.1 newer than the listed key version; use listed or older if not"
+      };
+    }
+    fields.triedVersion = normalized;
   }
 
   return { ok: true, fields };

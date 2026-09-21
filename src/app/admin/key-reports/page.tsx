@@ -24,6 +24,7 @@ import { useStatusChange } from "@/src/hooks/useStatusChange";
 import { I18nProvider } from "@/src/contexts/i18n";
 import adminKeyReportsEn from "@/src/locales/admin/key-reports/en.json";
 import { applyKeyReportEvent, emptyReportData } from "@/src/lib/program/keyReportVersionFit";
+import { mergeUniqueVersionLabels } from "@/src/lib/program/versionFitLabel";
 
 /** `?key=` filter: row storage is plaintext CD key, lowercase username, or link digest — not CD-key SHA. */
 function keyQueryMatchesRowStorage(
@@ -62,6 +63,7 @@ function KeyReportsPageContent() {
   const [selectedProgram, setSelectedProgram] = useState<string>("all");
   const [selectedReport, setSelectedReport] = useState<KeyReport | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reportReloadToken, setReportReloadToken] = useState(0);
   const hasAppliedProgramParam = useRef(false);
 
   const { pendingChanges, saving, handleStatusChange, saveStatusChange, cancelStatusChange } = useStatusChange({
@@ -69,6 +71,14 @@ function KeyReportsPageContent() {
     setReports,
     setPrograms
   });
+
+  const selectedReportKey = selectedReport ? `${selectedReport.programSlug}:${selectedReport.storageKey}` : null;
+
+  useEffect(() => {
+    if (!selectedReportKey || !isModalOpen) return;
+    const updated = reports.find(r => `${r.programSlug}:${r.storageKey}` === selectedReportKey);
+    if (updated) setSelectedReport(updated);
+  }, [reports, isModalOpen, selectedReportKey]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,6 +211,13 @@ function KeyReportsPageContent() {
           }
         }
 
+        for (const row of keyReports.values()) {
+          row.reportData = {
+            ...row.reportData,
+            otherVersionLabels: mergeUniqueVersionLabels(row.reportData.otherVersionLabels)
+          };
+        }
+
         const finalReports = Array.from(keyReports.values()).sort((a, b) => b.reportCount - a.reportCount);
         setReports(finalReports);
         logger.collapse(`Loaded ${finalReports.length} key reports`, "Reports Loaded", "success");
@@ -212,7 +229,7 @@ function KeyReportsPageContent() {
     };
 
     fetchData();
-  }, []);
+  }, [reportReloadToken]);
 
   useEffect(() => {
     const programSlug = searchParams.get("program");
@@ -325,6 +342,7 @@ function KeyReportsPageContent() {
           setSelectedReport(null);
         }}
         report={selectedReport}
+        onReportPatched={() => setReportReloadToken(t => t + 1)}
       />
     </ProtectedAdminLayout>
   );
