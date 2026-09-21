@@ -39,7 +39,7 @@ export const structure: StructureResolver = S =>
 
       docGroup(S, "Analytics", ["trackingEvent", "trackingEventBundle", "visitorBundle"]),
 
-      docGroup(S, "System", ["siteNotificationFeed", "cronRun"]),
+      docGroup(S, "System", ["siteNotificationFeed", "siteNotificationBundle", "cronRun"]),
 
       S.divider(),
 

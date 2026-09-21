@@ -10,6 +10,7 @@ import { visitor } from "./analytics/visitor";
 
 import { cronRun } from "./system/cronRun";
 import { changelogRelease } from "./system/changelogRelease";
+import { siteNotificationBundle } from "./system/siteNotificationBundle";
 import { siteNotificationFeed } from "./system/siteNotificationFeed";
 import contactMessage from "./contact/contactMessage";
 import { contactMessageReply } from "./contact/contactMessageReply";
@@ -42,6 +43,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     cronRun,
     changelogRelease,
     siteNotificationFeed,
+    siteNotificationBundle,
     contactMessage,
     contactMessageReply,
     keySuggestion,

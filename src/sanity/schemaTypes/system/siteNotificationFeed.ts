@@ -22,17 +22,17 @@ const feedItemFields = [
   defineField({ name: "imageUrl", type: "string" })
 ];
 
-/** Append-only feed snapshots — each rebuild creates a new document when content changes. */
+/** Singleton bell snapshot (`siteNotificationFeed` document id). History lives in `siteNotificationBundle`. */
 export const siteNotificationFeed = defineType({
   name: "siteNotificationFeed",
-  title: "Site notification feed",
+  title: "Site notification feed (bell)",
   type: "document",
   fields: [
     defineField({
       name: "generatedAt",
       title: "Generated at",
       type: "datetime",
-      description: "When this snapshot was built (webhook/admin rebuild).",
+      description: "When the header bell snapshot was rebuilt.",
       validation: Rule => Rule.required()
     }),
     defineField({
