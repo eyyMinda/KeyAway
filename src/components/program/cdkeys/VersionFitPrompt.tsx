@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  filterTriedVersionInput,
+  isValidOtherTriedVersionInput,
+  isValidTriedVersionInput,
+  minOtherTriedVersionExample,
+  parseListedVersionForCompare
+} from "@/src/lib/program/versionFitLabel";
+
 interface VersionFitPromptProps {
   listedVersion: string;
   disabled?: boolean;
@@ -20,7 +28,14 @@ export default function VersionFitPrompt({
   onBack
 }: VersionFitPromptProps) {
   const label = listedVersion.trim() || "the listed version";
-  const otherOk = Boolean(otherVersion.trim());
+  const trimmed = otherVersion.trim();
+  const formatOk = isValidTriedVersionInput(trimmed);
+  const listedComparable = Boolean(parseListedVersionForCompare(listedVersion));
+  const newerOk = isValidOtherTriedVersionInput(trimmed, listedVersion);
+  const otherOk = newerOk;
+  const showInvalidFormat = trimmed.length > 0 && !formatOk;
+  const showNotNewer = formatOk && listedComparable && !newerOk;
+  const minExample = minOtherTriedVersionExample(listedVersion);
 
   return (
     <div className="space-y-3">
@@ -40,17 +55,32 @@ export default function VersionFitPrompt({
       </button>
       <div className="space-y-2">
         <label className="block text-xs text-[#8f98a0]" htmlFor="tried-other-version">
-          No — I tried a different version
+          No — I tried a newer version
         </label>
         <input
           id="tried-other-version"
           value={otherVersion}
           disabled={disabled}
-          maxLength={40}
-          placeholder="e.g. 12.4"
-          onChange={e => onOtherVersionChange(e.target.value)}
+          maxLength={4}
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder={minExample ? `e.g. ${minExample}` : "e.g. 16.1"}
+          onChange={e => onOtherVersionChange(filterTriedVersionInput(e.target.value))}
           className="w-full rounded-sm border border-[#2a475e] bg-[#32465a] px-3 py-2 text-sm text-[#c6d4df] placeholder:text-[#556772] focus:border-[#66c0f4] focus:outline-none"
         />
+        {showInvalidFormat ? (
+          <p className="text-xs text-[#e8632a]">Use format 16 or 16.0 (not 16.0.0 or commas).</p>
+        ) : showNotNewer ? (
+          <p className="text-xs text-[#e8632a]">
+            Must be at least 0.1 newer than {label}
+            {minExample ? ` (e.g. ${minExample})` : ""}. If you tried {label} or older, use the button above.
+          </p>
+        ) : (
+          <p className="text-xs text-[#556772]">
+            Newer than {label}
+            {minExample ? ` — at least ${minExample}` : ""} (format 16 or 16.0).
+          </p>
+        )}
         <button
           type="button"
           disabled={disabled || !otherOk}
