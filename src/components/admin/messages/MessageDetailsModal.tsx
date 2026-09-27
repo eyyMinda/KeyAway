@@ -4,8 +4,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useStoreDetails } from "@/src/components/providers/StoreDetailsProvider";
 import Toast from "@/src/components/ui/Toast";
-import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
-import AdminVisitorSection from "@/src/components/admin/AdminVisitorSection";
+import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
 import { openAdminReplyEmail } from "@/src/lib/email/openAdminReplyEmail";
 import { resolveEmailFooterLinks } from "@/src/lib/email/resolveEmailFooterLinks";
 import { MAX_REPLY_BODY_LENGTH } from "@/src/lib/email/sendContactMessageReply";
@@ -29,7 +28,6 @@ export default function MessageDetailsModal({
   onReplySent,
   updating
 }: MessageDetailsModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
   const markedReadRef = useRef<string | null>(null);
   const storeData = useStoreDetails();
   const [emailInput, setEmailInput] = useState(message.email ?? "");
@@ -135,47 +133,16 @@ export default function MessageDetailsModal({
     });
   }, [replyEmailOptions]);
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    document.addEventListener("mousedown", handleClickOutside);
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "unset";
-    };
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fadeIn">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
-      <div
-        ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
-        style={{ animation: "slideDown 0.3s ease-out" }}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-2xl font-bold text-gray-900">Message Details</h2>
-          <ModalCloseButton
-            onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg"
-            iconClassName="h-5 w-5"
-            aria-label="Close modal"
-          />
-        </div>
-
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] space-y-6">
+    <>
+    <AdminDetailsModal
+      title="Message Details"
+      onClose={onClose}
+      visitorHash={message.ipHash}
+      visitorPosition="bottom"
+      maxWidthClass="max-w-2xl"
+    >
+      <div className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">Subject</label>
             <p className="text-lg font-semibold text-gray-900">{message.title ?? "-"}</p>
@@ -209,7 +176,7 @@ export default function MessageDetailsModal({
                   type="button"
                   onClick={handleSaveEmail}
                   disabled={updating || sending || emailInput.trim() === (message.email ?? "").trim()}
-                  className="shrink-0 px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  className="shrink-0 cursor-pointer px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   {emailSaved ? "Saved" : "Save"}
                 </button>
               </div>
@@ -310,17 +277,8 @@ export default function MessageDetailsModal({
             </div>
           </div>
 
-          <AdminVisitorSection ipHash={message.ipHash} />
-        </div>
-
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer">
-            Close
-          </button>
-        </div>
       </div>
+    </AdminDetailsModal>
 
       {toast && typeof document !== "undefined"
         ? createPortal(
@@ -333,6 +291,6 @@ export default function MessageDetailsModal({
             document.body
           )
         : null}
-    </div>
+    </>
   );
 }

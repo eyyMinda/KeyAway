@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Link from "next/link";
-import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
-import AdminVisitorSection from "@/src/components/admin/AdminVisitorSection";
+import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
 import ModalSection from "@/src/components/admin/ModalSection";
 import type { AdminProgramCommentRow } from "@/src/types/admin/programComments";
 
@@ -59,54 +57,33 @@ export default function ProgramCommentDetailsModal({
   onRequestDelete,
   onSpammerChanged
 }: ProgramCommentDetailsModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
   const busy = busyId === row.id;
   const displayRow = row.isReply && parentComment ? parentComment : row;
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    const handleClickOutside = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) onClose();
-    };
-    document.addEventListener("keydown", handleEscape);
-    document.addEventListener("mousedown", handleClickOutside);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "unset";
-    };
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        ref={modalRef}
-        className="relative flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-4">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              {row.isReply ? "Reply details" : "Comment details"}
-            </h2>
-            <Link
-              href={`/program/${row.programSlug}`}
-              target="_blank"
-              className="cursor-pointer text-sm text-blue-700 hover:underline">
-              {row.programTitle}
-            </Link>
-          </div>
-          <ModalCloseButton
-            onClick={onClose}
-            className="cursor-pointer rounded-lg p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
-            iconClassName="h-5 w-5"
-            aria-label="Close"
-          />
-        </div>
-
-        <div className="flex-1 space-y-6 overflow-y-auto p-6">
+    <AdminDetailsModal
+      title={row.isReply ? "Reply details" : "Comment details"}
+      accent="purple"
+      subtitle={
+        <Link href={`/program/${row.programSlug}`} target="_blank" className="cursor-pointer text-primary-800 hover:underline">
+          {row.programTitle}
+        </Link>
+      }
+      onClose={onClose}
+      visitorHash={row.ipHash}
+      onSpammerChanged={onSpammerChanged}
+      footerActions={
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => onRequestDelete(row)}
+          className="cursor-pointer rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Delete {row.isReply ? "reply" : "comment"}
+        </button>
+      }
+    >
+      <div className="space-y-6">
           {row.isReply && parentComment ? (
             <ModalSection title="Parent comment" color="gray">
               <CommentBlock
@@ -154,19 +131,7 @@ export default function ProgramCommentDetailsModal({
             <p className="text-sm text-gray-500">No replies on this comment.</p>
           ) : null}
 
-          <AdminVisitorSection ipHash={row.ipHash} onSpammerChanged={onSpammerChanged} />
-        </div>
-
-        <div className="flex flex-wrap justify-end gap-2 border-t border-gray-200 bg-gray-50 px-6 py-4">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => onRequestDelete(row)}
-            className="cursor-pointer rounded border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
-            Delete {row.isReply ? "reply" : "comment"}
-          </button>
-        </div>
       </div>
-    </div>
+    </AdminDetailsModal>
   );
 }
