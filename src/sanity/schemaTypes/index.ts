@@ -1,10 +1,7 @@
 import { type SchemaTypeDefinition } from "sanity";
 
-import { trackingEvent } from "./analytics/trackingEvent";
 import { bundledTrackingSession, trackingSession, trackingSessionBundle, trackingSessionEvent } from "./analytics/trackingSession";
-import { bundledTrackingEvent } from "./analytics/bundledTrackingEvent";
 import { bundledVisitor } from "./analytics/bundledVisitor";
-import { trackingEventBundle } from "./analytics/trackingEventBundle";
 import { visitorBundle } from "./analytics/visitorBundle";
 import { keyReport } from "./analytics/keyReport";
 import { visitor } from "./analytics/visitor";
@@ -35,14 +32,11 @@ import { giveawayComparisonRow } from "./vendor/giveawayComparisonRow";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
-    trackingEvent,
     trackingSessionEvent,
     trackingSession,
     bundledTrackingSession,
     trackingSessionBundle,
-    bundledTrackingEvent,
     bundledVisitor,
-    trackingEventBundle,
     visitorBundle,
     keyReport,
     cronRun,
