@@ -29,7 +29,7 @@ export default function AdminHeader() {
   const navLinks: Array<{ href: string; label: string; icon: typeof FaKey; countKey?: "suggestions" | "messages" }> = [
     { href: "/admin/analytics", label: "Analytics", icon: HiChartBar },
     { href: "/admin/programs", label: "Programs", icon: HiViewGrid },
-    { href: "/admin/events", label: "Events", icon: MdEventNote },
+    { href: "/admin/events", label: "Sessions", icon: MdEventNote },
     { href: "/admin/key-reports", label: "Key Reports", icon: MdRateReview },
     { href: "/admin/comments", label: "Comments", icon: FaCommentDots },
     { href: "/admin/key-suggestions", label: "Key Suggestions", icon: FaKey, countKey: "suggestions" },
