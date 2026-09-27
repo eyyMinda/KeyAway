@@ -52,10 +52,15 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    const keyReportOverview = new Set<string>([
+      "report_key_working",
+      "report_key_expired",
+      "report_key_limit_reached"
+    ]);
     const sessions = await listSessionsWithEvents(since, until);
-    const merged = flattenSessionEvents(sessions, since, until).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    const merged = flattenSessionEvents(sessions, since, until)
+      .filter(event => !keyReportOverview.has(event.event))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const { totals, byProgram, bySocial, byPath, byCountry } = aggregateEvents(merged);
     const uniqueVisitors = new Set(merged.map(e => e.ipHash).filter(Boolean)).size;
