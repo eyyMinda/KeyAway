@@ -24,7 +24,7 @@ export default function AdminHomePage() {
           color="green"
         />
         <DashboardCard
-          href="/admin/events"
+          href="/admin/sessions"
           title="Sessions"
           subtitle="Visits, clicks, and key reports in one timeline"
           icon="📈"
