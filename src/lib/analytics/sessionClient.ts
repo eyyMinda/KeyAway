@@ -101,11 +101,14 @@ function ensureSession(): StoredSession {
   const idle = now - existing.lastEventAt > SESSION_IDLE_MS;
   const expired = now - existing.startedAt > SESSION_MAX_MS;
   const full = existing.eventCount >= SESSION_MAX_EVENTS;
-  const sameDocument = existing.docId === docId;
-  if (idle || expired || full || !sameDocument) {
-    const created = newSession(docId, sameDocument && (idle || expired || full));
+  if (idle || expired || full) {
+    const created = newSession(docId, existing.docId === docId);
     writeStored(created);
     return created;
+  }
+  if (existing.docId !== docId) {
+    existing.docId = docId;
+    writeStored(existing);
   }
   return existing;
 }
