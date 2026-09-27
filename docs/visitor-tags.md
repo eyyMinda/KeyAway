@@ -5,7 +5,7 @@ This document describes how **visitor identity**, **session counts**, **tiers** 
 ## Identity: who is one visitor?
 
 - A **visitor** is keyed by `**visitorHash`**, a **SHA-256 hash of the client IP + `ANALYTICS_SALT`** (see `src/lib/api/requestGeo.ts`).
-- The same value is stored on each tracking row as `**ipHash**` (`trackingEvent` / bundled events). Admin queries join `visitor` with `visitorHash == ipHash` (`src/lib/sanity/queries.ts`).
+- The same value is stored on each session as `visitorHash`. Admin queries join `visitor` with `visitorHash == ipHash`.
 - **Not** a browser cookie or logged-in user: same network path can share one hash; VPN / mobile IP changes can split or merge “visitors.”
 
 ## When is a `visitor` document created or updated?
@@ -13,7 +13,7 @@ This document describes how **visitor identity**, **session counts**, **tiers** 
 ### Normal path: `page_viewed` after track API
 
 1. Client sends `POST /api/v1/analytics/track` with `event: "page_viewed"` (`src/app/api/v1/analytics/track/route.ts`).
-2. Server creates a `**trackingEvent`** (or skips on localhost).
+2. Server appends the view onto the open `trackingSession` (or skips on localhost).
 3. **After** a successful create, the server calls `**upsertVisitorOnPageView(ipHash)`** (`src/lib/visitors/upsertVisitorOnPageView.ts`).
 
 So: **only `page_viewed` drives visitor upsert**, not `copy_cdkey`, `download_click`, `social_click`, or key reports.
@@ -74,7 +74,7 @@ Important: the **analytics visitor-tags table** is **not** “events in range”
 
 | Field                     | Role                                                                             |
 | ------------------------- | -------------------------------------------------------------------------------- |
-| `visitorHash`             | Stable id; matches `trackingEvent.ipHash`.                                       |
+| `visitorHash`             | Stable id; matches the hash stored on a session.                                 |
 | `visitCount`              | Session count (increment rules above).                                           |
 | `lastActivityAt`          | Last `page_viewed` upsert time; drives session detection and admin range filter. |
 | `visitTier`               | Denormalized tier; recomputed on each upsert from `visitCount`.                  |
