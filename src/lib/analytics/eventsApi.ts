@@ -6,16 +6,6 @@ import { client } from "@/src/sanity/lib/client";
 import { visitorTagAggregatesQuery } from "@/src/lib/sanity/queries";
 import { AnalyticsEventData } from "@/src/types";
 
-export interface BundleCountsByProgram {
-  page_viewed: number;
-  download_click: number;
-}
-
-/** @deprecated Stats are stored on program documents via cron rollup. Returns empty map. */
-export async function getBundleCountsByProgram(): Promise<Map<string, BundleCountsByProgram>> {
-  return new Map();
-}
-
 /** Ensures view/download/popularity fields are numeric (already merged on program by cron). */
 export function mergeProgramStats<
   T extends { slug?: { current?: string }; viewCount?: number; downloadCount?: number; popularityScore?: number }
@@ -43,63 +33,6 @@ export async function fetchEventsForRange(since: string, until: string): Promise
   const merged = await mergeTrackingEventsForRange(since, until);
   const enriched = await enrichEventsWithVisitorMeta(merged as unknown as Array<Record<string, unknown>>);
   return enriched as unknown as AnalyticsEventData[];
-}
-
-export interface AdminEventsPageMeta {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasMore: boolean;
-  countsByEvent: Record<string, number>;
-  cacheHit?: boolean;
-  cachedAt?: string | null;
-}
-
-export interface AdminEventsPageResult {
-  data: AnalyticsEventData[];
-  meta: AdminEventsPageMeta;
-}
-
-export type FetchAdminEventsPageParams = {
-  since: string;
-  until: string;
-  event?: string;
-  page?: number;
-  limit?: number;
-  sort?: string;
-  order?: "asc" | "desc";
-  refresh?: boolean;
-};
-
-/** Paginated admin events list (server merge, cache, enrich page slice only). */
-export async function fetchAdminEventsPage(
-  params: FetchAdminEventsPageParams
-): Promise<AdminEventsPageResult> {
-  const sp = new URLSearchParams();
-  sp.set("since", params.since);
-  sp.set("until", params.until);
-  if (params.event && params.event !== "all") sp.set("event", params.event);
-  if (params.page != null) sp.set("page", String(params.page));
-  if (params.limit != null) sp.set("limit", String(params.limit));
-  if (params.sort) sp.set("sort", params.sort);
-  if (params.order) sp.set("order", params.order);
-  if (params.refresh) sp.set("refresh", "true");
-
-  const res = await fetch(`/api/v1/admin/events?${sp.toString()}`);
-  const json = (await res.json()) as { data?: AnalyticsEventData[]; meta?: AdminEventsPageMeta };
-  if (!res.ok) throw new Error("Failed to fetch events");
-  return {
-    data: json.data ?? [],
-    meta: json.meta ?? {
-      page: 1,
-      limit: 25,
-      total: 0,
-      totalPages: 1,
-      hasMore: false,
-      countsByEvent: {}
-    }
-  };
 }
 
 /** Admin UI: load range via server route (token + batched visitor lookup). */

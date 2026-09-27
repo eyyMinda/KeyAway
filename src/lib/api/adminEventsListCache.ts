@@ -1,63 +1,11 @@
-import { mergeTrackingEventsForRange } from "@/src/lib/analytics/mergeTrackingEventsForRange";
 import { AnalyticsEventData } from "@/src/types";
 
 export const ADMIN_EVENTS_LIST_CACHE_TTL_MS = 120_000;
 
-type CacheEntry = {
-  events: AnalyticsEventData[];
-  expiresAt: number;
-  cachedAt: string;
-};
-
-const store = new Map<string, CacheEntry>();
 const PRUNE_AT = 50;
 
 function cacheKey(since: string, until: string): string {
   return `${since}|${until}`;
-}
-
-function pruneExpired(now = Date.now()): void {
-  if (store.size <= PRUNE_AT) return;
-  for (const [k, v] of store) {
-    if (v.expiresAt <= now) store.delete(k);
-  }
-}
-
-export type MergedEventsCacheResult = {
-  events: AnalyticsEventData[];
-  cacheHit: boolean;
-  cachedAt: string | null;
-};
-
-/**
- * Returns merged slim events for since/until, cached ~120s per range key.
- * bypass=true skips read and refreshes the entry (admin refresh button).
- */
-export async function getMergedEventsForAdmin(
-  since: string,
-  until: string,
-  options?: { bypass?: boolean }
-): Promise<MergedEventsCacheResult> {
-  const key = cacheKey(since, until);
-  const now = Date.now();
-
-  if (!options?.bypass) {
-    const hit = store.get(key);
-    if (hit && hit.expiresAt > now) {
-      return { events: hit.events, cacheHit: true, cachedAt: hit.cachedAt };
-    }
-  }
-
-  const events = await mergeTrackingEventsForRange(since, until);
-  const cachedAt = new Date().toISOString();
-  store.set(key, {
-    events,
-    expiresAt: now + ADMIN_EVENTS_LIST_CACHE_TTL_MS,
-    cachedAt
-  });
-  pruneExpired(now);
-
-  return { events, cacheHit: false, cachedAt };
 }
 
 export type AnalyticsSummaryCachePayload = {
@@ -127,14 +75,3 @@ function pruneSummaryExpired(now: number): void {
   }
 }
 
-/** Invalidate a range after bulk PATCH (optional). */
-export function invalidateMergedEventsCache(since?: string, until?: string): void {
-  if (since && until) {
-    const key = cacheKey(since, until);
-    store.delete(key);
-    summaryStore.delete(key);
-    return;
-  }
-  store.clear();
-  summaryStore.clear();
-}
