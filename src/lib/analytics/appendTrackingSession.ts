@@ -44,11 +44,23 @@ export type AppendTrackingSessionInput = {
   events: SessionEventInput[];
 };
 
+const NEAR_DUPLICATE_MS = 90 * 1000;
+
+type RecentEvent = {
+  event?: string;
+  createdAt?: string;
+  path?: string;
+  programSlug?: string;
+  key?: string;
+  social?: string;
+};
+
 type OpenSession = {
   _id: string;
   eventCount?: number;
   startedAt?: string;
   lastEventAt?: string;
+  events?: RecentEvent[];
 };
 
 function clean(value: string | undefined): string | undefined {
@@ -80,6 +92,26 @@ function toRow(event: SessionEventInput) {
   };
 }
 
+function sameEvent(a: RecentEvent, b: RecentEvent): boolean {
+  return (
+    a.event === b.event &&
+    (a.path || "") === (b.path || "") &&
+    (a.programSlug || "") === (b.programSlug || "") &&
+    (a.key || "") === (b.key || "") &&
+    (a.social || "") === (b.social || "")
+  );
+}
+
+function isNearDuplicate(existing: RecentEvent[], row: RecentEvent): boolean {
+  const at = row.createdAt ? new Date(row.createdAt).getTime() : NaN;
+  if (!Number.isFinite(at)) return false;
+  return existing.some(event => {
+    if (!sameEvent(event, row)) return false;
+    const prev = event.createdAt ? new Date(event.createdAt).getTime() : NaN;
+    return Number.isFinite(prev) && Math.abs(at - prev) <= NEAR_DUPLICATE_MS;
+  });
+}
+
 function isClosed(doc: OpenSession, now: number): boolean {
   const last = doc.lastEventAt ? new Date(doc.lastEventAt).getTime() : 0;
   const started = doc.startedAt ? new Date(doc.startedAt).getTime() : 0;
@@ -89,19 +121,20 @@ function isClosed(doc: OpenSession, now: number): boolean {
   return count >= SESSION_MAX_EVENTS;
 }
 
-async function findOpenSessionId(visitorHash: string, now: number): Promise<string | null> {
+async function findOpenSession(visitorHash: string, now: number): Promise<OpenSession | null> {
   const doc = await client.fetch<OpenSession | null>(
-    `*[_type == "trackingSession" && visitorHash == $h && lastEventAt >= $cutoff && eventCount < $max] | order(lastEventAt desc)[0]{
-      _id, eventCount, startedAt, lastEventAt
+    `*[_type == "trackingSession" && visitorHash == $h && lastEventAt >= $cutoff && startedAt >= $minStart && eventCount < $max] | order(startedAt asc)[0]{
+      _id, eventCount, startedAt, lastEventAt, events
     }`,
     {
       h: visitorHash,
       cutoff: new Date(now - SESSION_IDLE_MS).toISOString(),
+      minStart: new Date(now - SESSION_MAX_MS).toISOString(),
       max: SESSION_MAX_EVENTS
     }
   );
   if (!doc?._id || isClosed(doc, now)) return null;
-  return doc._id;
+  return doc;
 }
 
 /** Append events onto one visit document. Referrer/entry are written only when the document is created. */
@@ -117,26 +150,30 @@ export async function appendTrackingSession(
   const requestedId =
     input.sessionId && SESSION_ID_RE.test(input.sessionId) ? trackingSessionDocumentId(input.sessionId) : null;
 
-  let docId = requestedId;
-  let rotated = false;
+  const open = await findOpenSession(input.visitorHash, now);
+  let docId = open?._id ?? requestedId ?? trackingSessionDocumentId(randomUUID());
+  let rotated = Boolean(open && requestedId && open._id !== requestedId);
+  let priorEvents = open?.events ?? [];
 
-  if (docId) {
+  if (!open && requestedId) {
     const existing = await client.fetch<OpenSession | null>(
-      `*[_id == $id][0]{ _id, eventCount, startedAt, lastEventAt }`,
-      { id: docId }
+      `*[_id == $id][0]{ _id, eventCount, startedAt, lastEventAt, events }`,
+      { id: requestedId }
     );
     if (existing && isClosed(existing, now)) {
-      docId = null;
+      docId = trackingSessionDocumentId(randomUUID());
       rotated = true;
+      priorEvents = [];
+    } else if (existing) {
+      docId = existing._id;
+      priorEvents = existing.events ?? [];
     }
   }
 
-  if (!docId) {
-    docId = (await findOpenSessionId(input.visitorHash, now)) ?? trackingSessionDocumentId(randomUUID());
-    if (requestedId) rotated = true;
+  const rows = events.map(toRow).filter(row => !isNearDuplicate(priorEvents, row));
+  if (!rows.length) {
+    return { sessionId: docId.slice("trackingSession.".length), rotated };
   }
-
-  const rows = events.map(toRow);
   const reportCount = rows.filter(r => r.event.startsWith("report_")).length;
   const contributionCount = rows.filter(r => isContributionEvent(r.event)).length;
   const lastEventAt = rows[rows.length - 1]?.createdAt ?? new Date(now).toISOString();
