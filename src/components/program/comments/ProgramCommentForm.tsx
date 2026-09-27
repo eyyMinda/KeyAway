@@ -5,6 +5,7 @@ import { FaRegSmile } from "react-icons/fa";
 import EmojiPickerPopover from "@/src/components/program/comments/EmojiPickerPopover";
 import { useAdminAccess } from "@/src/hooks/useAdminAccess";
 import { MAX_COMMENT_AUTHOR, MAX_COMMENT_BODY } from "@/src/lib/program/commentBody";
+import { getTrackingSessionMeta } from "@/src/lib/analytics/sessionClient";
 import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
 
 type ProgramCommentFormProps = {
@@ -78,7 +79,8 @@ export default function ProgramCommentForm({
           ...(!isAdmin ? { authorName: name } : {}),
           body: text,
           website,
-          ...(replyTo ? { parentCommentKey: replyTo.commentKey } : {})
+          ...(replyTo ? { parentCommentKey: replyTo.commentKey } : {}),
+          ...getTrackingSessionMeta()
         })
       });
       const json = await res.json().catch(() => ({}));

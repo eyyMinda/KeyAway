@@ -23,7 +23,7 @@ export const visitor = defineType({
       name: "visitCount",
       title: "Visit count (sessions)",
       type: "number",
-      description: "Increments when last activity was more than 1 hour ago",
+      description: "Increments when last activity was more than 30 minutes ago",
       initialValue: 1,
       validation: Rule => Rule.required().min(0)
     }),

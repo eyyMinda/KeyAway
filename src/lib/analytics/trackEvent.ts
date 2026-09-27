@@ -1,18 +1,11 @@
 import { AnalyticsEvent, KeyReportEvent, TrackEventMeta } from "@/src/types";
-import { isAdminSession } from "@/src/lib/admin/isAdminSession";
+import { enqueueAnalyticsEvent } from "@/src/lib/analytics/sessionClient";
 
+/** Queue a visit event. Flushed in a batch onto the current tracking session. */
 export async function trackEvent(event: AnalyticsEvent | KeyReportEvent, meta?: TrackEventMeta) {
   try {
-    if (await isAdminSession()) return;
-
-    await fetch("/api/v1/analytics/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event, meta }),
-      keepalive: true // better delivery when user navigates away
-    });
+    enqueueAnalyticsEvent(event, meta);
   } catch (e) {
     void e;
-    // keep silent; analytics should never break UX
   }
 }

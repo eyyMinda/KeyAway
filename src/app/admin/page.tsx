@@ -25,8 +25,8 @@ export default function AdminHomePage() {
         />
         <DashboardCard
           href="/admin/events"
-          title="Events"
-          subtitle="Track and analyze site analytics"
+          title="Sessions"
+          subtitle="Visits, clicks, and key reports in one timeline"
           icon="📈"
           color="purple"
         />

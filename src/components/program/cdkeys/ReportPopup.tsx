@@ -166,6 +166,7 @@ export default function ReportPopup({
             key: { ...cdKey, programFlow },
             programFlow,
             path: window.location.pathname,
+            ...(await import("@/src/lib/analytics/sessionClient")).getTrackingSessionMeta(),
             listedVersion: cdKey.version,
             ...(version ?? {})
           }

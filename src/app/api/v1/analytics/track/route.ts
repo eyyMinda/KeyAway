@@ -1,4 +1,4 @@
-/** @fileoverview Public POST tracking: creates `trackingEvent` or `keyReport`, geo + visitor upsert on page views, spammer skip on reports. */
+/** @fileoverview Public POST tracking: appends a visit session, or creates `keyReport` plus a session row. */
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { TrackRequestBody } from "@/src/types";
@@ -9,6 +9,8 @@ import { normalizePath } from "@/src/lib/api/inputNormalize";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
 import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
+import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
+import { isSessionEntry } from "@/src/lib/analytics/sessionConstants";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
@@ -180,10 +182,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });
     }
 
-    const documentType = isReportEvent ? "keyReport" : "trackingEvent";
-
     const eventData: Record<string, unknown> = {
-      _type: documentType,
+      _type: "keyReport",
       referrer: ref,
       userAgent: ua,
       ipHash,
@@ -235,7 +235,47 @@ export async function POST(req: NextRequest) {
       Object.assign(eventData, version.fields);
     }
 
-    await client.create(eventData as { _type: string } & Record<string, unknown>);
+    const sessionId = typeof body.meta?.sessionId === "string" ? body.meta.sessionId : undefined;
+    const sessionEntry = typeof body.meta?.sessionEntry === "string" ? body.meta.sessionEntry : undefined;
+
+    if (isReportEvent) {
+      await client.create(eventData as { _type: string } & Record<string, unknown>);
+    }
+
+    try {
+      await appendTrackingSession({
+        sessionId,
+        visitorHash: ipHash,
+        userAgent: ua,
+        country: location?.country,
+        city: location?.city,
+        entry: isSessionEntry(sessionEntry) ? sessionEntry : undefined,
+        referrer,
+        landingPath: path,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        events: [
+          {
+            event: body.event,
+            path,
+            programSlug,
+            notFound: eventData.notFound === true,
+            key: typeof eventData.key === "string" ? eventData.key : undefined,
+            label: typeof eventData.label === "string" ? eventData.label : undefined,
+            social,
+            activationUrl,
+            programFlow: typeof eventData.programFlow === "string" ? eventData.programFlow : undefined,
+            listedVersion: typeof eventData.listedVersion === "string" ? eventData.listedVersion : undefined,
+            triedVersionFit: typeof eventData.triedVersionFit === "string" ? eventData.triedVersionFit : undefined,
+            triedVersion: typeof eventData.triedVersion === "string" ? eventData.triedVersion : undefined
+          }
+        ]
+      });
+    } catch (e) {
+      console.error("[track] session append", e);
+      if (!isReportEvent) throw e;
+    }
 
     if (isReportEvent && ipHash) {
       try {

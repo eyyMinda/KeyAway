@@ -125,6 +125,7 @@ export default function RenewalModal({
         programSlug: slug,
         key: { ...cdKey, programFlow },
         listedVersion: cdKey.version,
+        ...(await import("@/src/lib/analytics/sessionClient")).getTrackingSessionMeta(),
         ...(version ?? {})
       };
 

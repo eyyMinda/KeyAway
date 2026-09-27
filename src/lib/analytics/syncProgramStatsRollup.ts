@@ -1,4 +1,4 @@
-/** @fileoverview Cron: aggregate trackingEvent + bundle counts onto program docs (removes 2MB bundle fetch from public pages). */
+/** @fileoverview Cron: aggregate session view/download counts onto program docs. */
 import { calculatePopularityScore } from "@/src/lib/program/programUtils";
 import {
   TAG_FEATURED_PROGRAM,
@@ -29,31 +29,35 @@ function applyEvent(
 async function aggregateEventStats(): Promise<Map<string, StatsRow>> {
   const map = new Map<string, StatsRow>();
 
-  let offset = 0;
+  const liveSessions = await client.fetch<Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }>>(
+    `*[_type == "trackingSession"]{
+      "events": events[event in ["page_viewed", "download_click"]]{ programSlug, event, notFound }
+    }`
+  );
+  for (const session of liveSessions ?? []) {
+    for (const e of session.events ?? []) applyEvent(map, e.programSlug, e.event, e.notFound);
+  }
+
+  let sessionOffset = 0;
   while (true) {
-    const batch = await client.fetch<Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }>>(
-      `*[_type == "trackingEventBundle"] | order(_id asc) [$start...$end]{
-        "events": events[]{ programSlug, event, notFound }
+    const batch = await client.fetch<
+      Array<{ sessions?: Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }> }>
+    >(
+      `*[_type == "trackingSessionBundle"] | order(_id asc) [$start...$end]{
+        "sessions": sessions[]{
+          "events": events[event in ["page_viewed", "download_click"]]{ programSlug, event, notFound }
+        }
       }`,
-      { start: offset, end: offset + BUNDLE_BATCH - 1 }
+      { start: sessionOffset, end: sessionOffset + BUNDLE_BATCH - 1 }
     );
     if (!batch?.length) break;
     for (const bundle of batch) {
-      for (const e of bundle.events ?? []) {
-        applyEvent(map, e.programSlug, e.event, e.notFound);
+      for (const session of bundle.sessions ?? []) {
+        for (const e of session.events ?? []) applyEvent(map, e.programSlug, e.event, e.notFound);
       }
     }
     if (batch.length < BUNDLE_BATCH) break;
-    offset += BUNDLE_BATCH;
-  }
-
-  const singular = await client.fetch<Array<{ programSlug?: string; event?: string; notFound?: boolean }>>(
-    `*[_type == "trackingEvent" && event in ["page_viewed", "download_click"]]{
-      programSlug, event, notFound
-    }`
-  );
-  for (const e of singular ?? []) {
-    applyEvent(map, e.programSlug, e.event, e.notFound);
+    sessionOffset += BUNDLE_BATCH;
   }
 
   return map;

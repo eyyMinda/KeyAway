@@ -10,6 +10,7 @@ import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContr
 import type { KeyReportEvent } from "@/src/types";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { parseVersionFitInput } from "@/src/lib/program/keyReportVersionFit";
+import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 
 const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
@@ -73,6 +74,26 @@ export async function POST(req: NextRequest) {
         patch.unset(["triedVersionFit", "triedVersion", "listedVersion"]);
       }
       const updated = await patch.commit();
+      const renewSessionId = typeof b.sessionId === "string" ? b.sessionId : undefined;
+      try {
+        await appendTrackingSession({
+          sessionId: renewSessionId,
+          visitorHash: ipHash,
+          userAgent: ua,
+          entry: typeof b.sessionEntry === "string" ? b.sessionEntry : undefined,
+          referrer: typeof b.referrer === "string" ? b.referrer : undefined,
+          events: [
+            {
+              event: newEventType,
+              programSlug: renewProgramSlug,
+              path: typeof b.path === "string" ? b.path : undefined,
+              ...version.fields
+            }
+          ]
+        });
+      } catch (e) {
+        console.error("[POST /api/v1/key-reports] session append (renew)", e);
+      }
       try {
         await upsertVisitorContribution(ipHash, "report");
       } catch (e) {
@@ -130,6 +151,33 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await client.create(eventData as { _type: string } & Record<string, unknown>);
+    const sessionId = typeof meta?.sessionId === "string" ? meta.sessionId : undefined;
+    try {
+      await appendTrackingSession({
+        sessionId,
+        visitorHash: ipHash,
+        userAgent: ua,
+        country: location?.country,
+        city: location?.city,
+        entry: typeof meta?.sessionEntry === "string" ? meta.sessionEntry : undefined,
+        referrer: typeof meta?.referrer === "string" ? meta.referrer : undefined,
+        landingPath: path,
+        events: [
+          {
+            event,
+            path,
+            programSlug,
+            key: keyData.hash,
+            label: keyData.identifier,
+            listedVersion: typeof eventData.listedVersion === "string" ? eventData.listedVersion : undefined,
+            triedVersionFit: typeof eventData.triedVersionFit === "string" ? eventData.triedVersionFit : undefined,
+            triedVersion: typeof eventData.triedVersion === "string" ? eventData.triedVersion : undefined
+          }
+        ]
+      });
+    } catch (e) {
+      console.error("[POST /api/v1/key-reports] session append", e);
+    }
     try {
       await upsertVisitorContribution(ipHash, "report");
     } catch (e) {

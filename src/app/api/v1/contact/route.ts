@@ -5,6 +5,7 @@ import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
 import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import { touchVisitorActivity } from "@/src/lib/visitors/upsertVisitorContribution";
+import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 
 const MAX_TITLE = 200;
 const MAX_MESSAGE = 5000;
@@ -59,6 +60,19 @@ export async function POST(req: NextRequest) {
       await touchVisitorActivity(ipHash);
     } catch (e) {
       console.error("[POST /api/v1/contact] visitor activity touch failed", e);
+    }
+    if (ipHash) {
+      try {
+        await appendTrackingSession({
+          sessionId: typeof b.sessionId === "string" ? b.sessionId : undefined,
+          visitorHash: ipHash,
+          entry: typeof b.sessionEntry === "string" ? b.sessionEntry : undefined,
+          referrer: typeof b.referrer === "string" ? b.referrer : undefined,
+          events: [{ event: "contact", label: title, path: "/contact" }]
+        });
+      } catch (e) {
+        console.error("[POST /api/v1/contact] session append failed", e);
+      }
     }
 
     return NextResponse.json({ data: { id: result._id }, meta: {} }, { status: 201 });

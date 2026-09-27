@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { KeySuggestionFormData } from "@/src/types/contact";
+import { getTrackingSessionMeta } from "@/src/lib/analytics/sessionClient";
 
 interface KeySuggestionFormProps {
   onSuccess: () => void;
@@ -29,7 +30,7 @@ export default function KeySuggestionForm({ onSuccess }: KeySuggestionFormProps)
       const response = await fetch("/api/v1/key-suggestions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, ...getTrackingSessionMeta() })
       });
 
       if (!response.ok) throw new Error("Failed to submit suggestion");

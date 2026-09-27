@@ -34,6 +34,7 @@ function SourceBadge({ source }: { source: string }) {
 function JobLabel({ job }: { job: string }) {
   const labels: Record<string, string> = {
     "bundle-events": "Bundle Events",
+    "bundle-sessions": "Bundle Sessions",
     "bundle-visitors": "Bundle Visitors",
     "update-expired-keys": "Update Expired Keys",
     "prune-cron-runs": "Prune Cron Runs"
@@ -41,7 +42,7 @@ function JobLabel({ job }: { job: string }) {
   return <>{labels[job] ?? job}</>;
 }
 
-type CronJobKey = "bundle-events" | "bundle-visitors" | "update-expired-keys" | "prune-cron-runs";
+type CronJobKey = "bundle-events" | "bundle-sessions" | "bundle-visitors" | "update-expired-keys" | "prune-cron-runs";
 
 export default function CronStatusCard() {
   const [runs, setRuns] = useState<CronRun[]>([]);
@@ -81,6 +82,9 @@ export default function CronStatusCard() {
     "bundle-events": runs.find(
       r => r.job === "bundle-events" && (r.source === "vercel_cron" || r.source === "bearer")
     ),
+    "bundle-sessions": runs.find(
+      r => r.job === "bundle-sessions" && (r.source === "vercel_cron" || r.source === "bearer")
+    ),
     "bundle-visitors": runs.find(
       r => r.job === "bundle-visitors" && (r.source === "vercel_cron" || r.source === "bearer")
     ),
@@ -93,6 +97,7 @@ export default function CronStatusCard() {
   };
   const lastByJob: Record<CronJobKey, CronRun | undefined> = {
     "bundle-events": runs.find(r => r.job === "bundle-events"),
+    "bundle-sessions": runs.find(r => r.job === "bundle-sessions"),
     "bundle-visitors": runs.find(r => r.job === "bundle-visitors"),
     "update-expired-keys": runs.find(r => r.job === "update-expired-keys"),
     "prune-cron-runs": runs.find(r => r.job === "prune-cron-runs")
@@ -144,6 +149,7 @@ export default function CronStatusCard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-0 min-w-0 lg:pr-8">
           <JobStatusRow job="bundle-events" schedule="Every 6h (12h live window)" label="Bundle Events" />
+          <JobStatusRow job="bundle-sessions" schedule="Every 30m (idle visits)" label="Bundle Sessions" />
           <JobStatusRow job="bundle-visitors" schedule="Daily at 21:30 UTC" label="Bundle Visitors" />
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
           <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (60d)" />

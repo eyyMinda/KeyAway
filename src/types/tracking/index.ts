@@ -75,6 +75,9 @@ export interface TrackEventMeta {
   social?: string;
   copyMethod?: "button_click" | "keyboard_or_context_menu";
   referrer?: string;
+  /** Open visit id. Landing source is stored once on the session, not on each event. */
+  sessionId?: string;
+  sessionEntry?: "direct" | "external" | "internal" | "restore";
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
@@ -117,6 +120,9 @@ export interface RenewReportRequest {
   newEventType: KeyReportEvent;
   programSlug: string;
   key: string | Record<string, unknown>;
+  sessionId?: string;
+  sessionEntry?: "direct" | "external" | "internal" | "restore";
+  referrer?: string;
   listedVersion?: string;
   triedVersionFit?: TriedVersionFit;
   triedVersion?: string;
