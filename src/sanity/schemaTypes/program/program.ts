@@ -275,7 +275,7 @@ export const program = defineType({
       type: "object",
       readOnly: true,
       options: { collapsible: true, collapsed: true },
-      description: "Synced from analytics by the bundle-events cron. Do not edit manually.",
+      description: "Synced from sessions by the sync-program-stats cron. Do not edit manually.",
       fields: [
         defineField({
           name: "viewCount",

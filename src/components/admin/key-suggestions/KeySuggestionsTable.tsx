@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { KeySuggestion } from "@/src/types/contact";
+import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import SuggestionDetailsModal from "./SuggestionDetailsModal";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 
@@ -150,11 +151,7 @@ export default function KeySuggestionsTable({
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-center">
-                        <button
-                          onClick={() => setSelectedSuggestion(suggestion)}
-                          className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors cursor-pointer">
-                          View Details
-                        </button>
+                        <AdminViewDetailsButton onClick={() => setSelectedSuggestion(suggestion)} />
                       </div>
                     </td>
                   </tr>

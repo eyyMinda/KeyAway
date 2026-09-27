@@ -3,8 +3,8 @@
 /** @fileoverview Admin visit list. One row per session, events open in a modal. */
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import TimeFilter from "@/src/components/admin/TimeFilter";
+import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import SessionDetailsModal from "@/src/components/admin/sessions/SessionDetailsModal";
-import SessionMigrationPanel from "@/src/components/admin/sessions/SessionMigrationPanel";
 import Pagination from "@/src/components/ui/Pagination";
 import { sessionSourceLabel } from "@/src/lib/analytics/sessionEntry";
 import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
@@ -32,7 +32,7 @@ function durationLabel(start: string, end: string): string {
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
 }
 
-export default function EventsPage() {
+export default function SessionsPage() {
   const [rows, setRows] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState("24h");
@@ -71,9 +71,9 @@ export default function EventsPage() {
   }, [load]);
 
   return (
-    <ProtectedAdminLayout title="Sessions" subtitle="One row per visit. Open a session to see every click and key report.">
-      <SessionMigrationPanel />
-
+    <ProtectedAdminLayout
+      title="Sessions"
+      subtitle="One row per visit. Open a session to see every click and contribution.">
       <div className="mb-6">
         <TimeFilter
           selectedPeriod={selectedPeriod}
@@ -101,8 +101,7 @@ export default function EventsPage() {
               setEntry(filter.id);
               setPage(1);
             }}
-            className={`rounded-full px-3 py-1 text-sm ${entry === filter.id ? adminChrome.filterPillActive : adminChrome.filterPillIdle}`}
-          >
+            className={`cursor-pointer rounded-full px-3 py-1 text-sm font-medium ${entry === filter.id ? adminChrome.filterPillActive : adminChrome.filterPillIdle}`}>
             {filter.label}
             {counts[filter.id] != null ? ` (${counts[filter.id]})` : ""}
           </button>
@@ -110,14 +109,14 @@ export default function EventsPage() {
       </div>
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-soft">
-        <div className="border-b border-gray-200 p-6">
+        <div className="border-b border-gray-200 bg-gray-50 p-6">
           <h3 className="text-lg font-semibold text-gray-900">Visits</h3>
-          <p className="mt-1 text-sm text-gray-500">{total.toLocaleString()} sessions</p>
+          <p className="mt-1 text-sm font-medium text-gray-700">{total.toLocaleString()} sessions</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-gray-500">
+            <thead className="bg-gray-50">
+              <tr className="text-left text-xs font-semibold uppercase tracking-wide text-gray-700">
                 <th className="p-4">Visitor</th>
                 <th className="p-4">Source</th>
                 <th className="p-4">Landing</th>
@@ -130,38 +129,38 @@ export default function EventsPage() {
             <tbody className="divide-y divide-gray-200">
               {rows.map(row => (
                 <tr key={row.id} className="hover:bg-gray-50">
-                  <td className="p-4 text-sm">
+                  <td className="p-4 text-sm text-gray-900">
                     <span className={visitorTierBadgeClasses(row.visitTier, false)}>{row.visitTier || "new"}</span>
                     {row.visitorIsSpammer ? (
                       <span className={`${visitorTierBadgeClasses("new", true)} ml-1`}>spammer</span>
                     ) : null}
                   </td>
-                  <td className="p-4 text-sm text-gray-900">{sessionSourceLabel(row.entry, row.referrer)}</td>
-                  <td className="max-w-48 truncate p-4 text-sm text-gray-700">{row.landingPath || "—"}</td>
-                  <td className="p-4 text-sm text-gray-700">{[row.city, row.country].filter(Boolean).join(", ") || "—"}</td>
-                  <td className="p-4 text-sm text-gray-700">
+                  <td className="p-4 text-sm font-medium text-gray-900">
+                    {sessionSourceLabel(row.entry, row.referrer)}
+                  </td>
+                  <td className="max-w-48 truncate p-4 text-sm text-gray-900">{row.landingPath || "—"}</td>
+                  <td className="p-4 text-sm text-gray-900">
+                    {[row.city, row.country].filter(Boolean).join(", ") || "—"}
+                  </td>
+                  <td className="p-4 text-sm text-gray-900">
                     {row.eventCount}
                     {(row.contributionCount || row.reportCount) > 0
                       ? ` · ${row.contributionCount || row.reportCount} contribution${(row.contributionCount || row.reportCount) === 1 ? "" : "s"}`
                       : ""}
-                    <div className="text-xs text-gray-400">{durationLabel(row.startedAt, row.lastEventAt)}</div>
+                    <div className="text-xs font-medium text-gray-700">
+                      {durationLabel(row.startedAt, row.lastEventAt)}
+                    </div>
                   </td>
-                  <td className="p-4 text-sm text-gray-700">{new Date(row.startedAt).toLocaleString()}</td>
+                  <td className="p-4 text-sm text-gray-900">{new Date(row.startedAt).toLocaleString()}</td>
                   <td className="p-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => setOpenId(row.id)}
-                      className="text-sm font-medium text-primary-600 hover:text-primary-800"
-                    >
-                      View session
-                    </button>
+                    <AdminViewDetailsButton onClick={() => setOpenId(row.id)} />
                   </td>
                 </tr>
               ))}
               {!loading && rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-sm text-gray-500">
-                    No sessions in this range yet. New visits are recorded here. Older clicks remain in analytics event documents.
+                  <td colSpan={7} className="p-8 text-center text-sm font-medium text-gray-800">
+                    No sessions in this range.
                   </td>
                 </tr>
               ) : null}
@@ -174,6 +173,7 @@ export default function EventsPage() {
           totalItems={total}
           itemsPerPage={25}
           onPageChange={setPage}
+          className="p-4 border-t border-gray-200"
         />
       </div>
 

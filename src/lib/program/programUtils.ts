@@ -63,24 +63,27 @@ export function isStatsBasedProgramsSort(_sortType: SortType): boolean {
  * GROQ `| order(...)` after `{ programsListingProjection }`.
  */
 export function groqProgramsOrderClause(sortType: SortType): string {
-  switch (sortType) {
-    case "popular":
-      return "| order(popularityScore desc)";
-    case "views":
-      return "| order(viewCount desc)";
-    case "downloads":
-      return "| order(downloadCount desc)";
-    case "latest":
-      return "| order(_createdAt desc)";
-    case "oldest":
-      return "| order(_createdAt asc)";
-    case "name":
-      return "| order(title asc)";
-    case "nameDesc":
-      return "| order(title desc)";
-    default:
-      return "| order(_createdAt desc)";
-  }
+  const primary = (() => {
+    switch (sortType) {
+      case "popular":
+        return "popularityScore desc";
+      case "views":
+        return "viewCount desc";
+      case "downloads":
+        return "downloadCount desc";
+      case "latest":
+        return "_createdAt desc";
+      case "oldest":
+        return "_createdAt asc";
+      case "name":
+        return "title asc";
+      case "nameDesc":
+        return "title desc";
+      default:
+        return "_createdAt desc";
+    }
+  })();
+  return `| order(${primary}, _id asc)`;
 }
 
 export function normalizeSortType(value?: string): SortType {

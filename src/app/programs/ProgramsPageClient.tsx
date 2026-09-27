@@ -87,7 +87,7 @@ export default function ProgramsPageClient({
 
   const programs = listData?.programs ?? EMPTY_PROGRAMS;
   const totalPrograms = listData?.totalCount ?? 0;
-  const programsPerPage = listData?.programsPerPage ?? 16;
+  const programsPerPage = listData?.programsPerPage ?? 15;
   const currentPage = listData?.page ?? page;
 
   const loadList = useCallback(async (sp: URLSearchParams) => {

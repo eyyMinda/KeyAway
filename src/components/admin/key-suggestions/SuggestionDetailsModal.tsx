@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FaExternalLinkAlt, FaCopy } from "react-icons/fa";
-import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
-import AdminVisitorSection from "@/src/components/admin/AdminVisitorSection";
+import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
 import { KeySuggestion } from "@/src/types/contact";
 import type { SuggestionUpdatePayload } from "./KeySuggestionsTable";
 
@@ -20,7 +19,6 @@ export default function SuggestionDetailsModal({
   onUpdateSuggestion,
   updating
 }: SuggestionDetailsModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null);
   const [emailInput, setEmailInput] = useState(suggestion.email ?? "");
   const [nameInput, setNameInput] = useState(suggestion.name ?? "");
   const [emailSaved, setEmailSaved] = useState(false);
@@ -47,53 +45,19 @@ export default function SuggestionDetailsModal({
     setTimeout(() => setNameSaved(false), 2000);
   }, [nameInput, suggestion.name, onUpdateSuggestion]);
 
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    document.addEventListener("mousedown", handleClickOutside);
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.body.style.overflow = "unset";
-    };
-  }, [onClose]);
-
   const handleCopyKey = () => {
     navigator.clipboard.writeText(suggestion.cdKey);
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fadeIn">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-
-      <div
-        ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
-        style={{ animation: "slideDown 0.3s ease-out" }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-2xl font-bold text-gray-900">Suggestion Details</h2>
-          <ModalCloseButton
-            onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg"
-            iconClassName="h-5 w-5"
-            aria-label="Close modal"
-          />
-        </div>
-
-        {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] space-y-6">
+    <AdminDetailsModal
+      title="Suggestion Details"
+      onClose={onClose}
+      visitorHash={suggestion.ipHash}
+      visitorPosition="bottom"
+      maxWidthClass="max-w-2xl"
+    >
+      <div className="space-y-6">
           {/* Program Info */}
           <div>
             <label className="block text-sm font-medium text-gray-500 mb-1">Program Name</label>
@@ -161,7 +125,7 @@ export default function SuggestionDetailsModal({
                   type="button"
                   onClick={handleSaveName}
                   disabled={updating || nameInput.trim() === (suggestion.name ?? "").trim()}
-                  className="shrink-0 px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  className="shrink-0 cursor-pointer px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   {nameSaved ? "Saved" : "Save"}
                 </button>
               </div>
@@ -183,7 +147,7 @@ export default function SuggestionDetailsModal({
                   type="button"
                   onClick={handleSaveEmail}
                   disabled={updating || emailInput.trim() === (suggestion.email ?? "").trim()}
-                  className="shrink-0 px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  className="shrink-0 cursor-pointer px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   {emailSaved ? "Saved" : "Save"}
                 </button>
               </div>
@@ -219,18 +183,7 @@ export default function SuggestionDetailsModal({
             </div>
           </div>
 
-          <AdminVisitorSection ipHash={suggestion.ipHash} />
-        </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer">
-            Close
-          </button>
-        </div>
       </div>
-    </div>
+    </AdminDetailsModal>
   );
 }

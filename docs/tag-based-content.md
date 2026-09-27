@@ -25,5 +25,5 @@ This documents **where** tier- and contribution-driven copy lives today and **ho
 
 ## Admin / analytics
 
-- **Visitor tiers & spam** show on event rows (GROQ join on `ipHash` in `trackingEventsWithRangeQuery`).
+- **Visitor tiers & spam** show on session rows. Admin joins `visitor` on `visitorHash`.
 - **Dashboard:** “Visitor tags (by last activity in range)” table uses `fetchVisitorTagAggregatesForRange` (`src/lib/analytics/eventsApi.ts`) — counts tiers + **Spammers (flagged)** in one table.

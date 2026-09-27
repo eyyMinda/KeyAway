@@ -30,9 +30,9 @@ export async function runBundleSessions(): Promise<{ ok: boolean; bundled: numbe
 
   try {
     for (let i = 0; i < 20; i++) {
-      const open = await client.fetch<{ _id: string; sessionCount: number; capacity?: number } | null>(
-        `*[_type == "trackingSessionBundle" && origin != "migration" && sessionCount < coalesce(capacity, $cap)] | order(timeRangeEnd desc)[0]{
-          _id, sessionCount, capacity
+      const open = await client.fetch<{ _id: string; sessionCount: number; capacity?: number; timeRangeEnd?: string } | null>(
+        `*[_type == "trackingSessionBundle" && count(sessions) < coalesce(capacity, $cap)] | order(timeRangeStart asc)[0]{
+          _id, "sessionCount": count(sessions), capacity, timeRangeEnd
         }`,
         { cap: SESSION_BUNDLE_CAPACITY }
       );
@@ -54,7 +54,7 @@ export async function runBundleSessions(): Promise<{ ok: boolean; bundled: numbe
         tx.patch(open._id, p =>
           p.append("sessions", sessions).set({
             sessionCount: open.sessionCount + sessions.length,
-            timeRangeEnd: end,
+            timeRangeEnd: end > (open.timeRangeEnd ?? "") ? end : open.timeRangeEnd,
             updatedAt: now
           })
         );

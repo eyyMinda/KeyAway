@@ -16,7 +16,8 @@ import {
 import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 
-export const PROGRAMS_PER_PAGE = 16;
+/** 4-column grid. The last cell on each page is SuggestKeyCTA. */
+export const PROGRAMS_PER_PAGE = 15;
 
 export type ProgramsListData = {
   programs: ProgramWithStats[];
@@ -106,7 +107,8 @@ async function fetchProgramsListData(
   page: number
 ): Promise<ProgramsListData> {
   const startIdx = (page - 1) * PROGRAMS_PER_PAGE;
-  const endIdx = startIdx + PROGRAMS_PER_PAGE - 1;
+  // GROQ [start...end] excludes end. end must be the first index of the next page.
+  const endIdx = startIdx + PROGRAMS_PER_PAGE;
   const { filterExpr, params } = buildProgramsFilterGroq(filter, searchTerm, category, platform);
   const countQuery = `count(${filterExpr})`;
   const keyCountQuery = `${filterExpr}{"keyCount": count(cdKeys[])}`;
@@ -156,7 +158,7 @@ export async function getProgramsListData(
 
   return unstable_cache(
     () => fetchProgramsListData(searchTerm, filter, sortBy, category, platform, page),
-    ["programs-list-v3", searchTerm, filter, sortBy, category, platform, String(page)],
+    ["programs-list-v5", searchTerm, filter, sortBy, category, platform, String(page)],
     { revalidate: PUBLIC_ISR_REVALIDATE_SECONDS, tags: [TAG_PROGRAM_LISTINGS] }
   )();
 }
@@ -167,12 +169,12 @@ export async function getCachedProgramsForJsonLd(limit = 20): Promise<ProgramWit
     async () => {
       const rows = await client.fetch<ProgramWithStats[]>(
         `*[_type == "program"] {${programsListingProjection}} | order(popularityScore desc) [0...$limit]`,
-        { limit: limit - 1 },
+        { limit },
         { next: { tags: [TAG_PROGRAM_LISTINGS] } }
       );
       return mergeProgramStats(rows ?? []);
     },
-    ["programs-jsonld-v2", String(limit)],
+    ["programs-jsonld-v3", String(limit)],
     { revalidate: PUBLIC_ISR_REVALIDATE_SECONDS, tags: [TAG_PROGRAM_LISTINGS] }
   )();
 }

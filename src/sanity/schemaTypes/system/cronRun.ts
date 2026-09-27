@@ -12,7 +12,7 @@ export const cronRun = defineType({
       type: "string",
       options: {
         list: [
-          { title: "Bundle Events", value: "bundle-events" },
+          { title: "Sync Program Stats", value: "sync-program-stats" },
           { title: "Bundle Sessions", value: "bundle-sessions" },
           { title: "Bundle Visitors", value: "bundle-visitors" },
           { title: "Update Expired Keys", value: "update-expired-keys" },

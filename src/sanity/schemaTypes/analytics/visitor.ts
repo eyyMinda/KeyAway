@@ -16,7 +16,7 @@ export const visitor = defineType({
       name: "visitorHash",
       title: "Visitor hash",
       type: "string",
-      description: "SHA-256 of IP + ANALYTICS_SALT (same as trackingEvent.ipHash)",
+      description: "SHA-256 of IP + ANALYTICS_SALT",
       validation: Rule => Rule.required()
     }),
     defineField({

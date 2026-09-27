@@ -51,10 +51,10 @@ src/
     privacy/, terms/              # Legal pages
     studio/[[...tool]]/           # Embedded Sanity Studio
     admin/                        # Dashboard (auth required)
-      analytics, events, programs, key-reports, key-suggestions, messages
+      analytics, sessions, programs, key-reports, key-suggestions, messages
     api/v1/                       # API
       analytics/track, key-reports, key-suggestions, contact
-      cron/update-expired-keys, cron/bundle-events, cron/bundle-visitors, cron/prune-cron-runs
+      cron/update-expired-keys, cron/sync-program-stats, cron/bundle-sessions, cron/bundle-visitors, cron/prune-cron-runs
       webhooks/revalidate
       admin/*                     # Protected admin APIs
   components/                     # UI (layout, program, admin, home)
@@ -78,7 +78,7 @@ src/
 
 Short notes on what each part does and why.
 
-- **Event bundling (cron)** — Raw tracking events (copy, download, social, etc.) are rolled up into `trackingEventBundle` documents. Reduces document count and keeps within Sanity quota instead of one row per click.
+- **Session bundling (cron)** — Visits are stored as `trackingSession` documents and archived into `trackingSessionBundle` after they go idle. Program view and download counts are written from those sessions by `sync-program-stats`.
 - **Expired-key updates** — Keys past `validUntil` are marked expired in Sanity. Triggered by a cron job (all programs) and on program page load via middleware (rate-limited to once per 5 minutes per program) so the CMS stays in sync without hammering the API.
 - **Key reports** — Visitors submit “working” / “expired” / “limit reached” for a key. Stored as `keyReport` with hashed key and hashed IP; same visitor can update an existing report (e.g. key stopped working). Feeds admin key-reports and notifications.
 - **Key-report notifications** — API aggregates negative reports over the last 60 days, excludes keys already marked expired/limit in the CMS, and returns `lastReportAt`. Admin header shows alerts with links to filtered key-reports (`?program=` and `?key=`).
@@ -160,7 +160,7 @@ In Studio, create **Program** documents and add CD keys (key, status, version, v
 
 - Set all required env vars in the Vercel project.
 - Build command: `npm run build`; output: default Next.js.
-- Optional: Vercel Cron for `/api/v1/cron/update-expired-keys`, `/api/v1/cron/bundle-events`, `/api/v1/cron/bundle-visitors`, and `/api/v1/cron/prune-cron-runs` (use `CRON_SECRET` or Vercel’s cron headers).
+- Optional: Vercel Cron for `/api/v1/cron/update-expired-keys`, `/api/v1/cron/sync-program-stats`, `/api/v1/cron/bundle-sessions`, `/api/v1/cron/bundle-visitors`, and `/api/v1/cron/prune-cron-runs` (use `CRON_SECRET` or Vercel’s cron headers).
 - **Webhook:** Point Sanity revalidate webhook to `https://yourdomain.com/api/v1/webhooks/revalidate` and set `SANITY_WEBHOOK_SECRET`.
 
 ---
