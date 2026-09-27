@@ -37,7 +37,13 @@ export const structure: StructureResolver = S =>
 
       docGroup(S, "Community", ["contactMessage", "keySuggestion", "keyReport"]),
 
-      docGroup(S, "Analytics", ["trackingEvent", "trackingEventBundle", "visitorBundle"]),
+      docGroup(S, "Analytics", [
+        "trackingSession",
+        "trackingSessionBundle",
+        "trackingEvent",
+        "trackingEventBundle",
+        "visitorBundle"
+      ]),
 
       docGroup(S, "System", ["siteNotificationFeed", "siteNotificationBundle", "cronRun"]),
 
