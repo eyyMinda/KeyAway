@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
 import { KeyReport, KeyReportEvent } from "@/src/types";
+import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
 import ModalSection from "./ModalSection";
-import { ModalCloseButton } from "@/src/components/ui/ModalCloseButton";
 import { FiAlertTriangle, FiCheck, FiX } from "react-icons/fi";
 import { client } from "@/src/sanity/lib/client";
 import { fetchVisitorsByHashes } from "@/src/lib/visitors/visitorLookup";
@@ -109,17 +108,11 @@ interface ReportDetailsModalProps {
 }
 
 export default function ReportDetailsModal({ isOpen, onClose, report, onReportPatched }: ReportDetailsModalProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const [rowEventTypes, setRowEventTypes] = useState<Record<string, KeyReportEvent>>({});
   const [rowTriedVersions, setRowTriedVersions] = useState<Record<string, string>>({});
   const [savingReportId, setSavingReportId] = useState<string | null>(null);
   const [savingTriedVersionId, setSavingTriedVersionId] = useState<string | null>(null);
   const [visitorByHash, setVisitorByHash] = useState<Record<string, { visitTier?: string; isSpammer?: boolean }>>({});
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!report) return;
@@ -159,20 +152,6 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
       cancelled = true;
     };
   }, [report]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setIsVisible(true);
-      document.body.style.overflow = "hidden";
-    } else {
-      setIsVisible(false);
-      document.body.style.overflow = "unset";
-    }
-
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
 
   const saveReportEventType = useCallback(
     async (reportId: string) => {
@@ -222,13 +201,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
     [rowTriedVersions, onReportPatched]
   );
 
-  if (!mounted || !isOpen || !report) return null;
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
+  if (!isOpen || !report) return null;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString("en-US", {
@@ -257,36 +230,13 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
     }
   };
 
-  const modalContent = (
-    <div
-      className={`fixed inset-0 z-9999 flex items-center justify-center p-4 transition-opacity duration-300 ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
-      onClick={handleBackdropClick}>
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-none" />
-
-      {/* Modal */}
-      <div
-        className={`relative bg-white rounded-lg shadow-2xl max-w-4xl w-full h-[90vh] flex flex-col transform transition-transform duration-300 ${
-          isVisible ? "scale-100" : "scale-95"
-        }`}
-        onClick={e => e.stopPropagation()}>
-        {/* Header */}
-        <div className="flex items-center justify-between py-2 px-6 border-b-2 border-blue-200 bg-white">
-          <div>
-            <h2 className="text-3xl font-bold text-black mb-2">Report Details</h2>
-            <p className="text-primary-700 font-medium text-lg">{report.programTitle}</p>
-          </div>
-          <ModalCloseButton
-            onClick={onClose}
-            className="p-3 rounded-full text-gray-700 hover:text-gray-950 hover:bg-gray-100 active:bg-gray-200/80 transition-colors duration-200"
-            iconClassName="h-7 w-7"
-          />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 p-6 overflow-y-auto">
+  return (
+    <AdminDetailsModal
+      title="Report Details"
+      subtitle={report.programTitle}
+      onClose={onClose}
+      footer={`${report.reportCount} total reports • Last updated: ${new Date(report.lastReported).toLocaleDateString()}`}
+    >
           {/* Key Information */}
           <ModalSection title="Key Information" color="blue">
             <KeyInformationGrid report={report} getStatusColor={getStatusColor} />
@@ -457,7 +407,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
                             currentSelect === reportItem.eventType
                           }
                           onClick={() => reportItem._id && void saveReportEventType(reportItem._id)}
-                          className="h-7 px-2 rounded bg-indigo-600 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
+                          className="h-7 cursor-pointer px-2 rounded bg-indigo-600 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
                           {savingReportId === reportItem._id ? "Saving…" : "Save"}
                         </button>
                       </div>
@@ -517,7 +467,7 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
                                   );
                                 })()}
                                 onClick={() => void saveTriedVersion(reportItem._id!)}
-                                className="h-7 px-2 rounded bg-amber-700 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
+                                className="h-7 cursor-pointer px-2 rounded bg-amber-700 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
                                 {savingTriedVersionId === reportItem._id ? "Saving…" : "Save version"}
                               </button>
                             </div>
@@ -562,22 +512,6 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
               })}
             </div>
           </ModalSection>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between py-2 px-6 border-t-2 border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50 shadow-lg">
-          <div className="text-sm text-gray-600 font-medium">
-            {report.reportCount} total reports • Last updated: {new Date(report.lastReported).toLocaleDateString()}
-          </div>
-          <ModalCloseButton
-            onClick={onClose}
-            className="px-8 py-3 text-base font-bold text-white bg-blue-600 border-2 border-blue-600 rounded-xl hover:bg-blue-700 hover:border-blue-700 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 focus-visible:ring-4 focus-visible:ring-blue-300 focus-visible:ring-offset-2">
-            Close
-          </ModalCloseButton>
-        </div>
-      </div>
-    </div>
+    </AdminDetailsModal>
   );
-
-  return createPortal(modalContent, document.body);
 }
