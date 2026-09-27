@@ -96,7 +96,7 @@ export const trackingSessionBundle = defineType({
     defineField({ name: "timeRangeStart", type: "datetime" }),
     defineField({ name: "timeRangeEnd", type: "datetime" }),
     defineField({ name: "sessionCount", type: "number" }),
-    defineField({ name: "origin", type: "string", description: "migration bundles are not reused by the live session cron." }),
+    defineField({ name: "origin", type: "string", description: "Set to migration when the bundle was built from the old event documents." }),
     defineField({ name: "capacity", type: "number", initialValue: 800, readOnly: true }),
     defineField({
       name: "sessions",
