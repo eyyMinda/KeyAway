@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ContactMessage } from "@/src/types/contact";
 import { messageHasNoEmail, messageNeedsReply } from "@/src/lib/admin/contactMessages";
+import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import MessageDetailsModal from "./MessageDetailsModal";
 import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
 
@@ -183,11 +184,7 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
                     <td className="px-6 py-4 align-top text-center text-sm text-gray-500">{dateStr}</td>
                     <td className="px-6 py-4 align-top text-center">
                       <div className="flex justify-center">
-                        <button
-                          onClick={() => setSelectedMessage(message)}
-                          className="px-4 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors cursor-pointer">
-                          View Details
-                        </button>
+                        <AdminViewDetailsButton onClick={() => setSelectedMessage(message)} />
                       </div>
                     </td>
                   </tr>

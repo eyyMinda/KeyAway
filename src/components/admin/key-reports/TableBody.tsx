@@ -1,4 +1,5 @@
 import React from "react";
+import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import { CDKeyStatus } from "@/src/types/program";
 import { KeyReport } from "@/src/types/admin";
 import ReportProgressBar from "@/src/components/program/cdkeys/ReportProgressBar";
@@ -87,11 +88,7 @@ export default function TableBody({
               })()}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <button
-                onClick={() => onViewDetails(report)}
-                className="text-blue-600 hover:text-blue-900 cursor-pointer">
-                View Details
-              </button>
+              <AdminViewDetailsButton onClick={() => onViewDetails(report)} />
             </td>
           </tr>
         );

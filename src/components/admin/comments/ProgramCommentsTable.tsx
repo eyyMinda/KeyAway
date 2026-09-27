@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import Pagination from "@/src/components/ui/Pagination";
 import SearchInput from "@/src/components/ui/SearchInput";
 import DeleteCommentConfirmModal from "@/src/components/admin/comments/DeleteCommentConfirmModal";
+import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import ProgramCommentDetailsModal from "@/src/components/admin/comments/ProgramCommentDetailsModal";
 import { FaChevronDown, FaTrash } from "react-icons/fa";
 import type { SortDirection } from "@/src/components/ui/SortableTableHead";
@@ -254,12 +255,7 @@ export default function ProgramCommentsTable({ rows, busyId, onDelete, onSpammer
                     <td className="px-4 py-3 align-top text-right">
                       <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setDetailsRow(row)}
-                            className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
-                            Details
-                          </button>
+                          <AdminViewDetailsButton onClick={() => setDetailsRow(row)} />
                           <button
                             type="button"
                             disabled={busy}
