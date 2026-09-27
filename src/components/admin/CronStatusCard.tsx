@@ -33,7 +33,7 @@ function SourceBadge({ source }: { source: string }) {
 
 function JobLabel({ job }: { job: string }) {
   const labels: Record<string, string> = {
-    "bundle-events": "Bundle Events",
+    "sync-program-stats": "Program Stats",
     "bundle-sessions": "Bundle Sessions",
     "bundle-visitors": "Bundle Visitors",
     "update-expired-keys": "Update Expired Keys",
@@ -42,7 +42,7 @@ function JobLabel({ job }: { job: string }) {
   return <>{labels[job] ?? job}</>;
 }
 
-type CronJobKey = "bundle-events" | "bundle-sessions" | "bundle-visitors" | "update-expired-keys" | "prune-cron-runs";
+type CronJobKey = "sync-program-stats" | "bundle-sessions" | "bundle-visitors" | "update-expired-keys" | "prune-cron-runs";
 
 export default function CronStatusCard() {
   const [runs, setRuns] = useState<CronRun[]>([]);
@@ -79,8 +79,8 @@ export default function CronStatusCard() {
   }
 
   const vercelByJob: Record<CronJobKey, CronRun | undefined> = {
-    "bundle-events": runs.find(
-      r => r.job === "bundle-events" && (r.source === "vercel_cron" || r.source === "bearer")
+    "sync-program-stats": runs.find(
+      r => r.job === "sync-program-stats" && (r.source === "vercel_cron" || r.source === "bearer")
     ),
     "bundle-sessions": runs.find(
       r => r.job === "bundle-sessions" && (r.source === "vercel_cron" || r.source === "bearer")
@@ -96,7 +96,7 @@ export default function CronStatusCard() {
     )
   };
   const lastByJob: Record<CronJobKey, CronRun | undefined> = {
-    "bundle-events": runs.find(r => r.job === "bundle-events"),
+    "sync-program-stats": runs.find(r => r.job === "sync-program-stats"),
     "bundle-sessions": runs.find(r => r.job === "bundle-sessions"),
     "bundle-visitors": runs.find(r => r.job === "bundle-visitors"),
     "update-expired-keys": runs.find(r => r.job === "update-expired-keys"),
@@ -148,7 +148,7 @@ export default function CronStatusCard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-0 min-w-0 lg:pr-8">
-          <JobStatusRow job="bundle-events" schedule="Every 6h (12h live window)" label="Bundle Events" />
+          <JobStatusRow job="sync-program-stats" schedule="Every 6h" label="Program Stats" />
           <JobStatusRow job="bundle-sessions" schedule="Every 30m (idle visits)" label="Bundle Sessions" />
           <JobStatusRow job="bundle-visitors" schedule="Daily at 21:30 UTC" label="Bundle Visitors" />
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
