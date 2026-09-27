@@ -18,6 +18,7 @@ import {
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
+import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 import { isDevelopmentEnv } from "@/src/lib/env/isDevelopment";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
@@ -137,6 +138,25 @@ export async function POST(req: NextRequest) {
         await upsertVisitorContribution(ipHash, "comment");
       } catch (e) {
         console.error("[POST /api/v1/program-comments] visitor contribution upsert failed", e);
+      }
+      try {
+        const bodyRecord = b as Record<string, unknown>;
+        await appendTrackingSession({
+          sessionId: typeof bodyRecord.sessionId === "string" ? bodyRecord.sessionId : undefined,
+          visitorHash: ipHash,
+          entry: typeof bodyRecord.sessionEntry === "string" ? bodyRecord.sessionEntry : undefined,
+          referrer: typeof bodyRecord.referrer === "string" ? bodyRecord.referrer : undefined,
+          events: [
+            {
+              event: parentCommentKey ? "comment_reply" : "comment",
+              programSlug,
+              path: `/program/${programSlug}`,
+              label: commentBody.slice(0, 140)
+            }
+          ]
+        });
+      } catch (e) {
+        console.error("[POST /api/v1/program-comments] session append failed", e);
       }
     }
 

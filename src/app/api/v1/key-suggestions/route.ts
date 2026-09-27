@@ -5,6 +5,7 @@ import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
 import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
+import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 
 const MAX_FIELD = 500;
 const MAX_MSG = 2000;
@@ -63,6 +64,19 @@ export async function POST(req: NextRequest) {
       await upsertVisitorContribution(visitorHash, "suggestion");
     } catch (e) {
       console.error("[POST /api/v1/key-suggestions] visitor contribution upsert failed", e);
+    }
+    if (visitorHash) {
+      try {
+        await appendTrackingSession({
+          sessionId: typeof b.sessionId === "string" ? b.sessionId : undefined,
+          visitorHash,
+          entry: typeof b.sessionEntry === "string" ? b.sessionEntry : undefined,
+          referrer: typeof b.referrer === "string" ? b.referrer : undefined,
+          events: [{ event: "key_suggestion", label: programName, path: "/contact" }]
+        });
+      } catch (e) {
+        console.error("[POST /api/v1/key-suggestions] session append failed", e);
+      }
     }
 
     return NextResponse.json({ data: { id: result._id }, meta: {} }, { status: 201 });

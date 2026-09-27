@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ContactFormData } from "@/src/types/contact";
+import { getTrackingSessionMeta } from "@/src/lib/analytics/sessionClient";
 
 interface ContactFormProps {
   onSuccess: () => void;
@@ -26,7 +27,7 @@ export default function ContactForm({ onSuccess }: ContactFormProps) {
       const response = await fetch("/api/v1/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, ...getTrackingSessionMeta() })
       });
 
       if (!response.ok) throw new Error("Failed to submit message");
