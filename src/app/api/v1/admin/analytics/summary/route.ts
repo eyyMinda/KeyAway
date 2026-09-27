@@ -3,7 +3,6 @@ import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import {
-  getMergedEventsForAdmin,
   getCachedAnalyticsSummary,
   setCachedAnalyticsSummary,
   type AnalyticsSummaryCachePayload
@@ -15,9 +14,9 @@ import {
   transformProgramData,
   transformSocialData,
   transformPathActivityTable,
-  transformCountryData,
-  transformReferrerDataWithParams
+  transformCountryData
 } from "@/src/lib/analytics/analyticsUtils";
+import { buildSessionSourceTable, flattenSessionEvents, listSessionsWithEvents } from "@/src/lib/analytics/sessionAdmin";
 import { AnalyticsEventData } from "@/src/types";
 
 const RECENT_LIMIT = 10;
@@ -53,8 +52,10 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const { events: merged, cacheHit: mergeCacheHit, cachedAt: mergeCachedAt } =
-      await getMergedEventsForAdmin(since, until, { bypass: refresh });
+    const sessions = await listSessionsWithEvents(since, until);
+    const merged = flattenSessionEvents(sessions, since, until).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 
     const { totals, byProgram, bySocial, byPath, byCountry } = aggregateEvents(merged);
     const uniqueVisitors = new Set(merged.map(e => e.ipHash).filter(Boolean)).size;
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
       socialTable: transformSocialData(bySocial),
       pathTable: transformPathActivityTable(merged, byPath),
       countryTable: transformCountryData(byCountry),
-      referrerTable: transformReferrerDataWithParams(merged),
+      referrerTable: buildSessionSourceTable(sessions.filter(s => s.startedAt >= since && s.startedAt <= until)),
       recentEvents: recentEnriched
     };
 
@@ -82,7 +83,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       data,
-      meta: { cacheHit: mergeCacheHit, cachedAt: refresh ? mergeCachedAt : cachedAt }
+      meta: { cacheHit: false, cachedAt }
     });
   } catch (err) {
     console.error("[GET /api/v1/admin/analytics/summary]", err);

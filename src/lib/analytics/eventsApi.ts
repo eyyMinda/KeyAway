@@ -1,4 +1,4 @@
-/** @fileoverview Fetches merged tracking events for admin ranges; program stats live on program docs (cron rollup). */
+/** @fileoverview Fetches session events for admin ranges; program stats live on program docs (cron rollup). */
 import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
 import { mergeTrackingEventsForRange } from "@/src/lib/analytics/mergeTrackingEventsForRange";
 import { calculatePopularityScore } from "@/src/lib/program/programUtils";
@@ -36,7 +36,7 @@ export function mergeSingleProgramStats(program: { viewCount?: number; downloadC
 }
 
 /**
- * Fetches all events (singular + bundled) for a date range with visitor meta.
+ * Fetches session events for a date range with visitor meta.
  * Prefer paginated admin API for large ranges.
  */
 export async function fetchEventsForRange(since: string, until: string): Promise<AnalyticsEventData[]> {

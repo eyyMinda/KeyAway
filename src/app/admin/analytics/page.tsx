@@ -170,7 +170,7 @@ export default function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <DataTable title="Top Programs" data={programData} maxItems={12} showPercentage={true} />
-        <DataTable title="Top Referrers" data={referrerData} maxItems={12} showPercentage={true} />
+        <DataTable title="Session sources" data={referrerData} maxItems={12} showPercentage={true} countNoun="sessions" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
