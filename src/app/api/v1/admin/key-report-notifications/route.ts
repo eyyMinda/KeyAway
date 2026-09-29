@@ -4,7 +4,7 @@ import { getCachedKeyReportNotifications } from "@/src/lib/admin/keyReportNotifi
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
-/** GET /api/v1/admin/key-report-notifications - Keys needing attention (negative reports, 60d) */
+/** GET /api/v1/admin/key-report-notifications - Keys needing attention (negative reports, alert window) */
 export async function GET(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
