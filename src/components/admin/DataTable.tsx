@@ -1,19 +1,25 @@
+import { useEffect, useMemo, useState } from "react";
 import { adminChrome } from "@/src/theme/colorSchema";
+
+interface DataTableRow {
+  key: string;
+  value: number;
+  label?: string;
+  referrerParam?: string;
+  /** Tailwind bg-* only — small dot before the label when set. */
+  swatchClass?: string;
+}
 
 interface DataTableProps {
   title: string;
-  data: Array<{
-    key: string;
-    value: number;
-    label?: string;
-    referrerParam?: string;
-    /** Tailwind bg-* only — small dot before the label when set. */
-    swatchClass?: string;
-  }>;
+  data: DataTableRow[];
   maxItems?: number;
   showPercentage?: boolean;
   className?: string;
   countNoun?: string;
+  /** Adds a search box; filters label/key/referrerParam. Use for long lists. */
+  searchable?: boolean;
+  searchPlaceholder?: string;
 }
 
 export default function DataTable({
@@ -22,11 +28,32 @@ export default function DataTable({
   maxItems = 10,
   showPercentage = false,
   className = "",
-  countNoun = "events"
+  countNoun = "events",
+  searchable = false,
+  searchPlaceholder = "Search…"
 }: DataTableProps) {
+  const [visible, setVisible] = useState(maxItems);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    setVisible(maxItems);
+  }, [maxItems]);
+
   const total = data.reduce((sum, item) => sum + item.value, 0);
-  const sortedData = [...data].sort((a, b) => b.value - a.value).slice(0, maxItems);
-  const barMax = Math.max(...sortedData.map(i => i.value), 1);
+  const sorted = useMemo(() => [...data].sort((a, b) => b.value - a.value), [data]);
+
+  const q = query.trim().toLowerCase();
+  const filtered = useMemo(() => {
+    if (!q) return sorted;
+    return sorted.filter(item =>
+      [item.label, item.key, item.referrerParam].some(v => v?.toLowerCase().includes(q))
+    );
+  }, [sorted, q]);
+
+  // While searching, show every match. Otherwise page with Show more.
+  const displayed = q ? filtered : filtered.slice(0, visible);
+  const barMax = Math.max(...displayed.map(i => i.value), 1);
+  const canShowMore = !q && filtered.length > visible;
 
   return (
     <div className={`bg-white rounded-xl shadow-soft border border-gray-200 ${className}`}>
@@ -35,18 +62,27 @@ export default function DataTable({
         <p className="text-sm text-gray-500 mt-1">
           {data.length} total items • {total.toLocaleString()} total {countNoun}
         </p>
+        {searchable ? (
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder={searchPlaceholder}
+            className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        ) : null}
       </div>
 
       <div className="p-6">
-        {sortedData.length === 0 ? (
+        {displayed.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <div className="text-4xl mb-2">📊</div>
-            <p>No data available</p>
+            <p>{q ? "No matches" : "No data available"}</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {sortedData.map((item, index) => {
-              const percentage = showPercentage ? (item.value / total) * 100 : 0;
+            {displayed.map((item, index) => {
+              const percentage = showPercentage && total > 0 ? (item.value / total) * 100 : 0;
 
               return (
                 <div key={item.key} className="flex items-center justify-between">
@@ -56,10 +92,7 @@ export default function DataTable({
                       <div className="flex flex-col min-w-0">
                         <div className="text-sm font-medium text-gray-900 flex items-center gap-2 min-w-0">
                           {item.swatchClass ? (
-                            <span
-                              className={`size-2.5 rounded-full shrink-0 ${item.swatchClass}`}
-                              aria-hidden
-                            />
+                            <span className={`size-2.5 rounded-full shrink-0 ${item.swatchClass}`} aria-hidden />
                           ) : null}
                           <span className="truncate">{item.label || item.key}</span>
                         </div>
@@ -88,6 +121,15 @@ export default function DataTable({
             })}
           </div>
         )}
+
+        {canShowMore ? (
+          <button
+            type="button"
+            onClick={() => setVisible(v => v + maxItems)}
+            className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+            Show more ({filtered.length - visible})
+          </button>
+        ) : null}
       </div>
     </div>
   );
