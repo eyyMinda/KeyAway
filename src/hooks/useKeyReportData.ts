@@ -25,9 +25,13 @@ export function useKeyReportData(programSlug: string, rowStorageIds: string[]) {
     const fetchReportData = async () => {
       try {
         setLoading(true);
-        const events = await sanityPublicReadClient.fetch<KeyReportFetched[]>(programPageKeyReportsQuery, {
+        const result = await sanityPublicReadClient.fetch<{
+          live?: KeyReportFetched[];
+          bundled?: KeyReportFetched[];
+        }>(programPageKeyReportsQuery, {
           programSlug
         });
+        const events = [...(result?.live ?? []), ...(result?.bundled ?? [])];
 
         const keyReportData = new Map<string, ReportData>();
 
