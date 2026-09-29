@@ -169,13 +169,42 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <DataTable title="Top Programs" data={programData} maxItems={12} showPercentage={true} />
-        <DataTable title="Session sources" data={referrerData} maxItems={12} showPercentage={true} countNoun="sessions" />
+        <DataTable
+          title="Top Programs"
+          data={programData}
+          maxItems={12}
+          showPercentage={true}
+          searchable
+          searchPlaceholder="Search programs…"
+        />
+        <DataTable
+          title="Session sources"
+          data={referrerData}
+          maxItems={12}
+          showPercentage={true}
+          countNoun="sessions"
+          searchable
+          searchPlaceholder="Search sources…"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <DataTable title="Top Countries" data={countryData} maxItems={20} showPercentage={true} />
-        <DataTable title="Page Activity" data={pathData} maxItems={20} showPercentage={true} />
+        <DataTable
+          title="Top Countries"
+          data={countryData}
+          maxItems={12}
+          showPercentage={true}
+          searchable
+          searchPlaceholder="Search countries…"
+        />
+        <DataTable
+          title="Page Activity"
+          data={pathData}
+          maxItems={12}
+          showPercentage={true}
+          searchable
+          searchPlaceholder="Search pages…"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
