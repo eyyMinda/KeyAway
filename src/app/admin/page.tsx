@@ -1,7 +1,7 @@
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import DashboardCard from "@/src/components/admin/DashboardCard";
 import CronStatusCard from "@/src/components/admin/CronStatusCard";
-import QuickOverviewStats from "@/src/components/admin/QuickOverviewStats";
+import DatasetDocCounts from "@/src/components/admin/DatasetDocCounts";
 import WelcomeHeader from "@/src/components/admin/WelcomeHeader";
 import IndexNowSubmitCard from "@/src/components/admin/IndexNowSubmitCard";
 
@@ -60,10 +60,8 @@ export default function AdminHomePage() {
         />
       </div>
 
-      {/* Quick Overview */}
       <div className="mt-8 md:mt-12">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4 md:mb-6">Quick Overview</h3>
-        <QuickOverviewStats />
+        <DatasetDocCounts />
       </div>
 
       {/* Cron Status */}
