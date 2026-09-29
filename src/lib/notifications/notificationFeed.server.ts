@@ -10,11 +10,10 @@ import { getMonthKey } from "@/src/lib/site/monthSidebarUtils";
 import { client } from "@/src/sanity/lib/client";
 import { urlFor } from "@/src/sanity/lib/image";
 import type { Notification, NotificationType } from "@/src/types/notifications";
+import { DAY_MS } from "@/src/lib/time";
 
 /** Singleton bell snapshot (`createOrReplace` on rebuild). */
 export const SITE_NOTIFICATION_FEED_DOCUMENT_ID = "siteNotificationFeed";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Activity window for the header bell snapshot. */
 export const NOTIFICATION_SNAPSHOT_WINDOW_DAYS = 30;

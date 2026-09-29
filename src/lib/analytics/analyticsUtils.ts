@@ -7,6 +7,27 @@ import {
   getAnalyticsEventDotClass,
   pageViewNotFoundDotClass
 } from "@/src/theme/colorSchema";
+import { HOUR_MS, DAY_MS, SEVEN_DAYS_MS, THIRTY_DAYS_MS, NINETY_DAYS_MS, isoSince } from "@/src/lib/time";
+
+const EPOCH_ISO = "1970-01-01T00:00:00.000Z";
+
+/** ms window per admin period key (undefined = "all"). */
+function periodWindowMs(period: string): number | undefined {
+  switch (period) {
+    case "1h":
+      return HOUR_MS;
+    case "24h":
+      return DAY_MS;
+    case "7d":
+      return SEVEN_DAYS_MS;
+    case "30d":
+      return THIRTY_DAYS_MS;
+    case "90d":
+      return NINETY_DAYS_MS;
+    default:
+      return THIRTY_DAYS_MS;
+  }
+}
 
 function referrerBucketHostname(hostname: string): string {
   const h = hostname.trim().toLowerCase();
@@ -18,64 +39,27 @@ export function getDateRange(
   period: string,
   customDateRange?: { start: string; end: string }
 ): { since: string; until: string } {
-  const now = new Date();
-  const until = now.toISOString();
-  let since: string;
-  switch (period) {
-    case "1h":
-      since = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-      break;
-    case "24h":
-      since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-      break;
-    case "7d":
-      since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      break;
-    case "30d":
-      since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      break;
-    case "90d":
-      since = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
-      break;
-    case "all":
-      since = "1970-01-01T00:00:00.000Z";
-      break;
-    case "custom":
-      if (customDateRange?.start && customDateRange?.end) {
-        since = new Date(customDateRange.start).toISOString();
-        return { since, until: new Date(customDateRange.end + "T23:59:59.999Z").toISOString() };
-      }
-      since = new Date("1970-01-01").toISOString();
-      break;
-    default:
-      since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const now = Date.now();
+  const until = new Date(now).toISOString();
+  if (period === "all") return { since: EPOCH_ISO, until };
+  if (period === "custom") {
+    if (customDateRange?.start && customDateRange?.end) {
+      return {
+        since: new Date(customDateRange.start).toISOString(),
+        until: new Date(customDateRange.end + "T23:59:59.999Z").toISOString()
+      };
+    }
+    return { since: EPOCH_ISO, until };
   }
-  return { since, until };
+  return { since: isoSince(periodWindowMs(period) as number, now), until };
 }
 
 export function getDateFromPeriod(period: string, customDateRange?: { start: string; end: string }): string {
-  const now = new Date();
-  switch (period) {
-    case "1h":
-      return new Date(now.getTime() - 60 * 60 * 1000).toISOString();
-    case "24h":
-      return new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-    case "7d":
-      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    case "30d":
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    case "90d":
-      return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
-    case "all":
-      return "1970-01-01T00:00:00.000Z";
-    case "custom":
-      if (customDateRange?.start && customDateRange?.end) {
-        return new Date(customDateRange.start).toISOString();
-      }
-      return new Date("1970-01-01").toISOString();
-    default:
-      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  if (period === "all") return EPOCH_ISO;
+  if (period === "custom") {
+    return customDateRange?.start && customDateRange?.end ? new Date(customDateRange.start).toISOString() : EPOCH_ISO;
   }
+  return isoSince(periodWindowMs(period) as number);
 }
 
 // Event colors: hex for charts, Tailwind for dots / UI (`src/theme/colorSchema.ts`)

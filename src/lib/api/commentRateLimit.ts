@@ -1,13 +1,14 @@
 import { getClientIp } from "./requestGeo";
+import { MINUTE_MS } from "@/src/lib/time";
 
 const store = new Map<string, { count: number; resetAt: number }>();
 
 /** Global comment posts per IP (all programs). */
-const GLOBAL_WINDOW_MS = 15 * 60_000;
+const GLOBAL_WINDOW_MS = 15 * MINUTE_MS;
 const GLOBAL_MAX = 8;
 
 /** Per-program comment posts per IP. */
-const PROGRAM_WINDOW_MS = 5 * 60_000;
+const PROGRAM_WINDOW_MS = 5 * MINUTE_MS;
 const PROGRAM_MAX = 3;
 
 function checkScoped(key: string, max: number, windowMs: number): { ok: boolean } {

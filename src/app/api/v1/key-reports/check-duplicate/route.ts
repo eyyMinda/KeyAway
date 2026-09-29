@@ -37,21 +37,39 @@ export async function POST(req: NextRequest) {
     if (!kd?.hash) return Errors.validation("key is invalid or empty for this program flow");
     const storageKey = kd.hash;
 
-    const existingReport = await client.fetch<{
-      _id: string;
+    type Row = {
+      _id?: string;
+      bundleId?: string;
+      rowKey?: string;
       eventType: string;
       programSlug: string;
       key: string;
       label?: string;
       createdAt: string;
-    } | null>(duplicateKeyReportQuery, { ipHash, programSlug, key: storageKey });
+    };
+
+    const result = await client.fetch<{
+      live: Row | null;
+      bundled: Array<{ bundleId: string; rows: Array<Omit<Row, "bundleId">> }>;
+    }>(duplicateKeyReportQuery, { ipHash, programSlug, key: storageKey });
+
+    const candidates: Row[] = [];
+    if (result?.live) candidates.push(result.live);
+    for (const b of result?.bundled ?? []) {
+      for (const r of b.rows ?? []) candidates.push({ ...r, bundleId: b.bundleId });
+    }
+
+    const existingReport = candidates.sort((a, b) =>
+      (b.createdAt ?? "").localeCompare(a.createdAt ?? "")
+    )[0];
 
     if (existingReport) {
       return NextResponse.json({
         data: {
           isDuplicate: true,
           existingReport: {
-            _id: existingReport._id,
+            ...(existingReport._id ? { _id: existingReport._id } : {}),
+            ...(existingReport.bundleId ? { bundleId: existingReport.bundleId, rowKey: existingReport.rowKey } : {}),
             eventType: existingReport.eventType,
             programSlug: existingReport.programSlug,
             key: existingReport.key,

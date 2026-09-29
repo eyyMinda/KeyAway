@@ -4,6 +4,7 @@ import { bundledTrackingSession, trackingSession, trackingSessionBundle, trackin
 import { bundledVisitor } from "./analytics/bundledVisitor";
 import { visitorBundle } from "./analytics/visitorBundle";
 import { keyReport } from "./analytics/keyReport";
+import { bundledKeyReport, keyReportBundle } from "./analytics/keyReportBundle";
 import { visitor } from "./analytics/visitor";
 
 import { cronRun } from "./system/cronRun";
@@ -39,6 +40,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     bundledVisitor,
     visitorBundle,
     keyReport,
+    bundledKeyReport,
+    keyReportBundle,
     cronRun,
     changelogRelease,
     siteNotificationFeed,

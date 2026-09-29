@@ -2,16 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
 import { verifyCronAuth, logCronRun } from "@/src/lib/api/cronUtils";
 import { Errors } from "@/src/lib/api/errors";
+import { WEEK_MS, isoSince } from "@/src/lib/time";
 
-const RETENTION_MS = 60 * 24 * 60 * 60 * 1000;
+const RETENTION_MS = WEEK_MS;
 const BATCH = 200;
 
-/** GET /api/v1/cron/prune-cron-runs — delete `cronRun` docs older than ~60 days (batched). */
+/** GET /api/v1/cron/prune-cron-runs — delete `cronRun` docs older than 7 days (batched). */
 export async function GET(req: NextRequest) {
   const { ok, source } = verifyCronAuth(req);
   if (!ok) return Errors.unauthorized("Cron auth required");
 
-  const cutoff = new Date(Date.now() - RETENTION_MS).toISOString();
+  const cutoff = isoSince(RETENTION_MS);
   let deleted = 0;
 
   try {

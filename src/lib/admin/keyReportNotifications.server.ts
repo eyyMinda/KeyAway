@@ -1,12 +1,13 @@
 import { unstable_cache } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
-import { keyReportsQuery } from "@/src/lib/sanity/queries";
+import { keyReportNotificationsQuery } from "@/src/lib/sanity/queries";
 import type { KeyReportNotificationItem } from "@/src/types/admin";
 import { getKeyData } from "@/src/lib/keyHashing";
 import type { CDKey, ProgramFlow } from "@/src/types/program";
 import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
+import { KEY_REPORT_ALERT_WINDOW_DAYS } from "@/src/lib/admin/keyReportAlertsConfig";
+import { days, isoSince } from "@/src/lib/time";
 
-const SIXTY_DAYS_MS = 60 * 24 * 60 * 60 * 1000;
 const MAX_ITEMS = 20;
 const CACHE_SECONDS = 120;
 
@@ -44,10 +45,10 @@ function reportLabel(r: KeyReportEvent): string {
 }
 
 async function buildKeyReportNotifications(): Promise<KeyReportNotificationItem[]> {
-  const since = new Date(Date.now() - SIXTY_DAYS_MS).toISOString();
+  const since = isoSince(days(KEY_REPORT_ALERT_WINDOW_DAYS));
 
-  const [events, programs] = await Promise.all([
-    client.fetch<KeyReportEvent[]>(keyReportsQuery, { since }),
+  const [reportRows, programs] = await Promise.all([
+    client.fetch<{ live?: KeyReportEvent[]; bundled?: KeyReportEvent[] }>(keyReportNotificationsQuery, { since }),
     client.fetch<
       Array<{
         slug?: string;
@@ -64,6 +65,8 @@ async function buildKeyReportNotifications(): Promise<KeyReportNotificationItem[
       }`
     )
   ]);
+
+  const events: KeyReportEvent[] = [...(reportRows?.live ?? []), ...(reportRows?.bundled ?? [])];
 
   const programTitleBySlug = new Map<string, string>();
   const resolvedKeys = new Set<string>();
@@ -150,6 +153,6 @@ async function buildKeyReportNotifications(): Promise<KeyReportNotificationItem[
 
 export const getCachedKeyReportNotifications = unstable_cache(
   buildKeyReportNotifications,
-  ["admin-key-report-notifications"],
+  ["admin-key-report-notifications", `window-${KEY_REPORT_ALERT_WINDOW_DAYS}d`],
   { revalidate: CACHE_SECONDS }
 );

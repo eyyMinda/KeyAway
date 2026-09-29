@@ -1,9 +1,10 @@
 import { getClientIp } from "./requestGeo";
+import { MINUTE_MS } from "@/src/lib/time";
 
 /** Simple in-memory rate limiter. Use Redis for multi-instance. */
 const store = new Map<string, { count: number; resetAt: number }>();
 
-const WINDOW_MS = 60_000; // 1 min
+const WINDOW_MS = MINUTE_MS;
 const MAX_REQUESTS = 60;
 
 export function checkRateLimit(identifier: string): { ok: boolean; remaining: number } {

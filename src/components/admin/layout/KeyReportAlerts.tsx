@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MdWarning } from "react-icons/md";
 import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 import type { KeyReportNotificationItem } from "@/src/types/admin";
+import { KEY_REPORT_ALERT_WINDOW_DAYS } from "@/src/lib/admin/keyReportAlertsConfig";
 
 export function useKeyReportAlerts() {
   const [alerts, setAlerts] = useState<KeyReportNotificationItem[] | null>(null);
@@ -84,7 +85,9 @@ export function KeyReportAlertsDesktop({ alerts }: KeyReportAlertsDesktopProps) 
           id="key-report-alerts-dropdown"
           className="absolute right-0 top-full mt-1 w-[380px] max-h-[70vh] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg z-50 py-2">
           <div className="px-3 py-2 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-900">Key report alerts (60d)</p>
+            <p className="text-sm font-medium text-gray-900">
+              Key report alerts ({KEY_REPORT_ALERT_WINDOW_DAYS}d)
+            </p>
             <p className="text-xs text-gray-500">Keys with negative reports needing attention</p>
           </div>
           <ul className="py-1">

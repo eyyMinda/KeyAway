@@ -65,6 +65,10 @@ export async function GET(req: NextRequest) {
     const { totals, byProgram, bySocial, byPath, byCountry } = aggregateEvents(merged);
     const uniqueVisitors = new Set(merged.map(e => e.ipHash).filter(Boolean)).size;
 
+    // Both event charts show visit/click signals only. Contributions have their own admin pages.
+    const chartTotals = new Map(totals);
+    for (const e of ["comment", "comment_reply", "key_suggestion", "contact"]) chartTotals.delete(e);
+
     const recentSlice = merged.slice(0, RECENT_LIMIT);
     const recentEnriched = (await enrichEventsWithVisitorMeta(
       recentSlice as unknown as Array<Record<string, unknown>>
@@ -75,7 +79,7 @@ export async function GET(req: NextRequest) {
       uniqueVisitors,
       uniqueCountries: byCountry.size,
       totals: Object.fromEntries(totals),
-      eventChart: transformEventData(totals),
+      eventChart: transformEventData(chartTotals),
       programTable: transformProgramData(byProgram),
       socialTable: transformSocialData(bySocial),
       pathTable: transformPathActivityTable(merged, byPath),

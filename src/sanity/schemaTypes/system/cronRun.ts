@@ -15,6 +15,7 @@ export const cronRun = defineType({
           { title: "Sync Program Stats", value: "sync-program-stats" },
           { title: "Bundle Sessions", value: "bundle-sessions" },
           { title: "Bundle Visitors", value: "bundle-visitors" },
+          { title: "Bundle Key Reports", value: "bundle-key-reports" },
           { title: "Update Expired Keys", value: "update-expired-keys" },
           { title: "Prune Cron Runs", value: "prune-cron-runs" }
         ]

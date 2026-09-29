@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
-import { getCachedKeyReportNotifications } from "@/src/lib/admin/keyReportNotifications.server";
+import { getCachedDatasetDocCounts } from "@/src/lib/admin/datasetDocCounts.server";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
-/** GET /api/v1/admin/key-report-notifications - Keys needing attention (negative reports, alert window) */
+/** GET /api/v1/admin/dataset-counts - Document counts by type (cached 10 min, admin only) */
 export async function GET(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
@@ -13,10 +13,10 @@ export async function GET(req: NextRequest) {
   if (admin instanceof Response) return admin;
 
   try {
-    const items = await getCachedKeyReportNotifications();
-    return NextResponse.json({ data: items, meta: {} });
+    const data = await getCachedDatasetDocCounts();
+    return NextResponse.json({ data, meta: {} });
   } catch (err) {
-    console.error("[GET /api/v1/admin/key-report-notifications]", err);
+    console.error("[GET /api/v1/admin/dataset-counts]", err);
     return Errors.internal();
   }
 }
