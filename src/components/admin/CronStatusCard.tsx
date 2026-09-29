@@ -25,9 +25,7 @@ function SourceBadge({ source }: { source: string }) {
     manual: "Manual"
   };
   return (
-    <span className={`text-xs px-2 py-0.5 rounded ${styles[source] ?? "bg-gray-100"}`}>
-      {labels[source] ?? source}
-    </span>
+    <span className={`text-xs px-2 py-0.5 rounded ${styles[source] ?? "bg-gray-100"}`}>{labels[source] ?? source}</span>
   );
 }
 
@@ -36,13 +34,20 @@ function JobLabel({ job }: { job: string }) {
     "sync-program-stats": "Program Stats",
     "bundle-sessions": "Bundle Sessions",
     "bundle-visitors": "Bundle Visitors",
+    "bundle-key-reports": "Bundle Key Reports",
     "update-expired-keys": "Update Expired Keys",
     "prune-cron-runs": "Prune Cron Runs"
   };
   return <>{labels[job] ?? job}</>;
 }
 
-type CronJobKey = "sync-program-stats" | "bundle-sessions" | "bundle-visitors" | "update-expired-keys" | "prune-cron-runs";
+type CronJobKey =
+  | "sync-program-stats"
+  | "bundle-sessions"
+  | "bundle-visitors"
+  | "bundle-key-reports"
+  | "update-expired-keys"
+  | "prune-cron-runs";
 
 export default function CronStatusCard() {
   const [runs, setRuns] = useState<CronRun[]>([]);
@@ -88,6 +93,9 @@ export default function CronStatusCard() {
     "bundle-visitors": runs.find(
       r => r.job === "bundle-visitors" && (r.source === "vercel_cron" || r.source === "bearer")
     ),
+    "bundle-key-reports": runs.find(
+      r => r.job === "bundle-key-reports" && (r.source === "vercel_cron" || r.source === "bearer")
+    ),
     "update-expired-keys": runs.find(
       r => r.job === "update-expired-keys" && (r.source === "vercel_cron" || r.source === "bearer")
     ),
@@ -99,6 +107,7 @@ export default function CronStatusCard() {
     "sync-program-stats": runs.find(r => r.job === "sync-program-stats"),
     "bundle-sessions": runs.find(r => r.job === "bundle-sessions"),
     "bundle-visitors": runs.find(r => r.job === "bundle-visitors"),
+    "bundle-key-reports": runs.find(r => r.job === "bundle-key-reports"),
     "update-expired-keys": runs.find(r => r.job === "update-expired-keys"),
     "prune-cron-runs": runs.find(r => r.job === "prune-cron-runs")
   };
@@ -150,17 +159,20 @@ export default function CronStatusCard() {
         <div className="space-y-0 min-w-0 lg:pr-8">
           <JobStatusRow job="sync-program-stats" schedule="Every 6h" label="Program Stats" />
           <JobStatusRow job="bundle-sessions" schedule="Every 30m (idle visits)" label="Bundle Sessions" />
-          <JobStatusRow job="bundle-visitors" schedule="Daily at 21:30 UTC" label="Bundle Visitors" />
+          <JobStatusRow job="bundle-visitors" schedule="Every 6h (idle 1d)" label="Bundle Visitors" />
+          <JobStatusRow job="bundle-key-reports" schedule="Daily at 04:45 UTC (older 7d)" label="Bundle Key Reports" />
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
-          <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (60d)" />
+          <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (7d)" />
         </div>
 
         <div className="min-w-0 lg:border-l lg:pl-8 border-gray-200">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent runs</h4>
           {runs.length > 0 ? (
-            <ul className="space-y-1.5 text-sm max-h-40 overflow-y-auto">
+            <ul className="space-y-1.5 text-sm max-h-58 overflow-y-auto">
               {runs.slice(0, 20).map(run => (
-                <li key={run._id} className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-50 last:border-0">
+                <li
+                  key={run._id}
+                  className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-50 last:border-0">
                   <span className="text-gray-900 font-medium shrink-0">
                     <JobLabel job={run.job} />
                   </span>
