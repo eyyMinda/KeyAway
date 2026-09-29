@@ -1,9 +1,10 @@
 import type { CDKey } from "@/src/types";
+import { THIRTY_DAYS_MS } from "@/src/lib/time";
 
 /** In-memory key status for display between cron runs (no Sanity writes). */
 export function applyKeyStatusForDisplay(cdKeys: CDKey[]): CDKey[] {
   const now = new Date();
-  const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const oneMonthAgo = new Date(now.getTime() - THIRTY_DAYS_MS);
 
   return cdKeys.map(key => {
     let updatedKey = { ...key };

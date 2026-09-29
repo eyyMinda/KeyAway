@@ -3,9 +3,10 @@ import { randomUUID } from "node:crypto";
 import {
   BUNDLE_MAX_ITERATIONS,
   BUNDLE_SIZE,
-  BUNDLING_RETENTION_DAYS
+  BUNDLING_RETENTION_MS
 } from "@/src/lib/analytics/bundlingConstants";
 import { client } from "@/src/sanity/lib/client";
+import { DAY_MS, isoSince } from "@/src/lib/time";
 
 const VISITOR_FIELDS =
   "visitorHash, visitCount, lastActivityAt, visitTier, isSpammer, reportCount, suggestionCount, commentCount, contributionScore, spamMarkedAt, country, city, geoUpdatedAt, createdAt, updatedAt";
@@ -39,11 +40,9 @@ export interface BundleVisitorsResult {
   error?: string;
 }
 
-/** Bundles visitors with lastActivityAt older than retention (2 days). Set skipRetention=true for one-time migration. */
+/** Bundles visitors with lastActivityAt older than retention. Set skipRetention=true for one-time migration. */
 export async function runBundleVisitors(skipRetention = false): Promise<BundleVisitorsResult> {
-  const cutoff = skipRetention
-    ? new Date(Date.now() + 864e5).toISOString()
-    : new Date(Date.now() - BUNDLING_RETENTION_DAYS * 864e5).toISOString();
+  const cutoff = skipRetention ? isoSince(-DAY_MS) : isoSince(BUNDLING_RETENTION_MS);
   let created = 0;
   let appended = 0;
 

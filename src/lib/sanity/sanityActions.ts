@@ -6,6 +6,7 @@ import { CDKey, Program } from "@/src/types";
 import { programBySlugQuery, featuredProgramSettingsQuery, programsForAutoSelectionQuery } from "./queries";
 import { mergeProgramStats, mergeSingleProgramStats } from "@/src/lib/analytics/eventsApi";
 import { applyKeyStatusForDisplay } from "@/src/lib/program/applyKeyStatusForDisplay";
+import { THIRTY_DAYS_MS } from "@/src/lib/time";
 
 /**
  * Updates expired CD keys in Sanity for a specific program
@@ -39,7 +40,7 @@ export async function updateAllExpiredKeys(): Promise<void> {
       if (!program.cdKeys || program.cdKeys.length === 0) continue;
 
       const now = new Date();
-      const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const oneMonthAgo = new Date(now.getTime() - THIRTY_DAYS_MS);
       let hasUpdates = false;
       const updatedKeys = program.cdKeys.map((key: CDKey) => {
         let updatedKey = { ...key };

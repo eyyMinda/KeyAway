@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { client } from "@/src/sanity/lib/client";
-import { cronRunsQuery } from "@/src/lib/sanity/queries";
+import { cronStatusQuery } from "@/src/lib/sanity/queries";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { SEVEN_DAYS_MS, isoSince } from "@/src/lib/time";
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const LIMIT = 50;
+type CronRunRow = {
+  _id: string;
+  job: string;
+  source: string;
+  status: string;
+  details?: string;
+  ranAt: string;
+};
 
 /** GET /api/v1/admin/cron-status - Last cron runs (last 7 days, admin only) */
 export async function GET(req: NextRequest) {
@@ -17,14 +24,23 @@ export async function GET(req: NextRequest) {
   if (admin instanceof Response) return admin;
 
   try {
-    const since = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
-    const runs = await client.fetch<Array<{ _id: string; job: string; source: string; status: string; details?: string; ranAt: string }>>(
-      cronRunsQuery,
-      { since, limit: LIMIT }
-    );
+    const since = isoSince(SEVEN_DAYS_MS);
+    const payload = await client.fetch<{
+      recent?: CronRunRow[] | null;
+      latestByJob?: Record<string, CronRunRow | null> | null;
+    }>(cronStatusQuery, { since });
+
+    const byId = new Map<string, CronRunRow>();
+    for (const run of Object.values(payload?.latestByJob ?? {})) {
+      if (run?._id) byId.set(run._id, run);
+    }
+    for (const run of payload?.recent ?? []) {
+      if (run?._id) byId.set(run._id, run);
+    }
+    const runs = [...byId.values()].sort((a, b) => (a.ranAt < b.ranAt ? 1 : -1));
 
     return NextResponse.json({
-      data: { runs: runs ?? [] },
+      data: { runs },
       meta: {}
     });
   } catch (err) {
