@@ -22,8 +22,9 @@ import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession
 import { isDevelopmentEnv } from "@/src/lib/env/isDevelopment";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
+import { MINUTE_MS } from "@/src/lib/time";
 
-const DUPLICATE_WINDOW_MS = 2 * 60_000;
+const DUPLICATE_WINDOW_MS = 2 * MINUTE_MS;
 
 /** POST /api/v1/program-comments — append a comment or reply on a program document */
 export async function POST(req: NextRequest) {

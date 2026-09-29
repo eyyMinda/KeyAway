@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import crypto from "crypto";
+import { HOUR_MS } from "@/src/lib/time";
 
 /** Extract client IP from request (x-forwarded-for, first hop). */
 export function getClientIp(req: NextRequest | Request): string | undefined {
@@ -26,7 +27,7 @@ export function hashIp(ip: string | undefined): string | undefined {
 }
 
 const locationCache = new Map<string, { data: { country?: string; city?: string }; expires: number }>();
-const CACHE_TTL_MS = 60 * 60 * 1000;
+const CACHE_TTL_MS = HOUR_MS;
 const MAX_CACHE_ENTRIES = 500;
 
 function pruneLocationCache(now = Date.now()) {
