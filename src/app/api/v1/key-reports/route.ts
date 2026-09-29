@@ -43,13 +43,16 @@ export async function POST(req: NextRequest) {
     const spammerNegativeForbidden = () =>
       Errors.forbidden("Spam-flagged visitors may only report keys as working.");
 
-    // --- Renew: update existing report (same visitor) ---
+    // --- Renew: update existing report (same visitor). Live doc via reportId, archived row via bundleId+rowKey. ---
     const reportId = typeof b.reportId === "string" ? b.reportId.trim() : "";
+    const bundleId = typeof b.bundleId === "string" ? b.bundleId.trim() : "";
+    const rowKey = typeof b.rowKey === "string" ? b.rowKey.trim() : "";
     const newEventType = typeof b.newEventType === "string" ? b.newEventType.trim() : "";
     const renewProgramSlug = typeof b.programSlug === "string" ? b.programSlug.trim() : "";
     const renewKey = b.key;
+    const isBundledRenew = !reportId && Boolean(bundleId && rowKey);
 
-    if (reportId && newEventType && renewProgramSlug && renewKey) {
+    if ((reportId || isBundledRenew) && newEventType && renewProgramSlug && renewKey) {
       if (!REPORT_EVENTS.has(newEventType as KeyReportEvent)) {
         return Errors.validation(
           "Invalid newEventType. Use report_key_working, report_key_expired, or report_key_limit_reached"
@@ -58,22 +61,44 @@ export async function POST(req: NextRequest) {
       if ((await isVisitorSpammerByHash(ipHash)) && newEventType !== "report_key_working") {
         return spammerNegativeForbidden();
       }
-      const existingReport = await client.fetch<{ _id: string } | null>(
-        `*[_type=="keyReport" && _id == $reportId && ipHash == $ipHash][0]{ _id }`,
-        { reportId, ipHash }
-      );
-      if (!existingReport) return Errors.notFound("Report not found or access denied");
       const version = parseVersionFitInput(newEventType, b);
       if (!version.ok) return Errors.validation(version.error);
-      const patch = client.patch(reportId).set({
-        eventType: newEventType,
-        createdAt: new Date().toISOString(),
-        ...version.fields
-      });
-      if (newEventType === "report_key_working") {
-        patch.unset(["triedVersionFit", "triedVersion", "listedVersion"]);
+      const now = new Date().toISOString();
+
+      let updated: Record<string, unknown>;
+      if (isBundledRenew) {
+        // Ownership: the bundle row must carry this visitor's ipHash.
+        const row = await client.fetch<{ rowKey: string } | null>(
+          `*[_type=="keyReportBundle" && _id == $bundleId][0].reports[_key == $rowKey && ipHash == $ipHash][0]{ "rowKey": _key }`,
+          { bundleId, rowKey, ipHash }
+        );
+        if (!row) return Errors.notFound("Report not found or access denied");
+        const at = (field: string) => `reports[_key=="${rowKey}"].${field}`;
+        const patch = client.patch(bundleId);
+        const setFields: Record<string, unknown> = { [at("eventType")]: newEventType, [at("createdAt")]: now };
+        for (const [k, v] of Object.entries(version.fields ?? {})) setFields[at(k)] = v;
+        patch.set(setFields).set({ updatedAt: now });
+        if (newEventType === "report_key_working") {
+          patch.unset([at("triedVersionFit"), at("triedVersion"), at("listedVersion")]);
+        }
+        await patch.commit();
+        updated = { _id: bundleId, eventType: newEventType };
+      } else {
+        const existingReport = await client.fetch<{ _id: string } | null>(
+          `*[_type=="keyReport" && _id == $reportId && ipHash == $ipHash][0]{ _id }`,
+          { reportId, ipHash }
+        );
+        if (!existingReport) return Errors.notFound("Report not found or access denied");
+        const patch = client.patch(reportId).set({
+          eventType: newEventType,
+          createdAt: now,
+          ...version.fields
+        });
+        if (newEventType === "report_key_working") {
+          patch.unset(["triedVersionFit", "triedVersion", "listedVersion"]);
+        }
+        updated = (await patch.commit()) as Record<string, unknown>;
       }
-      const updated = await patch.commit();
       const renewSessionId = typeof b.sessionId === "string" ? b.sessionId : undefined;
       try {
         await appendTrackingSession({
