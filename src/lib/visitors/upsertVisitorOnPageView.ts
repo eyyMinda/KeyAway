@@ -1,8 +1,9 @@
 import { client } from "@/src/sanity/lib/client";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
+import { MINUTE_MS } from "@/src/lib/time";
 
-const SESSION_GAP_MS = 30 * 60 * 1000;
+const SESSION_GAP_MS = 30 * MINUTE_MS;
 
 /** After a stored `page_viewed`, patch or create `visitor` (30m idle = new session, increments visitCount / tier). */
 export async function upsertVisitorOnPageView(

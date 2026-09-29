@@ -1,8 +1,10 @@
+import { MINUTE_MS, HOUR_MS } from "@/src/lib/time";
+
 /** Idle gap before a new visit starts. Matches GA4's default session timeout. */
-export const SESSION_IDLE_MS = 30 * 60 * 1000;
+export const SESSION_IDLE_MS = 30 * MINUTE_MS;
 
 /** Hard cap so a tab left open cannot grow one document all day. */
-export const SESSION_MAX_MS = 2 * 60 * 60 * 1000;
+export const SESSION_MAX_MS = 2 * HOUR_MS;
 
 export const SESSION_MAX_EVENTS = 100;
 

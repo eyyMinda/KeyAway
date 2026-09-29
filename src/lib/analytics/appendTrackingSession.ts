@@ -11,6 +11,7 @@ import {
   type SessionEntry
 } from "@/src/lib/analytics/sessionConstants";
 import { classifySessionReferrer } from "@/src/lib/analytics/sessionEntry";
+import { SECOND_MS } from "@/src/lib/time";
 
 export type SessionEventInput = {
   event: string;
@@ -44,7 +45,7 @@ export type AppendTrackingSessionInput = {
   events: SessionEventInput[];
 };
 
-const NEAR_DUPLICATE_MS = 90 * 1000;
+const NEAR_DUPLICATE_MS = 90 * SECOND_MS;
 
 type RecentEvent = {
   event?: string;
