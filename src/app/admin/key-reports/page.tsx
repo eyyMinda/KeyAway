@@ -4,7 +4,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { client } from "@/src/sanity/lib/client";
-import { keyReportsQuery, allProgramsQuery } from "@/src/lib/sanity/queries";
+import { adminKeyReportsQuery, allProgramsQuery } from "@/src/lib/sanity/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
 import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";
@@ -87,10 +87,16 @@ function KeyReportsPageContent() {
         const programsData: Program[] = await client.fetch(allProgramsQuery);
         setPrograms(programsData);
 
-        const since = "1970-01-01T00:00:00.000Z";
-        const events = await client.fetch(keyReportsQuery, { since });
+        const combined = await client.fetch<{
+          live?: Array<Record<string, unknown>>;
+          bundled?: Array<{ bundleId: string; rows?: Array<Record<string, unknown>> }>;
+        }>(adminKeyReportsQuery);
 
-        const keyReportEvents = events;
+        const liveEvents = combined?.live ?? [];
+        const bundledEvents: Array<Record<string, unknown>> = (combined?.bundled ?? []).flatMap(b =>
+          (b.rows ?? []).map(r => ({ ...r, bundleId: b.bundleId }))
+        );
+        const keyReportEvents = [...liveEvents, ...bundledEvents];
         const keyReports = new Map<string, KeyReport>();
 
         for (const report of keyReportEvents) {
@@ -191,7 +197,9 @@ function KeyReportsPageContent() {
           );
 
           keyReport.reports.push({
-            _id: report._id as string,
+            _id: (report._id as string) || "",
+            bundleId: (report as { bundleId?: string }).bundleId,
+            rowKey: (report as { rowKey?: string }).rowKey,
             ipHash: (report.ipHash as string) || undefined,
             referrer: (report.referrer as string) || undefined,
             createdAt: report.createdAt as string,

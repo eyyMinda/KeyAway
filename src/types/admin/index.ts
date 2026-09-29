@@ -89,6 +89,9 @@ export interface KeyReport {
   };
   reports: Array<{
     _id: string;
+    /** Set when this row lives inside a keyReportBundle instead of a live doc. */
+    bundleId?: string;
+    rowKey?: string;
     ipHash?: string;
     referrer?: string;
     createdAt: string;

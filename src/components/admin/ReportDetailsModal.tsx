@@ -107,6 +107,22 @@ interface ReportDetailsModalProps {
   onReportPatched?: () => void;
 }
 
+type ReportRow = KeyReport["reports"][number];
+
+/** Stable per-row key: live doc id, or bundle id + row key for archived rows. */
+function rowEditId(r: ReportRow): string {
+  if (r._id) return r._id;
+  if (r.bundleId && r.rowKey) return `${r.bundleId}:${r.rowKey}`;
+  return "";
+}
+
+/** PATCH body target: live doc uses reportId, archived row uses bundleId + rowKey. */
+function rowEditTarget(r: ReportRow): Record<string, string> | null {
+  if (r._id) return { reportId: r._id };
+  if (r.bundleId && r.rowKey) return { bundleId: r.bundleId, rowKey: r.rowKey };
+  return null;
+}
+
 export default function ReportDetailsModal({ isOpen, onClose, report, onReportPatched }: ReportDetailsModalProps) {
   const [rowEventTypes, setRowEventTypes] = useState<Record<string, KeyReportEvent>>({});
   const [rowTriedVersions, setRowTriedVersions] = useState<Record<string, string>>({});
@@ -119,9 +135,11 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
     const next: Record<string, KeyReportEvent> = {};
     const versions: Record<string, string> = {};
     for (const r of report.reports) {
-      if (r._id) next[r._id] = r.eventType;
-      if (r._id && r.triedVersionFit === "other") {
-        versions[r._id] = r.triedVersion ?? "";
+      const rid = rowEditId(r);
+      if (!rid) continue;
+      next[rid] = r.eventType;
+      if (r.triedVersionFit === "other") {
+        versions[rid] = r.triedVersion ?? "";
       }
     }
     setRowEventTypes(next);
@@ -154,16 +172,16 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
   }, [report]);
 
   const saveReportEventType = useCallback(
-    async (reportId: string) => {
-      const eventType = rowEventTypes[reportId];
+    async (rid: string, target: Record<string, string>) => {
+      const eventType = rowEventTypes[rid];
       if (!eventType) return;
-      setSavingReportId(reportId);
+      setSavingReportId(rid);
       try {
         const res = await fetch("/api/v1/admin/key-report-event", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ reportId, eventType })
+          body: JSON.stringify({ ...target, eventType })
         });
         if (!res.ok) {
           console.error("PATCH key-report-event", await res.text());
@@ -178,16 +196,16 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
   );
 
   const saveTriedVersion = useCallback(
-    async (reportId: string) => {
-      const triedVersion = rowTriedVersions[reportId]?.trim() ?? "";
+    async (rid: string, target: Record<string, string>) => {
+      const triedVersion = rowTriedVersions[rid]?.trim() ?? "";
       if (!isValidTriedVersionInput(triedVersion)) return;
-      setSavingTriedVersionId(reportId);
+      setSavingTriedVersionId(rid);
       try {
         const res = await fetch("/api/v1/admin/key-report-event", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ reportId, triedVersion })
+          body: JSON.stringify({ ...target, triedVersion })
         });
         if (!res.ok) {
           console.error("PATCH key-report-event triedVersion", await res.text());
@@ -341,7 +359,8 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
             </p>
             <div className="space-y-2">
               {report.reports.map((reportItem, index) => {
-                const rid = reportItem._id || `row-${index}`;
+                const rid = rowEditId(reportItem) || `row-${index}`;
+                const editTarget = rowEditTarget(reportItem);
                 const currentSelect = rowEventTypes[rid] ?? reportItem.eventType;
                 const eventTypeConfig = {
                   report_key_working: {
@@ -402,13 +421,13 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
                         <button
                           type="button"
                           disabled={
-                            !reportItem._id ||
-                            savingReportId === reportItem._id ||
+                            !editTarget ||
+                            savingReportId === rid ||
                             currentSelect === reportItem.eventType
                           }
-                          onClick={() => reportItem._id && void saveReportEventType(reportItem._id)}
+                          onClick={() => editTarget && void saveReportEventType(rid, editTarget)}
                           className="h-7 cursor-pointer px-2 rounded bg-indigo-600 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
-                          {savingReportId === reportItem._id ? "Saving…" : "Save"}
+                          {savingReportId === rid ? "Saving…" : "Save"}
                         </button>
                       </div>
                       {ref ? (
@@ -431,20 +450,20 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
                             Tried v{formatVersionLabelDisplay(reportItem.triedVersion || "?")}
                             {reportItem.listedVersion ? ` (key is ${reportItem.listedVersion})` : ""}
                           </div>
-                          {reportItem._id ? (
+                          {editTarget ? (
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <label className="sr-only" htmlFor={`tried-v-${reportItem._id}`}>
+                              <label className="sr-only" htmlFor={`tried-v-${rid}`}>
                                 Edit tried version
                               </label>
                               <input
-                                id={`tried-v-${reportItem._id}`}
+                                id={`tried-v-${rid}`}
                                 type="text"
                                 maxLength={4}
-                                value={rowTriedVersions[reportItem._id] ?? reportItem.triedVersion ?? ""}
+                                value={rowTriedVersions[rid] ?? reportItem.triedVersion ?? ""}
                                 onChange={e =>
                                   setRowTriedVersions(prev => ({
                                     ...prev,
-                                    [reportItem._id!]: filterTriedVersionInput(e.target.value)
+                                    [rid]: filterTriedVersionInput(e.target.value)
                                   }))
                                 }
                                 className="h-7 w-20 rounded border border-amber-300 bg-white px-2 text-xs text-gray-900"
@@ -453,22 +472,18 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
                               <button
                                 type="button"
                                 disabled={(() => {
-                                  const draft = (rowTriedVersions[reportItem._id] ?? "").trim();
+                                  const draft = (rowTriedVersions[rid] ?? "").trim();
                                   const stored = (reportItem.triedVersion ?? "").trim();
                                   const draftNorm = normalizeTriedVersionForStorage(draft);
                                   const storedNorm =
                                     stored && isValidTriedVersionInput(stored)
                                       ? normalizeTriedVersionForStorage(stored)
                                       : stored;
-                                  return (
-                                    savingTriedVersionId === reportItem._id ||
-                                    !draftNorm ||
-                                    draftNorm === storedNorm
-                                  );
+                                  return savingTriedVersionId === rid || !draftNorm || draftNorm === storedNorm;
                                 })()}
-                                onClick={() => void saveTriedVersion(reportItem._id!)}
+                                onClick={() => void saveTriedVersion(rid, editTarget)}
                                 className="h-7 cursor-pointer px-2 rounded bg-amber-700 text-white text-xs disabled:opacity-40 disabled:cursor-not-allowed">
-                                {savingTriedVersionId === reportItem._id ? "Saving…" : "Save version"}
+                                {savingTriedVersionId === rid ? "Saving…" : "Save version"}
                               </button>
                             </div>
                           ) : null}
