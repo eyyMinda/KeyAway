@@ -1,7 +1,7 @@
 /** @fileoverview Cron: moves key reports older than retention into `keyReportBundle`, deletes sources. */
 import { randomUUID } from "node:crypto";
 import { KEY_REPORT_BUNDLE_CAPACITY, KEY_REPORT_RETENTION_MS } from "@/src/lib/analytics/bundlingConstants";
-import { client } from "@/src/sanity/lib/client";
+import { mutationClient } from "@/src/lib/sanity/mutationClient";
 import { isoSince } from "@/src/lib/time";
 
 const BATCH = 100;
@@ -21,11 +21,12 @@ function toBundledReport(doc: LiveReport) {
 /** Bundle key reports with createdAt older than retention (7 days). */
 export async function runBundleKeyReports(): Promise<{ ok: boolean; bundled: number; error?: string }> {
   const cutoff = isoSince(KEY_REPORT_RETENTION_MS);
+  const archivedIds = new Set<string>();
   let bundled = 0;
 
   try {
     for (let i = 0; i < MAX_ITERATIONS; i++) {
-      const open = await client.fetch<{
+      const open = await mutationClient.fetch<{
         _id: string;
         reportCount: number;
         capacity?: number;
@@ -41,19 +42,20 @@ export async function runBundleKeyReports(): Promise<{ ok: boolean; bundled: num
       const limit = Math.min(BATCH, Math.max(room, 0));
       if (open && limit <= 0) break;
 
-      const docs = await client.fetch<LiveReport[]>(
+      const fetched = await mutationClient.fetch<LiveReport[]>(
         `*[_type == "keyReport" && coalesce(createdAt, _createdAt) < $cutoff] | order(coalesce(createdAt, _createdAt) asc) [0...$limit]{
           _id, ${REPORT_FIELDS}
         }`,
         { cutoff, limit: open ? limit : BATCH }
       );
+      const docs = fetched.filter(doc => doc._id && !archivedIds.has(doc._id));
       if (!docs.length) break;
 
       const reports = docs.map(toBundledReport);
       const start = docs[0].createdAt ?? cutoff;
       const end = docs[docs.length - 1].createdAt ?? cutoff;
       const now = new Date().toISOString();
-      const tx = client.transaction();
+      const tx = mutationClient.transaction();
 
       if (open) {
         tx.patch(open._id, p =>
@@ -76,7 +78,10 @@ export async function runBundleKeyReports(): Promise<{ ok: boolean; bundled: num
         });
       }
 
-      for (const doc of docs) tx.delete(doc._id);
+      for (const doc of docs) {
+        archivedIds.add(doc._id);
+        tx.delete(doc._id);
+      }
       await tx.commit();
       bundled += docs.length;
     }

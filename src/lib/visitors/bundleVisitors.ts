@@ -5,7 +5,7 @@ import {
   BUNDLE_SIZE,
   BUNDLING_RETENTION_MS
 } from "@/src/lib/analytics/bundlingConstants";
-import { client } from "@/src/sanity/lib/client";
+import { mutationClient } from "@/src/lib/sanity/mutationClient";
 import { DAY_MS, isoSince } from "@/src/lib/time";
 
 const VISITOR_FIELDS =
@@ -43,30 +43,33 @@ export interface BundleVisitorsResult {
 /** Bundles visitors with lastActivityAt older than retention. Set skipRetention=true for one-time migration. */
 export async function runBundleVisitors(skipRetention = false): Promise<BundleVisitorsResult> {
   const cutoff = skipRetention ? isoSince(-DAY_MS) : isoSince(BUNDLING_RETENTION_MS);
+  const archivedIds = new Set<string>();
   let created = 0;
   let appended = 0;
 
   try {
     while (true) {
-      const incomplete = await client.fetch<{ _id: string; visitorCount: number; timeRangeEnd: string } | null>(
+      const incomplete = await mutationClient.fetch<{ _id: string; visitorCount: number; timeRangeEnd: string } | null>(
         `*[_type == "visitorBundle" && visitorCount < $limit] | order(timeRangeEnd desc) [0]{ _id, visitorCount, timeRangeEnd }`,
         { limit: BUNDLE_SIZE }
       );
       if (!incomplete) break;
 
       const limit = BUNDLE_SIZE - incomplete.visitorCount;
-      const toAdd = await client.fetch<Array<Record<string, unknown> & { _id: string }>>(
+      const toAdd = await mutationClient.fetch<Array<Record<string, unknown> & { _id: string }>>(
         `*[_type == "visitor" && lastActivityAt < $cutoff && lastActivityAt > $after] | order(lastActivityAt asc) [0...$limit]{ _id, ${VISITOR_FIELDS} }`,
         { cutoff, after: incomplete.timeRangeEnd, limit }
       );
-      if (!toAdd.length) break;
+      const fresh = toAdd.filter(doc => doc._id && !archivedIds.has(doc._id));
+      if (!fresh.length) break;
 
-      const newVisitors = toAdd.map(d => toBundledVisitor(d));
-      const lastVisitor = toAdd[toAdd.length - 1];
+      const newVisitors = fresh.map(d => toBundledVisitor(d));
+      const lastVisitor = fresh[fresh.length - 1];
       const newTimeRangeEnd = (lastVisitor.lastActivityAt as string) ?? incomplete.timeRangeEnd;
-      const newVisitorCount = incomplete.visitorCount + toAdd.length;
-      const idsToDelete = toAdd.map(v => v._id);
-      const tx = client.transaction();
+      const newVisitorCount = incomplete.visitorCount + fresh.length;
+      const idsToDelete = fresh.map(v => v._id);
+      for (const id of idsToDelete) archivedIds.add(id);
+      const tx = mutationClient.transaction();
       const now = new Date().toISOString();
       tx.patch(incomplete._id, p =>
         p
@@ -75,28 +78,30 @@ export async function runBundleVisitors(skipRetention = false): Promise<BundleVi
       );
       idsToDelete.forEach(id => tx.delete(id));
       await tx.commit();
-      appended += toAdd.length;
+      appended += fresh.length;
     }
 
-    const latestBundle = await client.fetch<{ timeRangeEnd: string } | null>(
+    const latestBundle = await mutationClient.fetch<{ timeRangeEnd: string } | null>(
       `*[_type == "visitorBundle"] | order(timeRangeEnd desc) [0]{ timeRangeEnd }`
     );
     let after = latestBundle?.timeRangeEnd ?? "";
     for (let i = 0; i < BUNDLE_MAX_ITERATIONS; i++) {
-      const batch = await client.fetch<Array<Record<string, unknown> & { _id: string }>>(
+      const batch = await mutationClient.fetch<Array<Record<string, unknown> & { _id: string }>>(
         after
           ? `*[_type == "visitor" && lastActivityAt < $cutoff && lastActivityAt > $after] | order(lastActivityAt asc) [0...$limit]{ _id, ${VISITOR_FIELDS} }`
           : `*[_type == "visitor" && lastActivityAt < $cutoff] | order(lastActivityAt asc) [0...$limit]{ _id, ${VISITOR_FIELDS} }`,
         after ? { cutoff, after, limit: BUNDLE_SIZE } : { cutoff, limit: BUNDLE_SIZE }
       );
-      if (!batch.length) break;
+      const fresh = batch.filter(doc => doc._id && !archivedIds.has(doc._id));
+      if (!fresh.length) break;
 
-      const visitors = batch.map(d => toBundledVisitor(d));
+      const visitors = fresh.map(d => toBundledVisitor(d));
       const timeRangeStart = (visitors[0].lastActivityAt as string) ?? cutoff;
       const timeRangeEnd = (visitors[visitors.length - 1].lastActivityAt as string) ?? cutoff;
       after = timeRangeEnd;
-      const idsToDelete = batch.map(v => v._id);
-      const tx = client.transaction();
+      const idsToDelete = fresh.map(v => v._id);
+      for (const id of idsToDelete) archivedIds.add(id);
+      const tx = mutationClient.transaction();
       const now = new Date().toISOString();
       tx.create({
         _type: "visitorBundle",
