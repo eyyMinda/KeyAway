@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { SESSION_BUNDLE_CAPACITY, SESSION_IDLE_MS } from "@/src/lib/analytics/sessionConstants";
-import { client } from "@/src/sanity/lib/client";
+import { mutationClient } from "@/src/lib/sanity/mutationClient";
 
 const BATCH = 40;
 
 type LiveSession = Record<string, unknown> & { _id: string; startedAt?: string; lastEventAt?: string };
 
 async function fetchIdleSessions(cutoff: string, limit: number): Promise<LiveSession[]> {
-  return client.fetch<LiveSession[]>(
+  return mutationClient.fetch<LiveSession[]>(
     `*[_type == "trackingSession" && lastEventAt < $cutoff] | order(lastEventAt asc) [0...$limit]`,
     { cutoff, limit }
   );
@@ -26,11 +26,12 @@ function toBundledSession(doc: LiveSession) {
 /** Move idle sessions into `trackingSessionBundle` so only open visits stay as documents. */
 export async function runBundleSessions(): Promise<{ ok: boolean; bundled: number; error?: string }> {
   const cutoff = new Date(Date.now() - SESSION_IDLE_MS).toISOString();
+  const archivedIds = new Set<string>();
   let bundled = 0;
 
   try {
     for (let i = 0; i < 20; i++) {
-      const open = await client.fetch<{ _id: string; sessionCount: number; capacity?: number; timeRangeEnd?: string } | null>(
+      const open = await mutationClient.fetch<{ _id: string; sessionCount: number; capacity?: number; timeRangeEnd?: string } | null>(
         `*[_type == "trackingSessionBundle" && count(sessions) < coalesce(capacity, $cap)] | order(timeRangeStart asc)[0]{
           _id, "sessionCount": count(sessions), capacity, timeRangeEnd
         }`,
@@ -41,14 +42,15 @@ export async function runBundleSessions(): Promise<{ ok: boolean; bundled: numbe
       const limit = Math.min(BATCH, Math.max(room, 0));
       if (open && limit <= 0) break;
 
-      const docs = await fetchIdleSessions(cutoff, open ? limit : BATCH);
+      const fetched = await fetchIdleSessions(cutoff, open ? limit : BATCH);
+      const docs = fetched.filter(doc => doc._id && !archivedIds.has(doc._id));
       if (!docs.length) break;
 
       const sessions = docs.map(toBundledSession);
       const start = (docs[0].startedAt as string) ?? cutoff;
       const end = (docs[docs.length - 1].lastEventAt as string) ?? cutoff;
       const now = new Date().toISOString();
-      const tx = client.transaction();
+      const tx = mutationClient.transaction();
 
       if (open) {
         tx.patch(open._id, p =>
@@ -71,7 +73,10 @@ export async function runBundleSessions(): Promise<{ ok: boolean; bundled: numbe
         });
       }
 
-      for (const doc of docs) tx.delete(doc._id);
+      for (const doc of docs) {
+        archivedIds.add(doc._id);
+        tx.delete(doc._id);
+      }
       await tx.commit();
       bundled += docs.length;
     }

@@ -5,7 +5,7 @@ import {
   TAG_HOMEPAGE_PROGRAMS,
   TAG_PROGRAM_LISTINGS
 } from "@/src/lib/cache/cacheTags";
-import { client } from "@/src/sanity/lib/client";
+import { mutationClient } from "@/src/lib/sanity/mutationClient";
 import { revalidateTag } from "next/cache";
 
 const BUNDLE_BATCH = 40;
@@ -29,7 +29,7 @@ function applyEvent(
 async function aggregateEventStats(): Promise<Map<string, StatsRow>> {
   const map = new Map<string, StatsRow>();
 
-  const liveSessions = await client.fetch<Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }>>(
+  const liveSessions = await mutationClient.fetch<Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }>>(
     `*[_type == "trackingSession"]{
       "events": events[event in ["page_viewed", "download_click"]]{ programSlug, event, notFound }
     }`
@@ -40,7 +40,7 @@ async function aggregateEventStats(): Promise<Map<string, StatsRow>> {
 
   let sessionOffset = 0;
   while (true) {
-    const batch = await client.fetch<
+    const batch = await mutationClient.fetch<
       Array<{ sessions?: Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }> }>
     >(
       `*[_type == "trackingSessionBundle"] | order(_id asc) [$start...$end]{
@@ -73,12 +73,12 @@ export interface SyncProgramStatsRollupResult {
 export async function runSyncProgramStatsRollup(): Promise<SyncProgramStatsRollupResult> {
   try {
     const statsBySlug = await aggregateEventStats();
-    const programs = await client.fetch<Array<{ _id: string; slug?: { current?: string } }>>(
+    const programs = await mutationClient.fetch<Array<{ _id: string; slug?: { current?: string } }>>(
       `*[_type == "program"]{ _id, slug }`
     );
 
     let patched = 0;
-    const tx = client.transaction();
+    const tx = mutationClient.transaction();
 
     for (const program of programs ?? []) {
       const slug = program.slug?.current;
