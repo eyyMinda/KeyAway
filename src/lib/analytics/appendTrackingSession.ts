@@ -46,6 +46,7 @@ export type AppendTrackingSessionInput = {
 };
 
 const NEAR_DUPLICATE_MS = 90 * SECOND_MS;
+const RECENT_EVENTS = `"events": events[-2..-1]{ event, createdAt, path, programSlug, key, social }`;
 
 type RecentEvent = {
   event?: string;
@@ -125,7 +126,7 @@ function isClosed(doc: OpenSession, now: number): boolean {
 async function findOpenSession(visitorHash: string, now: number): Promise<OpenSession | null> {
   const doc = await client.fetch<OpenSession | null>(
     `*[_type == "trackingSession" && visitorHash == $h && lastEventAt >= $cutoff && startedAt >= $minStart && eventCount < $max] | order(startedAt asc)[0]{
-      _id, eventCount, startedAt, lastEventAt, events
+      _id, eventCount, startedAt, lastEventAt, ${RECENT_EVENTS}
     }`,
     {
       h: visitorHash,
@@ -158,7 +159,7 @@ export async function appendTrackingSession(
 
   if (!open && requestedId) {
     const existing = await client.fetch<OpenSession | null>(
-      `*[_id == $id][0]{ _id, eventCount, startedAt, lastEventAt, events }`,
+      `*[_id == $id][0]{ _id, eventCount, startedAt, lastEventAt, ${RECENT_EVENTS} }`,
       { id: requestedId }
     );
     if (existing && isClosed(existing, now)) {

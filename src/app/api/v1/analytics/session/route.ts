@@ -4,12 +4,11 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
-import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
+import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/requestGeo";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { appendTrackingSession, type SessionEventInput } from "@/src/lib/analytics/appendTrackingSession";
 import { isSessionEntry } from "@/src/lib/analytics/sessionConstants";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
-import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
 import { getKeyData } from "@/src/lib/keyHashing";
 import { normalizePath } from "@/src/lib/api/inputNormalize";
 import { isProgramSlugPublishedCached } from "@/src/lib/sanity/getCachedPublishedProgramSlugs";
@@ -67,12 +66,7 @@ export async function POST(req: NextRequest) {
     const ipHash = hashIp(ip) ?? "unknown";
     const ua = req.headers.get("user-agent") || undefined;
 
-    const resolvedVisitor = ipHash ? await fetchVisitorByHash(ipHash) : null;
-    let location: { country?: string; city?: string } | undefined =
-      resolvedVisitor?.country || resolvedVisitor?.city
-        ? { country: resolvedVisitor.country, city: resolvedVisitor.city }
-        : undefined;
-    if (!location) location = await getLocationFromIP(ip, "KeyAway Analytics");
+    const location = locationFromVercelHeaders(req.headers);
 
     const events: SessionEventInput[] = [];
     let sawPageView = false;

@@ -8,56 +8,56 @@ import {
 import { mutationClient } from "@/src/lib/sanity/mutationClient";
 import { revalidateTag } from "next/cache";
 
-const BUNDLE_BATCH = 40;
+const BUNDLE_CHUNK = 8;
 
 type StatsRow = { page_viewed: number; download_click: number };
 
-function applyEvent(
-  map: Map<string, StatsRow>,
-  programSlug: string | undefined,
-  event: string | undefined,
-  notFound?: boolean
-) {
-  const slug = programSlug?.trim();
-  if (!slug || !event) return;
-  const row = map.get(slug) ?? { page_viewed: 0, download_click: 0 };
-  if (event === "page_viewed" && !notFound) row.page_viewed++;
-  else if (event === "download_click") row.download_click++;
-  map.set(slug, row);
+function safeSlug(slug: string): string | null {
+  return /^[a-z0-9-]+$/i.test(slug) ? slug : null;
 }
 
-async function aggregateEventStats(): Promise<Map<string, StatsRow>> {
-  const map = new Map<string, StatsRow>();
+/** Counts stay inside GROQ. Bundle counts are per document so the cron does not scan every bundle on every slug. */
+function countFields(slugs: string[], scope: "live" | "bundle"): string {
+  return slugs
+    .flatMap(slug => {
+      const views =
+        scope === "live"
+          ? `count(*[_type == "trackingSession"].events[programSlug == "${slug}" && event == "page_viewed" && notFound != true])`
+          : `count(sessions[].events[programSlug == "${slug}" && event == "page_viewed" && notFound != true])`;
+      const downloads =
+        scope === "live"
+          ? `count(*[_type == "trackingSession"].events[programSlug == "${slug}" && event == "download_click"])`
+          : `count(sessions[].events[programSlug == "${slug}" && event == "download_click"])`;
+      return [`"${slug}__v": ${views}`, `"${slug}__d": ${downloads}`];
+    })
+    .join(", ");
+}
 
-  const liveSessions = await mutationClient.fetch<Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }>>(
-    `*[_type == "trackingSession"]{
-      "events": events[event in ["page_viewed", "download_click"]]{ programSlug, event, notFound }
-    }`
-  );
-  for (const session of liveSessions ?? []) {
-    for (const e of session.events ?? []) applyEvent(map, e.programSlug, e.event, e.notFound);
+function addCounts(map: Map<string, StatsRow>, slugs: string[], raw: Record<string, number> | null) {
+  for (const slug of slugs) {
+    const row = map.get(slug) ?? { page_viewed: 0, download_click: 0 };
+    row.page_viewed += raw?.[`${slug}__v`] ?? 0;
+    row.download_click += raw?.[`${slug}__d`] ?? 0;
+    map.set(slug, row);
   }
+}
 
-  let sessionOffset = 0;
-  while (true) {
-    const batch = await mutationClient.fetch<
-      Array<{ sessions?: Array<{ events?: Array<{ programSlug?: string; event?: string; notFound?: boolean }> }> }>
-    >(
-      `*[_type == "trackingSessionBundle"] | order(_id asc) [$start...$end]{
-        "sessions": sessions[]{
-          "events": events[event in ["page_viewed", "download_click"]]{ programSlug, event, notFound }
-        }
-      }`,
-      { start: sessionOffset, end: sessionOffset + BUNDLE_BATCH - 1 }
+async function aggregateEventStats(slugs: string[]): Promise<Map<string, StatsRow>> {
+  const map = new Map<string, StatsRow>();
+  const usable = slugs.map(safeSlug).filter((slug): slug is string => Boolean(slug));
+  if (!usable.length) return map;
+
+  const live = await mutationClient.fetch<Record<string, number>>(`{ ${countFields(usable, "live")} }`);
+  addCounts(map, usable, live);
+
+  const bundleIds = await mutationClient.fetch<string[]>(`*[_type == "trackingSessionBundle"]._id`);
+  for (let i = 0; i < (bundleIds?.length ?? 0); i += BUNDLE_CHUNK) {
+    const ids = bundleIds.slice(i, i + BUNDLE_CHUNK);
+    const rows = await mutationClient.fetch<Array<Record<string, number>>>(
+      `*[_id in $ids]{ ${countFields(usable, "bundle")} }`,
+      { ids }
     );
-    if (!batch?.length) break;
-    for (const bundle of batch) {
-      for (const session of bundle.sessions ?? []) {
-        for (const e of session.events ?? []) applyEvent(map, e.programSlug, e.event, e.notFound);
-      }
-    }
-    if (batch.length < BUNDLE_BATCH) break;
-    sessionOffset += BUNDLE_BATCH;
+    for (const row of rows ?? []) addCounts(map, usable, row);
   }
 
   return map;
@@ -72,9 +72,11 @@ export interface SyncProgramStatsRollupResult {
 /** Writes merged view/download/popularity scores onto each program document. */
 export async function runSyncProgramStatsRollup(): Promise<SyncProgramStatsRollupResult> {
   try {
-    const statsBySlug = await aggregateEventStats();
     const programs = await mutationClient.fetch<Array<{ _id: string; slug?: { current?: string } }>>(
       `*[_type == "program"]{ _id, slug }`
+    );
+    const statsBySlug = await aggregateEventStats(
+      (programs ?? []).map(program => program.slug?.current ?? "").filter(Boolean)
     );
 
     let patched = 0;

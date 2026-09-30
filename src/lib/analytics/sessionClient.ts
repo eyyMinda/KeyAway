@@ -1,7 +1,6 @@
 "use client";
 
 import type { AnalyticsEvent, KeyReportEvent, TrackEventMeta } from "@/src/types";
-import { isAdminSession } from "@/src/lib/admin/isAdminSession";
 import {
   SESSION_IDLE_MS,
   SESSION_MAX_EVENTS,
@@ -128,11 +127,7 @@ export function getTrackingSessionId(): string {
 function bindFlushListeners(): void {
   if (listenersBound || typeof window === "undefined") return;
   listenersBound = true;
-  const flushHidden = () => {
-    if (document.visibilityState === "hidden") void flushTrackingSession(true);
-  };
   window.addEventListener("pagehide", () => void flushTrackingSession(true));
-  document.addEventListener("visibilitychange", flushHidden);
 }
 
 function scheduleFlush(delayMs: number): void {
@@ -160,16 +155,12 @@ export function enqueueAnalyticsEvent(event: AnalyticsEvent | KeyReportEvent, me
     meta,
     createdAt: new Date().toISOString()
   });
-  if (event === "page_viewed" || queue.length >= 8) scheduleFlush(0);
+  if (queue.length >= 8) scheduleFlush(0);
   else scheduleFlush(4000);
 }
 
 export async function flushTrackingSession(useBeacon: boolean): Promise<void> {
   if (typeof window === "undefined" || queue.length === 0) return;
-  if (await isAdminSession()) {
-    queue = [];
-    return;
-  }
 
   const events = queue.splice(0, 30);
   const sessionId = events[0]?.sessionId;
