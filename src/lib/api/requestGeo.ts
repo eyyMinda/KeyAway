@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 import crypto from "crypto";
-import { HOUR_MS } from "@/src/lib/time";
 
 /** Extract client IP from request (x-forwarded-for, first hop). */
 export function getClientIp(req: NextRequest | Request): string | undefined {
@@ -26,68 +25,34 @@ export function hashIp(ip: string | undefined): string | undefined {
   }
 }
 
-const locationCache = new Map<string, { data: { country?: string; city?: string }; expires: number }>();
-const CACHE_TTL_MS = HOUR_MS;
-const MAX_CACHE_ENTRIES = 500;
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 
-function pruneLocationCache(now = Date.now()) {
-  for (const [ip, entry] of locationCache.entries()) {
-    if (entry.expires <= now) locationCache.delete(ip);
-  }
-  if (locationCache.size <= MAX_CACHE_ENTRIES) return;
-  const overflow = locationCache.size - MAX_CACHE_ENTRIES;
-  const keys = locationCache.keys();
-  for (let i = 0; i < overflow; i++) {
-    const k = keys.next().value;
-    if (k) locationCache.delete(k);
-  }
-}
-
-const GEO_SERVICES = [
-  {
-    url: (ip: string) => `https://ipapi.co/${ip}/json/`,
-    parser: (data: Record<string, unknown>) => ({ country: data.country_name as string, city: data.city as string })
-  },
-  {
-    url: (ip: string) => `https://ip-api.com/json/${ip}`,
-    parser: (data: Record<string, unknown>) => ({ country: data.country as string, city: data.city as string })
-  },
-  {
-    url: (ip: string) => `https://ipinfo.io/${ip}/json`,
-    parser: (data: Record<string, unknown>) => ({ country: data.country as string, city: data.city as string })
-  }
-];
-
-/** Resolve country/city from IP. Cached 1h per IP. */
-export async function getLocationFromIP(
-  ip: string | undefined,
-  userAgent = "KeyAway"
-): Promise<{ country?: string; city?: string } | undefined> {
-  if (!ip) return undefined;
-  pruneLocationCache();
-  const cached = locationCache.get(ip);
-  if (cached && cached.expires > Date.now()) return cached.data;
-
-  for (const service of GEO_SERVICES) {
+/**
+ * Country and city Vercel attaches to the incoming function request.
+ * Missing on localhost, and never shown in the browser Network tab.
+ * Country is the English region name so it matches older ipapi rows (`Germany`, not `DE`).
+ */
+export function locationFromVercelHeaders(h: Headers): { country?: string; city?: string } | undefined {
+  const code = h.get("x-vercel-ip-country")?.trim().toUpperCase();
+  let country: string | undefined;
+  if (code && /^[A-Z]{2}$/.test(code)) {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-      const response = await fetch(service.url(ip), {
-        headers: { "User-Agent": userAgent },
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      if (response.ok) {
-        const data = await response.json();
-        const result = service.parser(data);
-        if (result.country || result.city) {
-          locationCache.set(ip, { data: result, expires: Date.now() + CACHE_TTL_MS });
-          return result;
-        }
-      }
+      country = regionNames.of(code) || undefined;
     } catch {
-      continue;
+      country = undefined;
     }
   }
-  return undefined;
+
+  const rawCity = h.get("x-vercel-ip-city")?.trim();
+  let city: string | undefined;
+  if (rawCity) {
+    try {
+      city = decodeURIComponent(rawCity).trim() || undefined;
+    } catch {
+      city = rawCity;
+    }
+  }
+
+  if (!country && !city) return undefined;
+  return { country, city };
 }

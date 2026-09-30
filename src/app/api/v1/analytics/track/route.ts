@@ -8,7 +8,7 @@ import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { normalizePath } from "@/src/lib/api/inputNormalize";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
 import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
-import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
+import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/requestGeo";
 import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 import { isSessionEntry } from "@/src/lib/analytics/sessionConstants";
 import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
@@ -161,22 +161,8 @@ export async function POST(req: NextRequest) {
           ? { isSpammer: resolvedVisitor.isSpammer, country: resolvedVisitor.country, city: resolvedVisitor.city }
           : null;
 
-    let location: { country?: string; city?: string } | undefined =
-      visitor?.country || visitor?.city ? { country: visitor.country, city: visitor.city } : undefined;
-
-    if (!location) {
-      location = await getLocationFromIP(ip, "KeyAway Analytics");
-      if (visitor?._id && (location?.country || location?.city)) {
-        await client
-          .patch(visitor._id)
-          .set({
-            ...(location.country ? { country: location.country } : {}),
-            ...(location.city ? { city: location.city } : {}),
-            geoUpdatedAt: new Date().toISOString()
-          })
-          .commit();
-      }
-    }
+    const location = locationFromVercelHeaders(req.headers) ??
+      (visitor?.country || visitor?.city ? { country: visitor.country, city: visitor.city } : undefined);
 
     if (isReportEvent && visitor?.isSpammer === true && body.event !== "report_key_working") {
       return NextResponse.json({ data: { accepted: true, skipped: true }, meta: {} });

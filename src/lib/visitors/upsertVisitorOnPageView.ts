@@ -54,7 +54,8 @@ export async function upsertVisitorOnPageView(
 
   const lastMs = new Date(existing.lastActivityAt).getTime();
   const newSession = !Number.isFinite(lastMs) || nowMs - lastMs > SESSION_GAP_MS;
-  const nextCount = newSession ? existing.visitCount + 1 : existing.visitCount;
+  if (!newSession) return;
+  const nextCount = existing.visitCount + 1;
   const contributionScore = existing.contributionScore ?? 0;
   const isSpammer = existing.isSpammer === true;
 

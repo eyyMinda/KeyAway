@@ -4,7 +4,7 @@ import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
-import { getClientIp, hashIp, getLocationFromIP } from "@/src/lib/api/requestGeo";
+import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/requestGeo";
 import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
 import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
 import type { KeyReportEvent } from "@/src/types";
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
 
     const ref = req.headers.get("referer") || undefined;
     const path = meta?.path as string | undefined;
-    const location = await getLocationFromIP(ip, "KeyAway");
+    const location = locationFromVercelHeaders(req.headers);
 
     const eventData: Record<string, unknown> = {
       _type: "keyReport",
