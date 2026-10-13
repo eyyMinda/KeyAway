@@ -78,6 +78,14 @@ export const vendor = defineType({
       ]
     }),
     defineField({
+      name: "aliases",
+      title: "Aliases",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        'Other spellings of this vendor on giveaway sites (e.g. "iObit", "Aomei Tech"). Used by the giveaway scan to ignore the vendor name when matching program titles.'
+    }),
+    defineField({
       name: "giveawayVsOfficial",
       title: "Giveaway key vs Official PRO",
       type: "array",

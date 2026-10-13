@@ -302,6 +302,31 @@ export const program = defineType({
       ]
     }),
     defineField({
+      name: "giveawayDiscovery",
+      title: "Giveaway discovery",
+      type: "object",
+      options: { collapsible: true, collapsed: true },
+      description:
+        "How the daily giveaway scan finds this program on other giveaway sites. Results show in Admin → Giveaway Finds.",
+      fields: [
+        defineField({
+          name: "aliases",
+          title: "Aliases",
+          type: "array",
+          of: [{ type: "string" }],
+          description:
+            'Other names giveaway sites use for this program (e.g. "Ultra Pic"). Case, spacing, vendor name, version numbers and words like Pro/Giveaway/Lifetime are ignored.'
+        }),
+        defineField({
+          name: "ignore",
+          title: "Skip in giveaway scan",
+          type: "boolean",
+          description: "Turn on for retired programs so they are never matched.",
+          initialValue: false
+        })
+      ]
+    }),
+    defineField({
       name: "cdKeys",
       title: "Activation entries",
       description: "Keys, accounts, or giveaway links depending on Activation flow above.",
