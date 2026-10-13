@@ -5,12 +5,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HiChartBar, HiViewGrid } from "react-icons/hi";
 import { MdRateReview, MdEventNote } from "react-icons/md";
-import { FaKey, FaEnvelopeOpenText, FaCommentDots } from "react-icons/fa";
+import { FaKey, FaEnvelopeOpenText, FaCommentDots, FaGift } from "react-icons/fa";
 import { useKeyReportAlerts, KeyReportAlertsDesktop, KeyReportAlertsMobile } from "./KeyReportAlerts";
 
 export default function AdminHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [newCounts, setNewCounts] = useState<{ newMessages: number; newSuggestions: number } | null>(null);
+  const [newCounts, setNewCounts] = useState<{
+    newMessages: number;
+    newSuggestions: number;
+    newGiveawayFinds: number;
+  } | null>(null);
   const { alerts: keyReportAlerts } = useKeyReportAlerts();
   const pathname = usePathname();
 
@@ -19,15 +23,21 @@ export default function AdminHeader() {
       .then(res => res.json())
       .then(data => {
         const d = data?.data ?? data;
-        setNewCounts({ newMessages: d?.newMessages ?? 0, newSuggestions: d?.newSuggestions ?? 0 });
+        setNewCounts({
+          newMessages: d?.newMessages ?? 0,
+          newSuggestions: d?.newSuggestions ?? 0,
+          newGiveawayFinds: d?.newGiveawayFinds ?? 0
+        });
       })
-      .catch(() => setNewCounts({ newMessages: 0, newSuggestions: 0 }));
+      .catch(() => setNewCounts({ newMessages: 0, newSuggestions: 0, newGiveawayFinds: 0 }));
   }, []);
 
   const isActive = (path: string) => pathname === path;
 
-  const navLinks: Array<{ href: string; label: string; icon: typeof FaKey; countKey?: "suggestions" | "messages" }> = [
+  type CountKey = "suggestions" | "messages" | "giveaways";
+  const navLinks: Array<{ href: string; label: string; icon: typeof FaKey; countKey?: CountKey }> = [
     { href: "/admin/analytics", label: "Analytics", icon: HiChartBar },
+    { href: "/admin/giveaway-finds", label: "Giveaway Finds", icon: FaGift, countKey: "giveaways" },
     { href: "/admin/programs", label: "Programs", icon: HiViewGrid },
     { href: "/admin/sessions", label: "Sessions", icon: MdEventNote },
     { href: "/admin/key-reports", label: "Key Reports", icon: MdRateReview },
@@ -36,8 +46,12 @@ export default function AdminHeader() {
     { href: "/admin/messages", label: "Messages", icon: FaEnvelopeOpenText, countKey: "messages" }
   ];
 
-  const getCount = (countKey: "suggestions" | "messages") =>
-    newCounts ? (countKey === "suggestions" ? newCounts.newSuggestions : newCounts.newMessages) : 0;
+  const getCount = (countKey: CountKey) => {
+    if (!newCounts) return 0;
+    if (countKey === "suggestions") return newCounts.newSuggestions;
+    if (countKey === "giveaways") return newCounts.newGiveawayFinds;
+    return newCounts.newMessages;
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
