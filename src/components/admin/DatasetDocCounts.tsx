@@ -26,6 +26,7 @@ const LABELS: Record<string, { label: string; href?: string }> = {
   program: { label: "Programs", href: "/admin/programs" },
   contactMessage: { label: "Messages", href: "/admin/messages" },
   keySuggestion: { label: "Key suggestions", href: "/admin/key-suggestions" },
+  giveawayFind: { label: "Giveaway finds", href: "/admin/giveaway-finds" },
   programCategory: { label: "Categories" },
   vendor: { label: "Vendors" },
   socialLink: { label: "Social links" },

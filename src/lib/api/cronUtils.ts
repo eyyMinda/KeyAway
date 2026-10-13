@@ -7,7 +7,8 @@ export type CronJob =
   | "bundle-visitors"
   | "bundle-key-reports"
   | "update-expired-keys"
-  | "prune-cron-runs";
+  | "prune-cron-runs"
+  | "discover-giveaways";
 
 /** Verifies cron auth (x-vercel-cron or Bearer token). Returns ok + source for logging. */
 export function verifyCronAuth(req: Request): { ok: boolean; source: CronSource } {

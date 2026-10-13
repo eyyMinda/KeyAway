@@ -385,7 +385,8 @@ export const cronStatusQuery = `{
     "bundle-visitors": *[_type == "cronRun" && job == "bundle-visitors" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
     "bundle-key-reports": *[_type == "cronRun" && job == "bundle-key-reports" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
     "update-expired-keys": *[_type == "cronRun" && job == "update-expired-keys" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
-    "prune-cron-runs": *[_type == "cronRun" && job == "prune-cron-runs" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}}
+    "prune-cron-runs": *[_type == "cronRun" && job == "prune-cron-runs" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
+    "discover-giveaways": *[_type == "cronRun" && job == "discover-giveaways" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}}
   }
 }`;
 

@@ -17,7 +17,8 @@ export const cronRun = defineType({
           { title: "Bundle Visitors", value: "bundle-visitors" },
           { title: "Bundle Key Reports", value: "bundle-key-reports" },
           { title: "Update Expired Keys", value: "update-expired-keys" },
-          { title: "Prune Cron Runs", value: "prune-cron-runs" }
+          { title: "Prune Cron Runs", value: "prune-cron-runs" },
+          { title: "Discover Giveaways", value: "discover-giveaways" }
         ]
       },
       validation: Rule => Rule.required()
