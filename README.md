@@ -20,7 +20,7 @@ KeyAway is a **production-style side project** that demonstrates:
 - **Content & auth** — **Sanity v5** as headless CMS with embedded Studio; **Auth.js (NextAuth v5)** with GitHub (and optional Google) OAuth for admin; JWT sessions and org/allowlist-based access control.
 - **API design** — Versioned REST-style API (`/api/v1/...`): analytics tracking, key reports, key suggestions, contact, cron jobs (expired-key updates, event bundling), webhooks for revalidation, and protected admin endpoints.
 - **Data & DX** — TypeScript end-to-end; server actions and shared Sanity client; rate limiting, IP hashing for analytics, and structured error handling.
-- **SEO & performance** — Dynamic metadata and JSON-LD, server-rendered program pages, and optional Vercel Analytics / Speed Insights.
+- **SEO & performance** — Dynamic metadata and JSON-LD, statically cached (ISR) public pages including `/programs`, and Vercel Speed Insights. Vercel Web Analytics is off by default; first-party tracking covers it.
 
 No database beyond Sanity (document store); no separate backend service. Suited to reading as a single full-stack codebase.
 
@@ -36,7 +36,7 @@ No database beyond Sanity (document store); no separate backend service. Suited 
 | Language  | [TypeScript](https://www.typescriptlang.org/)                                  |
 | Styling   | [Tailwind CSS](https://tailwindcss.com/) v4                                    |
 | Comments  | [Giscus](https://giscus.app/) (GitHub-based)                                   |
-| Hosting   | [Vercel](https://vercel.com/) (Analytics, Speed Insights, Cron)                |
+| Hosting   | [Vercel](https://vercel.com/) (Speed Insights, Cron)                           |
 
 ---
 
@@ -79,11 +79,12 @@ src/
 Short notes on what each part does and why.
 
 - **Session bundling (cron)** — Visits are stored as `trackingSession` documents and archived into `trackingSessionBundle` after they go idle. Program view and download counts are written from those sessions by `sync-program-stats`.
+- **Visitor bundling (cron)** — Each hashed visitor has a live `visitor` doc (visit count, tier, contributions, location from Vercel's `x-vercel-ip-*` headers). `bundle-visitors` runs hourly and moves visitors idle for 3h into `visitorBundle` docs (up to 1,000 each), keeping the live document count low. Each bundle stores a `visitorHashes` list so lookups only load bundles that contain the visitor; a returning visitor's live doc is rebuilt from the archive.
 - **Expired-key updates** — Keys past `validUntil` are marked expired in Sanity. Triggered by a cron job (all programs) and on program page load via middleware (rate-limited to once per 5 minutes per program) so the CMS stays in sync without hammering the API.
 - **Key reports** — Visitors submit “working” / “expired” / “limit reached” for a key. Stored as `keyReport` with hashed key and hashed IP; same visitor can update an existing report (e.g. key stopped working). Feeds admin key-reports and notifications.
 - **Key-report notifications** — API aggregates negative reports over the last 60 days, excludes keys already marked expired/limit in the CMS, and returns `lastReportAt`. Admin header shows alerts with links to filtered key-reports (`?program=` and `?key=`).
 - **Analytics tracking** — Copy, download, and social events sent to `/api/v1/analytics/track`. IP is hashed with `ANALYTICS_SALT`; no PII stored. Data is used for popularity and dashboard stats.
-- **Cache & revalidation** — Public pages use a short **segment revalidate** window (shared constant, currently 120s) plus **tagged** Sanity fetches so `revalidateTag` can invalidate data before ISR would. The Sanity webhook (`POST /api/v1/webhooks/revalidate`, `SANITY_WEBHOOK_SECRET`) and admin program saves bust tags by document type — e.g. `storeDetails`, `program` / `cdKey` (and sitemap when the URL set changes), `featuredProgramSettings`, `keyReport`.
+- **Cache & revalidation** — Public pages use a **segment revalidate** window (`PUBLIC_ISR_REVALIDATE_SECONDS`, currently 12h) plus **tagged** Sanity fetches so `revalidateTag` can invalidate data before ISR would. `/programs` stays static: it renders the default list, and the client reads filter/sort/page from the URL and loads them from the cached `/api/v1/programs/list`. The Sanity webhook (`POST /api/v1/webhooks/revalidate`, `SANITY_WEBHOOK_SECRET`) and admin program saves bust tags by document type — e.g. `storeDetails`, `program` / `cdKey` (and sitemap when the URL set changes), `featuredProgramSettings`, `keyReport`.
 - **Header notifications (program activity)** — One **`siteNotificationFeed`** document stores a capped list of “what’s new” rows, rebuilt when programs or CD keys change (webhook or admin program APIs). **One row per program**, roughly the last 30 days by `_updatedAt` with real listing or key activity in that window. The header uses **`GET /api/v1/notifications/recent`**, cached server-side and cleared when the feed is rewritten.
 - **Admin auth** — Auth.js (NextAuth v5) with GitHub (and optional Google). Access to `/admin` is restricted by email allowlist (`ADMIN_ALLOWED_EMAILS`) or Sanity project membership; JWT session (e.g. 2h prod, 7d dev).
 - **Featured program** — One program is pinned as “featured” in Sanity and highlighted on the home page. Auto-rotation cycles through eligible programs over time so each gets exposure and visitors discover new options.
@@ -120,6 +121,8 @@ ADMIN_ALLOWED_EMAILS=you@example.com        # Or use Sanity Access (SANITY_ACCES
 # Optional
 CRON_SECRET=yourCronSecret                   # Cron routes (e.g. update-expired-keys)
 ANALYTICS_SALT=yourRandomSalt                # IP hashing for analytics
+NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=true    # Turns Vercel Web Analytics back on (off when unset)
+NEXT_PUBLIC_SPEED_INSIGHTS_SAMPLE_RATE=0.15  # Speed Insights sample rate (default 0.15)
 
 # Outbound email (admin message replies via Resend)
 RESEND_API_KEY=re_xxxxxxxx                   # https://resend.com — verify keyaway.app domain first
