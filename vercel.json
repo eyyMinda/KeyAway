@@ -5,6 +5,7 @@
     { "path": "/api/v1/cron/bundle-sessions", "schedule": "*/30 * * * *" },
     { "path": "/api/v1/cron/bundle-visitors", "schedule": "30 * * * *" },
     { "path": "/api/v1/cron/bundle-key-reports", "schedule": "45 4 * * *" },
-    { "path": "/api/v1/cron/update-expired-keys", "schedule": "0 22 * * *" }
+    { "path": "/api/v1/cron/update-expired-keys", "schedule": "0 22 * * *" },
+    { "path": "/api/v1/cron/discover-giveaways", "schedule": "0 7 * * *" }
   ]
 }

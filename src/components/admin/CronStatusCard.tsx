@@ -36,7 +36,8 @@ function JobLabel({ job }: { job: string }) {
     "bundle-visitors": "Bundle Visitors",
     "bundle-key-reports": "Bundle Key Reports",
     "update-expired-keys": "Update Expired Keys",
-    "prune-cron-runs": "Prune Cron Runs"
+    "prune-cron-runs": "Prune Cron Runs",
+    "discover-giveaways": "Discover Giveaways"
   };
   return <>{labels[job] ?? job}</>;
 }
@@ -47,7 +48,8 @@ type CronJobKey =
   | "bundle-visitors"
   | "bundle-key-reports"
   | "update-expired-keys"
-  | "prune-cron-runs";
+  | "prune-cron-runs"
+  | "discover-giveaways";
 
 export default function CronStatusCard() {
   const [runs, setRuns] = useState<CronRun[]>([]);
@@ -101,6 +103,9 @@ export default function CronStatusCard() {
     ),
     "prune-cron-runs": runs.find(
       r => r.job === "prune-cron-runs" && (r.source === "vercel_cron" || r.source === "bearer")
+    ),
+    "discover-giveaways": runs.find(
+      r => r.job === "discover-giveaways" && (r.source === "vercel_cron" || r.source === "bearer")
     )
   };
   const lastByJob: Record<CronJobKey, CronRun | undefined> = {
@@ -109,7 +114,8 @@ export default function CronStatusCard() {
     "bundle-visitors": runs.find(r => r.job === "bundle-visitors"),
     "bundle-key-reports": runs.find(r => r.job === "bundle-key-reports"),
     "update-expired-keys": runs.find(r => r.job === "update-expired-keys"),
-    "prune-cron-runs": runs.find(r => r.job === "prune-cron-runs")
+    "prune-cron-runs": runs.find(r => r.job === "prune-cron-runs"),
+    "discover-giveaways": runs.find(r => r.job === "discover-giveaways")
   };
 
   function JobStatusRow({ job, schedule, label }: { job: CronJobKey; schedule: string; label: string }) {
@@ -163,6 +169,7 @@ export default function CronStatusCard() {
           <JobStatusRow job="bundle-key-reports" schedule="Daily at 04:45 UTC (older 7d)" label="Bundle Key Reports" />
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
           <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (7d)" />
+          <JobStatusRow job="discover-giveaways" schedule="Daily at 07:00 UTC" label="Discover Giveaways" />
         </div>
 
         <div className="min-w-0 lg:border-l lg:pl-8 border-gray-200">
