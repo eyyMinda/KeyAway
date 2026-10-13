@@ -8,20 +8,28 @@ import { SIXTY_DAYS_MS, isoSince } from "@/src/lib/time";
 
 const inboxBadgeQuery = `{
   "newMessages": count(*[_type == "contactMessage" && status == "new" && createdAt >= $since]),
-  "newSuggestions": count(*[_type == "keySuggestion" && status == "new" && createdAt >= $since])
+  "newSuggestions": count(*[_type == "keySuggestion" && status == "new" && createdAt >= $since]),
+  "newGiveawayFinds": count(*[_type == "giveawayFind" && status == "new"])
 }`;
 
 const getInboxBadges = unstable_cache(
   async () => {
     const since = isoSince(SIXTY_DAYS_MS);
-    const row = await client.fetch<{ newMessages?: number; newSuggestions?: number }>(inboxBadgeQuery, { since });
-    return { newMessages: row?.newMessages ?? 0, newSuggestions: row?.newSuggestions ?? 0 };
+    const row = await client.fetch<{ newMessages?: number; newSuggestions?: number; newGiveawayFinds?: number }>(
+      inboxBadgeQuery,
+      { since }
+    );
+    return {
+      newMessages: row?.newMessages ?? 0,
+      newSuggestions: row?.newSuggestions ?? 0,
+      newGiveawayFinds: row?.newGiveawayFinds ?? 0
+    };
   },
   ["admin-inbox-badges"],
   { revalidate: 60 }
 );
 
-/** GET /api/v1/admin/dashboard/counts - Unread message and suggestion badges for the admin header */
+/** GET /api/v1/admin/dashboard/counts - Unread message, suggestion and giveaway find badges for the admin header */
 export async function GET(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
