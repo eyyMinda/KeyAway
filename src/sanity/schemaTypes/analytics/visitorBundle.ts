@@ -37,6 +37,15 @@ export const visitorBundle = defineType({
       description: "Number of visitors in this bundle"
     }),
     defineField({
+      name: "visitorHashes",
+      title: "Visitor Hashes",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "Hashes of every visitor in this bundle, so lookups only load matching bundles",
+      readOnly: true,
+      hidden: true
+    }),
+    defineField({
       name: "visitors",
       title: "Visitors",
       type: "array",

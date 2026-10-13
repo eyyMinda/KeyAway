@@ -33,6 +33,25 @@ function toBundledVisitor(doc: Record<string, unknown> & { _id?: string }) {
   };
 }
 
+/** Max older bundles given `visitorHashes` per run (one patch each). */
+const HASH_BACKFILL_LIMIT = 50;
+
+/** Fills `visitorHashes` on bundles created before that field existed, so lookups can skip them. */
+async function backfillBundleHashes(): Promise<number> {
+  const missing = await mutationClient.fetch<Array<{ _id: string; hashes: (string | null)[] | null }>>(
+    `*[_type == "visitorBundle" && !defined(visitorHashes)][0...$limit]{ _id, "hashes": visitors[].visitorHash }`,
+    { limit: HASH_BACKFILL_LIMIT }
+  );
+  if (!missing.length) return 0;
+
+  const tx = mutationClient.transaction();
+  for (const b of missing) {
+    tx.patch(b._id, p => p.set({ visitorHashes: (b.hashes ?? []).filter((h): h is string => Boolean(h)) }));
+  }
+  await tx.commit();
+  return missing.length;
+}
+
 export interface BundleVisitorsResult {
   ok: boolean;
   created: number;
@@ -48,6 +67,11 @@ export async function runBundleVisitors(skipRetention = false): Promise<BundleVi
   let appended = 0;
 
   try {
+    // Runs first so the append below never adds to a bundle whose hash list is still missing.
+    for (let i = 0; i < BUNDLE_MAX_ITERATIONS; i++) {
+      if ((await backfillBundleHashes()) < HASH_BACKFILL_LIMIT) break;
+    }
+
     while (true) {
       const incomplete = await mutationClient.fetch<{ _id: string; visitorCount: number; timeRangeEnd: string } | null>(
         `*[_type == "visitorBundle" && visitorCount < $limit] | order(timeRangeEnd desc) [0]{ _id, visitorCount, timeRangeEnd }`,
@@ -74,6 +98,8 @@ export async function runBundleVisitors(skipRetention = false): Promise<BundleVi
       tx.patch(incomplete._id, p =>
         p
           .append("visitors", newVisitors)
+          .setIfMissing({ visitorHashes: [] })
+          .append("visitorHashes", fresh.map(v => v.visitorHash))
           .set({ timeRangeEnd: newTimeRangeEnd, visitorCount: newVisitorCount, updatedAt: now })
       );
       idsToDelete.forEach(id => tx.delete(id));
@@ -110,6 +136,7 @@ export async function runBundleVisitors(skipRetention = false): Promise<BundleVi
         timeRangeStart,
         timeRangeEnd,
         visitorCount: visitors.length,
+        visitorHashes: fresh.map(v => v.visitorHash),
         visitors
       });
       idsToDelete.forEach(id => tx.delete(id));
