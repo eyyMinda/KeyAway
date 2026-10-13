@@ -3,6 +3,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
+  isVercelAnalyticsEnabled,
   isVercelProductionDeployment,
   resolveSpeedInsightsSampleRate,
   shouldTrackPublicVercelMetrics
@@ -19,13 +20,15 @@ export default function VercelPublicMetrics() {
 
   return (
     <>
-      <Analytics
-        mode="production"
-        beforeSend={event => {
-          if (!shouldTrackPublicVercelMetrics(event.url)) return null;
-          return event;
-        }}
-      />
+      {isVercelAnalyticsEnabled() && (
+        <Analytics
+          mode="production"
+          beforeSend={event => {
+            if (!shouldTrackPublicVercelMetrics(event.url)) return null;
+            return event;
+          }}
+        />
+      )}
       <SpeedInsights
         sampleRate={sampleRate}
         beforeSend={event => {
