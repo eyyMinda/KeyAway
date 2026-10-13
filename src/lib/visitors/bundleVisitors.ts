@@ -33,6 +33,25 @@ function toBundledVisitor(doc: Record<string, unknown> & { _id?: string }) {
   };
 }
 
+/** Max older bundles given `visitorHashes` per run (one patch each). */
+const HASH_BACKFILL_LIMIT = 50;
+
+/** Fills `visitorHashes` on bundles created before that field existed, so lookups can skip them. */
+async function backfillBundleHashes(): Promise<number> {
+  const missing = await mutationClient.fetch<Array<{ _id: string; hashes: (string | null)[] | null }>>(
+    `*[_type == "visitorBundle" && !defined(visitorHashes)][0...$limit]{ _id, "hashes": visitors[].visitorHash }`,
+    { limit: HASH_BACKFILL_LIMIT }
+  );
+  if (!missing.length) return 0;
+
+  const tx = mutationClient.transaction();
+  for (const b of missing) {
+    tx.patch(b._id, p => p.set({ visitorHashes: (b.hashes ?? []).filter((h): h is string => Boolean(h)) }));
+  }
+  await tx.commit();
+  return missing.length;
+}
+
 export interface BundleVisitorsResult {
   ok: boolean;
   created: number;
@@ -48,6 +67,11 @@ export async function runBundleVisitors(skipRetention = false): Promise<BundleVi
   let appended = 0;
 
   try {
+    // Runs first so the append below never adds to a bundle whose hash list is still missing.
+    for (let i = 0; i < BUNDLE_MAX_ITERATIONS; i++) {
+      if ((await backfillBundleHashes()) < HASH_BACKFILL_LIMIT) break;
+    }
+
     while (true) {
       const incomplete = await mutationClient.fetch<{ _id: string; visitorCount: number; timeRangeEnd: string } | null>(
         `*[_type == "visitorBundle" && visitorCount < $limit] | order(timeRangeEnd desc) [0]{ _id, visitorCount, timeRangeEnd }`,
@@ -74,12 +98,38 @@ export async function runBundleVisitors(skipRetention = false): Promise<BundleVi
       tx.patch(incomplete._id, p =>
         p
           .append("visitors", newVisitors)
+          .setIfMissing({ visitorHashes: [] })
+          .append("visitorHashes", fresh.map(v => v.visitorHash))
           .set({ timeRangeEnd: newTimeRangeEnd, visitorCount: newVisitorCount, updatedAt: now })
       );
       idsToDelete.forEach(id => tx.delete(id));
       await tx.commit();
       appended += fresh.length;
     }
+
+    const createBundle = async (fresh: Array<Record<string, unknown> & { _id: string }>) => {
+      const visitors = fresh.map(d => toBundledVisitor(d));
+      const timeRangeStart = (visitors[0].lastActivityAt as string) ?? cutoff;
+      const timeRangeEnd = (visitors[visitors.length - 1].lastActivityAt as string) ?? cutoff;
+      const idsToDelete = fresh.map(v => v._id);
+      for (const id of idsToDelete) archivedIds.add(id);
+      const tx = mutationClient.transaction();
+      const now = new Date().toISOString();
+      tx.create({
+        _type: "visitorBundle",
+        bundledAt: now,
+        updatedAt: now,
+        timeRangeStart,
+        timeRangeEnd,
+        visitorCount: visitors.length,
+        visitorHashes: fresh.map(v => v.visitorHash),
+        visitors
+      });
+      idsToDelete.forEach(id => tx.delete(id));
+      await tx.commit();
+      created += 1;
+      return timeRangeEnd;
+    };
 
     const latestBundle = await mutationClient.fetch<{ timeRangeEnd: string } | null>(
       `*[_type == "visitorBundle"] | order(timeRangeEnd desc) [0]{ timeRangeEnd }`
@@ -94,27 +144,18 @@ export async function runBundleVisitors(skipRetention = false): Promise<BundleVi
       );
       const fresh = batch.filter(doc => doc._id && !archivedIds.has(doc._id));
       if (!fresh.length) break;
+      after = await createBundle(fresh);
+    }
 
-      const visitors = fresh.map(d => toBundledVisitor(d));
-      const timeRangeStart = (visitors[0].lastActivityAt as string) ?? cutoff;
-      const timeRangeEnd = (visitors[visitors.length - 1].lastActivityAt as string) ?? cutoff;
-      after = timeRangeEnd;
-      const idsToDelete = fresh.map(v => v._id);
-      for (const id of idsToDelete) archivedIds.add(id);
-      const tx = mutationClient.transaction();
-      const now = new Date().toISOString();
-      tx.create({
-        _type: "visitorBundle",
-        bundledAt: now,
-        updatedAt: now,
-        timeRangeStart,
-        timeRangeEnd,
-        visitorCount: visitors.length,
-        visitors
-      });
-      idsToDelete.forEach(id => tx.delete(id));
-      await tx.commit();
-      created += 1;
+    // Idle visitors the cursor skipped: lastActivityAt not after the newest bundle (old restored docs, equal timestamps).
+    for (let i = 0; i < BUNDLE_MAX_ITERATIONS; i++) {
+      const strays = await mutationClient.fetch<Array<Record<string, unknown> & { _id: string }>>(
+        `*[_type == "visitor" && lastActivityAt < $cutoff] | order(lastActivityAt asc) [0...$limit]{ _id, ${VISITOR_FIELDS} }`,
+        { cutoff, limit: BUNDLE_SIZE }
+      );
+      const fresh = strays.filter(doc => doc._id && !archivedIds.has(doc._id));
+      if (!fresh.length) break;
+      await createBundle(fresh);
     }
 
     return { ok: true, created, appended };

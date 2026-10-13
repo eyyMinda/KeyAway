@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { generateProgramsPageMetadata } from "@/src/lib/seo/metadata";
 import { generateProgramsPageJsonLd } from "@/src/lib/seo/jsonLd";
 import ProgramsPageSocialShare from "@/src/components/social-share/ProgramsPageSocialShare";
@@ -26,27 +25,18 @@ export async function generateMetadata() {
   return await generateProgramsPageMetadata();
 }
 
-interface ProgramsPageProps {
-  searchParams: Promise<{
-    search?: string;
-    filter?: string;
-    sort?: string;
-    page?: string;
-    category?: string;
-    platform?: string;
-  }>;
-}
-
-/** SSR first page for crawlers; client hydrates for filter/sort/pagination via cached `/api/v1/programs/list`. */
-export default async function ProgramsPage({ searchParams }: ProgramsPageProps) {
-  const sp = await searchParams;
+/**
+ * Static shell with the default first page for crawlers. No `searchParams` here, so the page stays ISR;
+ * the client reads the URL and loads filter/sort/pagination via cached `/api/v1/programs/list`.
+ */
+export default async function ProgramsPage() {
   const [storeRow, featuredProgram, heroTotals, jsonLdPrograms, initialListData, vendors, categoryOptions, shareCounts] =
     await Promise.all([
       getCachedStoreDetailsDocument(),
       getFeaturedProgram(),
       getCachedProgramsHeroTotals(),
       getCachedProgramsForJsonLd(),
-      getProgramsListData(sp.search, sp.filter, sp.sort, sp.page, sp.category, sp.platform),
+      getProgramsListData(undefined, undefined, undefined, undefined),
       getCachedVendorsWithCounts(),
       getCachedProgramCategoryOptions(),
       getPageShareCounts("/programs")
@@ -79,18 +69,7 @@ export default async function ProgramsPage({ searchParams }: ProgramsPageProps) 
         </div>
       </section>
 
-      <Suspense
-        fallback={
-          <div id="programs-grid" className="mx-auto max-w-360 px-4 py-8 sm:px-6 lg:px-8">
-            <p className="text-sm text-neutral-100">Loading programs…</p>
-          </div>
-        }>
-        <ProgramsPageClient
-          initialListData={initialListData}
-          vendors={vendors}
-          categoryOptions={categoryOptions}
-        />
-      </Suspense>
+      <ProgramsPageClient initialListData={initialListData} vendors={vendors} categoryOptions={categoryOptions} />
 
       <ContributeSection />
       <FeaturedProgramSection program={featuredProgram} />

@@ -22,6 +22,11 @@ export function isVercelProductionDeployment(): boolean {
   return process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
 }
 
+/** Web Analytics is off unless `NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=true` (own event tracking covers it). */
+export function isVercelAnalyticsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED === "true";
+}
+
 const DEFAULT_SPEED_INSIGHTS_SAMPLE_RATE = 0.15;
 
 export function resolveSpeedInsightsSampleRate(): number {

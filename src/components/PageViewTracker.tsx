@@ -9,8 +9,9 @@ import { pageViewSkipKey } from "@/src/lib/analytics/pageViewSkip";
 import { primaryReferrerForPageView } from "@/src/lib/analytics/referrerResolve";
 import { shouldSkipClientPageView, waitForPageViewEngagement } from "@/src/lib/analytics/shouldSendPageView";
 
+/** Dev-only: runs for every visitor, so stays out of production consoles. */
 const log = (...args: unknown[]) => {
-  console.info("PageViewTracker:", ...args);
+  if (process.env.NODE_ENV === "development") console.info("PageViewTracker:", ...args);
 };
 
 const EXCLUDED_HOSTNAMES = new Set(["localhost"]);

@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { ProgramsFilter, ProgramsGrid } from "@/src/components/programs";
 import Pagination from "@/src/components/ui/Pagination";
 import type { ProgramsListData } from "@/src/lib/programs/getProgramsPageData";
 import { FilterType, SortType } from "@/src/types/programs";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 import { normalizeFilterType, normalizeSortType, normalizeCategoryFilter, normalizePlatformFilter } from "@/src/lib/program/programUtils";
 import type { ProgramWithStats } from "@/src/types/home";
@@ -38,6 +38,18 @@ function listParamsKey(p: {
   return `${p.searchTerm}|${p.filter}|${p.sortBy}|${p.category}|${p.platform}|${p.page}`;
 }
 
+/**
+ * Only part that reads the URL. Kept in its own Suspense so `useSearchParams` does not
+ * pull the grid out of the static /programs HTML.
+ */
+function SearchParamsSync({ onChange }: { onChange: (sp: URLSearchParams) => void }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    onChange(new URLSearchParams(searchParams.toString()));
+  }, [searchParams, onChange]);
+  return null;
+}
+
 export default function ProgramsPageClient({
   initialListData,
   vendors = [],
@@ -47,23 +59,19 @@ export default function ProgramsPageClient({
   vendors?: VendorListItem[];
   categoryOptions?: ProgramCategoryOption[];
 }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [searchParams, setSearchParams] = useState(() => new URLSearchParams());
   const searchParamsRef = useRef(searchParams);
-  searchParamsRef.current = searchParams;
 
-  const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
   const [listData, setListData] = useState<ProgramsListData | null>(initialListData);
   const [fetchError, setFetchError] = useState(false);
 
-  const wasPending = useRef(false);
   const scrollAfterPaginationRef = useRef(false);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fetchGenRef = useRef(0);
-  /** First effect run reuses server data when URL params match what was rendered. */
-  const initialParamsKey = useRef(
+  /** Params of the list currently shown; starts as the static page's default list. */
+  const loadedParamsKey = useRef(
     listParamsKey({
       searchTerm: initialListData.searchTerm,
       filter: initialListData.filter,
@@ -73,17 +81,11 @@ export default function ProgramsPageClient({
       page: initialListData.page
     })
   );
-  const skipInitialFetchRef = useRef(true);
 
   const params = readListParams(searchParams);
   const { searchTerm, filter, sortBy, category, platform, page } = params;
   const [localSearch, setLocalSearch] = useState(searchTerm);
   const localSearchRef = useRef(searchTerm);
-
-  useEffect(() => {
-    setLocalSearch(searchTerm);
-    localSearchRef.current = searchTerm;
-  }, [searchTerm]);
 
   const programs = listData?.programs ?? EMPTY_PROGRAMS;
   const totalPrograms = listData?.totalCount ?? 0;
@@ -110,17 +112,34 @@ export default function ProgramsPageClient({
         setListData(null);
       }
     } finally {
-      if (gen === fetchGenRef.current) setIsLoading(false);
+      if (gen === fetchGenRef.current) {
+        setIsLoading(false);
+        if (scrollAfterPaginationRef.current) {
+          scrollAfterPaginationRef.current = false;
+          scrollToSectionWithHeaderOffset("#programs-grid");
+        }
+      }
     }
   }, []);
 
-  useEffect(() => {
-    if (skipInitialFetchRef.current) {
-      skipInitialFetchRef.current = false;
-      if (listParamsKey(readListParams(searchParams)) === initialParamsKey.current) return;
-    }
-    void loadList(searchParams);
-  }, [searchParams, loadList]);
+  /** URL changed (mount, pushState, back/forward, links): sync controls and load the list if params differ. */
+  const handleUrlChange = useCallback(
+    (sp: URLSearchParams) => {
+      const next = readListParams(sp);
+      if (next.searchTerm !== readListParams(searchParamsRef.current).searchTerm) {
+        localSearchRef.current = next.searchTerm;
+        setLocalSearch(next.searchTerm);
+      }
+      searchParamsRef.current = sp;
+      setSearchParams(sp);
+
+      const key = listParamsKey(next);
+      if (key === loadedParamsKey.current) return;
+      loadedParamsKey.current = key;
+      void loadList(sp);
+    },
+    [loadList]
+  );
 
   const clearSearchDebounce = () => {
     if (searchDebounceRef.current != null) {
@@ -130,16 +149,6 @@ export default function ProgramsPageClient({
   };
 
   useEffect(() => () => clearSearchDebounce(), []);
-
-  useEffect(() => {
-    if (wasPending.current && !isPending) {
-      if (scrollAfterPaginationRef.current) {
-        scrollToSectionWithHeaderOffset("#programs-grid");
-        scrollAfterPaginationRef.current = false;
-      }
-    }
-    wasPending.current = isPending;
-  }, [isPending]);
 
   const maxViews = Math.max(...programs.map(p => p.viewCount), 0);
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
@@ -184,9 +193,9 @@ export default function ProgramsPageClient({
     if (nextPage > 1) next.set("page", String(nextPage));
     else next.delete("page");
 
-    startTransition(() => {
-      router.push(`${pathname}?${next.toString()}`, { scroll: false });
-    });
+    // Native pushState: Next syncs `useSearchParams` without an RSC request to the server.
+    const query = next.toString();
+    window.history.pushState(null, "", query ? `${pathname}?${query}` : pathname);
   };
 
   const scheduleSearchUrlSync = () => {
@@ -242,6 +251,10 @@ export default function ProgramsPageClient({
 
   return (
     <div id="programs-grid" className="mx-auto max-w-360 px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <Suspense fallback={null}>
+        <SearchParamsSync onChange={handleUrlChange} />
+      </Suspense>
+
       {!fetchError && !showLoading && <HomeVendorBrowse vendors={vendors} position="top" />}
 
       <ProgramsFilter
@@ -293,7 +306,7 @@ export default function ProgramsPageClient({
           variant="detailed"
           tone="light"
           showInfo={false}
-          className={`mt-8 sm:mt-10 lg:mt-12 ${isPending || isLoading ? "opacity-70" : ""}`}
+          className={`mt-8 sm:mt-10 lg:mt-12 ${isLoading ? "opacity-70" : ""}`}
         />
       )}
     </div>

@@ -20,6 +20,10 @@ export type ResolvedVisitor = {
 type LiveRow = Omit<ResolvedVisitor, "source" | "visitorHash"> & { visitorHash?: string };
 type ArchivedRow = Omit<ResolvedVisitor, "source" | "visitorHash"> & { visitorHash?: string };
 
+/** Bundles holding $h. Bundles not yet backfilled with `visitorHashes` still match until the cron fills them. */
+const BUNDLES_WITH_HASH = `_type == "visitorBundle" && ($h in visitorHashes || !defined(visitorHashes))`;
+export const BUNDLES_WITH_ANY_HASH = `_type == "visitorBundle" && (count(visitorHashes[@ in $hashes]) > 0 || !defined(visitorHashes))`;
+
 function pickLive(row: LiveRow | null | undefined, hash: string): ResolvedVisitor | null {
   if (!row?.visitorHash) return null;
   return { source: "live", ...row, visitorHash: hash };
@@ -46,7 +50,7 @@ export async function fetchVisitorByHash(visitorHash: string): Promise<ResolvedV
       "live": *[_type == "visitor" && visitorHash == $h][0]{
         _id, visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       },
-      "archived": *[_type == "visitorBundle"].visitors[visitorHash == $h]{
+      "archived": *[${BUNDLES_WITH_HASH}].visitors[visitorHash == $h]{
         visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       }
     }`,
@@ -70,7 +74,7 @@ export async function fetchVisitorsByHashes(
       "live": *[_type == "visitor" && visitorHash in $hashes]{
         _id, visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       },
-      "archived": *[_type == "visitorBundle"].visitors[visitorHash in $hashes]{
+      "archived": *[${BUNDLES_WITH_ANY_HASH}].visitors[visitorHash in $hashes]{
         visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt
       }
     }`,

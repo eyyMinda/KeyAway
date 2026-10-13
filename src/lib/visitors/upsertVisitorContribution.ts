@@ -67,13 +67,16 @@ export async function upsertVisitorContribution(
       _type: "visitor",
       visitorHash,
       visitCount,
-      lastActivityAt: archived?.lastActivityAt ?? now,
+      // Contributing is activity; an old archived timestamp would sit behind the bundle cursor forever.
+      lastActivityAt: now,
       visitTier: resolveVisitTier(visitCount, contributionScore, isSpammer),
       isSpammer,
       reportCount,
       suggestionCount,
       commentCount,
       contributionScore,
+      ...(archived?.country ? { country: archived.country } : {}),
+      ...(archived?.city ? { city: archived.city } : {}),
       createdAt: now,
       updatedAt: now
     });

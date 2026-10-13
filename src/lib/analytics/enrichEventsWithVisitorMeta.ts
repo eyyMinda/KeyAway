@@ -1,4 +1,5 @@
 import { client } from "@/src/sanity/lib/client";
+import { BUNDLES_WITH_ANY_HASH } from "@/src/lib/visitors/visitorLookup";
 
 const HASH_CHUNK = 500;
 
@@ -19,7 +20,7 @@ async function fetchVisitorMetaByHashes(hashes: string[]): Promise<Map<string, V
     }
 
     const archived = await client.fetch<VisitorRow[]>(
-      `*[_type == "visitorBundle"]{
+      `*[${BUNDLES_WITH_ANY_HASH}]{
         "rows": visitors[visitorHash in $hashes]{ visitorHash, visitTier, isSpammer }
       }.rows[]`,
       { hashes: chunk }
