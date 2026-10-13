@@ -14,6 +14,9 @@ import { siteNotificationFeed } from "./system/siteNotificationFeed";
 import contactMessage from "./contact/contactMessage";
 import { contactMessageReply } from "./contact/contactMessageReply";
 import keySuggestion from "./contact/keySuggestion";
+import { giveawayFind } from "./giveaways/giveawayFind";
+import { giveawayDiscoverySettings } from "./giveaways/giveawayDiscoverySettings";
+import { giveawayIgnoredItems } from "./giveaways/giveawayIgnoredItems";
 
 import { storeDetails } from "./store/storeDetails";
 import { storeOtherLink } from "./store/storeOtherLink";
@@ -49,6 +52,9 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     contactMessage,
     contactMessageReply,
     keySuggestion,
+    giveawayFind,
+    giveawayDiscoverySettings,
+    giveawayIgnoredItems,
     link,
     storeSocialEntry,
     storeOtherLink,
