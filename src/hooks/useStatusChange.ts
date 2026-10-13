@@ -25,12 +25,6 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
   const handleStatusChange = useCallback((report: KeyReport, newStatus: CDKeyStatus) => {
     const reportKey = createReportKey(report);
 
-    console.log("Status change:", {
-      reportKey,
-      currentStatus: report.status,
-      newStatus,
-      newStatusType: typeof newStatus
-    });
 
     if (newStatus === report.status) {
       // If status is same as original, remove from pending changes
@@ -80,13 +74,6 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
           return;
         }
 
-        console.log("Updating key:", {
-          programSlug: program.slug?.current,
-          keyIndex,
-          oldStatus: program.cdKeys?.[keyIndex]?.status,
-          newStatus: change.newStatus,
-          newStatusType: typeof change.newStatus
-        });
 
         // Validate the status value before sending to Sanity
         const validStatuses = ["new", "active", "expired", "limit"];
@@ -112,9 +99,6 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
           console.error("API Error:", errorData);
           throw new Error(errorData?.error?.message ?? errorData?.error ?? "Failed to update key status");
         }
-
-        const result = await response.json();
-        console.log("Update result:", result);
 
         // Update local reports state
         setReports(prev =>
@@ -145,8 +129,6 @@ export function useStatusChange({ programs, setReports, setPrograms }: UseStatus
           newMap.delete(reportKey);
           return newMap;
         });
-
-        console.log("Successfully updated key status");
       } catch (error) {
         console.error("Error updating key status:", error);
       } finally {

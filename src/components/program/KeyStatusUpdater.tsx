@@ -19,8 +19,6 @@ export default function KeyStatusUpdater() {
 
       if (data?.success ?? result?.success) {
         setLastUpdated(new Date());
-        // Optionally show a success message
-        console.log("Key statuses updated successfully");
       } else {
         console.error("Failed to update key statuses:", result.message);
       }
