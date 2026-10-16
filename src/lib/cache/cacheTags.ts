@@ -33,3 +33,8 @@ export const TAG_CHANGELOG = "changelog";
 export function programDetailTag(slug: string): string {
   return `program-${slug}`;
 }
+
+/** Comment threads with visitor hashes (reactions + ownership), expired immediately on every comment/reaction write. */
+export function programCommentsTag(slug: string): string {
+  return `program-comments-${slug}`;
+}

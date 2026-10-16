@@ -4,6 +4,7 @@ import {
   TAG_PROGRAM_LISTINGS,
   TAG_PROGRAMS_FULL,
   TAG_SITEMAP_URLS,
+  programCommentsTag,
   programDetailTag
 } from "@/src/lib/cache/cacheTags";
 
@@ -25,7 +26,11 @@ export function revalidateAfterProgramContentWrite(opts: ProgramWriteOpts = {}):
   revalidateTag(TAG_PROGRAMS_FULL, "max");
   revalidateTag(TAG_PROGRAM_LISTINGS, "max");
   revalidateTag(TAG_HOMEPAGE_PROGRAMS, "max");
-  if (slug) revalidateTag(programDetailTag(slug), "max");
+  if (slug) {
+    revalidateTag(programDetailTag(slug), "max");
+    // Per-visitor comment state must not serve a stale copy after a comment write.
+    revalidateTag(programCommentsTag(slug), { expire: 0 });
+  }
   if (previousSlug && previousSlug !== slug) revalidateTag(programDetailTag(previousSlug), "max");
   if (invalidateSitemap) {
     revalidateTag(TAG_SITEMAP_URLS, "max");

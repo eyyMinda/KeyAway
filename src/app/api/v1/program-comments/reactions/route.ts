@@ -8,11 +8,9 @@ import { isDevelopmentEnv } from "@/src/lib/env/isDevelopment";
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
 import { fetchVisitorByHash } from "@/src/lib/visitors/visitorStore";
 import { MAX_REACTIONS_PER_VISITOR, sanitizeReactionEmoji } from "@/src/lib/program/commentReactions";
-import {
-  fetchProgramReactionSummaryMap,
-  toggleCommentReaction,
-  type ReactionTarget
-} from "@/src/lib/program/toggleCommentReaction";
+import { toggleCommentReaction, type ReactionTarget } from "@/src/lib/program/toggleCommentReaction";
+import { revalidateTag } from "next/cache";
+import { programCommentsTag } from "@/src/lib/cache/cacheTags";
 
 async function resolveProgramId(slug: string): Promise<string | null> {
   const program = await client.fetch<{ _id: string } | null>(
@@ -20,35 +18,6 @@ async function resolveProgramId(slug: string): Promise<string | null> {
     { slug }
   );
   return program?._id ?? null;
-}
-
-/** GET /api/v1/program-comments/reactions?programSlug= — full summaries + reacted flags for this visitor */
-export async function GET(req: NextRequest) {
-  const isDev = isDevelopmentEnv();
-  if (!isDev && isLikelyBotUserAgent(req.headers.get("user-agent"))) {
-    return Errors.badRequest("Automated requests are not allowed");
-  }
-
-  const { ok: rateOk } = rateLimitMiddleware(req);
-  if (!rateOk) return Errors.tooManyRequests();
-
-  const programSlug = req.nextUrl.searchParams.get("programSlug")?.trim() ?? "";
-  if (!programSlug) {
-    return Errors.validation("programSlug is required", [{ field: "programSlug", message: "Required" }]);
-  }
-
-  const ipHash = hashIp(getClientIp(req)) ?? (isDev ? "dev-local" : undefined);
-  if (!ipHash) return Errors.badRequest("Unable to process request");
-
-  const published = await isProgramSlugPublished(programSlug);
-  if (!published) return Errors.notFound("Program not found");
-
-  const programId = await resolveProgramId(programSlug);
-  if (!programId) return Errors.notFound("Program not found");
-
-  const data = await fetchProgramReactionSummaryMap(programId, ipHash);
-
-  return NextResponse.json({ data, meta: {} });
 }
 
 /** POST /api/v1/program-comments/reactions — toggle emoji on a comment or reply */
@@ -129,6 +98,7 @@ export async function POST(req: NextRequest) {
       emoji,
       ipHash
     });
+    revalidateTag(programCommentsTag(programSlug), { expire: 0 });
 
     return NextResponse.json({
       data: {
@@ -154,4 +124,4 @@ export async function POST(req: NextRequest) {
     return Errors.internal();
   }
 }
-
+
