@@ -55,6 +55,10 @@ if (!dryRun && !process.env.SUPABASE_DB_URL) {
   console.error("Missing SUPABASE_DB_URL");
   process.exit(1);
 }
+if (!dryRun && !URL.canParse(process.env.SUPABASE_DB_URL)) {
+  console.error("SUPABASE_DB_URL is not a valid URL. URL-encode the password (e.g. % -> %25, # -> %23, @ -> %40).");
+  process.exit(1);
+}
 
 const LEGACY_TYPES = new Set(["analyticsMigration", "trackingEvent", "trackingEventBundle", "interactionEventBucket"]);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -6,6 +6,8 @@ const TIMESTAMP_OIDS = [1114, 1184];
 function createClient() {
   const url = process.env.SUPABASE_DB_URL;
   if (!url) throw new Error("Missing environment variable: SUPABASE_DB_URL");
+  // Fail without echoing the URL: it contains the database password.
+  if (!URL.canParse(url)) throw new Error("SUPABASE_DB_URL is not a valid URL. URL-encode the password (e.g. % -> %25, # -> %23, @ -> %40).");
 
   return postgres(url, {
     // Supavisor transaction pooler (port 6543) does not support prepared statements.
