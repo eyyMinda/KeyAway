@@ -50,40 +50,6 @@ export async function fetchReactions(
   return rows ?? [];
 }
 
-export async function fetchProgramReactionSummaryMap(
-  programId: string,
-  viewerHash?: string | null
-): Promise<Record<string, ProgramCommentReactionSummary[]>> {
-  const comments = await client.fetch<
-    Array<{
-      _key?: string;
-      reactions?: ProgramCommentReaction[];
-      replies?: Array<{ _key?: string; reactions?: ProgramCommentReaction[] }>;
-    }> | null
-  >(
-    `*[_id == $id][0].programComments[]{
-      _key,
-      reactions[]{ emoji, ipHash },
-      replies[]{
-        _key,
-        reactions[]{ emoji, ipHash }
-      }
-    }`,
-    { id: programId }
-  );
-
-  const map: Record<string, ProgramCommentReactionSummary[]> = {};
-  for (const c of comments ?? []) {
-    if (!c._key) continue;
-    map[reactionStorageKey(c._key)] = aggregateCommentReactions(c.reactions, viewerHash);
-    for (const reply of c.replies ?? []) {
-      if (!reply._key) continue;
-      map[reactionStorageKey(c._key, reply._key)] = aggregateCommentReactions(reply.reactions, viewerHash);
-    }
-  }
-  return map;
-}
-
 function visitorDistinctEmojiCount(reactions: ProgramCommentReaction[], ipHash: string): number {
   return new Set(reactions.filter(r => r.ipHash === ipHash).map(r => r.emoji).filter(Boolean)).size;
 }
@@ -144,6 +110,3 @@ export async function toggleCommentReaction(opts: {
     storageKey
   };
 }
-
-/** @deprecated use fetchProgramReactionSummaryMap */
-export const fetchProgramCommentReactionMap = fetchProgramReactionSummaryMap;

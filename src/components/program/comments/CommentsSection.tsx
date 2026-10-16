@@ -47,30 +47,24 @@ export default function CommentsSection({ program }: CommentsSectionProps) {
     });
   }, []);
 
+  // Visitor-specific reaction flags and ownership; nothing to load while the program has no comments.
+  const commentCount = comments.length;
   useEffect(() => {
-    if (!slug) return;
+    if (!slug || commentCount === 0) return;
     let cancelled = false;
 
     const load = async () => {
       try {
-        const [reactionsRes, ownershipRes] = await Promise.all([
-          fetch(`/api/v1/program-comments/reactions?programSlug=${encodeURIComponent(slug)}`, {
-            credentials: "same-origin"
-          }),
-          fetch(`/api/v1/program-comments/ownership?programSlug=${encodeURIComponent(slug)}`, {
-            credentials: "same-origin"
-          })
-        ]);
-
-        if (!cancelled && reactionsRes.ok) {
-          const json = (await reactionsRes.json()) as { data?: Record<string, ProgramCommentReactionSummary[]> };
-          if (json.data) setReactionSummaries(json.data);
-        }
-
-        if (!cancelled && ownershipRes.ok) {
-          const json = (await ownershipRes.json()) as { data?: ProgramCommentOwnership };
-          if (json.data) setOwnership(json.data);
-        }
+        const res = await fetch(`/api/v1/program-comments/viewer?programSlug=${encodeURIComponent(slug)}`, {
+          credentials: "same-origin"
+        });
+        if (cancelled || !res.ok) return;
+        const json = (await res.json()) as {
+          data?: { reactions: Record<string, ProgramCommentReactionSummary[]>; ownership: ProgramCommentOwnership };
+        };
+        if (!json.data) return;
+        setReactionSummaries(json.data.reactions);
+        setOwnership(json.data.ownership);
       } catch {
         /* keep count-only fallback from program payload */
       }
@@ -80,7 +74,7 @@ export default function CommentsSection({ program }: CommentsSectionProps) {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, commentCount]);
 
   function handlePosted() {
     router.refresh();
