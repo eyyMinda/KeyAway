@@ -3,7 +3,6 @@ import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { readSessionDetail } from "@/src/lib/analytics/sessionAdmin";
-import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
 
 /** GET /api/v1/admin/sessions/detail?id= */
 export async function GET(req: NextRequest) {
@@ -18,10 +17,7 @@ export async function GET(req: NextRequest) {
   try {
     const detail = await readSessionDetail(id);
     if (!detail) return Errors.notFound("Session not found");
-    const [enriched] = (await enrichEventsWithVisitorMeta([
-      { ...detail, ipHash: detail.visitorHash, createdAt: detail.startedAt }
-    ])) as Array<typeof detail & { visitTier?: string; visitorIsSpammer?: boolean }>;
-    return NextResponse.json({ data: enriched ?? detail, meta: {} });
+    return NextResponse.json({ data: detail, meta: {} });
   } catch (err) {
     console.error("[GET /api/v1/admin/sessions/detail]", err);
     return Errors.internal();

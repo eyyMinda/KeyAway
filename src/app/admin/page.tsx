@@ -2,6 +2,7 @@ import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import DashboardCard from "@/src/components/admin/DashboardCard";
 import CronStatusCard from "@/src/components/admin/CronStatusCard";
 import DatasetDocCounts from "@/src/components/admin/DatasetDocCounts";
+import AnalyticsDbUsage from "@/src/components/admin/AnalyticsDbUsage";
 import WelcomeHeader from "@/src/components/admin/WelcomeHeader";
 import IndexNowSubmitCard from "@/src/components/admin/IndexNowSubmitCard";
 
@@ -60,8 +61,9 @@ export default function AdminHomePage() {
         />
       </div>
 
-      <div className="mt-8 md:mt-12">
+      <div className="mt-8 md:mt-12 grid gap-6 lg:grid-cols-2 items-start">
         <DatasetDocCounts />
+        <AnalyticsDbUsage />
       </div>
 
       {/* Cron Status */}

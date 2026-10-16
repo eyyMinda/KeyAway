@@ -8,7 +8,7 @@ import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/re
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { appendTrackingSession, type SessionEventInput } from "@/src/lib/analytics/appendTrackingSession";
 import { isSessionEntry } from "@/src/lib/analytics/sessionConstants";
-import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
+import { upsertVisitorOnPageView } from "@/src/lib/visitors/visitorStore";
 import { getKeyData } from "@/src/lib/keyHashing";
 import { normalizePath } from "@/src/lib/api/inputNormalize";
 import { isProgramSlugPublishedCached } from "@/src/lib/sanity/getCachedPublishedProgramSlugs";

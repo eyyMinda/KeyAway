@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { sanityPublicReadClient } from "@/src/sanity/lib/publicReadClient";
-import { programPageKeyReportsQuery } from "@/src/lib/sanity/queries";
 import { ReportData } from "@/src/types/program";
 import { logger } from "@/src/lib/logger";
 import { applyKeyReportEvent, emptyReportData } from "@/src/lib/program/keyReportVersionFit";
@@ -25,13 +23,12 @@ export function useKeyReportData(programSlug: string, rowStorageIds: string[]) {
     const fetchReportData = async () => {
       try {
         setLoading(true);
-        const result = await sanityPublicReadClient.fetch<{
-          live?: KeyReportFetched[];
-          bundled?: KeyReportFetched[];
-        }>(programPageKeyReportsQuery, {
-          programSlug
-        });
-        const events = [...(result?.live ?? []), ...(result?.bundled ?? [])];
+        const sp = new URLSearchParams({ programSlug });
+        // After the visitor's own report, skip the CDN copy so the new count shows immediately.
+        if (refreshTrigger > 0) sp.set("fresh", String(Date.now()));
+        const res = await fetch(`/api/v1/key-reports?${sp.toString()}`);
+        if (!res.ok) throw new Error(`key reports ${res.status}`);
+        const events = ((await res.json()) as { data?: KeyReportFetched[] }).data ?? [];
 
         const keyReportData = new Map<string, ReportData>();
 

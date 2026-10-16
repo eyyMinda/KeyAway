@@ -246,100 +246,6 @@ export const programBySlugQuery = `
 }
 `;
 
-/* ------------ Analytics ------------ */
-/** Active + bundled visitors with lastActivityAt in range (admin tier aggregates). */
-export const visitorTagAggregatesQuery = `{
-  "singular": *[_type == "visitor" && lastActivityAt >= $since && lastActivityAt <= $until]{ visitTier, isSpammer },
-  "bundled": *[_type == "visitorBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
-    "rows": visitors[lastActivityAt >= $since && lastActivityAt <= $until]{ visitTier, isSpammer }
-  }.rows[]
-}`;
-
-/* ------------ Key Reports ------------ */
-/** Header alert feed — negative-report scan over a window. Live docs plus bundle rows (retention < window). */
-export const keyReportNotificationsQuery = `{
-  "live": *[_type=="keyReport" && coalesce(createdAt, _createdAt) >= $since]{
-    eventType, programSlug, key, label, triedVersionFit, "createdAt": coalesce(createdAt, _createdAt)
-  },
-  "bundled": *[_type=="keyReportBundle" && timeRangeEnd >= $since]{
-    "rows": reports[coalesce(createdAt, _createdAt) >= $since]{
-      eventType, programSlug, key, label, triedVersionFit, "createdAt": coalesce(createdAt, _createdAt)
-    }
-  }.rows[]
-}`;
-
-/** Admin key reports table — live docs plus archived bundle rows (bundleId + rowKey for in-place edits). */
-export const adminKeyReportsQuery = `{
-  "live": *[_type=="keyReport"]{
-    _id, eventType, programSlug, path, referrer, country, city, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt, _createdAt,
-    key, label, listedVersion, triedVersionFit, triedVersion
-  } | order(coalesce(createdAt, _createdAt) desc),
-  "bundled": *[_type=="keyReportBundle"]{
-    "bundleId": _id,
-    "rows": reports[]{
-      "rowKey": _key, eventType, programSlug, path, referrer, country, city, userAgent, ipHash, utm_source, utm_medium, utm_campaign, createdAt,
-      key, label, listedVersion, triedVersionFit, triedVersion, sourceId
-    }
-  }
-}`;
-
-/** Program table progress bars — slug-scoped, no PII projection. Live docs + archived bundle rows. */
-export const programPageKeyReportsQuery = `{
-  "live": *[_type=="keyReport" && programSlug == $programSlug]{ eventType, key, triedVersionFit, triedVersion },
-  "bundled": *[_type=="keyReportBundle" && count(reports[programSlug == $programSlug]) > 0]{
-    "rows": reports[programSlug == $programSlug]{ eventType, key, triedVersionFit, triedVersion }
-  }.rows[]
-}`;
-
-/* ------------ Program key report counts (community aggregateRating) ------------ */
-export const programKeyReportCountsQuery = `{
-  "working": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_working"])
-    + count(*[_type == "keyReportBundle"].reports[programSlug == $slug && eventType == "report_key_working"]),
-  "expired": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_expired" && triedVersionFit != "other"])
-    + count(*[_type == "keyReportBundle"].reports[programSlug == $slug && eventType == "report_key_expired" && triedVersionFit != "other"]),
-  "limitReached": count(*[_type == "keyReport" && programSlug == $slug && eventType == "report_key_limit_reached" && triedVersionFit != "other"])
-    + count(*[_type == "keyReportBundle"].reports[programSlug == $slug && eventType == "report_key_limit_reached" && triedVersionFit != "other"])
-}`;
-
-/* ------------ Program share counts (social_click per network, from sessions) ------------ */
-export const programShareCountsQuery = `{
-  "live": *[_type == "trackingSession"]{
-    "facebook": count(events[event == "social_click" && programSlug == $slug && social == "share-facebook"]),
-    "twitter": count(events[event == "social_click" && programSlug == $slug && social == "share-twitter"]),
-    "telegram": count(events[event == "social_click" && programSlug == $slug && social == "share-telegram"]),
-    "pinterest": count(events[event == "social_click" && programSlug == $slug && social == "share-pinterest"]),
-    "tumblr": count(events[event == "social_click" && programSlug == $slug && social == "share-tumblr"]),
-    "linkedin": count(events[event == "social_click" && programSlug == $slug && social == "share-linkedin"])
-  },
-  "bundled": *[_type == "trackingSessionBundle"]{
-    "facebook": count(sessions[].events[event == "social_click" && programSlug == $slug && social == "share-facebook"]),
-    "twitter": count(sessions[].events[event == "social_click" && programSlug == $slug && social == "share-twitter"]),
-    "telegram": count(sessions[].events[event == "social_click" && programSlug == $slug && social == "share-telegram"]),
-    "pinterest": count(sessions[].events[event == "social_click" && programSlug == $slug && social == "share-pinterest"]),
-    "tumblr": count(sessions[].events[event == "social_click" && programSlug == $slug && social == "share-tumblr"]),
-    "linkedin": count(sessions[].events[event == "social_click" && programSlug == $slug && social == "share-linkedin"])
-  }
-}`;
-
-export const pageShareCountsQuery = `{
-  "live": *[_type == "trackingSession"]{
-    "facebook": count(events[event == "social_click" && path == $path && social == "share-facebook"]),
-    "twitter": count(events[event == "social_click" && path == $path && social == "share-twitter"]),
-    "telegram": count(events[event == "social_click" && path == $path && social == "share-telegram"]),
-    "pinterest": count(events[event == "social_click" && path == $path && social == "share-pinterest"]),
-    "tumblr": count(events[event == "social_click" && path == $path && social == "share-tumblr"]),
-    "linkedin": count(events[event == "social_click" && path == $path && social == "share-linkedin"])
-  },
-  "bundled": *[_type == "trackingSessionBundle"]{
-    "facebook": count(sessions[].events[event == "social_click" && path == $path && social == "share-facebook"]),
-    "twitter": count(sessions[].events[event == "social_click" && path == $path && social == "share-twitter"]),
-    "telegram": count(sessions[].events[event == "social_click" && path == $path && social == "share-telegram"]),
-    "pinterest": count(sessions[].events[event == "social_click" && path == $path && social == "share-pinterest"]),
-    "tumblr": count(sessions[].events[event == "social_click" && path == $path && social == "share-tumblr"]),
-    "linkedin": count(sessions[].events[event == "social_click" && path == $path && social == "share-linkedin"])
-  }
-}`;
-
 /* ------------ Vendors ------------ */
 /** /vendors index + homepage chips: vendors that have at least one program, with counts. */
 export const vendorsWithCountsQuery = `*[_type == "vendor" && count(*[_type == "program" && references(^._id)]) > 0]{
@@ -374,16 +280,13 @@ export const vendorBySlugQuery = `*[_type == "vendor" && slug.current == $slug][
 /* ------------ Cron Runs ------------ */
 const cronRunFields = `_id, job, source, status, details, ranAt`;
 
-/** Latest run of each job, plus the 20 newest runs. A global limit hides daily jobs behind bundle-sessions (every 30m). */
+/** Latest run of each job, plus the 20 newest runs. A global limit would hide daily jobs behind frequent ones. */
 export const cronStatusQuery = `{
   "recent": *[_type == "cronRun" && ranAt >= $since] | order(ranAt desc) [0...20]{
     ${cronRunFields}
   },
   "latestByJob": {
     "sync-program-stats": *[_type == "cronRun" && job == "sync-program-stats" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
-    "bundle-sessions": *[_type == "cronRun" && job == "bundle-sessions" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
-    "bundle-visitors": *[_type == "cronRun" && job == "bundle-visitors" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
-    "bundle-key-reports": *[_type == "cronRun" && job == "bundle-key-reports" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
     "update-expired-keys": *[_type == "cronRun" && job == "update-expired-keys" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
     "prune-cron-runs": *[_type == "cronRun" && job == "prune-cron-runs" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
     "discover-giveaways": *[_type == "cronRun" && job == "discover-giveaways" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}}
@@ -392,20 +295,6 @@ export const cronStatusQuery = `{
 
 export const lastCronRunByJobQuery = `*[_type == "cronRun" && job == $job] | order(ranAt desc) [0]{
   ranAt, source, status, details
-}`;
-
-/* ------------ Duplicate Key Report Check ------------ */
-/** Same visitor's prior report on this key — live docs and archived bundle rows. Caller picks the newest. */
-export const duplicateKeyReportQuery = `{
-  "live": *[_type=="keyReport" && ipHash == $ipHash && programSlug == $programSlug && key == $key]{
-    "_id": _id, eventType, programSlug, key, label, "createdAt": coalesce(createdAt, _createdAt)
-  } | order(createdAt desc)[0],
-  "bundled": *[_type=="keyReportBundle" && count(reports[ipHash == $ipHash && programSlug == $programSlug && key == $key]) > 0]{
-    "bundleId": _id,
-    "rows": reports[ipHash == $ipHash && programSlug == $programSlug && key == $key]{
-      "rowKey": _key, eventType, programSlug, key, label, "createdAt": coalesce(createdAt, _createdAt)
-    }
-  }
 }`;
 
 /* ------------ Popular Programs (related / light cards — no per-program stats) ------------ */
@@ -420,14 +309,8 @@ export const popularProgramsByViewsQuery = `*[_type == "program"]{ ${programsLis
 /* ------------ Statistics ------------ */
 export const siteStatsQuery = `{
   "totalPrograms": count(*[_type == "program"]),
-  "totalKeys": count(*[_type == "program"].cdKeys[]._key),
-  "totalReports": count(*[_type == "keyReport"]) + count(*[_type == "keyReportBundle"].reports[]),
-  "recentReports": count(*[_type == "keyReport" && createdAt >= $weekAgo])
-    + count(*[_type == "keyReportBundle"].reports[createdAt >= $weekAgo])
+  "totalKeys": count(*[_type == "program"].cdKeys[]._key)
 }`;
-
-/* ------------ Recent Reports Query ------------ */
-export const recentReportsQuery = `*[_type == "keyReport" && createdAt >= $weekAgo] | order(createdAt desc)`;
 
 /* ------------ Programs with Filtering ------------ */
 export const programsWithStatsQuery = `*[_type == "program"]{

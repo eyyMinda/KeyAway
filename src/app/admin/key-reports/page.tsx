@@ -1,10 +1,10 @@
 "use client";
 
-/** @fileoverview Admin key reports: aggregate Sanity keyReport docs by program+key, filters, modal detail. */
+/** @fileoverview Admin key reports: aggregate key reports by program+key, filters, modal detail. */
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { client } from "@/src/sanity/lib/client";
-import { adminKeyReportsQuery, allProgramsQuery } from "@/src/lib/sanity/queries";
+import { allProgramsQuery } from "@/src/lib/sanity/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
 import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";
@@ -87,16 +87,9 @@ function KeyReportsPageContent() {
         const programsData: Program[] = await client.fetch(allProgramsQuery);
         setPrograms(programsData);
 
-        const combined = await client.fetch<{
-          live?: Array<Record<string, unknown>>;
-          bundled?: Array<{ bundleId: string; rows?: Array<Record<string, unknown>> }>;
-        }>(adminKeyReportsQuery);
-
-        const liveEvents = combined?.live ?? [];
-        const bundledEvents: Array<Record<string, unknown>> = (combined?.bundled ?? []).flatMap(b =>
-          (b.rows ?? []).map(r => ({ ...r, bundleId: b.bundleId }))
-        );
-        const keyReportEvents = [...liveEvents, ...bundledEvents];
+        const res = await fetch("/api/v1/admin/key-reports");
+        if (!res.ok) throw new Error(`key reports ${res.status}`);
+        const keyReportEvents = ((await res.json()) as { data?: Array<Record<string, unknown>> }).data ?? [];
         const keyReports = new Map<string, KeyReport>();
 
         for (const report of keyReportEvents) {
@@ -198,8 +191,6 @@ function KeyReportsPageContent() {
 
           keyReport.reports.push({
             _id: (report._id as string) || "",
-            bundleId: (report as { bundleId?: string }).bundleId,
-            rowKey: (report as { rowKey?: string }).rowKey,
             ipHash: (report.ipHash as string) || undefined,
             referrer: (report.referrer as string) || undefined,
             createdAt: report.createdAt as string,

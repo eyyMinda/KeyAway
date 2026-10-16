@@ -6,7 +6,6 @@ import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
 import ModalSection from "./ModalSection";
 import { FiAlertTriangle, FiCheck, FiX } from "react-icons/fi";
 import { client } from "@/src/sanity/lib/client";
-import { fetchVisitorsByHashes } from "@/src/lib/visitors/visitorLookup";
 import { effectiveReferrerHref, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
 import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import MarkSpammerButton from "@/src/components/admin/MarkSpammerButton";
@@ -109,18 +108,14 @@ interface ReportDetailsModalProps {
 
 type ReportRow = KeyReport["reports"][number];
 
-/** Stable per-row key: live doc id, or bundle id + row key for archived rows. */
+/** Stable per-row key (report id). */
 function rowEditId(r: ReportRow): string {
-  if (r._id) return r._id;
-  if (r.bundleId && r.rowKey) return `${r.bundleId}:${r.rowKey}`;
-  return "";
+  return r._id;
 }
 
-/** PATCH body target: live doc uses reportId, archived row uses bundleId + rowKey. */
+/** PATCH body target. */
 function rowEditTarget(r: ReportRow): Record<string, string> | null {
-  if (r._id) return { reportId: r._id };
-  if (r.bundleId && r.rowKey) return { bundleId: r.bundleId, rowKey: r.rowKey };
-  return null;
+  return r._id ? { reportId: r._id } : null;
 }
 
 export default function ReportDetailsModal({ isOpen, onClose, report, onReportPatched }: ReportDetailsModalProps) {
@@ -154,14 +149,10 @@ export default function ReportDetailsModal({ isOpen, onClose, report, onReportPa
       return;
     }
     let cancelled = false;
-    fetchVisitorsByHashes(hashes)
-      .then(map => {
-        if (cancelled) return;
-        const m: Record<string, { visitTier?: string; isSpammer?: boolean }> = {};
-        for (const [hash, v] of map) {
-          m[hash] = { visitTier: v.visitTier, isSpammer: v.isSpammer };
-        }
-        setVisitorByHash(m);
+    fetch(`/api/v1/admin/visitor?hashes=${encodeURIComponent(hashes.join(","))}`)
+      .then(res => (res.ok ? res.json() : Promise.reject(new Error(`visitor ${res.status}`))))
+      .then((json: { data?: Record<string, { visitTier?: string; isSpammer?: boolean }> }) => {
+        if (!cancelled) setVisitorByHash(json.data ?? {});
       })
       .catch(() => {
         if (!cancelled) setVisitorByHash({});

@@ -3,6 +3,7 @@ import { client } from "@/src/sanity/lib/client";
 import { programsWithStatsQuery, siteStatsQuery } from "@lib/sanity/queries";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { mergeProgramStats } from "@/src/lib/analytics/eventsApi";
+import { getSiteReportStats } from "@/src/lib/analytics/keyReportStore";
 import type { ProgramWithStats } from "@/src/types/home";
 import { generateHomePageMetadata } from "@/src/lib/seo/metadata";
 import { generateHomePageJsonLd } from "@/src/lib/seo/jsonLd";
@@ -28,17 +29,16 @@ export async function generateMetadata() {
 }
 
 export default async function HomePage() {
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const weekAgoISO = weekAgo.toISOString();
-
-  const [rawPopularPrograms, stats, store, featuredProgram, vendors] = await Promise.all([
+  const [rawPopularPrograms, programStats, reportStats, store, featuredProgram, vendors] = await Promise.all([
     client.fetch(programsWithStatsQuery, {}, { next: { tags: [TAG_HOMEPAGE_PROGRAMS] } }),
-    client.fetch(siteStatsQuery, { weekAgo: weekAgoISO }, { next: { tags: [TAG_HOMEPAGE_STATS] } }),
+    client.fetch(siteStatsQuery, {}, { next: { tags: [TAG_HOMEPAGE_STATS] } }),
+    getSiteReportStats(),
     getCachedStoreDetailsDocument(),
     getFeaturedProgram(),
     getCachedVendorsWithCounts()
   ]);
+
+  const stats = { ...programStats, ...reportStats };
 
   const popularPrograms = mergeProgramStats((rawPopularPrograms ?? []) as ProgramWithStats[])
     .sort((a, b) => b.popularityScore - a.popularityScore)

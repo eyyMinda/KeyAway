@@ -1,10 +1,9 @@
-/** @fileoverview Fetches session events for admin ranges; program stats live on program docs (cron rollup). */
-import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
-import { mergeTrackingEventsForRange } from "@/src/lib/analytics/mergeTrackingEventsForRange";
+/** @fileoverview Admin dashboard fetch helpers (browser) and program stat merging; program stats live on program docs (cron rollup). */
 import { calculatePopularityScore } from "@/src/lib/program/programUtils";
-import { client } from "@/src/sanity/lib/client";
-import { visitorTagAggregatesQuery } from "@/src/lib/sanity/queries";
+import type { VisitorTagAggregateRow } from "@/src/lib/visitors/visitorStore";
 import { AnalyticsEventData } from "@/src/types";
+
+export type { VisitorTagAggregateRow };
 
 /** Ensures view/download/popularity fields are numeric (already merged on program by cron). */
 export function mergeProgramStats<
@@ -23,29 +22,6 @@ export function mergeSingleProgramStats(program: { viewCount?: number; downloadC
   const viewCount = program.viewCount ?? 0;
   const downloadCount = program.downloadCount ?? 0;
   return { viewCount, downloadCount };
-}
-
-/**
- * Fetches session events for a date range with visitor meta.
- * Prefer paginated admin API for large ranges.
- */
-export async function fetchEventsForRange(since: string, until: string): Promise<AnalyticsEventData[]> {
-  const merged = await mergeTrackingEventsForRange(since, until);
-  const enriched = await enrichEventsWithVisitorMeta(merged as unknown as Array<Record<string, unknown>>);
-  return enriched as unknown as AnalyticsEventData[];
-}
-
-/** Admin UI: load range via server route (token + batched visitor lookup). */
-export async function fetchEventsForRangeFromAdminApi(
-  since: string,
-  until: string
-): Promise<AnalyticsEventData[]> {
-  const res = await fetch(
-    `/api/v1/admin/analytics/events?since=${encodeURIComponent(since)}&until=${encodeURIComponent(until)}`
-  );
-  const json = (await res.json()) as { data?: AnalyticsEventData[] };
-  if (!res.ok) throw new Error("Failed to fetch events");
-  return json.data ?? [];
 }
 
 export interface AnalyticsSummaryData {
@@ -90,39 +66,14 @@ export async function fetchAnalyticsSummary(
   );
 }
 
-export interface VisitorTagAggregateRow {
-  key: string;
-  label: string;
-  value: number;
-}
-
 /** Visitors with `lastActivityAt` in range; tier and flagged-spammer counts (display order is by count in the table component). */
 export async function fetchVisitorTagAggregatesForRange(
   since: string,
   until: string
 ): Promise<VisitorTagAggregateRow[]> {
-  const { singular, bundled } = await client.fetch<{
-    singular?: Array<{ visitTier?: string; isSpammer?: boolean }>;
-    bundled?: Array<{ visitTier?: string; isSpammer?: boolean }>;
-  }>(visitorTagAggregatesQuery, { since, until });
-  const rows = [...(singular ?? []), ...(bundled ?? [])];
-  const tierOrder = ["new", "returning", "regular", "star"] as const;
-  const tierCounts = new Map<string, number>();
-  let spammers = 0;
-  for (const r of rows ?? []) {
-    const tier = (r.visitTier || "new").toLowerCase();
-    tierCounts.set(tier, (tierCounts.get(tier) || 0) + 1);
-    if (r.isSpammer === true) spammers++;
-  }
-  const out: VisitorTagAggregateRow[] = tierOrder.map(t => ({
-    key: t,
-    label: t.charAt(0).toUpperCase() + t.slice(1),
-    value: tierCounts.get(t) ?? 0
-  }));
-  const extraTiers = [...tierCounts.keys()].filter(t => !tierOrder.includes(t as (typeof tierOrder)[number]));
-  for (const t of extraTiers.sort()) {
-    out.push({ key: t, label: t, value: tierCounts.get(t) ?? 0 });
-  }
-  out.push({ key: "spammer", label: "Spammers (flagged)", value: spammers });
-  return out;
+  const sp = new URLSearchParams({ since, until });
+  const res = await fetch(`/api/v1/admin/analytics/visitor-tiers?${sp.toString()}`);
+  const json = (await res.json()) as { data?: VisitorTagAggregateRow[] };
+  if (!res.ok) throw new Error("Failed to fetch visitor tiers");
+  return json.data ?? [];
 }

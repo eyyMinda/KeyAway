@@ -16,8 +16,7 @@ import {
   sanitizeCommentBody
 } from "@/src/lib/program/commentBody";
 import { isProgramSlugPublished } from "@/src/lib/sanity/programSlugExists";
-import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
-import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
+import { fetchVisitorByHash, upsertVisitorContribution } from "@/src/lib/visitors/visitorStore";
 import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 import { isDevelopmentEnv } from "@/src/lib/env/isDevelopment";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";

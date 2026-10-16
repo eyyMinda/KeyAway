@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-import { listSessionsForRange, type AdminSessionSummary } from "@/src/lib/analytics/sessionAdmin";
-import { enrichEventsWithVisitorMeta } from "@/src/lib/analytics/enrichEventsWithVisitorMeta";
+import { listSessionsPage } from "@/src/lib/analytics/sessionAdmin";
 
 /** GET /api/v1/admin/sessions?since=&until=&page=&entry= */
 export async function GET(req: NextRequest) {
@@ -26,28 +25,16 @@ export async function GET(req: NextRequest) {
   const entry = req.nextUrl.searchParams.get("entry") ?? "all";
 
   try {
-    const allRows = await listSessionsForRange(sinceDate.toISOString(), untilDate.toISOString());
-    const countsByEntry: Record<string, number> = {};
-    for (const row of allRows) {
-      const key = row.entry || "direct";
-      countsByEntry[key] = (countsByEntry[key] ?? 0) + 1;
-    }
-    countsByEntry.contributions = allRows.filter(r => (r.contributionCount || r.reportCount) > 0).length;
-    countsByEntry.all = allRows.length;
-
-    let rows = allRows;
-    if (entry === "contributions") rows = rows.filter(r => (r.contributionCount || r.reportCount) > 0);
-    else if (entry !== "all") rows = rows.filter(r => r.entry === entry);
-
-    const total = rows.length;
-    const start = (page - 1) * limit;
-    const slice = rows.slice(start, start + limit);
-    const enriched = (await enrichEventsWithVisitorMeta(
-      slice.map(row => ({ ...row, ipHash: row.visitorHash, createdAt: row.startedAt }))
-    )) as Array<AdminSessionSummary & { visitTier?: string; visitorIsSpammer?: boolean }>;
+    const { rows, total, countsByEntry } = await listSessionsPage({
+      since: sinceDate.toISOString(),
+      until: untilDate.toISOString(),
+      entry,
+      page,
+      limit
+    });
 
     return NextResponse.json({
-      data: enriched,
+      data: rows,
       meta: {
         page,
         limit,

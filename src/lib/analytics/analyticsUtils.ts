@@ -169,8 +169,7 @@ export function transformPathData(byPath: Map<string, number>): TableDataItem[] 
 }
 
 /** Page activity: paths + one “Not Found” row (when count > 0), all sorted by view count descending. */
-export function transformPathActivityTable(events: AnalyticsEventData[], byPath: Map<string, number>): TableDataItem[] {
-  const notFoundCount = events.filter(isPageViewNotFoundRow).length;
+export function transformPathActivityTable(byPath: Map<string, number>, notFoundCount: number): TableDataItem[] {
   const rows: TableDataItem[] = Array.from(byPath).map(([path, count]) => ({
     key: path,
     value: count,

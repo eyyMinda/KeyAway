@@ -32,9 +32,6 @@ function SourceBadge({ source }: { source: string }) {
 function JobLabel({ job }: { job: string }) {
   const labels: Record<string, string> = {
     "sync-program-stats": "Program Stats",
-    "bundle-sessions": "Bundle Sessions",
-    "bundle-visitors": "Bundle Visitors",
-    "bundle-key-reports": "Bundle Key Reports",
     "update-expired-keys": "Update Expired Keys",
     "prune-cron-runs": "Prune Cron Runs",
     "discover-giveaways": "Discover Giveaways"
@@ -44,9 +41,6 @@ function JobLabel({ job }: { job: string }) {
 
 type CronJobKey =
   | "sync-program-stats"
-  | "bundle-sessions"
-  | "bundle-visitors"
-  | "bundle-key-reports"
   | "update-expired-keys"
   | "prune-cron-runs"
   | "discover-giveaways";
@@ -89,15 +83,6 @@ export default function CronStatusCard() {
     "sync-program-stats": runs.find(
       r => r.job === "sync-program-stats" && (r.source === "vercel_cron" || r.source === "bearer")
     ),
-    "bundle-sessions": runs.find(
-      r => r.job === "bundle-sessions" && (r.source === "vercel_cron" || r.source === "bearer")
-    ),
-    "bundle-visitors": runs.find(
-      r => r.job === "bundle-visitors" && (r.source === "vercel_cron" || r.source === "bearer")
-    ),
-    "bundle-key-reports": runs.find(
-      r => r.job === "bundle-key-reports" && (r.source === "vercel_cron" || r.source === "bearer")
-    ),
     "update-expired-keys": runs.find(
       r => r.job === "update-expired-keys" && (r.source === "vercel_cron" || r.source === "bearer")
     ),
@@ -110,9 +95,6 @@ export default function CronStatusCard() {
   };
   const lastByJob: Record<CronJobKey, CronRun | undefined> = {
     "sync-program-stats": runs.find(r => r.job === "sync-program-stats"),
-    "bundle-sessions": runs.find(r => r.job === "bundle-sessions"),
-    "bundle-visitors": runs.find(r => r.job === "bundle-visitors"),
-    "bundle-key-reports": runs.find(r => r.job === "bundle-key-reports"),
     "update-expired-keys": runs.find(r => r.job === "update-expired-keys"),
     "prune-cron-runs": runs.find(r => r.job === "prune-cron-runs"),
     "discover-giveaways": runs.find(r => r.job === "discover-giveaways")
@@ -164,9 +146,6 @@ export default function CronStatusCard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-0 min-w-0 lg:pr-8">
           <JobStatusRow job="sync-program-stats" schedule="Every 6h" label="Program Stats" />
-          <JobStatusRow job="bundle-sessions" schedule="Every 30m (idle visits)" label="Bundle Sessions" />
-          <JobStatusRow job="bundle-visitors" schedule="Every 1h (idle 3h)" label="Bundle Visitors" />
-          <JobStatusRow job="bundle-key-reports" schedule="Daily at 04:45 UTC (older 7d)" label="Bundle Key Reports" />
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
           <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (7d)" />
           <JobStatusRow job="discover-giveaways" schedule="Daily at 07:00 UTC" label="Discover Giveaways" />

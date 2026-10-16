@@ -3,8 +3,26 @@ import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
+import { listKeyReportsForAdmin } from "@/src/lib/analytics/keyReportStore";
 
 const VALID_STATUSES = ["new", "active", "expired", "limit"] as const;
+
+/** GET /api/v1/admin/key-reports - Every key report, newest first (admin table). */
+export async function GET(req: NextRequest) {
+  const { ok: rateOk } = rateLimitMiddleware(req);
+  if (!rateOk) return Errors.tooManyRequests();
+
+  const admin = await requireAdminSession();
+  if (admin instanceof Response) return admin;
+
+  try {
+    const rows = await listKeyReportsForAdmin();
+    return NextResponse.json({ data: rows, meta: { count: rows.length } });
+  } catch (err) {
+    console.error("[GET /api/v1/admin/key-reports]", err);
+    return Errors.internal();
+  }
+}
 
 /** PATCH /api/v1/admin/key-reports - Update CD key status by programSlug + keyIndex */
 export async function PATCH(req: NextRequest) {
