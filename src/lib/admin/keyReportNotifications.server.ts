@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
-import { keyReportNotificationsQuery } from "@/src/lib/sanity/queries";
+import { listKeyReportsSince } from "@/src/lib/analytics/keyReportStore";
 import type { KeyReportNotificationItem } from "@/src/types/admin";
 import { getKeyData } from "@/src/lib/keyHashing";
 import type { CDKey, ProgramFlow } from "@/src/types/program";
@@ -16,11 +16,10 @@ type KeyReportEventType = "report_key_working" | "report_key_expired" | "report_
 interface KeyReportEvent {
   eventType: string;
   programSlug: string;
-  key?: string;
-  label?: string;
-  _createdAt?: string;
+  key?: string | null;
+  label?: string | null;
   createdAt?: string;
-  triedVersionFit?: string;
+  triedVersionFit?: string | null;
 }
 
 interface Group {
@@ -48,7 +47,7 @@ async function buildKeyReportNotifications(): Promise<KeyReportNotificationItem[
   const since = isoSince(days(KEY_REPORT_ALERT_WINDOW_DAYS));
 
   const [reportRows, programs] = await Promise.all([
-    client.fetch<{ live?: KeyReportEvent[]; bundled?: KeyReportEvent[] }>(keyReportNotificationsQuery, { since }),
+    listKeyReportsSince(since),
     client.fetch<
       Array<{
         slug?: string;
@@ -66,7 +65,7 @@ async function buildKeyReportNotifications(): Promise<KeyReportNotificationItem[
     )
   ]);
 
-  const events: KeyReportEvent[] = [...(reportRows?.live ?? []), ...(reportRows?.bundled ?? [])];
+  const events: KeyReportEvent[] = reportRows;
 
   const programTitleBySlug = new Map<string, string>();
   const resolvedKeys = new Set<string>();
@@ -89,7 +88,7 @@ async function buildKeyReportNotifications(): Promise<KeyReportNotificationItem[
     const groupKey = `${programSlug}:${storageKey}`;
     const eventType = report.eventType as KeyReportEventType;
 
-    const reportAt = report._createdAt ?? report.createdAt ?? "";
+    const reportAt = report.createdAt ?? "";
     if (!groups.has(groupKey)) {
       groups.set(groupKey, {
         programSlug,

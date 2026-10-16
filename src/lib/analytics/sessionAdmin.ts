@@ -1,5 +1,14 @@
-import { client } from "@/src/sanity/lib/client";
-import { isContributionEvent, type SessionEntry } from "@/src/lib/analytics/sessionConstants";
+/** @fileoverview Admin reads over `analytics.sessions` / `analytics.events`: session list, detail, dashboard summary. */
+import { db } from "@/src/lib/db/postgres";
+import type { AnalyticsSummaryCachePayload } from "@/src/lib/api/adminEventsListCache";
+import {
+  transformCountryData,
+  transformEventData,
+  transformPathActivityTable,
+  transformProgramData,
+  transformSocialData
+} from "@/src/lib/analytics/analyticsUtils";
+import { SESSION_ID_RE } from "@/src/lib/analytics/sessionConstants";
 import { sessionSourceLabel } from "@/src/lib/analytics/sessionEntry";
 import type { AnalyticsEventData } from "@/src/types";
 
@@ -43,196 +52,190 @@ export type AdminSessionDetail = AdminSessionSummary & {
   events: AdminSessionEvent[];
 };
 
-type RawSession = Omit<AdminSessionSummary, "id" | "eventCount" | "reportCount"> & {
-  _id?: string;
-  _key?: string;
-  eventCount?: number;
-  reportCount?: number;
-  contributionCount?: number;
-  events?: AdminSessionEvent[];
-  userAgent?: string;
-  utm_source?: string;
-  utm_medium?: string;
-  utm_campaign?: string;
-};
+type VisitorMeta = { visitTier?: string; visitorIsSpammer?: boolean };
 
-function toSummary(raw: RawSession, id: string): AdminSessionSummary {
+type WithoutNull<T> = { [K in keyof T]: Exclude<T[K], null> };
+
+/** Drop SQL nulls so payloads match the old optional-field shape. */
+function compact<T extends Record<string, unknown>>(row: T): WithoutNull<T> {
+  return Object.fromEntries(Object.entries(row).filter(([, v]) => v !== null)) as WithoutNull<T>;
+}
+
+/** Contribution sessions: any report, comment, suggestion or contact event. */
+const CONTRIBUTIONS = "contributions";
+
+export async function listSessionsPage(opts: {
+  since: string;
+  until: string;
+  entry: string;
+  page: number;
+  limit: number;
+}): Promise<{ rows: Array<AdminSessionSummary & VisitorMeta>; total: number; countsByEntry: Record<string, number> }> {
+  const sql = db();
+  const inRange = sql`s.last_event_at >= ${opts.since} and s.started_at <= ${opts.until}`;
+  const entryFilter =
+    opts.entry === "all"
+      ? sql``
+      : opts.entry === CONTRIBUTIONS
+        ? sql`and (s.contribution_count > 0 or s.report_count > 0)`
+        : sql`and coalesce(s.entry, 'direct') = ${opts.entry}`;
+
+  const [counts, rows] = await Promise.all([
+    sql<Array<{ entry: string; sessions: number; contributions: number }>>`
+      select coalesce(s.entry, 'direct') as entry,
+             count(*)::int as sessions,
+             count(*) filter (where s.contribution_count > 0 or s.report_count > 0)::int as contributions
+      from analytics.sessions s
+      where ${inRange}
+      group by 1
+    `,
+    sql<Array<AdminSessionSummary & { visitTier: string | null; visitorIsSpammer: boolean | null }>>`
+      select s.id, s.visitor_hash, s.started_at, s.last_event_at, s.entry, s.referrer, s.landing_path, s.country, s.city,
+             s.event_count, s.report_count, s.contribution_count,
+             v.visit_tier, v.is_spammer as visitor_is_spammer
+      from analytics.sessions s
+      left join analytics.visitors v on v.visitor_hash = s.visitor_hash
+      where ${inRange} ${entryFilter}
+      order by s.started_at desc
+      limit ${opts.limit} offset ${(opts.page - 1) * opts.limit}
+    `
+  ]);
+
+  const countsByEntry: Record<string, number> = { all: 0, [CONTRIBUTIONS]: 0 };
+  for (const c of counts) {
+    countsByEntry[c.entry] = c.sessions;
+    countsByEntry.all += c.sessions;
+    countsByEntry[CONTRIBUTIONS] += c.contributions;
+  }
+  const total = opts.entry === "all" ? countsByEntry.all : (countsByEntry[opts.entry] ?? 0);
+
+  return { rows: rows.map(r => compact({ ...r })), total, countsByEntry };
+}
+
+export async function readSessionDetail(id: string): Promise<(AdminSessionDetail & VisitorMeta) | null> {
+  if (!SESSION_ID_RE.test(id)) return null;
+  const sql = db();
+  const [session] = await sql<Array<Record<string, unknown>>>`
+    select s.id, s.visitor_hash, s.started_at, s.last_event_at, s.entry, s.referrer, s.landing_path, s.country, s.city,
+           s.event_count, s.report_count, s.contribution_count, s.user_agent,
+           s.utm_source, s.utm_medium, s.utm_campaign,
+           v.visit_tier, v.is_spammer as visitor_is_spammer
+    from analytics.sessions s
+    left join analytics.visitors v on v.visitor_hash = s.visitor_hash
+    where s.id = ${id}
+  `;
+  if (!session) return null;
+  const { utmSource, utmMedium, utmCampaign, ...rest } = session;
+  const events = await sql<AdminSessionEvent[]>`
+    select event, created_at, path, program_slug, nullif(not_found, false) as not_found, key, label, social,
+           activation_url, program_flow, listed_version, tried_version_fit, tried_version, source_id
+    from analytics.events
+    where session_id = ${id}
+    order by created_at asc
+  `;
   return {
-    id,
-    visitorHash: raw.visitorHash,
-    startedAt: raw.startedAt,
-    lastEventAt: raw.lastEventAt,
-    entry: raw.entry,
-    referrer: raw.referrer,
-    landingPath: raw.landingPath,
-    country: raw.country,
-    city: raw.city,
-    eventCount: raw.eventCount ?? raw.events?.length ?? 0,
-    reportCount: raw.reportCount ?? raw.events?.filter(e => e.event?.startsWith("report_")).length ?? 0,
-    contributionCount:
-      raw.contributionCount ??
-      raw.events?.filter(e => (e.event ? isContributionEvent(e.event) : false)).length ??
-      raw.reportCount ??
-      0
+    ...(compact({ ...rest, utm_source: utmSource, utm_medium: utmMedium, utm_campaign: utmCampaign }) as unknown as AdminSessionDetail & VisitorMeta),
+    events: events.map(e => compact({ ...e }))
   };
 }
 
-export async function listSessionsForRange(since: string, until: string): Promise<AdminSessionSummary[]> {
-  const [live, bundles] = await Promise.all([
-    client.fetch<RawSession[]>(
-      `*[_type == "trackingSession" && lastEventAt >= $since && startedAt <= $until]{
-        "id": _id,
-        visitorHash, startedAt, lastEventAt, entry, referrer, landingPath, country, city, eventCount, reportCount, contributionCount
-      }`,
-      { since, until }
-    ),
-    client.fetch<Array<{ _id: string; sessions?: RawSession[] }>>(
-      `*[_type == "trackingSessionBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
-        _id,
-        "sessions": sessions[]{
-          _key, visitorHash, startedAt, lastEventAt, entry, referrer, landingPath, country, city, eventCount, reportCount, contributionCount
-        }
-      }`,
-      { since, until }
-    )
-  ]);
-
-  const rows: AdminSessionSummary[] = [];
-  for (const doc of live ?? []) {
-    const id = (doc as { id?: string }).id;
-    if (!id || !doc.startedAt) continue;
-    rows.push(toSummary(doc, id));
-  }
-  for (const bundle of bundles ?? []) {
-    for (const session of bundle.sessions ?? []) {
-      if (!session.startedAt || !session.lastEventAt) continue;
-      if (session.lastEventAt < since || session.startedAt > until) continue;
-      const key = session._key ?? session.startedAt;
-      rows.push(toSummary(session, `${bundle._id}::${key}`));
-    }
-  }
-
-  return rows.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
-}
-
-export async function readSessionDetail(id: string): Promise<AdminSessionDetail | null> {
-  const splitAt = id.indexOf("::");
-  if (splitAt === -1) {
-    const doc = await client.fetch<RawSession | null>(
-      `*[_type == "trackingSession" && _id == $id][0]{
-        visitorHash, startedAt, lastEventAt, entry, referrer, landingPath, country, city,
-        eventCount, reportCount, contributionCount, userAgent, utm_source, utm_medium, utm_campaign, events
-      }`,
-      { id }
-    );
-    if (!doc?.startedAt) return null;
-    return { ...toSummary(doc, id), userAgent: doc.userAgent, utm_source: doc.utm_source, utm_medium: doc.utm_medium, utm_campaign: doc.utm_campaign, events: doc.events ?? [] };
-  }
-
-  const bundleId = id.slice(0, splitAt);
-  const key = id.slice(splitAt + 2);
-  const session = await client.fetch<RawSession | null>(
-    `*[_type == "trackingSessionBundle" && _id == $bundleId][0].sessions[_key == $key][0]`,
-    { bundleId, key }
-  );
-  if (!session?.startedAt) return null;
-  return {
-    ...toSummary(session, id),
-    userAgent: session.userAgent,
-    utm_source: session.utm_source,
-    utm_medium: session.utm_medium,
-    utm_campaign: session.utm_campaign,
-    events: session.events ?? []
-  };
-}
-
-type SessionWithEvents = AdminSessionSummary & { events?: AdminSessionEvent[] };
-
-export async function listSessionsWithEvents(since: string, until: string): Promise<SessionWithEvents[]> {
-  const [live, bundles] = await Promise.all([
-    client.fetch<Array<RawSession & { id: string }>>(
-      `*[_type == "trackingSession" && lastEventAt >= $since && startedAt <= $until]{
-        "id": _id,
-        visitorHash, startedAt, lastEventAt, entry, referrer, landingPath, country, city, eventCount, reportCount, contributionCount, events
-      }`,
-      { since, until }
-    ),
-    client.fetch<Array<{ _id: string; sessions?: RawSession[] }>>(
-      `*[_type == "trackingSessionBundle" && timeRangeEnd >= $since && timeRangeStart <= $until]{
-        _id,
-        sessions
-      }`,
-      { since, until }
-    )
-  ]);
-
-  const rows: SessionWithEvents[] = [];
-  for (const doc of live ?? []) {
-    if (!doc.id || !doc.startedAt) continue;
-    rows.push({ ...toSummary(doc, doc.id), events: doc.events });
-  }
-  for (const bundle of bundles ?? []) {
-    for (const session of bundle.sessions ?? []) {
-      if (!session.startedAt || !session.lastEventAt) continue;
-      if (session.lastEventAt < since || session.startedAt > until) continue;
-      const id = `${bundle._id}::${session._key ?? session.startedAt}`;
-      rows.push({ ...toSummary(session, id), events: session.events });
-    }
-  }
-  return rows;
-}
-
-export function flattenSessionEvents(
-  sessions: SessionWithEvents[],
-  since: string,
-  until: string
-): Array<AnalyticsEventData & { sourceId?: string }> {
-  const sinceMs = new Date(since).getTime();
-  const untilMs = new Date(until).getTime();
-  const out: Array<AnalyticsEventData & { sourceId?: string }> = [];
-  for (const session of sessions) {
-    for (const [index, event] of (session.events ?? []).entries()) {
-      const ts = new Date(event.createdAt).getTime();
-      if (!Number.isFinite(ts) || ts < sinceMs || ts > untilMs) continue;
-      out.push({
-        _id: `${session.id}:${index}`,
-        event: event.event as AnalyticsEventData["event"],
-        createdAt: event.createdAt,
-        path: event.path,
-        programSlug: event.programSlug,
-        notFound: event.notFound,
-        key: event.key,
-        social: event.social,
-        activationUrl: event.activationUrl,
-        programFlow: event.programFlow,
-        country: session.country,
-        city: session.city,
-        ipHash: session.visitorHash,
-        sourceId: event.sourceId
-      });
-    }
-  }
-  return out;
-}
-
+/** Sessions started in range, grouped into the dashboard "source" table. */
 export function buildSessionSourceTable(
-  sessions: Array<{ entry?: string; referrer?: string; startedAt: string }>
+  sessions: Array<{ entry?: string; referrer?: string; count?: number }>
 ): Array<{ key: string; value: number; label: string }> {
   const counts = new Map<string, number>();
-  const add = (entry: string | undefined, referrer?: string) => {
-    const label = sessionSourceLabel(entry, referrer);
-    counts.set(label, (counts.get(label) ?? 0) + 1);
-  };
-
-  for (const session of sessions) add(session.entry, session.referrer);
-
+  for (const session of sessions) {
+    const label = sessionSourceLabel(session.entry, session.referrer);
+    counts.set(label, (counts.get(label) ?? 0) + (session.count ?? 1));
+  }
   return [...counts.entries()].map(([label, value]) => ({ key: label, value, label }));
 }
 
-export function isReportSessionEvent(event: string): boolean {
-  return event.startsWith("report_");
-}
+type CountMap = Record<string, number>;
 
-export function sessionEntrySortKey(entry: SessionEntry | string | undefined): string {
-  return sessionSourceLabel(entry);
+const RECENT_LIMIT = 10;
+/** Contributions have their own admin pages; the event charts show visit/click signals only. */
+const CHART_EXCLUDED = ["comment", "comment_reply", "key_suggestion", "contact"];
+
+/** Dashboard aggregates for a range in three queries. Key report events are excluded (own overview). */
+export async function buildAnalyticsSummary(since: string, until: string): Promise<AnalyticsSummaryCachePayload> {
+  const sql = db();
+  const [[agg], recent, sources] = await Promise.all([
+    sql<
+      Array<{
+        totalEvents: number;
+        uniqueVisitors: number;
+        notFound: number;
+        totals: CountMap | null;
+        byProgram: CountMap | null;
+        bySocial: CountMap | null;
+        byPath: CountMap | null;
+        byCountry: CountMap | null;
+      }>
+    >`
+      with ev as materialized (
+        select e.event, e.program_slug, e.social, e.path, e.not_found, s.country, s.visitor_hash
+        from analytics.events e
+        join analytics.sessions s on s.id = e.session_id
+        where e.created_at >= ${since} and e.created_at <= ${until} and e.event not like 'report\\_%'
+      )
+      select
+        (select count(*)::int from ev) as total_events,
+        (select count(distinct visitor_hash)::int from ev) as unique_visitors,
+        (select count(*)::int from ev where event = 'page_viewed' and not_found) as not_found,
+        (select jsonb_object_agg(event, n) from (select event, count(*) as n from ev group by event) t) as totals,
+        (select jsonb_object_agg(program_slug, n) from (
+          select program_slug, count(*) as n from ev
+          where program_slug is not null and not (event = 'page_viewed' and not_found)
+          group by program_slug) t) as by_program,
+        (select jsonb_object_agg(social, n) from (
+          select social, count(*) as n from ev where event = 'social_click' and social is not null group by social) t) as by_social,
+        (select jsonb_object_agg(path, n) from (
+          select path, count(*) as n from ev
+          where path is not null and not (event = 'page_viewed' and not_found)
+          group by path) t) as by_path,
+        (select jsonb_object_agg(country, n) from (
+          select country, count(*) as n from ev where country is not null group by country) t) as by_country
+    `,
+    sql<Array<Record<string, unknown>>>`
+      select e.id as "_id", e.event, e.created_at, e.path, e.program_slug, nullif(e.not_found, false) as not_found,
+             e.key, e.social, e.activation_url, e.program_flow, e.source_id,
+             s.country, s.city, s.visitor_hash as ip_hash,
+             v.visit_tier, v.is_spammer as visitor_is_spammer
+      from analytics.events e
+      join analytics.sessions s on s.id = e.session_id
+      left join analytics.visitors v on v.visitor_hash = s.visitor_hash
+      where e.created_at >= ${since} and e.created_at <= ${until} and e.event not like 'report\\_%'
+      order by e.created_at desc
+      limit ${RECENT_LIMIT}
+    `,
+    sql<Array<{ entry: string | null; referrer: string | null; count: number }>>`
+      select entry, referrer, count(*)::int as count
+      from analytics.sessions
+      where started_at >= ${since} and started_at <= ${until}
+      group by entry, referrer
+    `
+  ]);
+
+  const toMap = (m: CountMap | null) => new Map(Object.entries(m ?? {}));
+  const totals = toMap(agg.totals);
+  const chartTotals = new Map(totals);
+  for (const e of CHART_EXCLUDED) chartTotals.delete(e);
+  const byCountry = toMap(agg.byCountry);
+
+  return {
+    totalEvents: agg.totalEvents,
+    uniqueVisitors: agg.uniqueVisitors,
+    uniqueCountries: byCountry.size,
+    totals: Object.fromEntries(totals),
+    eventChart: transformEventData(chartTotals),
+    programTable: transformProgramData(toMap(agg.byProgram)),
+    socialTable: transformSocialData(toMap(agg.bySocial)),
+    pathTable: transformPathActivityTable(toMap(agg.byPath), agg.notFound),
+    countryTable: transformCountryData(byCountry),
+    referrerTable: buildSessionSourceTable(
+      sources.map(s => ({ entry: s.entry ?? undefined, referrer: s.referrer ?? undefined, count: s.count }))
+    ),
+    recentEvents: recent.map(r => compact(r)) as unknown as AnalyticsEventData[]
+  };
 }

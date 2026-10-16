@@ -3,9 +3,6 @@ import { SanityClient } from "@sanity/client";
 export type CronSource = "vercel_cron" | "bearer" | "manual";
 export type CronJob =
   | "sync-program-stats"
-  | "bundle-sessions"
-  | "bundle-visitors"
-  | "bundle-key-reports"
   | "update-expired-keys"
   | "prune-cron-runs"
   | "discover-giveaways";

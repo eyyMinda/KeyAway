@@ -1,7 +1,7 @@
 import { client } from "@/src/sanity/lib/client";
 
 /**
- * Dataset API, not the CDN. Bundlers and rollups read a document and then delete it
- * in the next loop pass — a CDN hit still returns the deleted doc and the pass copies it again.
+ * Dataset API, not the CDN. For read-then-write jobs (stats rollup, giveaway discovery):
+ * a CDN hit can return a document version that was already changed or deleted.
  */
 export const mutationClient = client.withConfig({ useCdn: false });

@@ -8,9 +8,6 @@ export const SESSION_MAX_MS = 2 * HOUR_MS;
 
 export const SESSION_MAX_EVENTS = 100;
 
-/** Closed sessions per `trackingSessionBundle` document. */
-export const SESSION_BUNDLE_CAPACITY = 800;
-
 export const SESSION_ID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -25,10 +22,6 @@ export const SESSION_ENTRY_LABEL: Record<SessionEntry, string> = {
 
 export function isSessionEntry(value: string | undefined): value is SessionEntry {
   return value === "direct" || value === "external" || value === "internal" || value === "restore";
-}
-
-export function trackingSessionDocumentId(sessionId: string): string {
-  return `trackingSession.${sessionId}`;
 }
 
 export function isOwnSiteHost(hostname: string): boolean {

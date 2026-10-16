@@ -1,11 +1,9 @@
-/** @fileoverview Admin PATCH: set `visitor.isSpammer` by visitorHash (blocks public key reports). */
+/** @fileoverview Admin PATCH: set a visitor's spam flag by visitorHash (blocks negative public key reports). */
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
-import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-import { resolveVisitTier } from "@/src/lib/visitors/visitTier";
-import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
+import { setVisitorSpammer } from "@/src/lib/visitors/visitorStore";
 
 export async function PATCH(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
@@ -22,48 +20,8 @@ export async function PATCH(req: NextRequest) {
 
     if (!visitorHash) return Errors.validation("visitorHash required");
 
-    const now = new Date().toISOString();
-    const resolved = await fetchVisitorByHash(visitorHash);
-    const docId = resolved?.source === "live" ? resolved._id : undefined;
-
-    if (!docId) {
-      if (!isSpammer && !resolved) return Errors.notFound("No visitor document for this hash");
-      const visitCount = resolved?.visitCount ?? 0;
-      const contributionScore = resolved?.contributionScore ?? 0;
-      const visitTier = resolveVisitTier(visitCount, contributionScore, isSpammer);
-      await client.create({
-        _type: "visitor",
-        visitorHash,
-        visitCount,
-        lastActivityAt: resolved?.lastActivityAt ?? now,
-        visitTier,
-        isSpammer,
-        reportCount: resolved?.reportCount ?? 0,
-        suggestionCount: resolved?.suggestionCount ?? 0,
-        commentCount: resolved?.commentCount ?? 0,
-        contributionScore,
-        ...(isSpammer ? { spamMarkedAt: now } : {}),
-        ...(resolved?.country ? { country: resolved.country } : {}),
-        ...(resolved?.city ? { city: resolved.city } : {}),
-        createdAt: now,
-        updatedAt: now
-      });
-      return NextResponse.json({ data: { ok: true, visitorHash, isSpammer }, meta: {} });
-    }
-
-    const visitCount = resolved?.visitCount ?? 0;
-    const contributionScore = resolved?.contributionScore ?? 0;
-    const visitTier = resolveVisitTier(visitCount, contributionScore, isSpammer);
-
-    if (isSpammer) {
-      await client.patch(docId).set({ isSpammer: true, spamMarkedAt: now, visitTier, updatedAt: now }).commit();
-    } else {
-      await client
-        .patch(docId)
-        .set({ isSpammer: false, visitTier, updatedAt: now })
-        .unset(["spamMarkedAt"])
-        .commit();
-    }
+    const found = await setVisitorSpammer(visitorHash, isSpammer);
+    if (!found) return Errors.notFound("No visitor for this hash");
 
     return NextResponse.json({ data: { ok: true, visitorHash, isSpammer }, meta: {} });
   } catch (err) {

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { client } from "@/src/sanity/lib/client";
 import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { isLikelyBotUserAgent } from "@/src/lib/api/botUserAgent";
 import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/requestGeo";
-import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
-import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
+import { isVisitorSpammerByHash, upsertVisitorContribution } from "@/src/lib/visitors/visitorStore";
+import { createKeyReport, listProgramKeyReportRows, renewOwnReport } from "@/src/lib/analytics/keyReportStore";
+import { revalidateTag } from "next/cache";
+import { TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
 import type { KeyReportEvent } from "@/src/types";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { parseVersionFitInput } from "@/src/lib/program/keyReportVersionFit";
@@ -14,9 +15,26 @@ import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession
 
 const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key_expired", "report_key_limit_reached"]);
 
+/** Program page bars refresh after a visitor's own report by adding `fresh=<ts>`, which skips the CDN copy. */
+const PROGRAM_ROWS_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
+
+/** GET /api/v1/key-reports?programSlug= - Report rows for a program's progress bars (no PII). */
+export async function GET(req: NextRequest) {
+  const programSlug = req.nextUrl.searchParams.get("programSlug")?.trim() ?? "";
+  if (!/^[a-z0-9-]{1,120}$/i.test(programSlug)) return Errors.validation("programSlug is required");
+
+  try {
+    const rows = await listProgramKeyReportRows(programSlug);
+    return NextResponse.json({ data: rows, meta: {} }, { headers: { "Cache-Control": PROGRAM_ROWS_CACHE } });
+  } catch (err) {
+    console.error("[GET /api/v1/key-reports]", err);
+    return Errors.internal();
+  }
+}
+
 /** POST /api/v1/key-reports - Create or renew a key report.
  *  New: { event, meta: { programSlug, key, path? } }
- *  Renew: { reportId, newEventType, programSlug, key } */
+ *  Renew: { reportId, newEventType, programSlug, key } (reportId from check-duplicate) */
 export async function POST(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
@@ -43,16 +61,13 @@ export async function POST(req: NextRequest) {
     const spammerNegativeForbidden = () =>
       Errors.forbidden("Spam-flagged visitors may only report keys as working.");
 
-    // --- Renew: update existing report (same visitor). Live doc via reportId, archived row via bundleId+rowKey. ---
+    // --- Renew: update this visitor's existing report ---
     const reportId = typeof b.reportId === "string" ? b.reportId.trim() : "";
-    const bundleId = typeof b.bundleId === "string" ? b.bundleId.trim() : "";
-    const rowKey = typeof b.rowKey === "string" ? b.rowKey.trim() : "";
     const newEventType = typeof b.newEventType === "string" ? b.newEventType.trim() : "";
     const renewProgramSlug = typeof b.programSlug === "string" ? b.programSlug.trim() : "";
     const renewKey = b.key;
-    const isBundledRenew = !reportId && Boolean(bundleId && rowKey);
 
-    if ((reportId || isBundledRenew) && newEventType && renewProgramSlug && renewKey) {
+    if (reportId && newEventType && renewProgramSlug && renewKey) {
       if (!REPORT_EVENTS.has(newEventType as KeyReportEvent)) {
         return Errors.validation(
           "Invalid newEventType. Use report_key_working, report_key_expired, or report_key_limit_reached"
@@ -63,42 +78,9 @@ export async function POST(req: NextRequest) {
       }
       const version = parseVersionFitInput(newEventType, b);
       if (!version.ok) return Errors.validation(version.error);
-      const now = new Date().toISOString();
 
-      let updated: Record<string, unknown>;
-      if (isBundledRenew) {
-        // Ownership: the bundle row must carry this visitor's ipHash.
-        const row = await client.fetch<{ rowKey: string } | null>(
-          `*[_type=="keyReportBundle" && _id == $bundleId][0].reports[_key == $rowKey && ipHash == $ipHash][0]{ "rowKey": _key }`,
-          { bundleId, rowKey, ipHash }
-        );
-        if (!row) return Errors.notFound("Report not found or access denied");
-        const at = (field: string) => `reports[_key=="${rowKey}"].${field}`;
-        const patch = client.patch(bundleId);
-        const setFields: Record<string, unknown> = { [at("eventType")]: newEventType, [at("createdAt")]: now };
-        for (const [k, v] of Object.entries(version.fields ?? {})) setFields[at(k)] = v;
-        patch.set(setFields).set({ updatedAt: now });
-        if (newEventType === "report_key_working") {
-          patch.unset([at("triedVersionFit"), at("triedVersion"), at("listedVersion")]);
-        }
-        await patch.commit();
-        updated = { _id: bundleId, eventType: newEventType };
-      } else {
-        const existingReport = await client.fetch<{ _id: string } | null>(
-          `*[_type=="keyReport" && _id == $reportId && ipHash == $ipHash][0]{ _id }`,
-          { reportId, ipHash }
-        );
-        if (!existingReport) return Errors.notFound("Report not found or access denied");
-        const patch = client.patch(reportId).set({
-          eventType: newEventType,
-          createdAt: now,
-          ...version.fields
-        });
-        if (newEventType === "report_key_working") {
-          patch.unset(["triedVersionFit", "triedVersion", "listedVersion"]);
-        }
-        updated = (await patch.commit()) as Record<string, unknown>;
-      }
+      const updated = await renewOwnReport(reportId, ipHash, newEventType as KeyReportEvent, version.fields);
+      if (!updated) return Errors.notFound("Report not found or access denied");
       const renewSessionId = typeof b.sessionId === "string" ? b.sessionId : undefined;
       try {
         await appendTrackingSession({
@@ -124,8 +106,8 @@ export async function POST(req: NextRequest) {
       } catch (e) {
         console.error("[POST /api/v1/key-reports] visitor contribution upsert failed (renew)", e);
       }
-      const u = updated as Record<string, unknown>;
-      return NextResponse.json({ data: { updatedReport: { _id: u._id, eventType: u.eventType } }, meta: {} });
+      revalidateTag(TAG_HOMEPAGE_STATS, "max");
+      return NextResponse.json({ data: { updatedReport: updated }, meta: {} });
     }
 
     // --- Create: new report ---
@@ -152,8 +134,10 @@ export async function POST(req: NextRequest) {
     const path = meta?.path as string | undefined;
     const location = locationFromVercelHeaders(req.headers);
 
-    const eventData: Record<string, unknown> = {
-      _type: "keyReport",
+    const version = parseVersionFitInput(event, { ...b, ...(meta ?? {}) });
+    if (!version.ok) return Errors.validation(version.error);
+
+    const created = await createKeyReport({
       eventType: event,
       programSlug,
       key: keyData.hash,
@@ -161,21 +145,12 @@ export async function POST(req: NextRequest) {
       userAgent: ua,
       referrer: ref,
       ipHash,
-      createdAt: new Date().toISOString()
-    };
-    const version = parseVersionFitInput(event, { ...b, ...(meta ?? {}) });
-    if (!version.ok) return Errors.validation(version.error);
-    Object.assign(eventData, version.fields);
-
-    if (path) eventData.path = path;
-    if (location?.country) eventData.country = location.country;
-    if (location?.city) eventData.city = location.city;
-
-    if (!process.env.SANITY_API_TOKEN) {
-      console.error("[POST /api/v1/key-reports] SANITY_API_TOKEN not set - writes will fail");
-    }
-
-    const created = await client.create(eventData as { _type: string } & Record<string, unknown>);
+      path,
+      country: location?.country,
+      city: location?.city,
+      ...version.fields
+    });
+    revalidateTag(TAG_HOMEPAGE_STATS, "max");
     const sessionId = typeof meta?.sessionId === "string" ? meta.sessionId : undefined;
     try {
       await appendTrackingSession({
@@ -194,9 +169,7 @@ export async function POST(req: NextRequest) {
             programSlug,
             key: keyData.hash,
             label: keyData.identifier,
-            listedVersion: typeof eventData.listedVersion === "string" ? eventData.listedVersion : undefined,
-            triedVersionFit: typeof eventData.triedVersionFit === "string" ? eventData.triedVersionFit : undefined,
-            triedVersion: typeof eventData.triedVersion === "string" ? eventData.triedVersion : undefined
+            ...version.fields
           }
         ]
       });
@@ -209,7 +182,7 @@ export async function POST(req: NextRequest) {
       console.error("[POST /api/v1/key-reports] visitor contribution upsert failed (create)", e);
     }
 
-    return NextResponse.json({ data: { created: true, reportId: created._id }, meta: {} });
+    return NextResponse.json({ data: { created: true, reportId: created.id }, meta: {} });
   } catch (err) {
     console.error("[POST /api/v1/key-reports]", err);
     return Errors.internal();

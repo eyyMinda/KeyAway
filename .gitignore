@@ -48,3 +48,8 @@ next-env.d.ts
 
 # CRules CLI
 .crules-cli-config.json
+
+# sanity / analytics backups (hashed IPs, emails)
+/backups/
+*.tar.gz
+migration-report*.json

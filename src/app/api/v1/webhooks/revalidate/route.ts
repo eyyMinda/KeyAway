@@ -76,8 +76,6 @@ export async function POST(req: NextRequest) {
 
     if (t === "storeDetails") {
       revalidateTag(TAG_STORE_DETAILS, "max");
-    } else if (t === "keyReport" || t === "keyReportBundle") {
-      revalidateTag(TAG_HOMEPAGE_STATS, "max");
     } else if (t === "featuredProgramSettings") {
       revalidateTag(TAG_FEATURED_PROGRAM, "max");
     } else if (t === "changelogRelease") {

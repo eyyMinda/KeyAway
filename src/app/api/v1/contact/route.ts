@@ -3,8 +3,7 @@ import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { getClientIp, hashIp } from "@/src/lib/api/requestGeo";
-import { isVisitorSpammerByHash } from "@/src/lib/visitors/isVisitorSpammerByHash";
-import { touchVisitorActivity } from "@/src/lib/visitors/upsertVisitorContribution";
+import { isVisitorSpammerByHash, touchVisitorActivity } from "@/src/lib/visitors/visitorStore";
 import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 
 const MAX_TITLE = 200;

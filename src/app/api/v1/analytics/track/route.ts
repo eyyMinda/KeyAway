@@ -1,6 +1,5 @@
-/** @fileoverview Public POST tracking: appends a visit session, or creates `keyReport` plus a session row. */
+/** @fileoverview Public POST tracking: appends a visit session, or creates a key report plus a session row. */
 import { NextRequest, NextResponse } from "next/server";
-import { client } from "@/src/sanity/lib/client";
 import { TrackRequestBody } from "@/src/types";
 import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
@@ -11,9 +10,10 @@ import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsR
 import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/requestGeo";
 import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 import { isSessionEntry } from "@/src/lib/analytics/sessionConstants";
-import { upsertVisitorOnPageView } from "@/src/lib/visitors/upsertVisitorOnPageView";
-import { upsertVisitorContribution } from "@/src/lib/visitors/upsertVisitorContribution";
-import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
+import { fetchVisitorByHash, upsertVisitorContribution, upsertVisitorOnPageView } from "@/src/lib/visitors/visitorStore";
+import { createKeyReport, type NewKeyReport } from "@/src/lib/analytics/keyReportStore";
+import { revalidateTag } from "next/cache";
+import { TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
 import { isProgramSlugPublishedCached } from "@/src/lib/sanity/getCachedPublishedProgramSlugs";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { parseVersionFitInput } from "@/src/lib/program/keyReportVersionFit";
@@ -148,18 +148,7 @@ export async function POST(req: NextRequest) {
     }
 
     const ipHash = ipHashEarly;
-    const resolvedVisitor = ipHash ? await fetchVisitorByHash(ipHash) : null;
-    const visitor =
-      resolvedVisitor?.source === "live" && resolvedVisitor._id
-        ? {
-            _id: resolvedVisitor._id,
-            isSpammer: resolvedVisitor.isSpammer,
-            country: resolvedVisitor.country,
-            city: resolvedVisitor.city
-          }
-        : resolvedVisitor
-          ? { isSpammer: resolvedVisitor.isSpammer, country: resolvedVisitor.country, city: resolvedVisitor.city }
-          : null;
+    const visitor = ipHash ? await fetchVisitorByHash(ipHash) : null;
 
     const location = locationFromVercelHeaders(req.headers) ??
       (visitor?.country || visitor?.city ? { country: visitor.country, city: visitor.city } : undefined);
@@ -169,7 +158,6 @@ export async function POST(req: NextRequest) {
     }
 
     const eventData: Record<string, unknown> = {
-      _type: "keyReport",
       referrer: ref,
       userAgent: ua,
       ipHash,
@@ -225,7 +213,8 @@ export async function POST(req: NextRequest) {
     const sessionEntry = typeof body.meta?.sessionEntry === "string" ? body.meta.sessionEntry : undefined;
 
     if (isReportEvent) {
-      await client.create(eventData as { _type: string } & Record<string, unknown>);
+      await createKeyReport({ ...eventData, eventType: body.event } as NewKeyReport);
+      revalidateTag(TAG_HOMEPAGE_STATS, "max");
     }
 
     try {

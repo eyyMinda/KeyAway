@@ -7,10 +7,9 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { client } from "@/src/sanity/lib/client";
 import { adminProgramsWithCommentsQuery } from "@/src/lib/sanity/queries";
+import { fetchVisitorsByHashes } from "@/src/lib/visitors/visitorStore";
 import type { AdminCommentVisitor } from "@/src/types/admin/programComments";
 import type { Program } from "@/src/types/program";
-
-const VISITOR_FIELDS = `visitorHash, isSpammer, visitTier, visitCount, reportCount, suggestionCount, commentCount, contributionScore, country, city, lastActivityAt`;
 
 /** GET /api/v1/admin/comments — flattened comment rows */
 export async function GET(req: NextRequest) {
@@ -32,20 +31,9 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    const visitorRows =
-      hashes.size > 0
-        ? await client.fetch<
-            Array<{ visitorHash: string } & AdminCommentVisitor>
-          >(`*[_type == "visitor" && visitorHash in $hashes]{ ${VISITOR_FIELDS} }`, {
-            hashes: [...hashes]
-          })
-        : [];
-
     const visitorByHash: Record<string, AdminCommentVisitor> = {};
-    for (const v of visitorRows) {
-      if (!v.visitorHash) continue;
-      const { visitorHash: _h, ...meta } = v;
-      visitorByHash[v.visitorHash] = meta;
+    for (const [hash, { visitorHash: _h, ...meta }] of await fetchVisitorsByHashes([...hashes])) {
+      visitorByHash[hash] = meta;
     }
 
     const rows = flattenProgramCommentsForAdmin(programs, visitorByHash);

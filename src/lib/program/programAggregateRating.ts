@@ -1,6 +1,5 @@
 /** @fileoverview Community aggregateRating derived from all key reports (every row, every status) for a program. */
-import { client } from "@/src/sanity/lib/client";
-import { programKeyReportCountsQuery } from "@/src/lib/sanity/queries";
+import { getProgramKeyReportCounts } from "@/src/lib/analytics/keyReportStore";
 
 /** Below this, ratings are too thin to publish as rich-result signals. */
 export const MIN_REPORTS_FOR_RATING = 3;
@@ -19,10 +18,7 @@ export interface ProgramRating {
 
 /** Returns null when the program has fewer than `MIN_REPORTS_FOR_RATING` reports. */
 export async function getProgramAggregateRating(slug: string): Promise<ProgramRating | null> {
-  const counts = await client.fetch<{ working?: number; expired?: number; limitReached?: number }>(
-    programKeyReportCountsQuery,
-    { slug }
-  );
+  const counts = await getProgramKeyReportCounts(slug);
 
   const working = Math.max(0, Math.trunc(counts?.working ?? 0));
   const expired = Math.max(0, Math.trunc(counts?.expired ?? 0));

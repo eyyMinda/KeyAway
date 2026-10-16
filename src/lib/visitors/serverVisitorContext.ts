@@ -3,7 +3,7 @@ import { getClientIpFromForwardedHeaders, hashIp } from "@/src/lib/api/requestGe
 import { buildVisitorHintData } from "@/src/lib/visitors/buildVisitorHintData";
 import type { VisitTier } from "@/src/lib/visitors/visitTier";
 import type { PublicVisitorContext } from "@/src/lib/visitors/publicVisitorContext";
-import { fetchVisitorByHash } from "@/src/lib/visitors/visitorLookup";
+import { fetchVisitorByHash } from "@/src/lib/visitors/visitorStore";
 
 export async function getVisitorContextForPublicPage(headersList: Headers): Promise<PublicVisitorContext> {
   const ip = getClientIpFromForwardedHeaders(headersList);

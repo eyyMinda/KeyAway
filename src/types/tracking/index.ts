@@ -105,10 +105,7 @@ export interface DuplicateCheckResponse {
   ok: boolean;
   isDuplicate: boolean;
   existingReport?: {
-    /** Present for live reports. Bundled (archived) reports use `bundleId` + `rowKey` instead. */
-    _id?: string;
-    bundleId?: string;
-    rowKey?: string;
+    _id: string;
     eventType: KeyReportEvent;
     programSlug: string;
     key: string;
@@ -119,10 +116,8 @@ export interface DuplicateCheckResponse {
 }
 
 export interface RenewReportRequest {
-  /** Live report path. Omit and pass `bundleId` + `rowKey` to renew an archived (bundled) report. */
-  reportId?: string;
-  bundleId?: string;
-  rowKey?: string;
+  /** From the duplicate check (`existingReport._id`). */
+  reportId: string;
   newEventType: KeyReportEvent;
   programSlug: string;
   key: string | Record<string, unknown>;

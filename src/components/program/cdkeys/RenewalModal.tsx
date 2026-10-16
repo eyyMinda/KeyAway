@@ -29,9 +29,7 @@ interface RenewalModalProps {
   /** Human-readable row label for the modal. */
   activationLabel: string;
   existingReport: {
-    _id?: string;
-    bundleId?: string;
-    rowKey?: string;
+    _id: string;
     eventType: KeyReportEvent;
     programSlug: string;
     key: string;
@@ -122,9 +120,7 @@ export default function RenewalModal({
 
     try {
       const request: RenewReportRequest = {
-        ...(existingReport._id
-          ? { reportId: existingReport._id }
-          : { bundleId: existingReport.bundleId, rowKey: existingReport.rowKey }),
+        reportId: existingReport._id,
         newEventType: EVENT_TYPE_MAP[status],
         programSlug: slug,
         key: { ...cdKey, programFlow },
