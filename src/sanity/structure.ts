@@ -18,14 +18,6 @@ export const structure: StructureResolver = S =>
   S.list()
     .title("Content")
     .items([
-      // —— Top (pinned) ——
-      S.listItem()
-        .title("Visitors")
-        .id("visitor-desk")
-        .child(S.documentTypeList("visitor").title("Visitors")),
-
-      S.divider(),
-
       // —— Content groups ——
       docGroup(S, "Programs", [
         "program",
@@ -36,7 +28,7 @@ export const structure: StructureResolver = S =>
 
       docGroup(S, "Store", ["storeDetails"]),
 
-      docGroup(S, "Community", ["contactMessage", "keySuggestion", "keyReport"]),
+      docGroup(S, "Community", ["contactMessage", "keySuggestion"]),
 
       // Private: settings and finds use dotted ids, so the public dataset API never returns them.
       S.listItem()
@@ -67,8 +59,6 @@ export const structure: StructureResolver = S =>
               S.documentTypeListItem("giveawayFind").id("giveawayFind")
             ])
         ),
-
-      docGroup(S, "Analytics", ["trackingSession", "trackingSessionBundle", "visitorBundle"]),
 
       docGroup(S, "System", ["siteNotificationFeed", "siteNotificationBundle", "cronRun"]),
 

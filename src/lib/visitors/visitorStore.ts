@@ -1,7 +1,6 @@
 /** @fileoverview `analytics.visitors`: one row per hashed IP with visit tier, contribution counters and spam flag. */
 import { db } from "@/src/lib/db/postgres";
 import { MINUTE_MS } from "@/src/lib/time";
-import { ensureVisitorSeeded } from "@/src/lib/visitors/sanityVisitorSeed";
 
 export type Visitor = {
   visitorHash: string;
@@ -36,7 +35,6 @@ function toVisitor(row: Record<string, unknown>): Visitor {
 
 export async function fetchVisitorByHash(visitorHash: string): Promise<Visitor | null> {
   if (!visitorHash) return null;
-  await ensureVisitorSeeded(visitorHash);
   const sql = db();
   const [row] = await sql`select ${sql.unsafe(VISITOR_COLUMNS)} from analytics.visitors where visitor_hash = ${visitorHash}`;
   return row ? toVisitor(row) : null;
@@ -64,7 +62,6 @@ export async function upsertVisitorOnPageView(
   location?: { country?: string; city?: string }
 ): Promise<void> {
   if (!visitorHash) return;
-  await ensureVisitorSeeded(visitorHash);
   const country = location?.country ?? null;
   const city = location?.city ?? null;
   await db()`
@@ -88,7 +85,6 @@ export async function upsertVisitorContribution(
   kind: VisitorContributionKind
 ): Promise<void> {
   if (!visitorHash) return;
-  await ensureVisitorSeeded(visitorHash);
   const report = kind === "report" ? 1 : 0;
   const suggestion = kind === "suggestion" ? 1 : 0;
   const comment = kind === "comment" ? 1 : 0;
@@ -111,7 +107,6 @@ export async function upsertVisitorContribution(
 /** Ensures a visitor row exists and bumps lastActivityAt (no contribution increment). */
 export async function touchVisitorActivity(visitorHash: string | undefined): Promise<void> {
   if (!visitorHash) return;
-  await ensureVisitorSeeded(visitorHash);
   await db()`
     insert into analytics.visitors as v (visitor_hash, visit_count, last_activity_at, visit_tier)
     values (${visitorHash}, 0, now(), 'new')
@@ -121,7 +116,6 @@ export async function touchVisitorActivity(visitorHash: string | undefined): Pro
 
 /** Admin flag. Returns false when un-flagging a hash that has no visitor row. */
 export async function setVisitorSpammer(visitorHash: string, isSpammer: boolean): Promise<boolean> {
-  await ensureVisitorSeeded(visitorHash);
   const sql = db();
   if (!isSpammer) {
     const rows = await sql`

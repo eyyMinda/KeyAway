@@ -7,15 +7,9 @@ const CACHE_SECONDS = 600;
 
 /** Document types that exist in this dataset. One count() per type, one HTTP request. */
 const DOC_TYPES = [
-  "visitor",
-  "keyReport",
-  "keyReportBundle",
   "cronRun",
   "sanity.imageAsset",
-  "trackingSessionBundle",
-  "trackingSession",
   "changelogRelease",
-  "visitorBundle",
   "program",
   "contactMessage",
   "keySuggestion",
@@ -27,7 +21,6 @@ const DOC_TYPES = [
   "siteNotificationFeed",
   "featuredProgramSettings",
   "storeDetails",
-  "analyticsMigration",
   "footer",
   "header",
   "system.group",

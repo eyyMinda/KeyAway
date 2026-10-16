@@ -10,7 +10,7 @@
     "backfill:vendors": "node --env-file=.env.local scripts/backfillVendors.mjs",
     "backfill:changelog": "node --env-file=.env.local scripts/backfillChangelogToSanity.mjs",
     "sync:changelog-pr": "node --env-file=.env.local scripts/syncChangelogPrToSanity.mjs",
-    "migrate:analytics": "node --env-file=.env.local scripts/migrateAnalyticsToSupabase.mjs"
+    "cleanup:sanity-analytics": "node --env-file=.env.local scripts/deleteSanityAnalytics.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^6.2.0",

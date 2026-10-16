@@ -1,11 +1,5 @@
 import { type SchemaTypeDefinition } from "sanity";
 
-import { bundledTrackingSession, trackingSession, trackingSessionBundle, trackingSessionEvent } from "./analytics/trackingSession";
-import { bundledVisitor } from "./analytics/bundledVisitor";
-import { visitorBundle } from "./analytics/visitorBundle";
-import { keyReport } from "./analytics/keyReport";
-import { bundledKeyReport, keyReportBundle } from "./analytics/keyReportBundle";
-import { visitor } from "./analytics/visitor";
 
 import { cronRun } from "./system/cronRun";
 import { changelogRelease } from "./system/changelogRelease";
@@ -36,15 +30,6 @@ import { giveawayComparisonRow } from "./vendor/giveawayComparisonRow";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
-    trackingSessionEvent,
-    trackingSession,
-    bundledTrackingSession,
-    trackingSessionBundle,
-    bundledVisitor,
-    visitorBundle,
-    keyReport,
-    bundledKeyReport,
-    keyReportBundle,
     cronRun,
     changelogRelease,
     siteNotificationFeed,
@@ -71,7 +56,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     featuredProgramSettings,
     freeVsProRow,
     giveawayComparisonRow,
-    vendor,
-    visitor
+    vendor
   ]
 };

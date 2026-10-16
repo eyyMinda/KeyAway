@@ -8,7 +8,7 @@ visitors, and key reports. Editorial content (programs, vendors, store details, 
 | `analytics.sessions`, `analytics.events` | `trackingSession`, `trackingSessionBundle` |
 | `analytics.visitors` (+ `visitor_snapshots` for older bundled copies) | `visitor`, `visitorBundle` |
 | `analytics.key_reports` | `keyReport`, `keyReportBundle` |
-| `analytics.legacy_documents` | `analyticsMigration` |
+| `analytics.legacy_documents` | `analyticsMigration` (kept verbatim) |
 
 The app connects with [`postgres`](https://github.com/porsager/postgres) (`src/lib/db/postgres.ts`) through the
 Supavisor **transaction pooler**. The schema is not exposed to the Data API, and RLS without policies blocks the
@@ -22,37 +22,12 @@ Supavisor **transaction pooler**. The schema is not exposed to the Data API, and
    Add it as `SUPABASE_DB_URL` to `.env.local` and to Vercel (Production + Preview).
 3. The Supabase region should be close to the Vercel function region (Vercel → Settings → Functions).
 
-## Cutover from Sanity
+## History
 
-The import reads an extracted `sanity dataset export` file offline, so it spends no Sanity API quota. It is
-idempotent, prints a report, writes `migration-report-*.json`, and checks that every exported record exists in
-Postgres (exit code 1 otherwise).
-
-1. **Pre-import history** from an existing export (sessions and reports only, so live visitor state is not frozen early):
-   ```bash
-   tar -xzf backups/sanity-production-<date>.tar.gz -C backups/
-   npm run migrate:analytics -- --file backups/<export-dir>/data.ndjson --types sessions,keyReports,legacy
-   ```
-2. **Deploy** this branch with `SUPABASE_DB_URL` set. Analytics writes now go to Postgres. Until the final import,
-   a visitor seen for the first time is copied from Sanity (`src/lib/visitors/sanityVisitorSeed.ts`), so tiers,
-   counters and spam flags carry over.
-3. **Wait ~15 minutes** for old instances to finish their last Sanity writes, then take the final export:
-   ```bash
-   npx sanity dataset export production backups/sanity-analytics-final.tar.gz --no-assets \
-     --types trackingSession,trackingSessionBundle,keyReport,keyReportBundle,visitor,visitorBundle,analyticsMigration
-   tar -xzf backups/sanity-analytics-final.tar.gz -C backups/
-   npm run migrate:analytics -- --file backups/<final-export-dir>/data.ndjson
-   ```
-   Sessions that continued in Postgres are merged, and rows changed in Postgres after the cutover are never overwritten.
-4. When the report says `OK`, set `ANALYTICS_SANITY_SEEDING=off` on Vercel and redeploy.
-5. Keep both export tarballs in two places. After a quiet period, delete the analytics documents from Sanity and
-   remove their schemas, Studio structure entries and `sanityVisitorSeed.ts`.
-
-### Numbers that change on purpose
-
-The old bundling cron sometimes copied the same rows into several bundles. The import keeps one copy of each, and
-the report lists every copy it skipped (`skipped.duplicateSessionCopies`, `skipped.duplicateKeyReportCopies`).
-Totals that counted those copies (for example homepage "total reports") drop to the real numbers.
+Until October 2026 this data lived in Sanity. It was imported from a `sanity dataset export` on 2026-10-16
+(identical copies left by the old bundling cron were skipped, so totals dropped to the real numbers). The import
+script lives in git history (`scripts/migrateAnalyticsToSupabase.mjs`); the export tarballs are the original copy.
+`origin` / `sanity_ref` on imported rows point back to the Sanity document or bundle row.
 
 ## Storage
 
