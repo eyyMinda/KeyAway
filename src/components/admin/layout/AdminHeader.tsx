@@ -36,10 +36,10 @@ export default function AdminHeader() {
 
   type CountKey = "suggestions" | "messages" | "giveaways";
   const navLinks: Array<{ href: string; label: string; icon: typeof FaKey; countKey?: CountKey }> = [
-    { href: "/admin/analytics", label: "Analytics", icon: HiChartBar },
     { href: "/admin/giveaway-finds", label: "Giveaway Finds", icon: FaGift, countKey: "giveaways" },
-    { href: "/admin/programs", label: "Programs", icon: HiViewGrid },
+    { href: "/admin/analytics", label: "Analytics", icon: HiChartBar },
     { href: "/admin/sessions", label: "Sessions", icon: MdEventNote },
+    { href: "/admin/programs", label: "Programs", icon: HiViewGrid },
     { href: "/admin/key-reports", label: "Key Reports", icon: MdRateReview },
     { href: "/admin/comments", label: "Comments", icon: FaCommentDots },
     { href: "/admin/key-suggestions", label: "Key Suggestions", icon: FaKey, countKey: "suggestions" },
