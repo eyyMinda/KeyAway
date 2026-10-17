@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+/*
+ * `dark:` is the admin dark mode only: it applies under the `admin-dark` class that admin routes set on <html>
+ * (`src/lib/admin/adminTheme.ts`). The public site is always dark-styled and never sets that class.
+ */
+@custom-variant dark (&:where(.admin-dark, .admin-dark *));
+
+/* Native select popups follow `color-scheme` and option colors, not Tailwind classes on the <select>. */
+html.admin-light {
+  color-scheme: light;
+}
+html.admin-dark {
+  color-scheme: dark;
+}
+html.admin-light select option {
+  background-color: #ffffff;
+  color: #111827;
+}
+html.admin-dark select option {
+  background-color: #111827;
+  color: #f3f4f6;
+}
+
 /* Sticky header (~max-h-20 + padding); used by `scrollIntoView` + in-page hash links via scroll-padding. */
 @layer base {
   html {
