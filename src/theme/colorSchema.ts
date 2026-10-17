@@ -9,18 +9,6 @@ import tailwindPalette from "../../tailwind-palette.json";
 export const palette = tailwindPalette.palette;
 export const analyticsAccents = tailwindPalette.analyticsAccents;
 
-/** Extra colors for multi-series charts (doughnut fallbacks). */
-export const chartSeriesFallback = [
-  analyticsAccents.download,
-  analyticsAccents.copy,
-  analyticsAccents.social,
-  analyticsAccents.pageview,
-  palette.error[500],
-  "#06B6D4",
-  "#84CC16",
-  "#F97316"
-] as const;
-
 /** Per tracking event: chart hex + dot (Tailwind bg-*). */
 export const analyticsEvent = {
   copy_cdkey: {
@@ -181,14 +169,6 @@ export const modalSectionStyles = {
 } as const;
 
 /** `AnalyticsCard` icon well by semantic color name. */
-export const analyticsCardIconMap = {
-  blue: adminChrome.statCardBlue,
-  green: adminChrome.statCardGreen,
-  purple: { bg: "bg-accent-500/50", text: "text-accent-700", border: "border-accent-200" },
-  orange: { bg: "bg-warning-500/50", text: "text-warning-700", border: "border-warning-200" },
-  red: { bg: "bg-error-500/50", text: "text-error-700", border: "border-error-200" }
-} as const;
-
 export const devConsoleBadge = {
   success: `background-color: ${palette.success[500]}; color: white; font-weight: bold; padding: 6px; border-radius: 4px;`,
   error: `background-color: ${palette.error[500]}; color: white; font-weight: bold; padding: 6px; border-radius: 4px;`,
