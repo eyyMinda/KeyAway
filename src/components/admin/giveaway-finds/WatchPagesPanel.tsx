@@ -34,7 +34,7 @@ export default function WatchPagesPanel({ pages, removingKey, onRemove }: WatchP
 
   return (
     <div className="mb-6 bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-      <div className="p-4 sm:p-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="p-4 sm:px-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">{t.watch.title}</h3>
           <p className={`text-sm mt-1 ${failing.length ? "text-red-600" : "text-gray-500"}`}>

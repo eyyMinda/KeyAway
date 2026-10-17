@@ -43,7 +43,7 @@ export default function EventsTable({
 
   return (
     <div className="bg-white rounded-xl shadow-soft border border-gray-200">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 sm:px-6 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900">Recent Events</h3>
         <p className="text-sm text-gray-500 mt-1">Showing {events.length} events</p>
       </div>

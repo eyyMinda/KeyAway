@@ -89,7 +89,7 @@ export default function KeySuggestionsTable({
   return (
     <>
       <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 sm:px-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">CD Key Suggestions</h3>
           <p className="text-sm text-gray-500 mt-1">Total: {suggestions.length}</p>
         </div>

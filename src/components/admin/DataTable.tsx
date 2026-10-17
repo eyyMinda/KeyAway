@@ -45,9 +45,7 @@ export default function DataTable({
   const q = query.trim().toLowerCase();
   const filtered = useMemo(() => {
     if (!q) return sorted;
-    return sorted.filter(item =>
-      [item.label, item.key, item.referrerParam].some(v => v?.toLowerCase().includes(q))
-    );
+    return sorted.filter(item => [item.label, item.key, item.referrerParam].some(v => v?.toLowerCase().includes(q)));
   }, [sorted, q]);
 
   // While searching, show every match. Otherwise page with Show more.
@@ -57,7 +55,7 @@ export default function DataTable({
 
   return (
     <div className={`bg-white rounded-xl shadow-soft border border-gray-200 ${className}`}>
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 sm:px-6 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <p className="text-sm text-gray-500 mt-1">
           {data.length} total items • {total.toLocaleString()} total {countNoun}
@@ -84,7 +82,7 @@ export default function DataTable({
             {displayed.map((item, index) => {
               const percentage = showPercentage && total > 0 ? (item.value / total) * 100 : 0;
 
-              return (
+              return Number(item.value) > 0 ? (
                 <div key={item.key} className="flex items-center justify-between">
                   <div className="flex items-center flex-1 min-w-0">
                     <span className="text-sm font-medium text-gray-500 w-6">#{index + 1}</span>
@@ -117,7 +115,7 @@ export default function DataTable({
                     </span>
                   </div>
                 </div>
-              );
+              ) : null;
             })}
           </div>
         )}

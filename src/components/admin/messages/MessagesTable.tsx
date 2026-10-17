@@ -85,7 +85,7 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
   return (
     <>
       <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 sm:px-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">Contact Messages</h3>
           <p className="text-sm text-gray-500 mt-1">Total: {messages.length}</p>
         </div>
@@ -136,7 +136,8 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
                     <td className="px-6 py-4 align-top text-left">
                       {hasContact ? (
                         <div className="text-sm">
-                          <div className={`flex flex-wrap items-center gap-2 ${isArchived ? "text-gray-500" : "text-gray-900"}`}>
+                          <div
+                            className={`flex flex-wrap items-center gap-2 ${isArchived ? "text-gray-500" : "text-gray-900"}`}>
                             <span>{contactName}</span>
                             {needsReply ? (
                               <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
