@@ -35,12 +35,12 @@ const paginationToneStyles: Record<
     pageButtonActive: "border-[#8ec8ef] bg-[#3d5a73] text-white shadow-sm shadow-black/10"
   },
   dark: {
-    info: "text-gray-600",
-    pageSummary: "text-gray-700",
+    info: "text-gray-600 dark:text-gray-400",
+    pageSummary: "text-gray-700 dark:text-gray-300",
     navButton:
-      "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 disabled:hover:bg-white disabled:hover:border-gray-300",
-    pageButton: "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-400 hover:text-gray-900",
-    pageButtonActive: "border-primary-500 bg-primary-50 text-primary-700 shadow-sm"
+      "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-gray-400 dark:hover:border-gray-600 disabled:hover:bg-white dark:disabled:hover:bg-gray-900 disabled:hover:border-gray-300 dark:disabled:hover:border-gray-700",
+    pageButton: "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-900 dark:hover:text-gray-100",
+    pageButtonActive: "border-primary-500 bg-primary-50 dark:bg-sky-500/10 text-primary-700 dark:text-sky-300 shadow-sm"
   }
 };
 

@@ -32,10 +32,10 @@ const sortableHeadToneStyles: Record<
     static: "text-[#8f98a0]"
   },
   dark: {
-    inactive: "text-gray-600",
-    hover: "hover:text-gray-500",
-    active: "text-black",
-    static: "text-gray-600"
+    inactive: "text-gray-600 dark:text-gray-400",
+    hover: "hover:text-gray-500 dark:hover:text-gray-400",
+    active: "text-black dark:text-gray-100",
+    static: "text-gray-600 dark:text-gray-400"
   }
 };
 
