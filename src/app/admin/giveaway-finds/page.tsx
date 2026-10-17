@@ -36,7 +36,7 @@ async function loadFinds(): Promise<Payload | null> {
 }
 
 const selectClass =
-  "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900";
+  "w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-gray-100";
 
 export default function GiveawayFindsPage() {
   const [data, setData] = useState<Payload>({ finds: [], sources: [], programs: [], watchPages: [], lastRun: null });
@@ -182,7 +182,7 @@ export default function GiveawayFindsPage() {
     return (
       <ProtectedAdminLayout title={t.title} subtitle={t.subtitle}>
         <div className="flex items-center justify-center py-12">
-          <div className="text-gray-500">{t.loading}</div>
+          <div className="text-gray-500 dark:text-gray-400">{t.loading}</div>
         </div>
       </ProtectedAdminLayout>
     );
@@ -191,7 +191,7 @@ export default function GiveawayFindsPage() {
   return (
     <ProtectedAdminLayout title={t.title} subtitle={t.subtitle}>
       <div className="mb-6">
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 space-y-4">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder={t.searchPlaceholder} className="w-full" />
             <select
@@ -233,10 +233,10 @@ export default function GiveawayFindsPage() {
               className="px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 cursor-pointer disabled:opacity-60">
               {running ? t.running : t.runNow}
             </button>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {t.lastRun}:{" "}
               {data.lastRun ? (
-                <span className={data.lastRun.status === "ok" ? "text-gray-700" : "text-red-600"}>
+                <span className={data.lastRun.status === "ok" ? "text-gray-700 dark:text-gray-300" : "text-red-600 dark:text-red-400"}>
                   {formatRelativeTimeCompact(data.lastRun.ranAt)}
                   {data.lastRun.details ? ` (${data.lastRun.details})` : ""}
                 </span>
@@ -244,19 +244,19 @@ export default function GiveawayFindsPage() {
                 t.never
               )}
             </span>
-            <label className="flex items-center gap-2 text-sm text-gray-700 md:ml-auto" title={t.rememberNamesHint}>
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 md:ml-auto" title={t.rememberNamesHint}>
               <input
                 type="checkbox"
                 checked={rememberNames}
                 onChange={e => setRememberNames(e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 dark:border-gray-700"
               />
               {t.rememberNames}
             </label>
           </div>
 
           {message && (
-            <p className={`text-sm ${message.error ? "text-red-600" : "text-green-700"}`}>{message.text}</p>
+            <p className={`text-sm ${message.error ? "text-red-600 dark:text-red-400" : "text-green-700 dark:text-green-300"}`}>{message.text}</p>
           )}
         </div>
       </div>

@@ -59,7 +59,7 @@ export default function ProgramsPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading programs...</p>
+            <p className="text-gray-600 dark:text-gray-400">Loading programs...</p>
           </div>
         </div>
       </ProtectedAdminLayout>
@@ -79,7 +79,7 @@ export default function ProgramsPage() {
 
       {/* Search and Actions */}
       <div className="mb-6">
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex-1 max-w-md">
               <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search programs..." />
@@ -88,7 +88,7 @@ export default function ProgramsPage() {
               <select
                 value={filter}
                 onChange={e => setFilter(e.target.value as ProgramFilter)}
-                className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm cursor-pointer">
+                className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm cursor-pointer">
                 <option value="all">All programs</option>
                 <option value="no-working-keys">No working keys</option>
                 <option value="has-working-keys">Has working keys</option>
@@ -112,7 +112,7 @@ export default function ProgramsPage() {
         {filteredPrograms.map(program => (
           <div
             key={program._id ?? program.slug.current}
-            className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden flex flex-col">
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
             {/* Program Image */}
             <div className="h-48 bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
               {program.image ? (
@@ -123,16 +123,16 @@ export default function ProgramsPage() {
             </div>
 
             {/* Program Content */}
-            <div className="py-4 sm:py-5 lg:py-6 px-4 sm:px-5 flex flex-col grow bg-linear-to-b from-white to-gray-50/50">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{program.title}</h3>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{portableTextExcerpt(program.description, 200)}</p>
+            <div className="py-4 sm:py-5 lg:py-6 px-4 sm:px-5 flex flex-col grow bg-linear-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">{program.title}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{portableTextExcerpt(program.description, 200)}</p>
 
               {/* Program Stats */}
               <div className="flex items-center justify-between mb-4 mt-auto">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-medium">{program.cdKeys?.length || 0}</span> CD Keys
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-medium">{getWorkingKeysCount(program.cdKeys)}</span> Working
                 </div>
               </div>
@@ -150,7 +150,7 @@ export default function ProgramsPage() {
                     setSelectedProgram(program);
                     setEditModalOpen(true);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
+                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                   <FaWrench className="shrink-0" size={14} />
                   Edit
                 </button>
@@ -164,10 +164,10 @@ export default function ProgramsPage() {
       {filteredPrograms.length === 0 && (
         <div className="text-center py-12">
           <div className="text-4xl mb-4">🎮</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
             {searchTerm || filter !== "all" ? "No programs found" : "No programs available"}
           </h3>
-          <p className="text-gray-500 mb-4">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">
             {searchTerm || filter !== "all"
               ? "Try adjusting your search or filter."
               : "Get started by adding your first program."}
@@ -207,40 +207,40 @@ export default function ProgramsPage() {
 
       {/* Summary Stats */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
-            <div className="p-3 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-100 dark:bg-blue-500/15 rounded-lg">
               <span className="text-2xl">📊</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Programs</p>
-              <p className="text-2xl font-bold text-gray-900">{programs.length}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Programs</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{programs.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
-            <div className="p-3 bg-green-100 rounded-lg">
+            <div className="p-3 bg-green-100 dark:bg-green-500/15 rounded-lg">
               <span className="text-2xl">🔑</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total CD Keys</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total CD Keys</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {programs.reduce((total, program) => total + (program.cdKeys?.length || 0), 0)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
           <div className="flex items-center">
-            <div className="p-3 bg-purple-100 rounded-lg">
+            <div className="p-3 bg-purple-100 dark:bg-purple-500/15 rounded-lg">
               <span className="text-2xl">✅</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Working Keys</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Working Keys</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {programs.reduce((total, program) => total + getWorkingKeysCount(program.cdKeys), 0)}
               </p>
             </div>

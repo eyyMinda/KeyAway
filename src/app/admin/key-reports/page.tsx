@@ -285,7 +285,7 @@ function KeyReportsPageContent() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading key reports...</p>
+            <p className="text-gray-600 dark:text-gray-400">Loading key reports...</p>
           </div>
         </div>
       </ProtectedAdminLayout>
@@ -296,16 +296,16 @@ function KeyReportsPageContent() {
     <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
       <div className="space-y-6">
         {/* Filter */}
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-4">
           <div className="flex items-center space-x-4">
-            <label htmlFor="program-filter" className="text-sm font-medium text-gray-700">
+            <label htmlFor="program-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Filter by Program:
             </label>
             <select
               id="program-filter"
               value={selectedProgram}
               onChange={e => setSelectedProgram(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+              className="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100">
               <option key="all" value="all">
                 All Programs
               </option>
@@ -318,7 +318,7 @@ function KeyReportsPageContent() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
           <KeyReportsTable
             reports={filteredReports}
             pendingChanges={pendingChanges}
@@ -352,7 +352,7 @@ const KeyReportsFallback = () => (
     <div className="flex items-center justify-center h-64">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Loading key reports...</p>
+        <p className="text-gray-600 dark:text-gray-400">Loading key reports...</p>
       </div>
     </div>
   </ProtectedAdminLayout>

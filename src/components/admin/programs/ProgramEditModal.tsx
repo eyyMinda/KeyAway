@@ -251,19 +251,19 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         ref={modalRef}
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50">
-          <h2 className="text-2xl font-bold text-gray-900">{program ? "Edit program" : "Add program"}</h2>
+        className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{program ? "Edit program" : "Add program"}</h2>
           <ModalCloseButton
             onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded-lg"
+            className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
             iconClassName="h-5 w-5"
           />
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)] space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
             <input
               type="text"
               value={title}
@@ -272,12 +272,12 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
                 setTitle(v);
                 if (!program) setSlug(titleToSlug(v));
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
               disabled={saveLoading}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Slug *</label>
             <input
               type="text"
               value={slug}
@@ -287,47 +287,47 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
                 if (!error && normalized && normalized !== slug) setSlug(normalized);
               }}
               placeholder="URL-friendly, lowercase, hyphens"
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 ${
-                slugValidation.error ? "border-red-500" : "border-gray-300"
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100 ${
+                slugValidation.error ? "border-red-500" : "border-gray-300 dark:border-gray-700"
               }`}
               disabled={saveLoading}
             />
             {slugValidation.error && (
-              <p className="mt-1 text-sm text-red-600" role="alert">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
                 {slugValidation.error}
               </p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Program version
-              <span className="text-xs text-gray-500 ml-1">(latest official, e.g. 18.5)</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(latest official, e.g. 18.5)</span>
             </label>
             <input
               type="text"
               value={latestOfficialVersion}
               onChange={e => setLatestOfficialVersion(e.target.value)}
               placeholder="18.5"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
               disabled={saveLoading}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description *</label>
             <textarea
               value={description}
               onChange={e => setDescription(e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
               disabled={saveLoading}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Program flow *</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Program flow *</label>
             <select
               value={programFlow}
               onChange={e => setProgramFlow(e.target.value as ProgramFlow)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
               disabled={saveLoading}>
               {FLOW_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>
@@ -337,27 +337,27 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Featured copy
-              <span className="text-xs text-gray-500 ml-1">(homepage featured block)</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(homepage featured block)</span>
             </label>
             <textarea
               value={featuredCopy}
               onChange={e => setFeaturedCopy(e.target.value)}
               rows={4}
               placeholder="Optional copy when this program is featured on the homepage"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
               disabled={saveLoading}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Download link</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Download link</label>
             <input
               type="url"
               value={downloadLink}
               onChange={e => setDownloadLink(e.target.value)}
               placeholder="https://..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-gray-100"
               disabled={saveLoading}
             />
           </div>
@@ -383,7 +383,7 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
           />
 
           {saveError && (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-sm text-red-600 dark:text-red-400" role="alert">
               {saveError}
             </p>
           )}
@@ -398,18 +398,18 @@ export default function ProgramEditModal({ program, isOpen, onClose, onSaved, on
             <button
               onClick={onClose}
               disabled={saveLoading}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 cursor-pointer">
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 cursor-pointer">
               Close
             </button>
           </div>
 
           {program && (
-            <div className="border-t border-gray-200 pt-6 mt-6">
-              <p className="text-sm text-gray-600">
+            <div className="border-t border-gray-200 dark:border-gray-800 pt-6 mt-6">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 <button
                   type="button"
                   onClick={() => setDeleteExpanded(true)}
-                  className="text-gray-500 underline hover:text-gray-600 cursor-pointer align-baseline">
+                  className="text-gray-500 dark:text-gray-400 underline hover:text-gray-600 dark:hover:text-gray-400 cursor-pointer align-baseline">
                   Deleting this program
                 </button>{" "}
                 will remove it and all its CD keys. This cannot be undone.
