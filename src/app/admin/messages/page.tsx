@@ -4,16 +4,10 @@ import { useState, useEffect, useMemo } from "react";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import MessagesTable from "@/src/components/admin/messages/MessagesTable";
 import ReplyEmailTemplatePreview from "@/src/components/admin/messages/ReplyEmailTemplatePreview";
-import SearchInput from "@/src/components/ui/SearchInput";
-import {
-  filterMessagesByQuickFilter,
-  getMessageStats,
-  MESSAGE_QUICK_FILTERS,
-  type MessageQuickFilter
-} from "@/src/lib/admin/contactMessages";
+import { AdminFilterBar, AdminSearch, AdminSelect, usePagedList } from "@/src/components/admin/list/AdminListKit";
+import { filterMessagesByView, messageViewOptions, type MessageView } from "@/src/lib/admin/contactMessages";
 import { ContactMessage } from "@/src/types/contact";
 import { client } from "@/src/sanity/lib/client";
-import { SortDirection } from "@/src/components/ui/SortableTableHead";
 
 const MESSAGES_QUERY = `*[_type == "contactMessage"] | order(createdAt desc) {
   _id,
@@ -37,154 +31,97 @@ const MESSAGES_QUERY = `*[_type == "contactMessage"] | order(createdAt desc) {
   }
 }`;
 
+type SortKey = "newest" | "oldest" | "last_reply";
+
+async function loadMessages(): Promise<ContactMessage[] | null> {
+  try {
+    return await client.fetch<ContactMessage[]>(MESSAGES_QUERY);
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    return null;
+  }
+}
+
 export default function MessagesPage() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [quickFilter, setQuickFilter] = useState<MessageQuickFilter>("all");
-  const [sortColumn, setSortColumn] = useState<string>("status");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState<MessageView>("open");
+  const [sort, setSort] = useState<SortKey>("newest");
+
+  const fetchMessages = () =>
+    loadMessages().then(result => {
+      if (result) setMessages(result);
+      setLoading(false);
+    });
 
   useEffect(() => {
-    fetchMessages();
+    let cancelled = false;
+    loadMessages().then(result => {
+      if (cancelled) return;
+      if (result) setMessages(result);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const fetchMessages = async () => {
-    try {
-      const result = await client.fetch<ContactMessage[]>(MESSAGES_QUERY);
-      setMessages(result);
-    } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("desc");
-    }
-  };
-
-  const stats = useMemo(() => getMessageStats(messages), [messages]);
-
-  const filteredAndSortedMessages = useMemo(() => {
-    const search = searchTerm.toLowerCase();
-
-    const filtered = filterMessagesByQuickFilter(messages, quickFilter).filter(msg => {
-      if (!search) return true;
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const list = filterMessagesByView(messages, view).filter(msg => {
+      if (!q) return true;
       return (
-        msg.title.toLowerCase().includes(search) ||
-        msg.message.toLowerCase().includes(search) ||
-        msg.name?.toLowerCase().includes(search) ||
-        msg.email?.toLowerCase().includes(search) ||
-        msg.replies?.some(
-          reply =>
-            reply.body.toLowerCase().includes(search) ||
-            reply.sentBy.toLowerCase().includes(search) ||
-            reply.subject.toLowerCase().includes(search)
+        [msg.title, msg.message, msg.name, msg.email].some(v => v?.toLowerCase().includes(q)) ||
+        Boolean(
+          msg.replies?.some(r => [r.body, r.sentBy, r.subject].some(v => v?.toLowerCase().includes(q)))
         )
       );
     });
-
-    const statusOrder: Record<string, number> = { new: 0, read: 1, replied: 2, archived: 3 };
-    return [...filtered].sort((a, b) => {
-      let cmp = 0;
-      switch (sortColumn) {
-        case "title":
-          cmp = (a.title ?? "").localeCompare(b.title ?? "");
-          break;
-        case "status":
-          cmp = (statusOrder[a.status] ?? 0) - (statusOrder[b.status] ?? 0);
-          break;
-        case "createdAt":
-          cmp = new Date(a.createdAt ?? 0).getTime() - new Date(b.createdAt ?? 0).getTime();
-          break;
-        default:
-          return 0;
-      }
-      return sortDirection === "asc" ? cmp : -cmp;
+    const time = (iso?: string) => (iso ? new Date(iso).getTime() : 0);
+    return list.sort((a, b) => {
+      if (sort === "last_reply") return time(b.lastRepliedAt) - time(a.lastRepliedAt);
+      const diff = time(a.createdAt) - time(b.createdAt);
+      return sort === "oldest" ? diff : -diff;
     });
-  }, [messages, searchTerm, quickFilter, sortColumn, sortDirection]);
+  }, [messages, search, view, sort]);
 
-  if (loading) {
-    return (
-      <ProtectedAdminLayout title="Messages" subtitle="Manage contact messages">
-        <div className="flex items-center justify-center py-12">
-          <div className="text-gray-500">Loading messages...</div>
-        </div>
-      </ProtectedAdminLayout>
-    );
-  }
+  const paged = usePagedList(filtered, `${search}|${view}|${sort}`);
 
   return (
-    <ProtectedAdminLayout title="Messages" subtitle="Manage contact messages">
-      <div className="mb-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        {[
-          { label: "Total", value: stats.total, tone: "text-gray-900" },
-          { label: "New", value: stats.new, tone: "text-blue-700" },
-          { label: "Needs reply", value: stats.needsReply, tone: "text-amber-700" },
-          { label: "No email", value: stats.noEmail, tone: "text-red-700" },
-          { label: "Replied", value: stats.replied, tone: "text-green-700" },
-          { label: "Archived", value: stats.archived, tone: "text-purple-700" }
-        ].map(item => (
-          <div key={item.label} className="rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-soft">
-            <div className="text-xs font-medium uppercase tracking-wide text-gray-500">{item.label}</div>
-            <div className={`mt-1 text-2xl font-bold ${item.tone}`}>{item.value}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mb-6">
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 space-y-4">
-          <SearchInput
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search messages, emails, or reply history..."
-            className="w-full"
-          />
-
-          <div className="flex flex-wrap gap-2">
-            {MESSAGE_QUICK_FILTERS.map(filter => {
-              const count =
-                filter.id === "all"
-                  ? stats.total
-                  : filter.id === "needs_reply"
-                    ? stats.needsReply
-                    : filter.id === "no_email"
-                      ? stats.noEmail
-                      : filter.id === "replied"
-                        ? stats.replied
-                        : stats.archived;
-              const active = quickFilter === filter.id;
-
-              return (
-                <button
-                  key={filter.id}
-                  type="button"
-                  onClick={() => setQuickFilter(filter.id)}
-                  className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
-                    active
-                      ? "bg-primary-600 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}>
-                  {filter.label} ({count})
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+    <ProtectedAdminLayout title="Messages" subtitle="Contact form messages and your replies">
+      <AdminFilterBar>
+        <AdminSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Search title, message, sender or replies…"
+          className="sm:flex-1 sm:min-w-64"
+        />
+        <AdminSelect
+          label="View"
+          value={view}
+          onChange={v => setView(v as MessageView)}
+          options={messageViewOptions(messages)}
+        />
+        <AdminSelect
+          label="Sort"
+          value={sort}
+          onChange={v => setSort(v as SortKey)}
+          options={[
+            { value: "newest", label: "Newest first" },
+            { value: "oldest", label: "Oldest first" },
+            { value: "last_reply", label: "Recently replied" }
+          ]}
+        />
+      </AdminFilterBar>
 
       <MessagesTable
-        messages={filteredAndSortedMessages}
+        messages={paged.pageItems}
+        all={messages}
+        total={filtered.length}
+        loading={loading}
+        paging={paged}
         onUpdate={fetchMessages}
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
-        onSort={handleSort}
       />
 
       <ReplyEmailTemplatePreview />

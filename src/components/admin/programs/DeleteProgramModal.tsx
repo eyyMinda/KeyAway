@@ -23,12 +23,12 @@ export default function DeleteProgramModal({
 
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm rounded-2xl">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
-        <p className="text-sm text-gray-600">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           This will permanently remove the program and all its CD keys. Links and reports referencing it may break. This
           cannot be undone.
         </p>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           Type the program name to confirm: <strong>{programTitle}</strong>
         </p>
         <input
@@ -36,11 +36,11 @@ export default function DeleteProgramModal({
           value={confirmValue}
           onChange={e => onConfirmChange(e.target.value)}
           placeholder="Program name"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-900"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-red-500 text-gray-900 dark:text-gray-100"
           disabled={loading}
         />
         {error && (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-sm text-red-600 dark:text-red-400" role="alert">
             {error}
           </p>
         )}
@@ -55,7 +55,7 @@ export default function DeleteProgramModal({
             type="button"
             onClick={onCancel}
             disabled={loading}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer">
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
             Cancel
           </button>
         </div>

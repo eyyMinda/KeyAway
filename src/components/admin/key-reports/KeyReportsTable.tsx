@@ -104,15 +104,15 @@ export default function KeyReportsTable({
   if (reports.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="text-gray-500 text-lg">No key reports found</div>
-        <div className="text-gray-400 text-sm mt-2">Reports will appear here when users report key status changes</div>
+        <div className="text-gray-500 dark:text-gray-400 text-lg">No key reports found</div>
+        <div className="text-gray-400 dark:text-gray-500 text-sm mt-2">Reports will appear here when users report key status changes</div>
       </div>
     );
   }
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
         <TableHead
           tableHead={tableHead}
           sortColumn={sortColumn}
@@ -139,7 +139,7 @@ export default function KeyReportsTable({
         variant="simple"
         tone="dark"
         alwaysVisible={true}
-        className="p-4 border-t border-gray-200"
+        className="p-4 border-t border-gray-200 dark:border-gray-800"
       />
     </div>
   );

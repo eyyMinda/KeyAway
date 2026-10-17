@@ -144,24 +144,24 @@ export default function MessageDetailsModal({
     >
       <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-500 mb-1">Subject</label>
-            <p className="text-lg font-semibold text-gray-900">{message.title ?? "-"}</p>
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Subject</label>
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{message.title ?? "-"}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-500 mb-1">Message</label>
-            <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Message</label>
+            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
               {message.message ?? "-"}
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Name</label>
-              <p className="text-gray-900">{message.name?.trim() ? message.name : "-"}</p>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Name</label>
+              <p className="text-gray-900 dark:text-gray-100">{message.name?.trim() ? message.name : "-"}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Email</label>
               <div className="flex gap-2 items-center">
                 <input
                   type="email"
@@ -169,7 +169,7 @@ export default function MessageDetailsModal({
                   onChange={e => setEmailInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSaveEmail()}
                   placeholder="Add or edit email..."
-                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 text-sm"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-gray-100 text-sm"
                   disabled={updating || sending}
                 />
                 <button
@@ -181,20 +181,20 @@ export default function MessageDetailsModal({
                 </button>
               </div>
               {!message.email?.trim() && !emailInput.trim() ? (
-                <p className="mt-1 text-xs text-amber-600">Add an email address to send a reply.</p>
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">Add an email address to send a reply.</p>
               ) : null}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gray-200 space-y-3">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
             <div className="flex items-center justify-between gap-3">
-              <label htmlFor="admin-reply-text" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="admin-reply-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Your reply
               </label>
               {resendConfigured === false ? (
-                <span className="text-xs text-amber-600">Resend not configured — use mail app fallback</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400">Resend not configured — use mail app fallback</span>
               ) : resendConfigured ? (
-                <span className="text-xs text-green-600">HTML email via Resend</span>
+                <span className="text-xs text-green-600 dark:text-green-400">HTML email via Resend</span>
               ) : null}
             </div>
             <textarea
@@ -204,7 +204,7 @@ export default function MessageDetailsModal({
               rows={5}
               maxLength={MAX_REPLY_BODY_LENGTH}
               placeholder="Write your reply here. The original message and KeyAway footer are added automatically."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 text-sm resize-y min-h-[120px]"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-gray-100 text-sm resize-y min-h-[120px]"
               disabled={sending || updating}
             />
             <div className="flex flex-wrap items-center gap-2">
@@ -220,7 +220,7 @@ export default function MessageDetailsModal({
                   type="button"
                   onClick={handleOpenMailApp}
                   disabled={sending || updating}
-                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
                   Open in mail app
                 </button>
               ) : null}
@@ -228,47 +228,47 @@ export default function MessageDetailsModal({
           </div>
 
           {replies.length > 0 ? (
-            <div className="pt-4 border-t border-gray-200 space-y-3">
-              <h3 className="text-sm font-semibold text-gray-900">
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Reply history ({replies.length})
               </h3>
               <ul className="space-y-3">
                 {[...replies].reverse().map(reply => (
                   <li
                     key={reply._key ?? `${reply.sentAt}-${reply.sentBy}`}
-                    className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 mb-2">
+                    className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-4">
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400 mb-2">
                       <span>{reply.sentBy}</span>
                       <span>→ {reply.sentTo}</span>
                       <span>{reply.sentAt ? new Date(reply.sentAt).toLocaleString() : ""}</span>
                       {reply.resendId ? <span className="font-mono">#{reply.resendId.slice(0, 8)}</span> : null}
                     </div>
-                    <p className="text-sm font-medium text-gray-700 mb-1">{reply.subject}</p>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{reply.body}</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{reply.subject}</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{reply.body}</p>
                   </li>
                 ))}
               </ul>
             </div>
           ) : null}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Received</label>
-              <p className="text-gray-900">{message.createdAt ? new Date(message.createdAt).toLocaleString() : "-"}</p>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Received</label>
+              <p className="text-gray-900 dark:text-gray-100">{message.createdAt ? new Date(message.createdAt).toLocaleString() : "-"}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Last replied</label>
-              <p className="text-gray-900">
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Last replied</label>
+              <p className="text-gray-900 dark:text-gray-100">
                 {message.lastRepliedAt ? new Date(message.lastRepliedAt).toLocaleString() : "-"}
               </p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
               <select
                 value={message.status ?? "new"}
                 onChange={e => onUpdateMessage({ status: e.target.value as ContactMessage["status"] })}
                 disabled={updating || sending}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer text-gray-900 disabled:opacity-50">
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer text-gray-900 dark:text-gray-100 disabled:opacity-50">
                 <option value="new">New</option>
                 <option value="read">Read</option>
                 <option value="replied">Replied</option>

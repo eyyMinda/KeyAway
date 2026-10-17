@@ -44,15 +44,15 @@ function barClass(ratio: number) {
 
 /** Large inflow that is still stored. */
 function growthClass(n: number) {
-  if (n >= 500) return "text-red-600 font-semibold";
-  if (n >= 150) return "text-amber-700 font-medium";
-  return "text-gray-500";
+  if (n >= 500) return "text-red-600 dark:text-red-400 font-semibold";
+  if (n >= 150) return "text-amber-700 dark:text-amber-300 font-medium";
+  return "text-gray-500 dark:text-gray-400";
 }
 
 /** Stock that is mostly older than 7 days, so nothing is clearing it. */
 function stockClass(count: number, week: number) {
-  if (count >= 200 && count - week >= 200) return "text-amber-700 font-semibold";
-  return "text-gray-900 font-medium";
+  if (count >= 200 && count - week >= 200) return "text-amber-700 dark:text-amber-300 font-semibold";
+  return "text-gray-900 dark:text-gray-100 font-medium";
 }
 
 function Growth({ n }: { n: number }) {
@@ -83,15 +83,15 @@ export default function DatasetDocCounts() {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Sanity documents</h3>
-        <p className="text-red-600 text-sm">{error}</p>
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Sanity documents</h3>
+        <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
       </div>
     );
   }
 
   if (!data) {
-    return <div className="bg-gray-100 rounded-xl h-64 animate-pulse" />;
+    return <div className="bg-gray-100 dark:bg-gray-800 rounded-xl h-64 animate-pulse" />;
   }
 
   const ratio = data.limit > 0 ? data.total / data.limit : 0;
@@ -100,33 +100,33 @@ export default function DatasetDocCounts() {
   const remaining = data.counts.length - shownRows.length;
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
       <div className="flex items-baseline justify-between gap-4 mb-3">
-        <h3 className="text-lg font-semibold text-gray-900">Sanity documents</h3>
-        <p className="text-sm text-gray-500 tabular-nums">
-          <span className="text-gray-900 font-semibold">{data.total.toLocaleString()}</span>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sanity documents</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">
+          <span className="text-gray-900 dark:text-gray-100 font-semibold">{data.total.toLocaleString()}</span>
           {" / "}
           {data.limit.toLocaleString()}
           <span className="ml-2">{pct}%</span>
         </p>
       </div>
-      <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+      <div className="h-2 rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
         <div className={`h-full rounded-full ${barClass(ratio)}`} style={{ width: `${pct}%` }} />
       </div>
-      <p className="text-xs text-gray-500 mt-2">
-        <span className="tabular-nums text-gray-700">+{(data.day ?? 0).toLocaleString()}</span> in 24h
+      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        <span className="tabular-nums text-gray-700 dark:text-gray-300">+{(data.day ?? 0).toLocaleString()}</span> in 24h
         <span className="mx-1.5 text-gray-300">·</span>
-        <span className="tabular-nums text-gray-700">+{(data.week ?? 0).toLocaleString()}</span> in 7d still stored
+        <span className="tabular-nums text-gray-700 dark:text-gray-300">+{(data.week ?? 0).toLocaleString()}</span> in 7d still stored
         <span className="mx-1.5 text-gray-300">·</span>
         cached 10 min
       </p>
-      <p className="text-xs text-gray-400 mt-1 mb-4">
+      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 mb-4">
         Amber totals are mostly older than 7 days. Red growth is still landing as new documents.
       </p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-[11px] uppercase tracking-wider text-gray-400">
+            <tr className="text-[11px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
               <th className="text-left font-medium pb-2 pr-4">Type</th>
               <th className="text-right font-medium pb-2 px-2 w-24">Docs</th>
               <th className="text-right font-medium pb-2 px-2 w-20">24h</th>
@@ -136,18 +136,18 @@ export default function DatasetDocCounts() {
           <tbody>
             {shownRows.map(row => {
               const meta = LABELS[row.type] ?? { label: row.type };
-              const label = <span className="font-medium text-gray-900">{meta.label}</span>;
+              const label = <span className="font-medium text-gray-900 dark:text-gray-100">{meta.label}</span>;
               return (
-                <tr key={row.type} className="border-t border-gray-100">
+                <tr key={row.type} className="border-t border-gray-100 dark:border-gray-800">
                   <td className="py-2 pr-4 min-w-0">
                     {meta.href ? (
-                      <Link href={meta.href} className="hover:text-primary-700">
+                      <Link href={meta.href} className="hover:text-primary-700 dark:hover:text-sky-300">
                         {label}
                       </Link>
                     ) : (
                       label
                     )}
-                    <span className="ml-2 text-xs text-gray-400">{row.type}</span>
+                    <span className="ml-2 text-xs text-gray-400 dark:text-gray-500">{row.type}</span>
                   </td>
                   <td className={`py-2 px-2 text-right tabular-nums ${stockClass(row.count, row.week ?? 0)}`}>
                     {row.count.toLocaleString()}
@@ -168,7 +168,7 @@ export default function DatasetDocCounts() {
         <button
           type="button"
           onClick={() => setVisible(v => v + PAGE_STEP)}
-          className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+          className="mt-4 w-full rounded-lg border border-gray-200 dark:border-gray-800 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
           Show more ({remaining})
         </button>
       ) : null}

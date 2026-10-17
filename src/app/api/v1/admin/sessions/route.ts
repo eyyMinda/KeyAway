@@ -4,7 +4,7 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { listSessionsPage } from "@/src/lib/analytics/sessionAdmin";
 
-/** GET /api/v1/admin/sessions?since=&until=&page=&entry= */
+/** GET /api/v1/admin/sessions?since=&until=&page=&entry=&q= */
 export async function GET(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
       since: sinceDate.toISOString(),
       until: untilDate.toISOString(),
       entry,
+      q: req.nextUrl.searchParams.get("q") ?? undefined,
       page,
       limit
     });

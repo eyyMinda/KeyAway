@@ -15,9 +15,9 @@ interface CronRun {
 
 function SourceBadge({ source }: { source: string }) {
   const styles: Record<string, string> = {
-    vercel_cron: "bg-blue-100 text-blue-800",
-    bearer: "bg-blue-100 text-blue-800",
-    manual: "bg-gray-100 text-gray-700"
+    vercel_cron: "bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300",
+    bearer: "bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300",
+    manual: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
   };
   const labels: Record<string, string> = {
     vercel_cron: "Vercel",
@@ -25,7 +25,7 @@ function SourceBadge({ source }: { source: string }) {
     manual: "Manual"
   };
   return (
-    <span className={`text-xs px-2 py-0.5 rounded ${styles[source] ?? "bg-gray-100"}`}>{labels[source] ?? source}</span>
+    <span className={`text-xs px-2 py-0.5 rounded ${styles[source] ?? "bg-gray-100 dark:bg-gray-800"}`}>{labels[source] ?? source}</span>
   );
 }
 
@@ -63,18 +63,18 @@ export default function CronStatusCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">🕐 Cron Jobs</h3>
-        <p className="text-gray-500 text-sm">Loading...</p>
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">🕐 Cron Jobs</h3>
+        <p className="text-gray-500 dark:text-gray-400 text-sm">Loading...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">🕐 Cron Jobs</h3>
-        <p className="text-red-600 text-sm">{error}</p>
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">🕐 Cron Jobs</h3>
+        <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
       </div>
     );
   }
@@ -104,24 +104,24 @@ export default function CronStatusCard() {
     const vercelRun = vercelByJob[job];
     const lastRun = lastByJob[job];
     return (
-      <div className="flex items-center justify-between py-2 border-b border-gray-100">
+      <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
         <div>
-          <span className="font-medium text-gray-900">{label}</span>
-          <p className="text-xs text-gray-500">{schedule}</p>
+          <span className="font-medium text-gray-900 dark:text-gray-100">{label}</span>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{schedule}</p>
         </div>
         {vercelRun ? (
           <div className="text-right">
-            <span className={`text-sm font-medium ${vercelRun.status === "ok" ? "text-green-600" : "text-red-600"}`}>
+            <span className={`text-sm font-medium ${vercelRun.status === "ok" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
               {vercelRun.status === "ok" ? "✓" : "✗"}
             </span>
-            <p className="text-xs text-gray-500">{formatRelativeTimeCompact(vercelRun.ranAt)}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{formatRelativeTimeCompact(vercelRun.ranAt)}</p>
           </div>
         ) : lastRun ? (
           <div className="text-right">
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               Last: <SourceBadge source={lastRun.source} /> {formatRelativeTimeCompact(lastRun.ranAt)}
             </p>
-            <p className="text-xs text-amber-600 flex items-center justify-end gap-1.5">
+            <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center justify-end gap-1.5">
               <FiInfo
                 className="w-4 h-4 shrink-0"
                 title="Automatic Vercel cron runs on schedule. This job was triggered manually via POST."
@@ -130,16 +130,16 @@ export default function CronStatusCard() {
             </p>
           </div>
         ) : (
-          <span className="text-amber-600 text-sm">No runs yet</span>
+          <span className="text-amber-600 dark:text-amber-400 text-sm">No runs yet</span>
         )}
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 w-full">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">🕐 Cron Jobs</h3>
-      <p className="text-gray-500 text-sm mb-4">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6 w-full">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">🕐 Cron Jobs</h3>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">
         Automatic runs via Vercel cron. Manual runs appear in recent history.
       </p>
 
@@ -151,21 +151,21 @@ export default function CronStatusCard() {
           <JobStatusRow job="discover-giveaways" schedule="Daily at 07:00 UTC" label="Discover Giveaways" />
         </div>
 
-        <div className="min-w-0 lg:border-l lg:pl-8 border-gray-200">
-          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent runs</h4>
+        <div className="min-w-0 lg:border-l lg:pl-8 border-gray-200 dark:border-gray-800">
+          <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Recent runs</h4>
           {runs.length > 0 ? (
             <ul className="space-y-1.5 text-sm max-h-58 overflow-y-auto">
               {runs.slice(0, 20).map(run => (
                 <li
                   key={run._id}
-                  className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-50 last:border-0">
-                  <span className="text-gray-900 font-medium shrink-0">
+                  className="flex items-center justify-between gap-2 py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                  <span className="text-gray-900 dark:text-gray-100 font-medium shrink-0">
                     <JobLabel job={run.job} />
                   </span>
                   <span className="flex items-center gap-2 flex-wrap justify-end">
                     <SourceBadge source={run.source} />
-                    {run.details && <span className="text-gray-500 text-xs">({run.details})</span>}
-                    <span className={`font-medium shrink-0 ${run.status === "ok" ? "text-green-600" : "text-red-600"}`}>
+                    {run.details && <span className="text-gray-500 dark:text-gray-400 text-xs">({run.details})</span>}
+                    <span className={`font-medium shrink-0 ${run.status === "ok" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                       {formatRelativeTimeCompact(run.ranAt)}
                     </span>
                   </span>
@@ -173,7 +173,7 @@ export default function CronStatusCard() {
               ))}
             </ul>
           ) : (
-            <p className="text-gray-500 text-sm">No runs recorded yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">No runs recorded yet</p>
           )}
         </div>
       </div>

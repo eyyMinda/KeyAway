@@ -1,15 +1,19 @@
 /** @fileoverview Admin reads over `analytics.sessions` / `analytics.events`: session list, detail, dashboard summary. */
 import { db } from "@/src/lib/db/postgres";
-import type { AnalyticsSummaryCachePayload } from "@/src/lib/api/adminEventsListCache";
+import type {
+  AnalyticsSummaryCachePayload,
+  AnalyticsTimeline,
+  AnalyticsTimelineBucket
+} from "@/src/lib/api/adminEventsListCache";
 import {
   transformCountryData,
-  transformEventData,
   transformPathActivityTable,
   transformProgramData,
   transformSocialData
 } from "@/src/lib/analytics/analyticsUtils";
 import { SESSION_ID_RE } from "@/src/lib/analytics/sessionConstants";
 import { sessionSourceLabel } from "@/src/lib/analytics/sessionEntry";
+import { HOUR_MS } from "@/src/lib/time";
 import type { AnalyticsEventData } from "@/src/types";
 
 export type AdminSessionSummary = {
@@ -70,9 +74,23 @@ export async function listSessionsPage(opts: {
   entry: string;
   page: number;
   limit: number;
+  /** Visitor id / session id prefix, or part of the location, landing path or referrer. */
+  q?: string;
 }): Promise<{ rows: Array<AdminSessionSummary & VisitorMeta>; total: number; countsByEntry: Record<string, number> }> {
   const sql = db();
-  const inRange = sql`s.last_event_at >= ${opts.since} and s.started_at <= ${opts.until}`;
+  const q = opts.q?.trim().toLowerCase().slice(0, 100) ?? "";
+  // Escape LIKE wildcards so "_" or "%" in the query match literally.
+  const like = q.replace(/[\\%_]/g, m => `\\${m}`);
+  const search = q
+    ? sql`and (
+        s.visitor_hash like ${`${like}%`}
+        or s.id::text like ${`${like}%`}
+        or lower(coalesce(s.country, '') || ' ' || coalesce(s.city, '')) like ${`%${like}%`}
+        or lower(coalesce(s.landing_path, '')) like ${`%${like}%`}
+        or lower(coalesce(s.referrer, '')) like ${`%${like}%`}
+      )`
+    : sql``;
+  const inRange = sql`s.last_event_at >= ${opts.since} and s.started_at <= ${opts.until} ${search}`;
   const entryFilter =
     opts.entry === "all"
       ? sql``
@@ -154,13 +172,57 @@ export function buildSessionSourceTable(
 type CountMap = Record<string, number>;
 
 const RECENT_LIMIT = 10;
-/** Contributions have their own admin pages; the event charts show visit/click signals only. */
+/** Contributions have their own admin pages; the timeline shows visit/click signals only. */
 const CHART_EXCLUDED = ["comment", "comment_reply", "key_suggestion", "contact"];
 
-/** Dashboard aggregates for a range in three queries. Key report events are excluded (own overview). */
+/** Before this, "all time" ranges start at the epoch; the timeline starts at the first real activity instead. */
+const EPOCH_RANGE_CUTOFF = Date.parse("2001-01-01");
+
+/** Visitors, page views and actions per hour (≤ 2 days), day (≤ 120 days) or week, zero-filled. */
+async function buildTimeline(since: string, until: string): Promise<AnalyticsTimeline> {
+  const sql = db();
+  const endMs = Math.min(Date.parse(until), Date.now());
+  let startMs = Date.parse(since);
+  if (startMs < EPOCH_RANGE_CUTOFF) {
+    // A few clients send bogus old dates; skip the earliest 0.1% so the axis starts where activity does.
+    const [row] = await sql<Array<{ first: string | null }>>`
+      select percentile_disc(0.001) within group (order by created_at) as first from analytics.events
+    `;
+    startMs = row?.first ? Date.parse(row.first) : endMs;
+  }
+  if (!(endMs > startMs)) return { bucket: "day", points: [] };
+
+  const spanHours = (endMs - startMs) / HOUR_MS;
+  const bucket: AnalyticsTimelineBucket = spanHours <= 48 ? "hour" : spanHours <= 24 * 120 ? "day" : "week";
+  const start = new Date(startMs).toISOString();
+  const end = new Date(endMs).toISOString();
+
+  const points = await sql<AnalyticsTimeline["points"]>`
+    with buckets as (
+      select generate_series(date_trunc(${bucket}, ${start}::timestamptz), ${end}::timestamptz, ${`1 ${bucket}`}::interval) as t
+    ), ev as (
+      select date_trunc(${bucket}, e.created_at) as t, e.event, s.visitor_hash
+      from analytics.events e
+      join analytics.sessions s on s.id = e.session_id
+      where e.created_at >= ${start} and e.created_at <= ${end}
+        and e.event not like 'report\\_%' and e.event not in ${sql(CHART_EXCLUDED)}
+    )
+    select b.t,
+           count(distinct ev.visitor_hash)::int as visitors,
+           count(ev.event) filter (where ev.event = 'page_viewed')::int as views,
+           count(ev.event) filter (where ev.event <> 'page_viewed')::int as actions
+    from buckets b
+    left join ev on ev.t = b.t
+    group by b.t
+    order by b.t
+  `;
+  return { bucket, points: points.map(p => ({ ...p })) };
+}
+
+/** Dashboard aggregates for a range. Key report events are excluded (own overview). */
 export async function buildAnalyticsSummary(since: string, until: string): Promise<AnalyticsSummaryCachePayload> {
   const sql = db();
-  const [[agg], recent, sources] = await Promise.all([
+  const [[agg], recent, sources, timeline] = await Promise.all([
     sql<
       Array<{
         totalEvents: number;
@@ -214,21 +276,21 @@ export async function buildAnalyticsSummary(since: string, until: string): Promi
       from analytics.sessions
       where started_at >= ${since} and started_at <= ${until}
       group by entry, referrer
-    `
+    `,
+    buildTimeline(since, until)
   ]);
 
   const toMap = (m: CountMap | null) => new Map(Object.entries(m ?? {}));
   const totals = toMap(agg.totals);
-  const chartTotals = new Map(totals);
-  for (const e of CHART_EXCLUDED) chartTotals.delete(e);
   const byCountry = toMap(agg.byCountry);
 
   return {
     totalEvents: agg.totalEvents,
     uniqueVisitors: agg.uniqueVisitors,
     uniqueCountries: byCountry.size,
+    sessions: sources.reduce((n, s) => n + s.count, 0),
     totals: Object.fromEntries(totals),
-    eventChart: transformEventData(chartTotals),
+    timeline,
     programTable: transformProgramData(toMap(agg.byProgram)),
     socialTable: transformSocialData(toMap(agg.bySocial)),
     pathTable: transformPathActivityTable(toMap(agg.byPath), agg.notFound),

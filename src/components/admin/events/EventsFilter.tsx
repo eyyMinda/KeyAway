@@ -26,8 +26,8 @@ export default function EventsFilter({
 
   return (
     <div className="mb-6">
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Events</h3>
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filter Events</h3>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => onEventChange("all")}

@@ -9,10 +9,10 @@ export default function WelcomeHeader() {
 
   return (
     <div className="mb-6 sm:mb-8">
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
         {firstName ? `Welcome, ${firstName}` : "Welcome back"}
       </h2>
-      <p className="mt-2 text-base sm:text-lg text-gray-600">Here&apos;s what needs your attention</p>
+      <p className="mt-2 text-base sm:text-lg text-gray-600 dark:text-gray-400">Here&apos;s what needs your attention</p>
     </div>
   );
 }

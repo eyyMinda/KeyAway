@@ -1,6 +1,7 @@
 import type { ContactMessage } from "@/src/types/contact";
 
-export type MessageQuickFilter = "all" | "needs_reply" | "no_email" | "replied" | "archived";
+/** "open" = not handled yet (new or read). Replied and archived leave the default view. */
+export type MessageView = "open" | "needs_reply" | "no_email" | "new" | "read" | "replied" | "archived" | "all";
 
 export function messageNeedsReply(message: ContactMessage): boolean {
   const hasEmail = Boolean(message.email?.trim());
@@ -11,39 +12,36 @@ export function messageHasNoEmail(message: ContactMessage): boolean {
   return !message.email?.trim();
 }
 
-export function filterMessagesByQuickFilter(
-  messages: ContactMessage[],
-  filter: MessageQuickFilter
-): ContactMessage[] {
-  switch (filter) {
+function inView(message: ContactMessage, view: MessageView): boolean {
+  switch (view) {
+    case "open":
+      return message.status === "new" || message.status === "read";
     case "needs_reply":
-      return messages.filter(messageNeedsReply);
+      return messageNeedsReply(message);
     case "no_email":
-      return messages.filter(messageHasNoEmail);
-    case "replied":
-      return messages.filter(m => m.status === "replied");
-    case "archived":
-      return messages.filter(m => m.status === "archived");
+      return messageHasNoEmail(message);
+    case "all":
+      return true;
     default:
-      return messages;
+      return message.status === view;
   }
 }
 
-export function getMessageStats(messages: ContactMessage[]) {
-  return {
-    total: messages.length,
-    new: messages.filter(m => m.status === "new").length,
-    needsReply: messages.filter(messageNeedsReply).length,
-    noEmail: messages.filter(messageHasNoEmail).length,
-    replied: messages.filter(m => m.status === "replied").length,
-    archived: messages.filter(m => m.status === "archived").length
-  };
+export function filterMessagesByView(messages: ContactMessage[], view: MessageView): ContactMessage[] {
+  return messages.filter(m => inView(m, view));
 }
 
-export const MESSAGE_QUICK_FILTERS: Array<{ id: MessageQuickFilter; label: string }> = [
-  { id: "all", label: "All" },
+export const MESSAGE_VIEWS: Array<{ id: MessageView; label: string }> = [
+  { id: "open", label: "Open" },
   { id: "needs_reply", label: "Needs reply" },
   { id: "no_email", label: "No email" },
+  { id: "new", label: "New" },
+  { id: "read", label: "Read" },
   { id: "replied", label: "Replied" },
-  { id: "archived", label: "Archived" }
+  { id: "archived", label: "Archived" },
+  { id: "all", label: "All" }
 ];
+
+export function messageViewOptions(messages: ContactMessage[]) {
+  return MESSAGE_VIEWS.map(v => ({ value: v.id, label: v.label, count: filterMessagesByView(messages, v.id).length }));
+}

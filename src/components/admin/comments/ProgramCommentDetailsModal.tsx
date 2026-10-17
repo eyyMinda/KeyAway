@@ -34,16 +34,16 @@ function CommentBlock({
   createdAt?: string;
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4">
+    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
       <div className="mb-2 flex flex-wrap items-baseline gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{label}</span>
-        <span className="font-semibold text-gray-900">{authorName}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</span>
+        <span className="font-semibold text-gray-900 dark:text-gray-100">{authorName}</span>
         {authorRole?.trim() ? (
-          <span className="text-xs text-gray-500">{authorRole.trim()}</span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">{authorRole.trim()}</span>
         ) : null}
-        <span className="text-xs text-gray-400">{formatDate(createdAt)}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">{formatDate(createdAt)}</span>
       </div>
-      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-800">{body}</p>
+      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-800 dark:text-gray-200">{body}</p>
     </div>
   );
 }
@@ -65,7 +65,7 @@ export default function ProgramCommentDetailsModal({
       title={row.isReply ? "Reply details" : "Comment details"}
       accent="purple"
       subtitle={
-        <Link href={`/program/${row.programSlug}`} target="_blank" className="cursor-pointer text-primary-800 hover:underline">
+        <Link href={`/program/${row.programSlug}`} target="_blank" className="cursor-pointer text-primary-800 dark:text-sky-300 hover:underline">
           {row.programTitle}
         </Link>
       }
@@ -77,7 +77,7 @@ export default function ProgramCommentDetailsModal({
           type="button"
           disabled={busy}
           onClick={() => onRequestDelete(row)}
-          className="cursor-pointer rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Delete {row.isReply ? "reply" : "comment"}
         </button>
@@ -105,7 +105,7 @@ export default function ProgramCommentDetailsModal({
               createdAt={row.createdAt}
             />
             {displayRow.isPinned ? (
-              <p className="mt-2 text-xs font-medium text-amber-700">Pinned on program page</p>
+              <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">Pinned on program page</p>
             ) : null}
           </ModalSection>
 
@@ -128,7 +128,7 @@ export default function ProgramCommentDetailsModal({
           ) : null}
 
           {!row.isReply && threadReplies.length === 0 ? (
-            <p className="text-sm text-gray-500">No replies on this comment.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">No replies on this comment.</p>
           ) : null}
 
       </div>

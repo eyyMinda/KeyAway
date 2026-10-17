@@ -78,7 +78,7 @@ export default function ReportProgressBar({
           <span className="text-success-400">{workingPercentRounded}%</span>
         </div>
       ) : showPercentage && otherVersion === 0 ? (
-        <span className="text-xs font-medium text-neutral-500">No reports</span>
+        <span className="text-xs font-medium text-neutral-500 dark:text-gray-400">No reports</span>
       ) : null}
 
       <div className="w-full h-2 overflow-hidden rounded-full bg-neutral-600">

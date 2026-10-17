@@ -24,13 +24,13 @@ function AdminSignInForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">Admin sign in</h1>
-        <p className="mt-2 text-sm text-gray-600">Use your approved GitHub account to access the dashboard.</p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center px-4">
+      <div className="w-full max-w-md rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-sm">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Admin sign in</h1>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Use your approved GitHub account to access the dashboard.</p>
 
         {(errorParam || error) && (
-          <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="mt-4 rounded-lg border border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
             {error ?? "Sign-in failed. Try again or contact support."}
           </p>
         )}
@@ -52,8 +52,8 @@ export default function AdminSignInPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <p className="text-gray-600">Loading sign in...</p>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+          <p className="text-gray-600 dark:text-gray-400">Loading sign in...</p>
         </div>
       }>
       <AdminSignInForm />

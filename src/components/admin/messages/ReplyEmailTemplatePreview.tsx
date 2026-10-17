@@ -34,17 +34,17 @@ export default function ReplyEmailTemplatePreview() {
   return (
     <section className="mt-8 md:mt-12">
       <div className="mb-4">
-        <h3 className="text-xl font-semibold text-gray-900">Reply email preview</h3>
-        <p className="mt-1 text-sm text-gray-500">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Reply email preview</h3>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Sample of the HTML visitors receive when you send a reply. Footer buttons pull from Sanity store settings.
         </p>
-        <p className="mt-2 text-sm text-gray-600">
-          <span className="font-medium text-gray-700">Subject:</span> {subject}
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <span className="font-medium text-gray-700 dark:text-gray-300">Subject:</span> {subject}
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-soft">
-        <div className="border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-gray-500">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-soft">
+        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-4 py-2 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
           Email body preview
         </div>
         <iframe

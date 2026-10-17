@@ -35,7 +35,7 @@ export default function TableBody({
   getLatestReportTs
 }: TableBodyProps) {
   return (
-    <tbody className="bg-white divide-y divide-gray-200">
+    <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
       {reports.map((report, index) => {
         const reportKey = createReportKey(report);
         const hasChanges = pendingChanges.has(reportKey);
@@ -43,17 +43,17 @@ export default function TableBody({
         const change = pendingChanges.get(reportKey);
 
         return (
-          <tr key={`${report.programSlug}-${report.storageKey}-${index}`} className="hover:bg-gray-50">
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+          <tr key={`${report.programSlug}-${report.storageKey}-${index}`} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
               {formatSlugToTitle(report.programSlug)}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">{report.key}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 font-mono">{report.key}</td>
             <td className="px-6 py-4 whitespace-nowrap">
               <div className="space-y-2">
                 <select
                   value={change ? change.newStatus : report.status}
                   onChange={e => onStatusChange(report, e.target.value as CDKeyStatus)}
-                  className="text-sm border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900">
+                  className="text-sm border border-gray-300 dark:border-gray-700 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100">
                   {Object.entries(STATUS_OPTIONS).map(([value, label]) => (
                     <option key={value} value={value}>
                       {label}
@@ -81,7 +81,7 @@ export default function TableBody({
             <td className="px-6 py-4 whitespace-nowrap">
               <ReportProgressBar reportData={report.reportData} />
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
               {(() => {
                 const ts = getLatestReportTs(report);
                 return ts ? new Date(ts).toLocaleDateString() : "N/A";

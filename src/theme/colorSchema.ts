@@ -9,18 +9,6 @@ import tailwindPalette from "../../tailwind-palette.json";
 export const palette = tailwindPalette.palette;
 export const analyticsAccents = tailwindPalette.analyticsAccents;
 
-/** Extra colors for multi-series charts (doughnut fallbacks). */
-export const chartSeriesFallback = [
-  analyticsAccents.download,
-  analyticsAccents.copy,
-  analyticsAccents.social,
-  analyticsAccents.pageview,
-  palette.error[500],
-  "#06B6D4",
-  "#84CC16",
-  "#F97316"
-] as const;
-
 /** Per tracking event: chart hex + dot (Tailwind bg-*). */
 export const analyticsEvent = {
   copy_cdkey: {
@@ -132,17 +120,17 @@ export function getAnalyticsEventDotClass(event: string): string {
 /** Shared admin / marketing class strings (map legacy blue/green to theme `primary` / `success`). */
 export const adminChrome = {
   filterPillActive: "bg-primary-500 text-white",
-  filterPillIdle: "bg-gray-100 text-gray-700 hover:bg-gray-200",
+  filterPillIdle: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700",
   progressBarFill: "bg-primary-500",
   statCardBlue: {
     bg: "bg-primary-500/50",
-    text: "text-primary-600",
-    border: "border-primary-200"
+    text: "text-primary-600 dark:text-sky-400",
+    border: "border-primary-200 dark:border-sky-500/30"
   },
   statCardGreen: {
     bg: "bg-success-500/50",
-    text: "text-success-600",
-    border: "border-success-200"
+    text: "text-success-600 dark:text-green-400",
+    border: "border-success-200 dark:border-green-500/30"
   }
 } as const;
 
@@ -150,45 +138,37 @@ export const adminChrome = {
 export const modalSectionStyles = {
   blue: {
     bar: "bg-primary-500",
-    background: "bg-linear-to-br from-primary-50 to-indigo-50",
-    border: "border-primary-100",
-    content: "border-primary-200"
+    background: "bg-linear-to-br from-primary-50 to-indigo-50 dark:bg-none dark:bg-gray-800/40",
+    border: "border-primary-100 dark:border-sky-500/30",
+    content: "border-primary-200 dark:border-sky-500/30"
   },
   green: {
     bar: "bg-success-500",
-    background: "bg-linear-to-br from-success-50 to-success-100",
-    border: "border-success-100",
-    content: "border-success-200"
+    background: "bg-linear-to-br from-success-50 to-success-100 dark:bg-none dark:bg-gray-800/40",
+    border: "border-success-100 dark:border-green-500/30",
+    content: "border-success-200 dark:border-green-500/30"
   },
   red: {
     bar: "bg-error-500",
-    background: "bg-linear-to-br from-error-50 to-pink-50",
-    border: "border-error-100",
-    content: "border-error-200"
+    background: "bg-linear-to-br from-error-50 to-pink-50 dark:bg-none dark:bg-gray-800/40",
+    border: "border-error-100 dark:border-red-500/30",
+    content: "border-error-200 dark:border-red-500/30"
   },
   purple: {
     bar: "bg-accent-600",
-    background: "bg-linear-to-br from-accent-50 to-primary-50",
-    border: "border-accent-100",
-    content: "border-accent-200"
+    background: "bg-linear-to-br from-accent-50 to-primary-50 dark:bg-none dark:bg-gray-800/40",
+    border: "border-accent-100 dark:border-blue-500/30",
+    content: "border-accent-200 dark:border-blue-500/30"
   },
   gray: {
     bar: "bg-neutral-500",
-    background: "bg-linear-to-br from-neutral-50 to-neutral-100",
-    border: "border-neutral-100",
-    content: "border-neutral-200"
+    background: "bg-linear-to-br from-neutral-50 to-neutral-100 dark:bg-none dark:bg-gray-800/40",
+    border: "border-neutral-100 dark:border-gray-800",
+    content: "border-neutral-200 dark:border-gray-800"
   }
 } as const;
 
 /** `AnalyticsCard` icon well by semantic color name. */
-export const analyticsCardIconMap = {
-  blue: adminChrome.statCardBlue,
-  green: adminChrome.statCardGreen,
-  purple: { bg: "bg-accent-500/50", text: "text-accent-700", border: "border-accent-200" },
-  orange: { bg: "bg-warning-500/50", text: "text-warning-700", border: "border-warning-200" },
-  red: { bg: "bg-error-500/50", text: "text-error-700", border: "border-error-200" }
-} as const;
-
 export const devConsoleBadge = {
   success: `background-color: ${palette.success[500]}; color: white; font-weight: bold; padding: 6px; border-radius: 4px;`,
   error: `background-color: ${palette.error[500]}; color: white; font-weight: bold; padding: 6px; border-radius: 4px;`,

@@ -3,141 +3,129 @@
 import { useState, useEffect, useMemo } from "react";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import KeySuggestionsTable from "@/src/components/admin/key-suggestions/KeySuggestionsTable";
-import SearchInput from "@/src/components/ui/SearchInput";
+import {
+  AdminFilterBar,
+  AdminSearch,
+  AdminSelect,
+  programOptions,
+  usePagedList
+} from "@/src/components/admin/list/AdminListKit";
 import { KeySuggestion } from "@/src/types/contact";
 import { client } from "@/src/sanity/lib/client";
-import { SortDirection } from "@/src/components/ui/SortableTableHead";
+
+type StatusView = "open" | KeySuggestion["status"] | "all";
+type SortKey = "newest" | "oldest" | "program";
+
+/** Open = still needs a decision. Added / rejected leave the default view like resolved giveaway finds. */
+const OPEN: KeySuggestion["status"][] = ["new", "reviewing"];
+
+/** Suggestions name programs as free text; group case-insensitively. */
+const programKey = (s: KeySuggestion) => s.programName.trim().toLowerCase();
+
+async function loadSuggestions(): Promise<KeySuggestion[] | null> {
+  try {
+    return await client.fetch<KeySuggestion[]>(
+      `*[_type == "keySuggestion"] | order(createdAt desc) {
+        _id, _createdAt, cdKey, programName, programVersion, programLink, name, email, message, status, ipHash, createdAt
+      }`
+    );
+  } catch (error) {
+    console.error("Error fetching suggestions:", error);
+    return null;
+  }
+}
 
 export default function KeySuggestionsPage() {
   const [suggestions, setSuggestions] = useState<KeySuggestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortColumn, setSortColumn] = useState<string>("createdAt");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<StatusView>("open");
+  const [program, setProgram] = useState("all");
+  const [sort, setSort] = useState<SortKey>("newest");
+
+  const fetchSuggestions = () =>
+    loadSuggestions().then(result => {
+      if (result) setSuggestions(result);
+      setLoading(false);
+    });
 
   useEffect(() => {
-    fetchSuggestions();
+    let cancelled = false;
+    loadSuggestions().then(result => {
+      if (cancelled) return;
+      if (result) setSuggestions(result);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const fetchSuggestions = async () => {
-    try {
-      const result = await client.fetch<KeySuggestion[]>(
-        `*[_type == "keySuggestion"] | order(createdAt desc) {
-          _id,
-          _createdAt,
-          cdKey,
-          programName,
-          programVersion,
-          programLink,
-          name,
-          email,
-          message,
-          status,
-          ipHash,
-          createdAt
-        }`
+  const countOf = (s: KeySuggestion["status"]) => suggestions.filter(x => x.status === s).length;
+  const statusOptions = [
+    { value: "open", label: "Open", count: suggestions.filter(s => OPEN.includes(s.status)).length },
+    { value: "new", label: "New", count: countOf("new") },
+    { value: "reviewing", label: "Reviewing", count: countOf("reviewing") },
+    { value: "added", label: "Added", count: countOf("added") },
+    { value: "rejected", label: "Rejected", count: countOf("rejected") },
+    { value: "all", label: "All", count: suggestions.length }
+  ];
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const list = suggestions.filter(s => {
+      if (status === "open" ? !OPEN.includes(s.status) : status !== "all" && s.status !== status) return false;
+      if (program !== "all" && programKey(s) !== program) return false;
+      if (!q) return true;
+      return [s.programName, s.cdKey, s.programVersion, s.name, s.email, s.message].some(v =>
+        v?.toLowerCase().includes(q)
       );
-      setSuggestions(result);
-    } catch (error) {
-      console.error("Error fetching suggestions:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSort = (column: string) => {
-    if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortColumn(column);
-      setSortDirection("desc");
-    }
-  };
-
-  const filteredAndSortedSuggestions = useMemo(() => {
-    const filtered = suggestions.filter(sug => {
-      const matchesSearch =
-        sug.programName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sug.cdKey.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sug.programVersion.toLowerCase().includes(searchTerm.toLowerCase());
-
-      const matchesStatus = statusFilter === "all" || sug.status === statusFilter;
-
-      return matchesSearch && matchesStatus;
     });
-
-    // Sort
-    return [...filtered].sort((a, b) => {
-      let cmp = 0;
-      switch (sortColumn) {
-        case "programName":
-          cmp = a.programName.localeCompare(b.programName);
-          break;
-        case "status":
-          cmp = a.status.localeCompare(b.status);
-          break;
-        case "createdAt":
-          cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-        default:
-          return 0;
-      }
-      return sortDirection === "asc" ? cmp : -cmp;
+    return list.sort((a, b) => {
+      if (sort === "program") return a.programName.localeCompare(b.programName);
+      const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return sort === "oldest" ? diff : -diff;
     });
-  }, [suggestions, searchTerm, statusFilter, sortColumn, sortDirection]);
+  }, [suggestions, search, status, program, sort]);
 
-  if (loading) {
-    return (
-      <ProtectedAdminLayout title="Key Suggestions" subtitle="Manage suggested CD keys">
-        <div className="flex items-center justify-center py-12">
-          <div className="text-gray-500">Loading suggestions...</div>
-        </div>
-      </ProtectedAdminLayout>
-    );
-  }
+  const paged = usePagedList(filtered, `${search}|${status}|${program}|${sort}`);
 
   return (
-    <ProtectedAdminLayout title="Key Suggestions" subtitle="Manage suggested CD keys">
-      {/* Filters */}
-      <div className="mb-6">
-        <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Search */}
-            <SearchInput
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder="Search suggestions..."
-              className="w-full"
-            />
+    <ProtectedAdminLayout title="Key Suggestions" subtitle="Keys visitors suggested for programs">
+      <AdminFilterBar>
+        <AdminSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Search program, key, name or email…"
+          className="sm:flex-1 sm:min-w-64"
+        />
+        <AdminSelect label="Status" value={status} onChange={v => setStatus(v as StatusView)} options={statusOptions} />
+        <AdminSelect
+          label="Program"
+          value={program}
+          onChange={setProgram}
+          options={programOptions(suggestions.map(s => ({ key: programKey(s), label: s.programName.trim() })))}
+          className="sm:max-w-64"
+        />
+        <AdminSelect
+          label="Sort"
+          value={sort}
+          onChange={v => setSort(v as SortKey)}
+          options={[
+            { value: "newest", label: "Newest first" },
+            { value: "oldest", label: "Oldest first" },
+            { value: "program", label: "Program A–Z" }
+          ]}
+        />
+      </AdminFilterBar>
 
-            {/* Status Filter */}
-            <div>
-              <select
-                id="status-filter"
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900">
-                <option value="all">All Suggestions ({suggestions.length})</option>
-                <option value="new">New ({suggestions.filter(s => s.status === "new").length})</option>
-                <option value="reviewing">
-                  Reviewing ({suggestions.filter(s => s.status === "reviewing").length})
-                </option>
-                <option value="added">Added ({suggestions.filter(s => s.status === "added").length})</option>
-                <option value="rejected">Rejected ({suggestions.filter(s => s.status === "rejected").length})</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Suggestions Table */}
       <KeySuggestionsTable
-        suggestions={filteredAndSortedSuggestions}
+        suggestions={paged.pageItems}
+        all={suggestions}
+        total={filtered.length}
+        loading={loading}
+        paging={paged}
         onUpdate={fetchSuggestions}
-        sortColumn={sortColumn}
-        sortDirection={sortDirection}
-        onSort={handleSort}
       />
     </ProtectedAdminLayout>
   );

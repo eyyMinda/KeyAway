@@ -25,12 +25,12 @@ function eventDetail(event: AdminSessionEvent): string {
 }
 
 function rowClass(event: string): string {
-  if (event === "report_key_working") return "border-green-300 bg-green-50";
-  if (event === "report_key_expired") return "border-red-300 bg-red-50";
-  if (event === "report_key_limit_reached") return "border-amber-300 bg-amber-50";
-  if (event === "comment" || event === "comment_reply") return "border-purple-300 bg-purple-50";
-  if (event === "key_suggestion" || event === "contact") return "border-indigo-300 bg-indigo-50";
-  return "border-gray-300 bg-white";
+  if (event === "report_key_working") return "border-green-300 dark:border-green-500/40 bg-green-50 dark:bg-green-500/10";
+  if (event === "report_key_expired") return "border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10";
+  if (event === "report_key_limit_reached") return "border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10";
+  if (event === "comment" || event === "comment_reply") return "border-purple-300 dark:border-purple-500/40 bg-purple-50 dark:bg-purple-500/10";
+  if (event === "key_suggestion" || event === "contact") return "border-indigo-300 dark:border-indigo-500/40 bg-indigo-50 dark:bg-indigo-500/10";
+  return "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900";
 }
 
 export default function SessionDetailsModal({ sessionId, onClose }: { sessionId: string; onClose: () => void }) {
@@ -75,35 +75,35 @@ export default function SessionDetailsModal({ sessionId, onClose }: { sessionId:
           : null
       }
     >
-      {loading ? <p className="text-sm font-medium text-gray-800">Loading session…</p> : null}
-      {!loading && !detail ? <p className="text-sm font-medium text-gray-800">Session not found.</p> : null}
+      {loading ? <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Loading session…</p> : null}
+      {!loading && !detail ? <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Session not found.</p> : null}
       {detail ? (
         <>
           <dl className="mb-6 grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
             <div>
-              <dt className="font-semibold text-gray-800">Location</dt>
-              <dd className="mt-1 text-gray-900">{[detail.city, detail.country].filter(Boolean).join(", ") || "—"}</dd>
+              <dt className="font-semibold text-gray-800 dark:text-gray-200">Location</dt>
+              <dd className="mt-1 text-gray-900 dark:text-gray-100">{[detail.city, detail.country].filter(Boolean).join(", ") || "—"}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-800">Source</dt>
-              <dd className="mt-1 text-gray-900">
+              <dt className="font-semibold text-gray-800 dark:text-gray-200">Source</dt>
+              <dd className="mt-1 text-gray-900 dark:text-gray-100">
                 {source}
                 {detail.entry === "external" && detail.referrer ? (
-                  <span className="mt-1 block break-all text-gray-700">{detail.referrer}</span>
+                  <span className="mt-1 block break-all text-gray-700 dark:text-gray-300">{detail.referrer}</span>
                 ) : null}
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-800">Started</dt>
-              <dd className="mt-1 text-gray-900">{new Date(detail.startedAt).toLocaleString()}</dd>
+              <dt className="font-semibold text-gray-800 dark:text-gray-200">Started</dt>
+              <dd className="mt-1 text-gray-900 dark:text-gray-100">{new Date(detail.startedAt).toLocaleString()}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-800">Last event</dt>
-              <dd className="mt-1 text-gray-900">{new Date(detail.lastEventAt).toLocaleString()}</dd>
+              <dt className="font-semibold text-gray-800 dark:text-gray-200">Last event</dt>
+              <dd className="mt-1 text-gray-900 dark:text-gray-100">{new Date(detail.lastEventAt).toLocaleString()}</dd>
             </div>
           </dl>
 
-          <h3 className="mb-3 flex items-center text-lg font-semibold text-gray-900">
+          <h3 className="mb-3 flex items-center text-lg font-semibold text-gray-900 dark:text-gray-100">
             <span className="mr-3 h-6 w-1 rounded-full bg-accent-600" />
             History
           </h3>
@@ -111,12 +111,12 @@ export default function SessionDetailsModal({ sessionId, onClose }: { sessionId:
             {events.map((event, index) => (
               <li key={`${event.createdAt}-${index}`} className={`rounded-lg border px-3 py-2 ${rowClass(event.event)}`}>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-semibold text-gray-900">{reportLabel(event.event)}</span>
-                  <span className="shrink-0 text-xs font-medium text-gray-800">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{reportLabel(event.event)}</span>
+                  <span className="shrink-0 text-xs font-medium text-gray-800 dark:text-gray-200">
                     {new Date(event.createdAt).toLocaleString()}
                   </span>
                 </div>
-                {eventDetail(event) ? <p className="mt-1 text-sm text-gray-800">{eventDetail(event)}</p> : null}
+                {eventDetail(event) ? <p className="mt-1 text-sm text-gray-800 dark:text-gray-200">{eventDetail(event)}</p> : null}
               </li>
             ))}
           </ol>

@@ -21,7 +21,7 @@ type LinkRow = { title: string; url: string; note: string };
 const STATUSES: CDKeyStatus[] = ["new", "active", "expired", "limit"];
 
 const inputClass =
-  "w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent";
+  "w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-primary-500 focus:border-transparent";
 
 /** `<input type="date">` value (YYYY-MM-DD) from an ISO datetime. */
 function toDateInput(iso?: string): string {
@@ -41,9 +41,9 @@ function hostLabel(url: string): string {
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-sm font-medium text-gray-800 mb-1">{label}</span>
+      <span className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">{label}</span>
       {children}
-      {hint && <span className="block text-xs text-gray-500 mt-1">{hint}</span>}
+      {hint && <span className="block text-xs text-gray-500 dark:text-gray-400 mt-1">{hint}</span>}
     </label>
   );
 }
@@ -116,7 +116,7 @@ export default function AddEntryModal({ find, preset, onClose, onAdded }: AddEnt
       accent="green"
       maxWidthClass="max-w-2xl"
       onClose={onClose}
-      footer={error ? <span className="text-red-600">{error}</span> : t.addEntry.footerHint}
+      footer={error ? <span className="text-red-600 dark:text-red-400">{error}</span> : t.addEntry.footerHint}
       footerActions={
         <button
           type="button"
@@ -127,9 +127,9 @@ export default function AddEntryModal({ find, preset, onClose, onAdded }: AddEnt
         </button>
       }>
       <div className="space-y-5">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           {t.addEntry.from}{" "}
-          <a href={find.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">
+          <a href={find.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-sky-400 hover:underline">
             {find.sourceTitle}
           </a>
         </p>
@@ -167,7 +167,7 @@ export default function AddEntryModal({ find, preset, onClose, onAdded }: AddEnt
 
         {flow === "link_based_account" && (
           <div className="space-y-3">
-            <span className="block text-sm font-medium text-gray-800">{t.addEntry.links}</span>
+            <span className="block text-sm font-medium text-gray-800 dark:text-gray-200">{t.addEntry.links}</span>
             {links.map((link, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-[1fr_2fr_auto] gap-2 items-start">
                 <input
@@ -185,7 +185,7 @@ export default function AddEntryModal({ find, preset, onClose, onAdded }: AddEnt
                 <button
                   type="button"
                   onClick={() => setLinks(rows => rows.filter((_, j) => j !== i))}
-                  className="px-3 py-2 text-sm text-gray-500 hover:text-red-600 cursor-pointer">
+                  className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 cursor-pointer">
                   {t.addEntry.removeLink}
                 </button>
               </div>
@@ -193,7 +193,7 @@ export default function AddEntryModal({ find, preset, onClose, onAdded }: AddEnt
             <button
               type="button"
               onClick={() => setLinks(rows => [...rows, { title: "", url: "", note: "" }])}
-              className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer">
+              className="text-sm text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300 cursor-pointer">
               + {t.addEntry.addLink}
             </button>
           </div>

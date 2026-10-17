@@ -68,14 +68,14 @@ export default function AdminHomePage() {
 
       {/* Cron Status */}
       <div className="mt-8 md:mt-12">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4 md:mb-6">System</h3>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">System</h3>
         <div className="grid grid-cols-1 gap-4 md:gap-6">
           <CronStatusCard />
         </div>
       </div>
 
       <div className="mt-8 md:mt-12">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4 md:mb-6">SEO</h3>
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">SEO</h3>
         <div className="grid grid-cols-1 gap-4 md:gap-6">
           <IndexNowSubmitCard />
         </div>

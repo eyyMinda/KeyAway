@@ -6,6 +6,7 @@ import TimeFilter from "@/src/components/admin/TimeFilter";
 import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import SessionDetailsModal from "@/src/components/admin/sessions/SessionDetailsModal";
 import Pagination from "@/src/components/ui/Pagination";
+import { AdminSearch } from "@/src/components/admin/list/AdminListKit";
 import { sessionSourceLabel } from "@/src/lib/analytics/sessionEntry";
 import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
 import { adminChrome, visitorTierBadgeClasses } from "@/src/theme/colorSchema";
@@ -43,6 +44,17 @@ export default function SessionsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [openId, setOpenId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
+
+  // Search hits the database, so wait for typing to pause.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setQuery(search.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [search]);
 
   const load = useCallback(async () => {
     if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
@@ -53,6 +65,7 @@ export default function SessionsPage() {
     try {
       const { since, until } = getDateRange(selectedPeriod, customDateRange);
       const sp = new URLSearchParams({ since, until, page: String(page), limit: "25", entry });
+      if (query) sp.set("q", query);
       const res = await fetch(`/api/v1/admin/sessions?${sp.toString()}`);
       const json = await res.json();
       setRows(json.data ?? []);
@@ -64,7 +77,7 @@ export default function SessionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPeriod, customDateRange, page, entry]);
+  }, [selectedPeriod, customDateRange, page, entry, query]);
 
   useEffect(() => {
     void load();
@@ -92,7 +105,14 @@ export default function SessionsPage() {
         />
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
+        <AdminSearch
+          value={search}
+          onChange={setSearch}
+          placeholder="Search visitor id, session id, location, page or referrer…"
+          className="lg:w-96"
+        />
+        <div className="flex flex-wrap gap-2">
         {FILTERS.map(filter => (
           <button
             key={filter.id}
@@ -106,17 +126,18 @@ export default function SessionsPage() {
             {counts[filter.id] != null ? ` (${counts[filter.id]})` : ""}
           </button>
         ))}
+        </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-soft">
-        <div className="border-b border-gray-200 bg-gray-50 p-6">
-          <h3 className="text-lg font-semibold text-gray-900">Visits</h3>
-          <p className="mt-1 text-sm font-medium text-gray-700">{total.toLocaleString()} sessions</p>
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-soft">
+        <div className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Visits</h3>
+          <p className="mt-1 text-sm font-medium text-gray-700 dark:text-gray-300">{total.toLocaleString()} sessions</p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr className="text-left text-xs font-semibold uppercase tracking-wide text-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-800/50">
+              <tr className="text-left text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
                 <th className="p-4">Visitor</th>
                 <th className="p-4">Source</th>
                 <th className="p-4">Landing</th>
@@ -126,32 +147,42 @@ export default function SessionsPage() {
                 <th className="p-4" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {rows.map(row => (
-                <tr key={row.id} className="hover:bg-gray-50">
-                  <td className="p-4 text-sm text-gray-900">
+                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                  <td className="p-4 text-sm text-gray-900 dark:text-gray-100">
                     <span className={visitorTierBadgeClasses(row.visitTier, false)}>{row.visitTier || "new"}</span>
                     {row.visitorIsSpammer ? (
                       <span className={`${visitorTierBadgeClasses("new", true)} ml-1`}>spammer</span>
                     ) : null}
+                    {row.visitorHash && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch(row.visitorHash ?? "")}
+                        title={`${row.visitorHash}
+Show this visitor's sessions`}
+                        className="mt-1 block font-mono text-[11px] text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-sky-400 cursor-pointer">
+                        {row.visitorHash.slice(0, 10)}…
+                      </button>
+                    )}
                   </td>
-                  <td className="p-4 text-sm font-medium text-gray-900">
+                  <td className="p-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                     {sessionSourceLabel(row.entry, row.referrer)}
                   </td>
-                  <td className="max-w-48 truncate p-4 text-sm text-gray-900">{row.landingPath || "—"}</td>
-                  <td className="p-4 text-sm text-gray-900">
+                  <td className="max-w-48 truncate p-4 text-sm text-gray-900 dark:text-gray-100">{row.landingPath || "—"}</td>
+                  <td className="p-4 text-sm text-gray-900 dark:text-gray-100">
                     {[row.city, row.country].filter(Boolean).join(", ") || "—"}
                   </td>
-                  <td className="p-4 text-sm text-gray-900">
+                  <td className="p-4 text-sm text-gray-900 dark:text-gray-100">
                     {row.eventCount}
                     {(row.contributionCount || row.reportCount) > 0
                       ? ` · ${row.contributionCount || row.reportCount} contribution${(row.contributionCount || row.reportCount) === 1 ? "" : "s"}`
                       : ""}
-                    <div className="text-xs font-medium text-gray-700">
+                    <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
                       {durationLabel(row.startedAt, row.lastEventAt)}
                     </div>
                   </td>
-                  <td className="p-4 text-sm text-gray-900">{new Date(row.startedAt).toLocaleString()}</td>
+                  <td className="p-4 text-sm text-gray-900 dark:text-gray-100">{new Date(row.startedAt).toLocaleString()}</td>
                   <td className="p-4 text-right">
                     <AdminViewDetailsButton onClick={() => setOpenId(row.id)} />
                   </td>
@@ -159,8 +190,8 @@ export default function SessionsPage() {
               ))}
               {!loading && rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-sm font-medium text-gray-800">
-                    No sessions in this range.
+                  <td colSpan={7} className="p-8 text-center text-sm font-medium text-gray-800 dark:text-gray-200">
+                    {query ? "No sessions match this search." : "No sessions in this range."}
                   </td>
                 </tr>
               ) : null}
@@ -173,7 +204,7 @@ export default function SessionsPage() {
           totalItems={total}
           itemsPerPage={25}
           onPageChange={setPage}
-          className="p-4 border-t border-gray-200"
+          className="p-4 border-t border-gray-200 dark:border-gray-800"
         />
       </div>
 

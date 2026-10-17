@@ -135,7 +135,7 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 mb-6">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6 mb-6">
         <div className="flex items-center justify-center py-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
         </div>
@@ -144,21 +144,21 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6 mb-6">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Featured Program Settings</h3>
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Featured Program Settings</h3>
+        {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Rotation Schedule</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Rotation Schedule</label>
             <select
               value={localRotationSchedule}
               onChange={e => setLocalRotationSchedule(e.target.value as "weekly" | "biweekly" | "monthly")}
               disabled={saving}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm cursor-pointer disabled:opacity-50">
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm cursor-pointer disabled:opacity-50">
               <option value="weekly">Weekly</option>
               <option value="biweekly">Bi-weekly</option>
               <option value="monthly">Monthly</option>
@@ -166,14 +166,14 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Auto-Select Criteria</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Auto-Select Criteria</label>
             <select
               value={localAutoSelectCriteria}
               onChange={e =>
                 setLocalAutoSelectCriteria(e.target.value as "highest_working_keys" | "most_popular" | "random")
               }
               disabled={saving}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm cursor-pointer disabled:opacity-50">
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm cursor-pointer disabled:opacity-50">
               <option value="highest_working_keys">Highest Working Keys</option>
               <option value="most_popular">Most Popular</option>
               <option value="random">Random</option>
@@ -183,22 +183,22 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
 
         <div className="lg:col-span-1">
           <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">Current Featured Program</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Featured Program</label>
             <button
               type="button"
               onClick={() => setShowProgramSelect(!showProgramSelect)}
               disabled={saving}
-              className="text-xs text-gray-500 hover:text-gray-700 underline disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+              className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
               {showProgramSelect ? "Cancel" : "Change"}
             </button>
           </div>
           {showProgramSelect ? (
-            <div className="border border-gray-300 rounded-lg p-2 bg-white max-h-48 overflow-y-auto">
+            <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-2 bg-white dark:bg-gray-900 max-h-48 overflow-y-auto">
               <select
                 value={localFeaturedProgramId || ""}
                 onChange={e => setLocalFeaturedProgramId(e.target.value || null)}
                 disabled={saving}
-                className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-gray-900 cursor-pointer disabled:opacity-50">
+                className="w-full px-2 py-1 border border-gray-300 dark:border-gray-700 rounded text-sm text-gray-900 dark:text-gray-100 cursor-pointer disabled:opacity-50">
                 <option value="">Select a program...</option>
                 {programs.map(program => (
                   <option key={program._id ?? program.slug.current} value={program._id ?? ""}>
@@ -212,7 +212,7 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
               const featuredProgram = programs.find(p => p._id === localFeaturedProgramId);
               if (!featuredProgram) {
                 return (
-                  <div className="border border-gray-200 rounded-lg p-4 text-center text-gray-500 text-sm bg-gray-50">
+                  <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 text-center text-gray-500 dark:text-gray-400 text-sm bg-gray-50 dark:bg-gray-800/50">
                     No featured program set
                   </div>
                 );
@@ -220,10 +220,10 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
               return (
                 <div
                   onClick={() => onProgramClick(featuredProgram)}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer bg-gray-50">
+                  className="border border-gray-200 dark:border-gray-800 rounded-lg p-4 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer bg-gray-50 dark:bg-gray-800/50">
                   <div className="flex items-start gap-3">
                     {featuredProgram.image && (
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0">
                         <IdealImage
                           image={featuredProgram.image}
                           alt={featuredProgram.title}
@@ -232,13 +232,13 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 text-sm line-clamp-1">{featuredProgram.title}</h4>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm line-clamp-1">{featuredProgram.title}</h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {getWorkingKeysCount(featuredProgram.cdKeys)} working keys
                       </p>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2 text-center">Click to edit</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Click to edit</p>
                 </div>
               );
             })()
@@ -247,9 +247,9 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
       </div>
 
       {hasChanges && (
-        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 sm:gap-4 mt-6 pt-6 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3 sm:gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
           {settings?.lastRotationDate && (
-            <div className="text-sm text-gray-600 order-2 sm:order-1">
+            <div className="text-sm text-gray-600 dark:text-gray-400 order-2 sm:order-1">
               <span className="font-medium">Last Rotation:</span> {new Date(settings.lastRotationDate).toLocaleString()}
             </div>
           )}
@@ -258,7 +258,7 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
               type="button"
               onClick={handleCancel}
               disabled={saving}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
               Cancel
             </button>
             <button
@@ -272,8 +272,8 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
         </div>
       )}
       {!hasChanges && settings?.lastRotationDate && (
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <div className="text-sm text-gray-600">
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
             <span className="font-medium">Last Rotation:</span> {new Date(settings.lastRotationDate).toLocaleString()}
           </div>
         </div>

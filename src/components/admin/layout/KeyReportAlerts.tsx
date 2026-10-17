@@ -73,7 +73,7 @@ export function KeyReportAlertsDesktop({ alerts }: KeyReportAlertsDesktopProps) 
         aria-controls="key-report-alerts-dropdown"
         aria-label="Key report alerts"
         className={`relative p-2.5 rounded-md transition-colors cursor-pointer ${
-          dropdownOpen ? "bg-amber-50 text-amber-600" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+          dropdownOpen ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50"
         }`}>
         <MdWarning size={20} />
         <span className="absolute -top-0.5 -right-0.5 min-w-[1.25rem] h-5 px-1 flex items-center justify-center bg-amber-500 text-white text-xs font-semibold rounded-full">
@@ -83,26 +83,26 @@ export function KeyReportAlertsDesktop({ alerts }: KeyReportAlertsDesktopProps) 
       {dropdownOpen && (
         <div
           id="key-report-alerts-dropdown"
-          className="absolute right-0 top-full mt-1 w-[380px] max-h-[70vh] overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg z-50 py-2">
-          <div className="px-3 py-2 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-900">
+          className="absolute right-0 top-full mt-1 w-[380px] max-h-[70vh] overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-lg z-50 py-2">
+          <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
               Key report alerts ({KEY_REPORT_ALERT_WINDOW_DAYS}d)
             </p>
-            <p className="text-xs text-gray-500">Keys with negative reports needing attention</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Keys with negative reports needing attention</p>
           </div>
           <ul className="py-1">
             {alerts.map((item, i) => (
-              <li key={`${item.programSlug}:${item.label}:${i}`} className="px-3 py-2 hover:bg-gray-50">
-                <p className="text-sm font-medium text-gray-900 truncate">{item.programTitle}</p>
-                <p className="text-xs font-mono text-gray-600 truncate">{item.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+              <li key={`${item.programSlug}:${item.label}:${i}`} className="px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{item.programTitle}</p>
+                <p className="text-xs font-mono text-gray-600 dark:text-gray-400 truncate">{item.label}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   {item.negativeCount} negative · {item.ratioLabel}
                   {item.lastReportAt && ` · ${formatRelativeTimeCompact(item.lastReportAt)}`}
                 </p>
                 <Link
                   href={item.link}
                   onClick={() => setDropdownOpen(false)}
-                  className="inline-block mt-1.5 text-xs font-medium text-primary-600 hover:text-primary-700">
+                  className="inline-block mt-1.5 text-xs font-medium text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300">
                   View →
                 </Link>
               </li>
@@ -123,25 +123,25 @@ export function KeyReportAlertsMobile({ alerts, onLinkClick }: KeyReportAlertsMo
   if (!alerts || alerts.length === 0) return null;
 
   return (
-    <div className="px-3 pb-3 mb-3 border-b border-gray-200">
-      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+    <div className="px-3 pb-3 mb-3 border-b border-gray-200 dark:border-gray-800">
+      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
         Key report alerts ({alerts.length})
       </p>
       <ul className="space-y-2 max-h-48 overflow-y-auto">
         {alerts.map((item, i) => (
           <li
             key={`${item.programSlug}:${item.label}:${i}`}
-            className="rounded-md border border-gray-100 p-2 bg-gray-50">
-            <p className="text-sm font-medium text-gray-900 truncate">{item.programTitle}</p>
-            <p className="text-xs font-mono text-gray-600 truncate">{item.label}</p>
-            <p className="text-xs text-gray-500 mt-0.5">
+            className="rounded-md border border-gray-100 dark:border-gray-800 p-2 bg-gray-50 dark:bg-gray-800/50">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{item.programTitle}</p>
+            <p className="text-xs font-mono text-gray-600 dark:text-gray-400 truncate">{item.label}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {item.negativeCount} negative · {item.ratioLabel}
               {item.lastReportAt && ` · ${formatRelativeTimeCompact(item.lastReportAt)}`}
             </p>
             <Link
               href={item.link}
               onClick={onLinkClick}
-              className="inline-block mt-1.5 text-xs font-medium text-primary-600 hover:text-primary-700">
+              className="inline-block mt-1.5 text-xs font-medium text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300">
               View →
             </Link>
           </li>

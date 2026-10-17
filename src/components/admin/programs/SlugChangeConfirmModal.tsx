@@ -19,8 +19,8 @@ export default function SlugChangeConfirmModal({
     <div
       className="absolute inset-0 z-10 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm rounded-2xl"
       onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
-        <p className="text-sm text-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4" onClick={e => e.stopPropagation()}>
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           Changing the slug will change this program&apos;s URL. Links shared elsewhere may stop working. Are you sure
           you want to continue?
         </p>
@@ -39,7 +39,7 @@ export default function SlugChangeConfirmModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer">
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer">
             Cancel
           </button>
         </div>

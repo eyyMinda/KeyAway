@@ -1,37 +1,69 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { KeySuggestion } from "@/src/types/contact";
 import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import SuggestionDetailsModal from "./SuggestionDetailsModal";
-import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
+import {
+  AdminEmptyRows,
+  AdminListCard,
+  AdminPagination,
+  RelativeDate,
+  StatusPill,
+  adminRow,
+  adminTd,
+  adminTh,
+  adminTheadRow,
+  pillTones
+} from "@/src/components/admin/list/AdminListKit";
 
 export type SuggestionUpdatePayload = Partial<Pick<KeySuggestion, "status" | "email" | "name">>;
 
+const STATUS_OPTIONS: Array<{ value: KeySuggestion["status"]; label: string }> = [
+  { value: "new", label: "New" },
+  { value: "reviewing", label: "Reviewing" },
+  { value: "added", label: "Added" },
+  { value: "rejected", label: "Rejected" }
+];
+
+const STATUS_TONES: Record<KeySuggestion["status"], string> = {
+  new: pillTones.blue,
+  reviewing: pillTones.amber,
+  added: pillTones.green,
+  rejected: pillTones.gray
+};
+
+function hostOf(url?: string): string {
+  if (!url) return "";
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
 interface KeySuggestionsTableProps {
+  /** Current page. */
   suggestions: KeySuggestion[];
+  /** Every suggestion, so an open details modal survives a status change that filters its row out. */
+  all: KeySuggestion[];
+  total: number;
+  loading: boolean;
+  paging: { page: number; totalPages: number; pageSize: number; setPage: (page: number) => void };
   onUpdate: () => void;
-  sortColumn?: string;
-  sortDirection?: SortDirection;
-  onSort?: (column: string) => void;
 }
 
 export default function KeySuggestionsTable({
   suggestions,
-  onUpdate,
-  sortColumn,
-  sortDirection,
-  onSort
+  all,
+  total,
+  loading,
+  paging,
+  onUpdate
 }: KeySuggestionsTableProps) {
-  const [selectedSuggestion, setSelectedSuggestion] = useState<KeySuggestion | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
-
-  const selectedId = selectedSuggestion?._id;
-  useEffect(() => {
-    if (!selectedId || !suggestions.length) return;
-    const updated = suggestions.find(s => s._id === selectedId);
-    if (updated) setSelectedSuggestion(updated);
-  }, [suggestions, selectedId]);
+  const selected = all.find(s => s._id === selectedId) ?? null;
 
   const handleUpdateSuggestion = async (suggestionId: string, updates: SuggestionUpdatePayload) => {
     if (Object.keys(updates).length === 0) return;
@@ -52,123 +84,95 @@ export default function KeySuggestionsTable({
     }
   };
 
-  const tableColumns: SortableColumn[] = [
-    { key: "programName", label: "Program", sortable: true, className: "text-left" },
-    { key: "cdKey", label: "CD Key", sortable: false, className: "text-left" },
-    { key: "version", label: "Version", sortable: false, className: "text-center" },
-    { key: "status", label: "Status", sortable: true, className: "text-center" },
-    { key: "createdAt", label: "Date", sortable: true, className: "text-center" },
-    { key: "actions", label: "Actions", sortable: false, className: "text-center" }
-  ];
-
-  const getStatusColor = (status: KeySuggestion["status"]) => {
-    switch (status) {
-      case "new":
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case "reviewing":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "added":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "rejected":
-        return "bg-red-100 text-red-800 border-red-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
-
-  if (suggestions.length === 0) {
-    return (
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-12 text-center">
-        <div className="text-4xl mb-4">🔑</div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No suggestions found</h3>
-        <p className="text-gray-500">No key suggestions match the current filters.</p>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">CD Key Suggestions</h3>
-          <p className="text-sm text-gray-500 mt-1">Total: {suggestions.length}</p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <SortableTableHead
-              columns={tableColumns}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={onSort}
+      <AdminListCard
+        title="Suggestions"
+        meta={`${total.toLocaleString()} ${total === 1 ? "result" : "results"}`}
+        footer={
+          total > 0 && (
+            <AdminPagination
+              page={paging.page}
+              totalPages={paging.totalPages}
+              total={total}
+              pageSize={paging.pageSize}
+              onPageChange={paging.setPage}
             />
-            <tbody className="divide-y divide-gray-200">
-              {suggestions.map(suggestion => {
-                const isRejected = suggestion.status === "rejected";
-                return (
-                  <tr key={suggestion._id} className={`hover:bg-gray-50 ${isRejected ? "bg-gray-50 opacity-75" : ""}`}>
-                    <td className="px-6 py-4">
-                      <div className={`font-medium truncate ${isRejected ? "text-gray-500" : "text-gray-900"}`}>
-                        {suggestion.programName}
-                      </div>
-                      <a
-                        href={suggestion.programLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`text-xs truncate max-w-xs block ${isRejected ? "text-gray-400" : "text-primary-600 hover:text-primary-700"}`}>
-                        {suggestion.programLink}
-                      </a>
+          )
+        }>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className={adminTheadRow}>
+              <tr>
+                <th className={adminTh}>Program</th>
+                <th className={adminTh}>Key</th>
+                <th className={`${adminTh} hidden lg:table-cell`}>From</th>
+                <th className={adminTh}>Status</th>
+                <th className={adminTh}>Submitted</th>
+                <th className={adminTh} />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {loading ? (
+                <AdminEmptyRows colSpan={6}>Loading suggestions…</AdminEmptyRows>
+              ) : suggestions.length === 0 ? (
+                <AdminEmptyRows colSpan={6}>No suggestions match these filters.</AdminEmptyRows>
+              ) : (
+                suggestions.map(s => (
+                  <tr key={s._id} className={adminRow}>
+                    <td className={`${adminTd} max-w-64`}>
+                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{s.programName}</div>
+                      {s.programLink && (
+                        <a
+                          href={s.programLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary-600 dark:text-sky-400 hover:underline truncate block">
+                          {hostOf(s.programLink)}
+                        </a>
+                      )}
                     </td>
-                    <td className="px-6 py-4">
-                      <code
-                        className={`px-2 py-1 bg-gray-100 whitespace-nowrap rounded text-sm font-mono ${isRejected ? "text-gray-500" : "text-gray-900"}`}>
-                        {suggestion.cdKey}
+                    <td className={adminTd}>
+                      <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                        {s.cdKey}
                       </code>
+                      {s.programVersion && (
+                        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">v{s.programVersion}</div>
+                      )}
                     </td>
-                    <td className={`px-6 py-4 text-center text-sm ${isRejected ? "text-gray-500" : "text-gray-900"}`}>
-                      v{suggestion.programVersion}
+                    <td className={`${adminTd} hidden lg:table-cell max-w-56`}>
+                      <div className="text-gray-900 dark:text-gray-100 truncate">{s.name || "—"}</div>
+                      {s.email && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{s.email}</div>}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center">
-                        <select
-                          value={suggestion.status}
-                          onChange={e =>
-                            handleUpdateSuggestion(suggestion._id, {
-                              status: e.target.value as KeySuggestion["status"]
-                            })
-                          }
-                          disabled={updating === suggestion._id}
-                          className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${getStatusColor(suggestion.status)} disabled:opacity-50`}>
-                          <option value="new">New</option>
-                          <option value="reviewing">Reviewing</option>
-                          <option value="added">Added</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
-                      </div>
+                    <td className={adminTd}>
+                      <StatusPill
+                        value={s.status}
+                        options={STATUS_OPTIONS}
+                        tones={STATUS_TONES}
+                        disabled={updating === s._id}
+                        onChange={status => handleUpdateSuggestion(s._id, { status })}
+                      />
                     </td>
-                    <td className={`px-6 py-4 text-center text-sm ${isRejected ? "text-gray-400" : "text-gray-500"}`}>
-                      {new Date(suggestion.createdAt).toLocaleDateString()}
+                    <td className={`${adminTd} text-xs text-gray-500 dark:text-gray-400`}>
+                      <RelativeDate iso={s.createdAt} />
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex justify-center">
-                        <AdminViewDetailsButton onClick={() => setSelectedSuggestion(suggestion)} />
-                      </div>
+                    <td className={`${adminTd} text-right`}>
+                      <AdminViewDetailsButton onClick={() => setSelectedId(s._id)} />
                     </td>
                   </tr>
-                );
-              })}
+                ))
+              )}
             </tbody>
           </table>
         </div>
-      </div>
+      </AdminListCard>
 
-      {/* Details Modal */}
-      {selectedSuggestion && (
+      {selected && (
         <SuggestionDetailsModal
-          suggestion={selectedSuggestion}
-          onClose={() => setSelectedSuggestion(null)}
-          onUpdateSuggestion={updates => handleUpdateSuggestion(selectedSuggestion._id, updates)}
-          updating={updating === selectedSuggestion._id}
+          suggestion={selected}
+          onClose={() => setSelectedId(null)}
+          onUpdateSuggestion={updates => handleUpdateSuggestion(selected._id, updates)}
+          updating={updating === selected._id}
         />
       )}
     </>

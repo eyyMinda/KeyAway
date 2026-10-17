@@ -1,7 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { FiCopy, FiCheck, FiExternalLink, FiEdit2, FiPlusCircle, FiEye } from "react-icons/fi";
+import { useMemo, useState } from "react";
+import {
+  FiCopy,
+  FiCheck,
+  FiExternalLink,
+  FiEdit2,
+  FiPlusCircle,
+  FiEye,
+  FiChevronUp,
+  FiChevronDown,
+  FiSearch,
+  FiEdit3,
+  FiRefreshCw
+} from "react-icons/fi";
+import type { IconType } from "react-icons";
 import t from "@/src/locales/admin/giveaway-finds/en.json";
 import { formatDateOnly, formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 import type {
@@ -35,10 +48,10 @@ interface GiveawayFindsTableProps {
 }
 
 const STATUS_COLORS: Record<GiveawayFindStatus, string> = {
-  new: "bg-blue-100 text-blue-800 border-blue-300",
-  reviewing: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  added: "bg-green-100 text-green-800 border-green-300",
-  dismissed: "bg-gray-100 text-gray-600 border-gray-300"
+  new: "bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-500/40",
+  reviewing: "bg-yellow-100 dark:bg-yellow-500/15 text-yellow-800 dark:text-yellow-300 border-yellow-300 dark:border-yellow-500/40",
+  added: "bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 border-green-300 dark:border-green-500/40",
+  dismissed: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700"
 };
 
 function flowLabel(flow?: string): string {
@@ -46,11 +59,11 @@ function flowLabel(flow?: string): string {
 }
 
 const CHIP_STYLES = {
-  new: { box: "bg-green-50 border-green-300 text-gray-900", badge: "text-green-700" },
-  known: { box: "bg-gray-50 border-gray-200 text-gray-400", badge: "text-gray-400" },
-  limit: { box: "bg-yellow-50 border-yellow-300 text-yellow-900", badge: "text-yellow-700" },
-  invalid: { box: "bg-red-50 border-red-200 text-red-800 line-through", badge: "text-red-700" },
-  expired: { box: "bg-yellow-50 border-yellow-300 text-yellow-900 line-through", badge: "text-yellow-700" }
+  new: { box: "bg-green-50 dark:bg-green-500/10 border-green-300 dark:border-green-500/40 text-gray-900 dark:text-gray-100", badge: "text-green-700 dark:text-green-300" },
+  known: { box: "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-500", badge: "text-gray-400 dark:text-gray-500" },
+  limit: { box: "bg-yellow-50 dark:bg-yellow-500/10 border-yellow-300 dark:border-yellow-500/40 text-yellow-900 dark:text-yellow-200", badge: "text-yellow-700 dark:text-yellow-300" },
+  invalid: { box: "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30 text-red-800 dark:text-red-300 line-through", badge: "text-red-700 dark:text-red-300" },
+  expired: { box: "bg-yellow-50 dark:bg-yellow-500/10 border-yellow-300 dark:border-yellow-500/40 text-yellow-900 dark:text-yellow-200 line-through", badge: "text-yellow-700 dark:text-yellow-300" }
 } as const;
 
 function CopyChip({
@@ -84,7 +97,7 @@ function CopyChip({
       <span className="truncate font-mono">{value}</span>
       <span className={`shrink-0 text-[10px] font-semibold uppercase no-underline ${style.badge}`}>{badge}</span>
       {copied ? (
-        <FiCheck className="w-3 h-3 shrink-0 text-green-600" />
+        <FiCheck className="w-3 h-3 shrink-0 text-green-600 dark:text-green-400" />
       ) : (
         <FiCopy className="w-3 h-3 shrink-0 opacity-50 group-hover:opacity-100" />
       )}
@@ -125,7 +138,7 @@ function ItemRow({
           disabled={disabled}
           title={t.undoIgnoreHint}
           onClick={() => onUnignore({ kind, value })}
-          className={`${action} text-gray-500 hover:text-gray-800`}>
+          className={`${action} text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200`}>
           {t.undoIgnore}
         </button>
       ) : (
@@ -136,7 +149,7 @@ function ItemRow({
                 type="button"
                 disabled={disabled}
                 onClick={() => onAdd({ kind, value })}
-                className={`${action} font-semibold text-green-700 hover:text-green-900`}>
+                className={`${action} font-semibold text-green-700 dark:text-green-300 hover:text-green-900 dark:hover:text-green-200`}>
                 {t.addThisKey}
               </button>
             )}
@@ -145,7 +158,7 @@ function ItemRow({
               disabled={disabled}
               title={t.markLimitHint}
               onClick={() => onIgnore({ kind, value }, "limit")}
-              className={`${action} text-yellow-700 hover:text-yellow-900`}>
+              className={`${action} text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-200`}>
               {t.markLimit}
             </button>
             <button
@@ -153,7 +166,7 @@ function ItemRow({
               disabled={disabled}
               title={t.markInvalidHint}
               onClick={() => onIgnore({ kind, value }, "invalid")}
-              className={`${action} text-red-600 hover:text-red-800`}>
+              className={`${action} text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300`}>
               {t.markInvalid}
             </button>
           </span>
@@ -190,15 +203,15 @@ function LinkRow({
         rel="noopener noreferrer"
         className={`inline-flex items-center gap-1 max-w-full text-xs ${
           ignoredReason
-            ? "text-yellow-800 line-through"
+            ? "text-yellow-800 dark:text-yellow-300 line-through"
             : isNew
-              ? "text-primary-600 hover:text-primary-700"
-              : "text-gray-400 hover:text-gray-600"
+              ? "text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300"
+              : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400"
         }`}>
         <FiExternalLink className="w-3 h-3 shrink-0" />
         <span className="truncate">{label || url}</span>
         {ignoredReason && (
-          <span className="shrink-0 text-[10px] font-semibold uppercase no-underline text-yellow-700">
+          <span className="shrink-0 text-[10px] font-semibold uppercase no-underline text-yellow-700 dark:text-yellow-300">
             {t.ignoredBadge[ignoredReason]}
           </span>
         )}
@@ -209,7 +222,7 @@ function LinkRow({
           disabled={disabled}
           title={t.undoIgnoreHint}
           onClick={() => onUnignore({ kind: "link", value: url })}
-          className={`${action} text-gray-500 hover:text-gray-800`}>
+          className={`${action} text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200`}>
           {t.undoIgnore}
         </button>
       ) : (
@@ -218,7 +231,7 @@ function LinkRow({
           disabled={disabled}
           title={t.markExpiredHint}
           onClick={() => onIgnore({ kind: "link", value: url }, "expired")}
-          className={`${action} text-yellow-700 hover:text-yellow-900`}>
+          className={`${action} text-yellow-700 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-200`}>
           {t.markExpired}
         </button>
       )}
@@ -241,12 +254,22 @@ function ProgramCell({
     <div className="space-y-2 min-w-48">
       {find.program ? (
         <div>
-          <div className="font-medium text-gray-900">{find.program.title}</div>
+          {find.program.slug ? (
+            <a
+              href={`/program/${find.program.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-gray-900 dark:text-gray-100 hover:text-primary-700 dark:hover:text-sky-300 hover:underline">
+              {find.program.title}
+            </a>
+          ) : (
+            <div className="font-medium text-gray-900 dark:text-gray-100">{find.program.title}</div>
+          )}
           <div className="flex flex-wrap items-center gap-1.5 mt-1">
-            <span className="text-[11px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">
+            <span className="text-[11px] px-1.5 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300">
               {flowLabel(find.program.programFlow)}
             </span>
-            <span className="text-[11px] text-gray-500">
+            <span className="text-[11px] text-gray-500 dark:text-gray-400">
               {t.matchMethod[find.matchMethod] ?? find.matchMethod}
               {typeof find.matchConfidence === "number" && find.matchMethod !== "manual"
                 ? ` · ${find.matchConfidence.toFixed(2)}`
@@ -256,7 +279,7 @@ function ProgramCell({
         </div>
       ) : (
         <div>
-          <div className="text-sm font-medium text-amber-700">{t.possibleMatch}</div>
+          <div className="text-sm font-medium text-amber-700 dark:text-amber-300">{t.possibleMatch}</div>
           <div className="flex flex-col items-start gap-1 mt-1">
             {(find.candidates ?? [])
               .filter(c => c.program)
@@ -266,7 +289,7 @@ function ProgramCell({
                   type="button"
                   disabled={disabled}
                   onClick={() => onAssign(c.program!._id)}
-                  className="text-xs px-2 py-1 rounded border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 cursor-pointer disabled:opacity-50">
+                  className="text-xs px-2 py-1 rounded border border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-200 hover:bg-amber-100 dark:hover:bg-amber-500/15 cursor-pointer disabled:opacity-50">
                   {t.confirm}: {c.program!.title} ({c.score.toFixed(2)})
                 </button>
               ))}
@@ -277,7 +300,7 @@ function ProgramCell({
         value=""
         disabled={disabled}
         onChange={e => e.target.value && onAssign(e.target.value)}
-        className="w-full max-w-56 px-2 py-1 border border-gray-300 rounded text-xs text-gray-700 disabled:opacity-50">
+        className="w-full max-w-56 px-2 py-1 border border-gray-300 dark:border-gray-700 rounded text-xs text-gray-700 dark:text-gray-300 disabled:opacity-50">
         <option value="">{find.program ? t.changeProgram : t.assignProgram}</option>
         {programs.map(p => (
           <option key={p._id} value={p._id}>
@@ -285,6 +308,62 @@ function ProgramCell({
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+type SortKey = "program" | "giveaway" | "found" | "scanned";
+type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
+
+/** Text columns start A→Z, dates start newest first. */
+const DEFAULT_DIR: Record<SortKey, "asc" | "desc"> = {
+  program: "asc",
+  giveaway: "asc",
+  found: "desc",
+  scanned: "desc"
+};
+
+/** Header sort toggle. With `icon`, the label moves to the tooltip to keep the column narrow. */
+function SortButton({
+  label,
+  icon: LabelIcon,
+  sortKey,
+  sort,
+  onSort
+}: {
+  label: string;
+  icon?: IconType;
+  sortKey: SortKey;
+  sort: Sort;
+  onSort: (key: SortKey) => void;
+}) {
+  const active = sort?.key === sortKey;
+  const Icon = active && sort.dir === "asc" ? FiChevronUp : FiChevronDown;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(sortKey)}
+      title={t.sortBy.replace("{column}", label)}
+      aria-label={t.sortBy.replace("{column}", label)}
+      className={`inline-flex items-center gap-0.5 uppercase tracking-wider cursor-pointer hover:text-gray-900 dark:hover:text-gray-100 ${
+        active ? "text-gray-900 dark:text-gray-100" : ""
+      }`}>
+      {LabelIcon ? <LabelIcon className="w-3.5 h-3.5" /> : label}
+      <Icon className={`w-3 h-3 ${active ? "" : "opacity-30"}`} />
+    </button>
+  );
+}
+
+/** "3d ago" -> "3d"; the column header icons say what each date is. */
+function shortAgo(iso?: string): string {
+  return formatRelativeTimeCompact(iso).replace(/ ago$/, "").replace("just now", "now");
+}
+
+function SeenRow({ icon: Icon, label, iso, strong }: { icon: IconType; label: string; iso: string; strong?: boolean }) {
+  return (
+    <div className="flex items-center gap-1" title={`${label}: ${new Date(iso).toLocaleString()}`}>
+      <Icon className="w-3 h-3 shrink-0 text-gray-400 dark:text-gray-500" aria-label={label} />
+      <span className={strong ? "text-gray-900 dark:text-gray-100" : undefined}>{shortAgo(iso)}</span>
     </div>
   );
 }
@@ -299,46 +378,87 @@ export default function GiveawayFindsTable({
   onWatch
 }: GiveawayFindsTableProps) {
   const sourceLabel = (key: string) => sources.find(s => s.key === key)?.label ?? key;
+  // null keeps the API order (most recently changed first).
+  const [sort, setSort] = useState<Sort>(null);
+
+  const onSort = (key: SortKey) =>
+    setSort(prev =>
+      prev?.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: DEFAULT_DIR[key] }
+    );
+
+  const sorted = useMemo(() => {
+    if (!sort) return finds;
+    const label = (f: GiveawayFind) => sources.find(s => s.key === f.sourceId)?.label ?? f.sourceId;
+    const keys = (f: GiveawayFind): (string | undefined)[] => {
+      if (sort.key === "program") return [f.program?.title];
+      if (sort.key === "giveaway") return [label(f), f.sourceTitle];
+      return [sort.key === "found" ? f.firstSeenAt : f.lastSeenAt];
+    };
+    const sign = sort.dir === "asc" ? 1 : -1;
+    // Rows without a value (unmatched program, missing date) always go last.
+    return [...finds].sort((a, b) => {
+      const ka = keys(a);
+      const kb = keys(b);
+      if (!ka[0] || !kb[0]) return ka[0] ? -1 : kb[0] ? 1 : 0;
+      for (let i = 0; i < ka.length; i++) {
+        const diff = (ka[i] ?? "").localeCompare(kb[i] ?? "", undefined, { sensitivity: "base" });
+        if (diff) return diff * sign;
+      }
+      return 0;
+    });
+  }, [finds, sort, sources]);
+
   if (finds.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-12 text-center">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-12 text-center">
         <div className="text-4xl mb-4">🎁</div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">{t.emptyTitle}</h3>
-        <p className="text-gray-500">{t.emptyBody}</p>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{t.emptyTitle}</h3>
+        <p className="text-gray-500 dark:text-gray-400">{t.emptyBody}</p>
       </div>
     );
   }
 
-  const columns = [t.columns.program, t.columns.giveaway, t.columns.found, t.columns.details, t.columns.status, t.columns.actions];
+  const thClass = "px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap";
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-      <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">{t.tableTitle}</h3>
-        <p className="text-sm text-gray-500 mt-1">Total: {finds.length}</p>
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="p-4 sm:px-6 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center gap-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t.tableTitle}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Total: {finds.length}</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-800/50">
             <tr>
-              {columns.map(label => (
-                <th
-                  key={label}
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  {label}
-                </th>
-              ))}
+              <th className={thClass}>
+                <SortButton label={t.columns.program} sortKey="program" sort={sort} onSort={onSort} />
+              </th>
+              <th className={thClass}>
+                <SortButton label={t.columns.giveaway} sortKey="giveaway" sort={sort} onSort={onSort} />
+              </th>
+              <th className={thClass}>{t.columns.found}</th>
+              <th className={thClass}>{t.columns.details}</th>
+              <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                <span className="inline-flex items-center gap-1.5">
+                  <SortButton label={t.foundAt} icon={FiSearch} sortKey="found" sort={sort} onSort={onSort} />
+                  <SortButton label={t.scannedAt} icon={FiRefreshCw} sortKey="scanned" sort={sort} onSort={onSort} />
+                </span>
+              </th>
+              <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                {t.columns.status}
+              </th>
+              <th className={thClass}>{t.columns.actions}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {finds.map(find => {
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+            {sorted.map(find => {
               const busy = updatingId === find._id;
               const muted = find.status === "dismissed" || find.status === "added";
               const programFlow = find.program?.programFlow ?? "cd_key";
               const flowMismatch = Boolean(find.program && find.detectedFlow && find.detectedFlow !== programFlow);
               const hasItems = Boolean(find.keys?.length || find.accounts?.length || find.links?.length);
               return (
-                <tr key={find._id} className={`align-top hover:bg-gray-50 ${muted ? "opacity-70" : ""}`}>
+                <tr key={find._id} className={`align-top hover:bg-gray-50 dark:hover:bg-gray-800/50 ${muted ? "opacity-70" : ""}`}>
                   <td className="px-4 py-4">
                     <ProgramCell
                       find={find}
@@ -352,15 +472,15 @@ export default function GiveawayFindsTable({
                       href={find.sourceUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-primary-600 hover:text-primary-700 break-words">
+                      className="font-medium text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300 break-words">
                       {find.sourceTitle}
                     </a>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       {sourceLabel(find.sourceId)}
                       {find.publishedAt ? ` · ${formatDateOnly(find.publishedAt)}` : ""}
                     </div>
                     {find.excerpt && (
-                      <p className="text-xs text-gray-500 mt-2 line-clamp-3" title={find.excerpt}>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-3" title={find.excerpt}>
                         {find.excerpt}
                       </p>
                     )}
@@ -410,43 +530,42 @@ export default function GiveawayFindsTable({
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-500 italic">{t.linkOnly}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 italic">{t.linkOnly}</span>
                     )}
                   </td>
-                  <td className="px-4 py-4 text-xs text-gray-600 whitespace-nowrap space-y-1">
+                  <td className="px-4 py-4 text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap space-y-1">
                     {find.version && (
                       <div>
-                        {t.version}: <span className="text-gray-900">{find.version}</span>
+                        {t.version}: <span className="text-gray-900 dark:text-gray-100">{find.version}</span>
                       </div>
                     )}
                     {find.validUntil && (
                       <div>
-                        {t.validUntil}: <span className="text-gray-900">{formatDateOnly(find.validUntil)}</span>
+                        {t.validUntil}: <span className="text-gray-900 dark:text-gray-100">{formatDateOnly(find.validUntil)}</span>
                       </div>
                     )}
                     {find.detectedFlow && (
                       <div>
-                        {t.detectedFlow}: <span className="text-gray-900">{flowLabel(find.detectedFlow)}</span>
+                        {t.detectedFlow}: <span className="text-gray-900 dark:text-gray-100">{flowLabel(find.detectedFlow)}</span>
                       </div>
                     )}
                     {flowMismatch && (
-                      <div className="text-amber-700">⚠ {t.flowMismatch.replace("{flow}", flowLabel(programFlow))}</div>
-                    )}
-                    <div className="pt-1 text-gray-500">
-                      {t.firstSeen} {formatRelativeTimeCompact(find.firstSeenAt)}
-                    </div>
-                    {find.lastChangedAt && find.lastChangedAt !== find.firstSeenAt && (
-                      <div className="text-gray-500">
-                        {t.changed} {formatRelativeTimeCompact(find.lastChangedAt)}
-                      </div>
+                      <div className="text-amber-700 dark:text-amber-300">⚠ {t.flowMismatch.replace("{flow}", flowLabel(programFlow))}</div>
                     )}
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-2 py-4 text-[11px] text-gray-500 dark:text-gray-400 whitespace-nowrap space-y-0.5 tabular-nums">
+                    <SeenRow icon={FiSearch} label={t.foundAt} iso={find.firstSeenAt} strong />
+                    {find.lastChangedAt && find.lastChangedAt !== find.firstSeenAt && (
+                      <SeenRow icon={FiEdit3} label={t.changed} iso={find.lastChangedAt} />
+                    )}
+                    {find.lastSeenAt && <SeenRow icon={FiRefreshCw} label={t.scannedAt} iso={find.lastSeenAt} />}
+                  </td>
+                  <td className="px-2 py-4">
                     <select
                       value={find.status}
                       disabled={busy}
                       onChange={e => onUpdate(find._id, { status: e.target.value as GiveawayFindStatus })}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${STATUS_COLORS[find.status]} disabled:opacity-50`}>
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer ${STATUS_COLORS[find.status]} disabled:opacity-50`}>
                       {(Object.keys(t.status) as GiveawayFindStatus[]).map(s => (
                         <option key={s} value={s}>
                           {t.status[s]}
@@ -454,7 +573,7 @@ export default function GiveawayFindsTable({
                       ))}
                     </select>
                     {find.status === "dismissed" && find.dismissedReason === "expired" && (
-                      <div className="text-[11px] text-gray-500 mt-1 whitespace-nowrap">{t.dismissedExpired}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">{t.dismissedExpired}</div>
                     )}
                   </td>
                   <td className="px-4 py-4">
@@ -464,13 +583,13 @@ export default function GiveawayFindsTable({
                           type="button"
                           disabled={busy}
                           onClick={() => onAddEntry(find, null)}
-                          className="inline-flex items-center gap-1 font-semibold text-green-700 hover:text-green-900 cursor-pointer disabled:opacity-50">
+                          className="inline-flex items-center gap-1 font-semibold text-green-700 dark:text-green-300 hover:text-green-900 dark:hover:text-green-200 cursor-pointer disabled:opacity-50">
                           <FiPlusCircle className="w-3.5 h-3.5" /> {t.addToProgram}
                         </button>
                       )}
                       {find.program &&
                         (find.watched ? (
-                          <span className="inline-flex items-center gap-1 text-gray-400">
+                          <span className="inline-flex items-center gap-1 text-gray-400 dark:text-gray-500">
                             <FiEye className="w-3.5 h-3.5" /> {t.watching}
                           </span>
                         ) : (
@@ -479,7 +598,7 @@ export default function GiveawayFindsTable({
                             disabled={busy}
                             title={t.watchThisPageHint}
                             onClick={() => onWatch(find)}
-                            className="inline-flex items-center gap-1 text-gray-700 hover:text-gray-900 cursor-pointer disabled:opacity-50">
+                            className="inline-flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-pointer disabled:opacity-50">
                             <FiEye className="w-3.5 h-3.5" /> {t.watchThisPage}
                           </button>
                         ))}
@@ -487,7 +606,7 @@ export default function GiveawayFindsTable({
                         href={find.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700">
+                        className="inline-flex items-center gap-1 text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300">
                         <FiExternalLink className="w-3.5 h-3.5" /> {t.openSource}
                       </a>
                       {find.program && (
@@ -495,7 +614,7 @@ export default function GiveawayFindsTable({
                           href={`/studio/intent/edit/id=${find.program._id};type=program`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-gray-700 hover:text-gray-900">
+                          className="inline-flex items-center gap-1 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100">
                           <FiEdit2 className="w-3.5 h-3.5" /> {t.openStudio}
                         </a>
                       )}
@@ -504,7 +623,7 @@ export default function GiveawayFindsTable({
                           type="button"
                           disabled={busy}
                           onClick={() => onUpdate(find._id, { status: "added" })}
-                          className="text-green-700 hover:text-green-800 cursor-pointer disabled:opacity-50">
+                          className="text-green-700 dark:text-green-300 hover:text-green-800 dark:hover:text-green-300 cursor-pointer disabled:opacity-50">
                           {t.markAdded}
                         </button>
                       )}
@@ -513,7 +632,7 @@ export default function GiveawayFindsTable({
                           type="button"
                           disabled={busy}
                           onClick={() => onUpdate(find._id, { status: "dismissed" })}
-                          className="text-gray-500 hover:text-gray-700 cursor-pointer disabled:opacity-50">
+                          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer disabled:opacity-50">
                           {t.dismiss}
                         </button>
                       )}

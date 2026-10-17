@@ -2,8 +2,6 @@
 
 /** @fileoverview Admin analytics dashboard: time filter, charts, ranked tables, recent activity. */
 import { useState, useEffect, useCallback } from "react";
-import { allProgramsQuery } from "@/src/lib/sanity/queries";
-import { client } from "@/src/sanity/lib/client";
 import {
   fetchAnalyticsSummary,
   fetchVisitorTagAggregatesForRange,
@@ -14,15 +12,14 @@ import { visitorTierSwatchBgClass } from "@/src/theme/colorSchema";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
-import EventChart from "@/src/components/admin/EventChart";
+import ActivityChart from "@/src/components/admin/ActivityChart";
+import ActionBreakdown, { actionRows } from "@/src/components/admin/ActionBreakdown";
 import TimeFilter from "@/src/components/admin/TimeFilter";
 import RecentActivity from "@/src/components/admin/RecentActivity";
-import { Program } from "@/src/types";
 import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
 
 export default function AnalyticsPage() {
   const [summary, setSummary] = useState<AnalyticsSummaryData | null>(null);
-  const [programs, setPrograms] = useState<Program[]>([]);
   const [visitorTagRows, setVisitorTagRows] = useState<VisitorTagAggregateRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -41,18 +38,15 @@ export default function AnalyticsPage() {
       try {
         if (selectedPeriod === "custom" && (!customDateRange.start || !customDateRange.end)) {
           setSummary(null);
-          setPrograms([]);
           setVisitorTagRows([]);
           return;
         }
         const { since, until } = getDateRange(selectedPeriod, customDateRange);
-        const [summaryData, programsData, visitorRows] = await Promise.all([
+        const [summaryData, visitorRows] = await Promise.all([
           fetchAnalyticsSummary(since, until, { refresh: isRefresh }),
-          client.fetch(allProgramsQuery),
           fetchVisitorTagAggregatesForRange(since, until)
         ]);
         setSummary(summaryData);
-        setPrograms(programsData);
         setVisitorTagRows(visitorRows);
       } catch (error) {
         console.error("Error fetching analytics:", error);
@@ -80,8 +74,6 @@ export default function AnalyticsPage() {
     setCustomDateRange({ start, end });
   };
 
-  const totalPrograms = programs.filter(p => p.slug?.current).length;
-  const totals = summary?.totals ?? {};
 
   if (loading && !refreshing) {
     return (
@@ -89,18 +81,26 @@ export default function AnalyticsPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading analytics data...</p>
+            <p className="text-gray-600 dark:text-gray-400">Loading analytics data...</p>
           </div>
         </div>
       </ProtectedAdminLayout>
     );
   }
 
-  const eventData = summary?.eventChart ?? [];
+  const totals = summary?.totals ?? {};
+  const timeline = summary?.timeline ?? { bucket: "day" as const, points: [] };
+  const sessions = summary?.sessions ?? 0;
+  const pageViews = totals.page_viewed ?? 0;
+  const actions = actionRows(totals).reduce((n, [, v]) => n + v, 0);
+  const spark = (key: "visitors" | "views" | "actions") => timeline.points.map(p => p[key]);
   const programData = summary?.programTable ?? [];
   const socialData = summary?.socialTable ?? [];
   const pathData = summary?.pathTable ?? [];
   const countryData = summary?.countryTable ?? [];
+  const countryTotal = countryData.reduce((n, c) => n + c.value, 0);
+  const topCountry = countryData.reduce<(typeof countryData)[number] | null>((top, c) => (!top || c.value > top.value ? c : top), null);
+  const topCountryShare = topCountry && countryTotal ? Math.round((topCountry.value / countryTotal) * 100) : 0;
   const referrerData = summary?.referrerTable ?? [];
   const recentEvents = summary?.recentEvents ?? [];
 
@@ -118,54 +118,37 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <AnalyticsCard
-          title="Total Events"
-          value={summary?.totalEvents ?? 0}
-          subtitle="Selected period"
-          icon="📊"
-          color="blue"
-        />
-        <AnalyticsCard
-          title="Total Programs"
-          value={totalPrograms}
-          subtitle="Programs on website"
-          icon="💻"
-          color="green"
-        />
-        <AnalyticsCard
-          title="Social Clicks"
-          value={totals.social_click ?? 0}
-          subtitle="Social media engagement"
-          icon="📱"
-          color="purple"
-        />
-        <AnalyticsCard
-          title="Page Views"
-          value={totals.page_viewed ?? 0}
-          subtitle="Total page views"
-          icon="👁️"
-          color="orange"
-        />
-        <AnalyticsCard
-          title="Unique Visitors"
+          label="Visitors"
           value={summary?.uniqueVisitors ?? 0}
-          subtitle="Distinct visitors"
-          icon="👨‍👩‍👧"
-          color="purple"
+          detail={`${sessions.toLocaleString()} sessions`}
+          spark={spark("visitors")}
         />
         <AnalyticsCard
-          title="Unique Countries"
+          label="Page views"
+          value={pageViews}
+          detail={sessions ? `${(pageViews / sessions).toFixed(1)} per session` : undefined}
+          spark={spark("views")}
+        />
+        <AnalyticsCard
+          label="Actions"
+          value={actions}
+          detail={pageViews ? `${((actions / pageViews) * 100).toFixed(1)} per 100 views` : undefined}
+          spark={spark("actions")}
+        />
+        <AnalyticsCard
+          label="Countries"
           value={summary?.uniqueCountries ?? 0}
-          subtitle="Geographic reach"
-          icon="🌍"
-          color="blue"
+          detail={topCountry ? `Top: ${topCountry.label} · ${topCountryShare}%` : undefined}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <EventChart data={eventData} title="Events Distribution" type="doughnut" />
-        <EventChart data={eventData} title="Events Overview" type="bar" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="lg:col-span-2 min-w-0">
+          <ActivityChart timeline={timeline} />
+        </div>
+        <ActionBreakdown totals={totals} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

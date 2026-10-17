@@ -40,30 +40,30 @@ export default function DeleteCommentConfirmModal({
         role="alertdialog"
         aria-labelledby="delete-comment-title"
         aria-describedby="delete-comment-desc"
-        className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-2xl"
+        className="relative w-full max-w-md rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl"
         onClick={e => e.stopPropagation()}>
         <div className="mb-4 flex items-start justify-between gap-3">
-          <h3 id="delete-comment-title" className="text-lg font-bold text-gray-900">
+          <h3 id="delete-comment-title" className="text-lg font-bold text-gray-900 dark:text-gray-100">
             Delete {kind}?
           </h3>
           <ModalCloseButton
             onClick={onClose}
             disabled={busy}
-            className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className="cursor-pointer rounded-lg p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50"
             iconClassName="h-5 w-5"
             aria-label="Close"
           />
         </div>
-        <p id="delete-comment-desc" className="text-sm leading-relaxed text-gray-600">
-          Remove this {kind} by <strong className="text-gray-900">{row.authorName}</strong> on{" "}
-          <strong className="text-gray-900">{row.programTitle}</strong>? This cannot be undone.
+        <p id="delete-comment-desc" className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+          Remove this {kind} by <strong className="text-gray-900 dark:text-gray-100">{row.authorName}</strong> on{" "}
+          <strong className="text-gray-900 dark:text-gray-100">{row.programTitle}</strong>? This cannot be undone.
         </p>
         <div className="mt-6 flex flex-wrap justify-end gap-2">
           <button
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+            className="cursor-pointer rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 disabled:cursor-not-allowed disabled:opacity-50">
             Cancel
           </button>
           <button
