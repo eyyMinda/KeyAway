@@ -74,9 +74,23 @@ export async function listSessionsPage(opts: {
   entry: string;
   page: number;
   limit: number;
+  /** Visitor id / session id prefix, or part of the location, landing path or referrer. */
+  q?: string;
 }): Promise<{ rows: Array<AdminSessionSummary & VisitorMeta>; total: number; countsByEntry: Record<string, number> }> {
   const sql = db();
-  const inRange = sql`s.last_event_at >= ${opts.since} and s.started_at <= ${opts.until}`;
+  const q = opts.q?.trim().toLowerCase().slice(0, 100) ?? "";
+  // Escape LIKE wildcards so "_" or "%" in the query match literally.
+  const like = q.replace(/[\\%_]/g, m => `\\${m}`);
+  const search = q
+    ? sql`and (
+        s.visitor_hash like ${`${like}%`}
+        or s.id::text like ${`${like}%`}
+        or lower(coalesce(s.country, '') || ' ' || coalesce(s.city, '')) like ${`%${like}%`}
+        or lower(coalesce(s.landing_path, '')) like ${`%${like}%`}
+        or lower(coalesce(s.referrer, '')) like ${`%${like}%`}
+      )`
+    : sql``;
+  const inRange = sql`s.last_event_at >= ${opts.since} and s.started_at <= ${opts.until} ${search}`;
   const entryFilter =
     opts.entry === "all"
       ? sql``
