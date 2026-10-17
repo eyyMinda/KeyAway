@@ -28,10 +28,10 @@ export default function ProtectedAdminLayout({
 
   if (status === "loading" || isChecking) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying admin access...</p>
+          <p className="text-gray-600 dark:text-gray-400">Verifying admin access...</p>
         </div>
       </div>
     );
@@ -40,10 +40,10 @@ export default function ProtectedAdminLayout({
   const isAdmin = (session?.user as { isAdmin?: boolean })?.isAdmin === true;
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to sign in...</p>
+          <p className="text-gray-600 dark:text-gray-400">Redirecting to sign in...</p>
         </div>
       </div>
     );

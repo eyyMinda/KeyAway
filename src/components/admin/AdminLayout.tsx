@@ -12,7 +12,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children, title, subtitle, headerContent }: AdminLayoutProps) {
   const showHeader = headerContent ?? title;
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
       <AdminHeader />
 
@@ -23,8 +23,8 @@ export default function AdminLayout({ children, title, subtitle, headerContent }
           <div className="mb-6 sm:mb-8">
             {headerContent ?? (
               <>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{title}</h2>
-                {subtitle && <p className="mt-2 text-base sm:text-lg text-gray-600">{subtitle}</p>}
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">{title}</h2>
+                {subtitle && <p className="mt-2 text-base sm:text-lg text-gray-600 dark:text-gray-400">{subtitle}</p>}
               </>
             )}
           </div>

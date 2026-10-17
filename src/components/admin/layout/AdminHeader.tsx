@@ -7,6 +7,7 @@ import { HiChartBar, HiViewGrid } from "react-icons/hi";
 import { MdRateReview, MdEventNote } from "react-icons/md";
 import { FaKey, FaEnvelopeOpenText, FaCommentDots, FaGift } from "react-icons/fa";
 import { useKeyReportAlerts, KeyReportAlertsDesktop, KeyReportAlertsMobile } from "./KeyReportAlerts";
+import AdminThemeToggle from "./AdminThemeToggle";
 
 export default function AdminHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -54,7 +55,7 @@ export default function AdminHeader() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo and Title */}
@@ -64,8 +65,8 @@ export default function AdminHeader() {
                 <span className="text-white font-bold text-sm">A</span>
               </div>
               <div className="block">
-                <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500">KeyAway Analytics</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Admin Dashboard</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">KeyAway Analytics</p>
               </div>
             </Link>
           </div>
@@ -84,7 +85,7 @@ export default function AdminHeader() {
                   href={link.href}
                   title={link.label}
                   className={`group relative p-2.5 rounded-md transition-colors ${
-                    active ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                    active ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   }`}>
                   <Icon size={20} />
                   {showBadge && (
@@ -92,18 +93,22 @@ export default function AdminHeader() {
                       {count > 99 ? "99+" : count}
                     </span>
                   )}
-                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                  <span className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
                     {link.label}
                   </span>
                 </Link>
               );
             })}
+            <span className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-1" aria-hidden />
+            <AdminThemeToggle />
           </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile: theme toggle + menu button */}
+          <div className="md:hidden flex items-center gap-1">
+            <AdminThemeToggle />
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors cursor-pointer">
+            className="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -113,11 +118,12 @@ export default function AdminHeader() {
               />
             </svg>
           </button>
+          </div>
         </div>
 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-800 py-4">
             <KeyReportAlertsMobile alerts={keyReportAlerts} onLinkClick={() => setIsMobileMenuOpen(false)} />
             <nav className="flex flex-col space-y-2">
               {navLinks.map(link => {
@@ -130,7 +136,7 @@ export default function AdminHeader() {
                     key={link.href}
                     href={link.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      active ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                      active ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}>
                     <span className="relative shrink-0">
