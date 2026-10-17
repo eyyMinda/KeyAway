@@ -1,6 +1,8 @@
-/** @fileoverview Analytics dashboard “Recent activity” list: event line + meta row; visitor tier/hash on the right under the timestamp. */
+/** @fileoverview Analytics dashboard “Recent activity” list: one compact row per event (event + context, meta line, time + visitor). */
+import { FiCornerDownRight, FiMapPin } from "react-icons/fi";
 import { AnalyticsEventData } from "@/src/types";
 import { getTrackingRowDotClass, formatEventName, extractReferrerInfo } from "@/src/lib/analytics/analyticsUtils";
+import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import { isPageViewNotFoundRow } from "@/src/lib/analytics/pageViewDisplay";
 
@@ -11,6 +13,8 @@ interface RecentActivityProps {
   subtitle?: string;
 }
 
+const chip = "text-[11px] leading-4 px-1.5 rounded";
+
 export default function RecentActivity({
   events,
   maxItems = 10,
@@ -20,91 +24,85 @@ export default function RecentActivity({
   const displayEvents = events.slice(0, maxItems);
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200">
-      <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+    <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
+      <div className="px-4 py-3 sm:px-6 border-b border-gray-200 flex items-baseline justify-between gap-3">
+        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+        <p className="text-xs text-gray-500">{subtitle}</p>
       </div>
-      <div className="p-6">
-        <div className="space-y-3">
-          {displayEvents.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-gray-400 text-4xl mb-2">📊</div>
-              <p className="text-gray-500">No recent activity</p>
-            </div>
-          ) : (
-            displayEvents.map(event => {
-              const hash = event.ipHash?.trim();
-              const hashShort = hash ? `${hash.slice(0, 10)}…` : null;
-              return (
-                <div
-                  key={event._id}
-                  className="flex items-start justify-between gap-3 py-3 border-b border-gray-100 last:border-b-0">
-                  <div className="flex items-start space-x-3 flex-1 min-w-0">
-                    <div className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${getTrackingRowDotClass(event)}`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center flex-wrap gap-x-1.5 gap-y-1">
-                        <span className="text-sm font-medium text-gray-900 shrink-0">
-                          {formatEventName(event.event)}
-                        </span>
-                        {event.notFound === true && (
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-rose-800 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
-                            Not found
-                          </span>
-                        )}
-                        {event.programSlug && !isPageViewNotFoundRow(event) && (
-                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                            {event.programSlug}
-                          </span>
-                        )}
-                        {event.social && (
-                          <span className="text-xs text-gray-500 bg-blue-100 px-2 py-1 rounded">{event.social}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        {event.country && (
-                          <span className="text-xs text-gray-500 bg-green-100 px-2 py-1 rounded">
-                            {event.country}
-                            {event.city && `, ${event.city}`}
-                          </span>
-                        )}
-                        {event.path && <span className="text-xs text-gray-500 font-mono">{event.path}</span>}
-                        {event.referrer && (
-                          <span
-                            className="text-xs text-gray-500 truncate max-w-32 whitespace-nowrap"
-                            title={event.referrer}>
-                            from {extractReferrerInfo(event.referrer).hostname}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 shrink-0 text-right">
-                    <div className="text-xs text-gray-500 whitespace-nowrap">
-                      {new Date(event.createdAt).toLocaleString()}
-                    </div>
-                    {hash ? (
-                      <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-56">
-                        {event.visitorIsSpammer ? (
-                          <span className={visitorTierBadgeClasses("new", true)}>spammer</span>
-                        ) : null}
-                        <span className={visitorTierBadgeClasses(event.visitTier, false)}>
-                          {event.visitTier || "new"}
-                        </span>
-                        <span className="font-mono text-[10px] text-gray-500 truncate" title={hash}>
-                          {hashShort}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-[10px] text-gray-400">—</span>
+      {displayEvents.length === 0 ? (
+        <p className="text-center text-sm text-gray-500 py-8">No recent activity</p>
+      ) : (
+        <ul className="divide-y divide-gray-100">
+          {displayEvents.map(event => {
+            const hash = event.ipHash?.trim();
+            const location = [event.city, event.country].filter(Boolean).join(", ");
+            const referrer = event.referrer ? extractReferrerInfo(event.referrer).hostname : "";
+            const showProgram = event.programSlug && !isPageViewNotFoundRow(event);
+            // The program chip already says where the visit was; repeat the path only when it adds something.
+            const showPath = event.path && !(showProgram && event.path === `/program/${event.programSlug}`);
+            return (
+              <li
+                key={event._id}
+                className="flex items-center gap-3 px-4 sm:px-6 py-2 hover:bg-gray-50 transition-colors">
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getTrackingRowDotClass(event)}`} />
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                      {formatEventName(event.event)}
+                    </span>
+                    {event.notFound === true && (
+                      <span className={`${chip} font-semibold uppercase text-rose-700 bg-rose-50`}>404</span>
                     )}
+                    {showProgram && (
+                      <span className={`${chip} text-gray-600 bg-gray-100 truncate`}>{event.programSlug}</span>
+                    )}
+                    {event.social && <span className={`${chip} text-blue-700 bg-blue-50 truncate`}>{event.social}</span>}
                   </div>
+                  {(location || showPath || referrer) && (
+                    <div className="flex items-center gap-2.5 mt-0.5 text-[11px] text-gray-500 min-w-0">
+                      {location && (
+                        <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                          <FiMapPin className="w-3 h-3 text-gray-400" />
+                          {location}
+                        </span>
+                      )}
+                      {showPath && (
+                        <span className="font-mono truncate" title={event.path}>
+                          {event.path}
+                        </span>
+                      )}
+                      {referrer && (
+                        <span className="inline-flex items-center gap-1 truncate" title={event.referrer}>
+                          <FiCornerDownRight className="w-3 h-3 text-gray-400 shrink-0" />
+                          {referrer}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-              );
-            })
-          )}
-        </div>
-      </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {hash && (
+                    <>
+                      {event.visitorIsSpammer && <span className={visitorTierBadgeClasses("new", true)}>spammer</span>}
+                      <span className={visitorTierBadgeClasses(event.visitTier, false)} title={hash}>
+                        {event.visitTier || "new"}
+                      </span>
+                    </>
+                  )}
+                  <time
+                    dateTime={event.createdAt}
+                    title={new Date(event.createdAt).toLocaleString()}
+                    className="w-14 text-right text-[11px] text-gray-500 tabular-nums whitespace-nowrap">
+                    {formatRelativeTimeCompact(event.createdAt)}
+                  </time>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
