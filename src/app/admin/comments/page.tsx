@@ -60,7 +60,7 @@ export default function AdminCommentsPage() {
   if (loading) {
     return (
       <ProtectedAdminLayout title="Comments" subtitle="Moderate program page comments">
-        <div className="py-12 text-center text-gray-500">Loading comments…</div>
+        <div className="py-12 text-center text-gray-500 dark:text-gray-400">Loading comments…</div>
       </ProtectedAdminLayout>
     );
   }
