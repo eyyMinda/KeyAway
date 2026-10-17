@@ -8,12 +8,22 @@ function cacheKey(since: string, until: string): string {
   return `${since}|${until}`;
 }
 
+export type AnalyticsTimelineBucket = "hour" | "day" | "week";
+
+/** Activity per time bucket (zero-filled). `actions` = every non-page-view click event. */
+export type AnalyticsTimeline = {
+  bucket: AnalyticsTimelineBucket;
+  points: Array<{ t: string; visitors: number; views: number; actions: number }>;
+};
+
 export type AnalyticsSummaryCachePayload = {
   totalEvents: number;
   uniqueVisitors: number;
   uniqueCountries: number;
+  /** Sessions started in range. */
+  sessions: number;
   totals: Record<string, number>;
-  eventChart: Array<{ name: string; value: number; color: string }>;
+  timeline: AnalyticsTimeline;
   programTable: Array<{ key: string; value: number; label: string }>;
   socialTable: Array<{ key: string; value: number; label: string }>;
   pathTable: Array<{ key: string; value: number; label: string }>;

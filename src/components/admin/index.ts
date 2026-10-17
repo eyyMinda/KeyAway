@@ -3,6 +3,7 @@ export { default as ProtectedAdminLayout } from "./ProtectedAdminLayout";
 export { default as AdminHeader } from "./layout/AdminHeader";
 export { default as AnalyticsCard } from "./AnalyticsCard";
 export { default as DataTable } from "./DataTable";
-export { default as EventChart } from "./EventChart";
+export { default as ActivityChart } from "./ActivityChart";
+export { default as ActionBreakdown } from "./ActionBreakdown";
 export { default as TimeFilter } from "./TimeFilter";
 export { default as RecentActivity } from "./RecentActivity";

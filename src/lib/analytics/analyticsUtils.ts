@@ -116,25 +116,11 @@ export function aggregateEvents(events: AnalyticsEventData[]): AggregatedData {
   return { totals, byProgram, bySocial, byPath, byCountry, byReferrer };
 }
 
-// Maps → chart rows / table rows for DataTable & EventChart
-export interface ChartDataItem {
-  name: string;
-  value: number;
-  color: string;
-}
-
+// Maps → table rows for DataTable
 export interface TableDataItem {
   key: string;
   value: number;
   label: string;
-}
-
-export function transformEventData(totals: Map<string, number>): ChartDataItem[] {
-  return Array.from(totals).map(([name, count]) => ({
-    name: name.replace(/_/g, " ").toUpperCase(),
-    value: count,
-    color: getEventColor(name)
-  }));
 }
 
 export function transformProgramData(byProgram: Map<string, number>): TableDataItem[] {

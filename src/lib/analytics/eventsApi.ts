@@ -1,7 +1,7 @@
 /** @fileoverview Admin dashboard fetch helpers (browser) and program stat merging; program stats live on program docs (cron rollup). */
 import { calculatePopularityScore } from "@/src/lib/program/programUtils";
 import type { VisitorTagAggregateRow } from "@/src/lib/visitors/visitorStore";
-import { AnalyticsEventData } from "@/src/types";
+import type { AnalyticsSummaryCachePayload } from "@/src/lib/api/adminEventsListCache";
 
 export type { VisitorTagAggregateRow };
 
@@ -24,19 +24,7 @@ export function mergeSingleProgramStats(program: { viewCount?: number; downloadC
   return { viewCount, downloadCount };
 }
 
-export interface AnalyticsSummaryData {
-  totalEvents: number;
-  uniqueVisitors: number;
-  uniqueCountries: number;
-  totals: Record<string, number>;
-  eventChart: Array<{ name: string; value: number; color: string }>;
-  programTable: Array<{ key: string; value: number; label: string }>;
-  socialTable: Array<{ key: string; value: number; label: string }>;
-  pathTable: Array<{ key: string; value: number; label: string }>;
-  countryTable: Array<{ key: string; value: number; label: string }>;
-  referrerTable: Array<{ key: string; value: number; label: string; referrerParam?: string }>;
-  recentEvents: AnalyticsEventData[];
-}
+export type AnalyticsSummaryData = AnalyticsSummaryCachePayload;
 
 /** Server-side analytics aggregates for dashboard (no full event array to client). */
 export async function fetchAnalyticsSummary(
@@ -54,8 +42,9 @@ export async function fetchAnalyticsSummary(
       totalEvents: 0,
       uniqueVisitors: 0,
       uniqueCountries: 0,
+      sessions: 0,
       totals: {},
-      eventChart: [],
+      timeline: { bucket: "day", points: [] },
       programTable: [],
       socialTable: [],
       pathTable: [],
