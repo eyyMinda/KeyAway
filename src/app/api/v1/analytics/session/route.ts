@@ -1,4 +1,4 @@
-/** @fileoverview Batched visit writes: one `trackingSession` document, landing referrer only. */
+/** @fileoverview Batched visit writes: appended to the visitor's open session, landing referrer only. */
 import { NextRequest, NextResponse } from "next/server";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";

@@ -14,15 +14,9 @@ type Payload = {
 };
 
 const LABELS: Record<string, { label: string; href?: string }> = {
-  visitor: { label: "Visitors" },
-  keyReport: { label: "Key reports", href: "/admin/key-reports" },
-  keyReportBundle: { label: "Key report bundles", href: "/admin/key-reports" },
   cronRun: { label: "Cron runs" },
   "sanity.imageAsset": { label: "Images" },
-  trackingSessionBundle: { label: "Session bundles" },
-  trackingSession: { label: "Open sessions", href: "/admin/sessions" },
   changelogRelease: { label: "Changelog" },
-  visitorBundle: { label: "Visitor bundles" },
   program: { label: "Programs", href: "/admin/programs" },
   contactMessage: { label: "Messages", href: "/admin/messages" },
   keySuggestion: { label: "Key suggestions", href: "/admin/key-suggestions" },
@@ -35,7 +29,6 @@ const LABELS: Record<string, { label: string; href?: string }> = {
   siteNotificationFeed: { label: "Notification feed" },
   featuredProgramSettings: { label: "Featured program" },
   storeDetails: { label: "Store details" },
-  analyticsMigration: { label: "Analytics migration" },
   footer: { label: "Footer" },
   header: { label: "Header" },
   "system.group": { label: "System groups" },
