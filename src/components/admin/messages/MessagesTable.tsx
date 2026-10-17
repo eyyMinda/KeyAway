@@ -1,42 +1,55 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ContactMessage } from "@/src/types/contact";
 import { messageHasNoEmail, messageNeedsReply } from "@/src/lib/admin/contactMessages";
 import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import MessageDetailsModal from "./MessageDetailsModal";
-import SortableTableHead, { SortableColumn, SortDirection } from "@/src/components/ui/SortableTableHead";
+import {
+  AdminEmptyRows,
+  AdminListCard,
+  AdminPagination,
+  Chip,
+  RelativeDate,
+  StatusPill,
+  adminRow,
+  adminTd,
+  adminTh,
+  adminTheadRow,
+  pillTones
+} from "@/src/components/admin/list/AdminListKit";
 
 export type MessageUpdatePayload = Partial<Pick<ContactMessage, "status" | "email" | "name">>;
 
+const STATUS_OPTIONS: Array<{ value: ContactMessage["status"]; label: string }> = [
+  { value: "new", label: "New" },
+  { value: "read", label: "Read" },
+  { value: "replied", label: "Replied" },
+  { value: "archived", label: "Archived" }
+];
+
+const STATUS_TONES: Record<ContactMessage["status"], string> = {
+  new: pillTones.blue,
+  read: pillTones.gray,
+  replied: pillTones.green,
+  archived: pillTones.purple
+};
+
 interface MessagesTableProps {
+  /** Current page. */
   messages: ContactMessage[];
+  /** Every message, so an open details modal survives a status change that filters its row out. */
+  all: ContactMessage[];
+  total: number;
+  loading: boolean;
+  paging: { page: number; totalPages: number; pageSize: number; setPage: (page: number) => void };
   onUpdate: () => void;
-  sortColumn?: string;
-  sortDirection?: SortDirection;
-  onSort?: (column: string) => void;
 }
 
-export default function MessagesTable({ messages, onUpdate, sortColumn, sortDirection, onSort }: MessagesTableProps) {
-  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+export default function MessagesTable({ messages, all, total, loading, paging, onUpdate }: MessagesTableProps) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
-
-  // Keep selected message in sync when list refetches (e.g. after update)
-  const selectedId = selectedMessage?._id;
-  useEffect(() => {
-    if (!selectedId || !messages.length) return;
-    const updated = messages.find(m => m._id === selectedId);
-    if (updated) setSelectedMessage(updated);
-  }, [messages, selectedId]);
-
-  const tableColumns: SortableColumn[] = [
-    { key: "title", label: "Title", sortable: true, className: "text-left" },
-    { key: "contact", label: "Contact", sortable: false, className: "text-left" },
-    { key: "status", label: "Status", sortable: true, className: "text-center" },
-    { key: "replies", label: "Replies", sortable: false, className: "text-center" },
-    { key: "createdAt", label: "Date", sortable: true, className: "text-center" },
-    { key: "actions", label: "Actions", sortable: false, className: "text-center" }
-  ];
+  const selected = all.find(m => m._id === selectedId) ?? null;
 
   const handleUpdateMessage = async (messageId: string, updates: MessageUpdatePayload) => {
     if (Object.keys(updates).length === 0) return;
@@ -57,153 +70,109 @@ export default function MessagesTable({ messages, onUpdate, sortColumn, sortDire
     }
   };
 
-  const getStatusColor = (status: ContactMessage["status"]) => {
-    switch (status) {
-      case "new":
-        return "bg-blue-100 text-blue-800 border-blue-300";
-      case "read":
-        return "bg-gray-100 text-gray-800 border-gray-300";
-      case "replied":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "archived":
-        return "bg-purple-100 text-purple-800 border-purple-300";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-300";
-    }
-  };
-
-  if (messages.length === 0) {
-    return (
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-12 text-center">
-        <div className="text-4xl mb-4">📬</div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No messages found</h3>
-        <p className="text-gray-500">No contact messages match the current filters.</p>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-        <div className="p-4 sm:px-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Contact Messages</h3>
-          <p className="text-sm text-gray-500 mt-1">Total: {messages.length}</p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full table-fixed">
-            <colgroup>
-              <col className="w-[24%]" />
-              <col className="w-[20%]" />
-              <col className="w-[12%]" />
-              <col className="w-[10%]" />
-              <col className="w-[14%]" />
-              <col className="w-[20%]" />
-            </colgroup>
-            <SortableTableHead
-              columns={tableColumns}
-              sortColumn={sortColumn}
-              sortDirection={sortDirection}
-              onSort={onSort}
+      <AdminListCard
+        title="Messages"
+        meta={`${total.toLocaleString()} ${total === 1 ? "result" : "results"}`}
+        footer={
+          total > 0 && (
+            <AdminPagination
+              page={paging.page}
+              totalPages={paging.totalPages}
+              total={total}
+              pageSize={paging.pageSize}
+              onPageChange={paging.setPage}
             />
-            <tbody className="divide-y divide-gray-200">
-              {messages.map(message => {
-                const isArchived = message.status === "archived";
-                const title = message.title ?? "-";
-                const messagePreview = message.message
-                  ? `${message.message.slice(0, 60)}${message.message.length > 60 ? "..." : ""}`
-                  : "-";
-                const contactName = message.name ?? "-";
-                const contactEmail = message.email ?? "-";
-                const hasContact = (message.name ?? "").trim() || (message.email ?? "").trim();
-                const replyCount = message.replies?.length ?? 0;
-                const needsReply = messageNeedsReply(message);
-                const noEmail = messageHasNoEmail(message);
-                const dateStr = message.createdAt ? new Date(message.createdAt).toLocaleDateString() : "-";
-                const lastReplyStr = message.lastRepliedAt
-                  ? new Date(message.lastRepliedAt).toLocaleDateString()
-                  : null;
-                return (
-                  <tr key={message._id} className={`hover:bg-gray-50 ${isArchived ? "bg-gray-50 opacity-75" : ""}`}>
-                    <td className="px-6 py-4 align-top text-left">
-                      <div className={`font-medium truncate ${isArchived ? "text-gray-500" : "text-gray-900"}`}>
-                        {title}
-                      </div>
-                      <div className={`text-sm truncate ${isArchived ? "text-gray-400" : "text-gray-500"}`}>
-                        {messagePreview}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 align-top text-left">
-                      {hasContact ? (
-                        <div className="text-sm">
-                          <div
-                            className={`flex flex-wrap items-center gap-2 ${isArchived ? "text-gray-500" : "text-gray-900"}`}>
-                            <span>{contactName}</span>
-                            {needsReply ? (
-                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800">
-                                Needs reply
-                              </span>
-                            ) : null}
-                            {noEmail ? (
-                              <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-700">
-                                No email
-                              </span>
-                            ) : null}
-                          </div>
-                          <div className={isArchived ? "text-gray-400" : "text-gray-500"}>{contactEmail}</div>
+          )
+        }>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className={adminTheadRow}>
+              <tr>
+                <th className={adminTh}>Message</th>
+                <th className={`${adminTh} hidden md:table-cell`}>From</th>
+                <th className={adminTh}>Status</th>
+                <th className={`${adminTh} hidden lg:table-cell`}>Replies</th>
+                <th className={adminTh}>Received</th>
+                <th className={adminTh} />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {loading ? (
+                <AdminEmptyRows colSpan={6}>Loading messages…</AdminEmptyRows>
+              ) : messages.length === 0 ? (
+                <AdminEmptyRows colSpan={6}>No messages match these filters.</AdminEmptyRows>
+              ) : (
+                messages.map(message => {
+                  const replyCount = message.replies?.length ?? 0;
+                  const needsReply = messageNeedsReply(message);
+                  const noEmail = messageHasNoEmail(message);
+                  return (
+                    <tr key={message._id} className={adminRow}>
+                      <td className={`${adminTd} max-w-md`}>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {message.title || "(no title)"}
+                          </span>
+                          {needsReply && <Chip tone="amber">Needs reply</Chip>}
                         </div>
-                      ) : (
-                        <span className={isArchived ? "text-gray-400" : "text-gray-500"}>-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 align-top text-center">
-                      <div className="flex justify-center">
-                        <select
+                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{message.message}</p>
+                      </td>
+                      <td className={`${adminTd} hidden md:table-cell max-w-56`}>
+                        <div className="text-gray-900 dark:text-gray-100 truncate">{message.name || "—"}</div>
+                        {noEmail ? (
+                          <Chip tone="red">No email</Chip>
+                        ) : (
+                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{message.email}</div>
+                        )}
+                      </td>
+                      <td className={adminTd}>
+                        <StatusPill
                           value={message.status ?? "new"}
-                          onChange={e =>
-                            handleUpdateMessage(message._id, { status: e.target.value as ContactMessage["status"] })
-                          }
+                          options={STATUS_OPTIONS}
+                          tones={STATUS_TONES}
                           disabled={updating === message._id}
-                          className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${getStatusColor(message.status ?? "new")} disabled:opacity-50`}>
-                          <option value="new">New</option>
-                          <option value="read">Read</option>
-                          <option value="replied">Replied</option>
-                          <option value="archived">Archived</option>
-                        </select>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 align-top text-center text-sm text-gray-500">
-                      {replyCount > 0 ? (
-                        <div>
-                          <div className="font-medium text-gray-900">{replyCount}</div>
-                          {lastReplyStr ? <div className="text-xs text-gray-400">{lastReplyStr}</div> : null}
-                        </div>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td className="px-6 py-4 align-top text-center text-sm text-gray-500">{dateStr}</td>
-                    <td className="px-6 py-4 align-top text-center">
-                      <div className="flex justify-center">
-                        <AdminViewDetailsButton onClick={() => setSelectedMessage(message)} />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+                          onChange={status => handleUpdateMessage(message._id, { status })}
+                        />
+                      </td>
+                      <td className={`${adminTd} hidden lg:table-cell text-xs text-gray-500 dark:text-gray-400`}>
+                        {replyCount > 0 ? (
+                          <>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{replyCount}</span>
+                            {message.lastRepliedAt && (
+                              <span>
+                                {" "}
+                                · <RelativeDate iso={message.lastRepliedAt} />
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                      <td className={`${adminTd} text-xs text-gray-500 dark:text-gray-400`}>
+                        <RelativeDate iso={message.createdAt} />
+                      </td>
+                      <td className={`${adminTd} text-right`}>
+                        <AdminViewDetailsButton onClick={() => setSelectedId(message._id)} />
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
-      </div>
+      </AdminListCard>
 
-      {/* Details Modal */}
-      {selectedMessage && (
+      {selected && (
         <MessageDetailsModal
-          message={selectedMessage}
-          onClose={() => setSelectedMessage(null)}
-          onUpdateMessage={updates => handleUpdateMessage(selectedMessage._id, updates)}
+          message={selected}
+          onClose={() => setSelectedId(null)}
+          onUpdateMessage={updates => handleUpdateMessage(selected._id, updates)}
           onReplySent={onUpdate}
-          updating={updating === selectedMessage._id}
+          updating={updating === selected._id}
         />
       )}
     </>
