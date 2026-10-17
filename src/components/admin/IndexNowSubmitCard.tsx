@@ -48,13 +48,13 @@ export default function IndexNowSubmitCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
-      <h4 className="text-lg font-semibold text-gray-900 mb-2">IndexNow Submit</h4>
-      <p className="text-sm text-gray-600 mb-4">Push updated URLs to Bing IndexNow without waiting for recrawl.</p>
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
+      <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">IndexNow Submit</h4>
+      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Push updated URLs to Bing IndexNow without waiting for recrawl.</p>
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="indexnow-mode" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="indexnow-mode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             URL set
           </label>
           <select
@@ -62,7 +62,7 @@ export default function IndexNowSubmitCard() {
             value={mode}
             onChange={e => setMode(e.target.value as SubmitMode)}
             disabled={submitting}
-            className="w-full md:w-72 px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm cursor-pointer disabled:opacity-50">
+            className="w-full md:w-72 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm cursor-pointer disabled:opacity-50">
             {MODE_OPTIONS.map(option => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -73,7 +73,7 @@ export default function IndexNowSubmitCard() {
 
         {isCustom && (
           <div>
-            <label htmlFor="indexnow-custom-urls" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="indexnow-custom-urls" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Custom URLs
             </label>
             <textarea
@@ -85,9 +85,9 @@ export default function IndexNowSubmitCard() {
               placeholder={
                 "https://www.keyaway.app/programs\nhttps://www.keyaway.app/program/itop-vpn\n/program/some-slug"
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm disabled:opacity-50"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm disabled:opacity-50"
             />
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Use one URL per line (or comma-separated). Relative paths are supported.
             </p>
           </div>
@@ -101,8 +101,8 @@ export default function IndexNowSubmitCard() {
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
             {submitting ? "Submitting..." : "Submit to IndexNow"}
           </button>
-          {result && <p className="text-sm text-green-700">{result}</p>}
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {result && <p className="text-sm text-green-700 dark:text-green-300">{result}</p>}
+          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
         </div>
       </div>
     </div>
