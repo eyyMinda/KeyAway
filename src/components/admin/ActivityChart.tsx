@@ -61,10 +61,10 @@ export default function ActivityChart({ timeline }: { timeline: AnalyticsTimelin
   const xLabels = points.length > 1 ? [0, Math.floor((points.length - 1) / 2), points.length - 1] : [0];
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-4 sm:p-5 min-w-0">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-4 sm:p-5 min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <h3 className="text-base font-semibold text-gray-900">Activity</h3>
-        <div className="inline-flex rounded-lg bg-gray-100 p-0.5 text-xs font-medium" role="tablist">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Activity</h3>
+        <div className="inline-flex rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5 text-xs font-medium" role="tablist">
           {METRICS.map(m => (
             <button
               key={m.key}
@@ -73,7 +73,7 @@ export default function ActivityChart({ timeline }: { timeline: AnalyticsTimelin
               aria-selected={metric === m.key}
               onClick={() => setMetric(m.key)}
               className={`px-3 py-1.5 rounded-md cursor-pointer transition-colors ${
-                metric === m.key ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"
+                metric === m.key ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               }`}>
               {m.label}
             </button>
@@ -82,11 +82,11 @@ export default function ActivityChart({ timeline }: { timeline: AnalyticsTimelin
       </div>
 
       {points.length < 2 ? (
-        <p className="text-sm text-gray-500 py-16 text-center">Not enough activity in this period</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 py-16 text-center">Not enough activity in this period</p>
       ) : (
         <div className="flex gap-2">
           {/* Y axis labels */}
-          <div className="relative w-8 shrink-0 text-[10px] text-gray-400 tabular-nums text-right" style={{ height: HEIGHT }}>
+          <div className="relative w-8 shrink-0 text-[10px] text-gray-400 dark:text-gray-500 tabular-nums text-right" style={{ height: HEIGHT }}>
             {Array.from({ length: GRID_LINES + 1 }, (_, i) => (
               <span
                 key={i}
@@ -109,7 +109,7 @@ export default function ActivityChart({ timeline }: { timeline: AnalyticsTimelin
               {Array.from({ length: GRID_LINES + 1 }, (_, i) => (
                 <div
                   key={i}
-                  className={`absolute inset-x-0 border-t ${i === GRID_LINES ? "border-gray-200" : "border-gray-100"}`}
+                  className={`absolute inset-x-0 border-t ${i === GRID_LINES ? "border-gray-200 dark:border-gray-800" : "border-gray-100 dark:border-gray-800"}`}
                   style={{ top: `${(i / GRID_LINES) * 100}%` }}
                 />
               ))}
@@ -128,17 +128,17 @@ export default function ActivityChart({ timeline }: { timeline: AnalyticsTimelin
 
               {hovered && (
                 <>
-                  <div className="absolute inset-y-0 w-px bg-gray-300 pointer-events-none" style={{ left: `${hoverX}%` }} />
+                  <div className="absolute inset-y-0 w-px bg-gray-300 dark:bg-gray-600 pointer-events-none" style={{ left: `${hoverX}%` }} />
                   <div
-                    className="absolute w-2.5 h-2.5 -ml-[5px] -mt-[5px] rounded-full bg-primary-500 ring-2 ring-white pointer-events-none"
+                    className="absolute w-2.5 h-2.5 -ml-[5px] -mt-[5px] rounded-full bg-primary-500 ring-2 ring-white dark:ring-gray-900 pointer-events-none"
                     style={{ left: `${hoverX}%`, top: `${100 - (hovered[metric] / max) * 100}%` }}
                   />
                   <div
-                    className="absolute top-0 z-10 pointer-events-none rounded-lg bg-gray-900 text-white text-xs px-3 py-2 shadow-lg whitespace-nowrap"
+                    className="absolute top-0 z-10 pointer-events-none rounded-lg bg-gray-900 dark:bg-gray-700 text-white text-xs px-3 py-2 shadow-lg whitespace-nowrap"
                     style={hoverX > 60 ? { right: `${100 - hoverX}%`, marginRight: 8 } : { left: `${hoverX}%`, marginLeft: 8 }}>
                     <div className="font-medium mb-1">{formatBucket(hovered.t, timeline.bucket, true)}</div>
                     {METRICS.map(m => (
-                      <div key={m.key} className={`flex justify-between gap-4 ${m.key === metric ? "" : "text-gray-400"}`}>
+                      <div key={m.key} className={`flex justify-between gap-4 ${m.key === metric ? "" : "text-gray-400 dark:text-gray-500"}`}>
                         <span>{m.label}</span>
                         <span className="tabular-nums">{hovered[m.key].toLocaleString()}</span>
                       </div>
@@ -149,7 +149,7 @@ export default function ActivityChart({ timeline }: { timeline: AnalyticsTimelin
             </div>
 
             {/* X axis labels */}
-            <div className="flex justify-between mt-2 text-[10px] text-gray-400">
+            <div className="flex justify-between mt-2 text-[10px] text-gray-400 dark:text-gray-500">
               {xLabels.map(i => (
                 <span key={i}>{formatBucket(points[i].t, timeline.bucket)}</span>
               ))}

@@ -24,15 +24,15 @@ export default function RecentActivity({
   const displayEvents = events.slice(0, maxItems);
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-      <div className="px-4 py-3 sm:px-6 border-b border-gray-200 flex items-baseline justify-between gap-3">
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-        <p className="text-xs text-gray-500">{subtitle}</p>
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-800 flex items-baseline justify-between gap-3">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
       </div>
       {displayEvents.length === 0 ? (
-        <p className="text-center text-sm text-gray-500 py-8">No recent activity</p>
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-8">No recent activity</p>
       ) : (
-        <ul className="divide-y divide-gray-100">
+        <ul className="divide-y divide-gray-100 dark:divide-gray-800">
           {displayEvents.map(event => {
             const hash = event.ipHash?.trim();
             const location = [event.city, event.country].filter(Boolean).join(", ");
@@ -43,27 +43,27 @@ export default function RecentActivity({
             return (
               <li
                 key={event._id}
-                className="flex items-center gap-3 px-4 sm:px-6 py-2 hover:bg-gray-50 transition-colors">
+                className="flex items-center gap-3 px-4 sm:px-6 py-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                 <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${getTrackingRowDotClass(event)}`} />
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
                       {formatEventName(event.event)}
                     </span>
                     {event.notFound === true && (
-                      <span className={`${chip} font-semibold uppercase text-rose-700 bg-rose-50`}>404</span>
+                      <span className={`${chip} font-semibold uppercase text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-500/10`}>404</span>
                     )}
                     {showProgram && (
-                      <span className={`${chip} text-gray-600 bg-gray-100 truncate`}>{event.programSlug}</span>
+                      <span className={`${chip} text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 truncate`}>{event.programSlug}</span>
                     )}
-                    {event.social && <span className={`${chip} text-blue-700 bg-blue-50 truncate`}>{event.social}</span>}
+                    {event.social && <span className={`${chip} text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/10 truncate`}>{event.social}</span>}
                   </div>
                   {(location || showPath || referrer) && (
-                    <div className="flex items-center gap-2.5 mt-0.5 text-[11px] text-gray-500 min-w-0">
+                    <div className="flex items-center gap-2.5 mt-0.5 text-[11px] text-gray-500 dark:text-gray-400 min-w-0">
                       {location && (
                         <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                          <FiMapPin className="w-3 h-3 text-gray-400" />
+                          <FiMapPin className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                           {location}
                         </span>
                       )}
@@ -74,7 +74,7 @@ export default function RecentActivity({
                       )}
                       {referrer && (
                         <span className="inline-flex items-center gap-1 truncate" title={event.referrer}>
-                          <FiCornerDownRight className="w-3 h-3 text-gray-400 shrink-0" />
+                          <FiCornerDownRight className="w-3 h-3 text-gray-400 dark:text-gray-500 shrink-0" />
                           {referrer}
                         </span>
                       )}
@@ -94,7 +94,7 @@ export default function RecentActivity({
                   <time
                     dateTime={event.createdAt}
                     title={new Date(event.createdAt).toLocaleString()}
-                    className="w-14 text-right text-[11px] text-gray-500 tabular-nums whitespace-nowrap">
+                    className="w-14 text-right text-[11px] text-gray-500 dark:text-gray-400 tabular-nums whitespace-nowrap">
                     {formatRelativeTimeCompact(event.createdAt)}
                   </time>
                 </div>

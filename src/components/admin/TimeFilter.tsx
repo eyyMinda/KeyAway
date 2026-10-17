@@ -63,15 +63,15 @@ export default function TimeFilter({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
       <div className="flex items-center justify-between gap-4 mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Time Period</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Time Period</h3>
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => handlePeriodChange("all")}
             className={`text-sm font-medium underline-offset-2 hover:underline cursor-pointer ${
-              selectedPeriod === "all" ? "text-blue-600 underline" : "text-gray-600 hover:text-gray-900"
+              selectedPeriod === "all" ? "text-blue-600 dark:text-blue-400 underline" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
             }`}>
             All time
           </button>
@@ -82,8 +82,8 @@ export default function TimeFilter({
               disabled={refreshDisabled || refreshing}
               title="Refresh data (bypass cache)"
               aria-label="Refresh data"
-              className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 bg-white transition-colors cursor-pointer disabled:opacity-50 ${adminChrome.filterPillIdle} hover:border-blue-300`}>
-              <FaArrowsRotate className={`w-4 h-4 text-gray-700 ${refreshing ? "animate-spin" : ""}`} />
+              className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors cursor-pointer disabled:opacity-50 ${adminChrome.filterPillIdle} hover:border-blue-300 dark:hover:border-blue-500/40`}>
+              <FaArrowsRotate className={`w-4 h-4 text-gray-700 dark:text-gray-300 ${refreshing ? "animate-spin" : ""}`} />
             </button>
           )}
         </div>
@@ -108,41 +108,41 @@ export default function TimeFilter({
       </div>
 
       {showCustomRange && (
-        <div className="mt-4 pt-4 border-t border-gray-200 animate-in slide-in-from-top-2 duration-200">
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800 animate-in slide-in-from-top-2 duration-200">
           <div className="mb-3">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Select Date Range</h4>
-            <p className="text-xs text-gray-500">Choose both start and end dates to apply the custom filter</p>
+            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Date Range</h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Choose both start and end dates to apply the custom filter</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
               <input
                 type="date"
                 value={customDateRange?.start || ""}
                 onChange={e => handleCustomDateChange("start", e.target.value)}
                 max={customDateRange?.end || new Date().toISOString().split("T")[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
               <input
                 type="date"
                 value={customDateRange?.end || ""}
                 onChange={e => handleCustomDateChange("end", e.target.value)}
                 min={customDateRange?.start || ""}
                 max={new Date().toISOString().split("T")[0]}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
           </div>
           {customDateRange?.start && customDateRange?.end && (
-            <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+            <div className="mt-3 p-3 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/30 rounded-lg">
               <div className="flex items-center">
                 <svg className="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-green-700 dark:text-green-300">
                   <span className="font-medium">Selected range:</span> {customDateRange.start} to {customDateRange.end}
                 </p>
               </div>

@@ -54,10 +54,10 @@ export default function DataTable({
   const canShowMore = !q && filtered.length > visible;
 
   return (
-    <div className={`bg-white rounded-xl shadow-soft border border-gray-200 ${className}`}>
-      <div className="p-4 sm:px-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-500 mt-1">
+    <div className={`bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 ${className}`}>
+      <div className="p-4 sm:px-6 border-b border-gray-200 dark:border-gray-800">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           {data.length} total items • {total.toLocaleString()} total {countNoun}
         </p>
         {searchable ? (
@@ -66,14 +66,14 @@ export default function DataTable({
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={searchPlaceholder}
-            className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="mt-3 w-full rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         ) : null}
       </div>
 
       <div className="p-6">
         {displayed.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             <div className="text-4xl mb-2">📊</div>
             <p>{q ? "No matches" : "No data available"}</p>
           </div>
@@ -85,10 +85,10 @@ export default function DataTable({
               return Number(item.value) > 0 ? (
                 <div key={item.key} className="flex items-center justify-between">
                   <div className="flex items-center flex-1 min-w-0">
-                    <span className="text-sm font-medium text-gray-500 w-6">#{index + 1}</span>
+                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-6">#{index + 1}</span>
                     <div className="flex-1 min-w-0 ml-3">
                       <div className="flex flex-col min-w-0">
-                        <div className="text-sm font-medium text-gray-900 flex items-center gap-2 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2 min-w-0">
                           {item.swatchClass ? (
                             <span className={`size-2.5 rounded-full shrink-0 ${item.swatchClass}`} aria-hidden />
                           ) : null}
@@ -101,16 +101,16 @@ export default function DataTable({
                   <div className="flex items-center space-x-3">
                     <div className="flex flex-col">
                       {showPercentage && (
-                        <p className="text-xs text-gray-500 mb-1">{percentage.toFixed(1)}% of total</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{percentage.toFixed(1)}% of total</p>
                       )}
-                      <div className="w-24 bg-gray-200 rounded-full h-2">
+                      <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                         <div
                           className={`${adminChrome.progressBarFill} h-2 rounded-full transition-all duration-300`}
                           style={{ width: `${(item.value / barMax) * 100}%` }}
                         />
                       </div>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900 w-12 text-right">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 w-12 text-right">
                       {item.value.toLocaleString()}
                     </span>
                   </div>
@@ -124,7 +124,7 @@ export default function DataTable({
           <button
             type="button"
             onClick={() => setVisible(v => v + maxItems)}
-            className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer">
+            className="mt-4 w-full rounded-lg border border-gray-200 dark:border-gray-800 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer">
             Show more ({filtered.length - visible})
           </button>
         ) : null}
