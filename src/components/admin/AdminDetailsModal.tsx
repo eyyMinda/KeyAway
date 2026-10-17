@@ -76,32 +76,32 @@ export default function AdminDetailsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="admin-details-title"
-        className={`relative flex h-[90vh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}
+        className={`relative flex h-[90vh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-2xl`}
         onMouseDown={event => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b-2 border-blue-200 bg-white px-6 py-4">
+        <div className="flex items-center justify-between border-b-2 border-blue-200 dark:border-blue-500/30 bg-white dark:bg-gray-900 px-6 py-4">
           <div className="min-w-0">
-            <h2 id="admin-details-title" className="flex items-center text-2xl font-bold text-gray-900">
+            <h2 id="admin-details-title" className="flex items-center text-2xl font-bold text-gray-900 dark:text-gray-100">
               <span className={`mr-3 h-7 w-1 shrink-0 rounded-full ${bar}`} />
               {title}
             </h2>
-            {subtitle ? <div className="mt-1 pl-4 text-base font-medium text-primary-800">{subtitle}</div> : null}
+            {subtitle ? <div className="mt-1 pl-4 text-base font-medium text-primary-800 dark:text-sky-300">{subtitle}</div> : null}
           </div>
           <ModalCloseButton
             onClick={onClose}
-            className="cursor-pointer rounded-full p-3 text-gray-800 hover:bg-gray-100 hover:text-gray-950"
+            className="cursor-pointer rounded-full p-3 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-950"
             iconClassName="h-7 w-7"
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 text-gray-900">
+        <div className="flex-1 overflow-y-auto p-6 text-gray-900 dark:text-gray-100">
           {visitorPosition === "top" ? visitor : null}
           {children}
           {visitorPosition === "bottom" ? visitor : null}
         </div>
 
-        <div className="flex items-center justify-between gap-4 border-t-2 border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50 px-6 py-3">
-          <div className="min-w-0 text-sm font-medium text-gray-800">{footer}</div>
+        <div className="flex items-center justify-between gap-4 border-t-2 border-blue-200 dark:border-blue-500/30 bg-linear-to-r from-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-800/50 px-6 py-3">
+          <div className="min-w-0 text-sm font-medium text-gray-800 dark:text-gray-200">{footer}</div>
           <div className="flex shrink-0 items-center gap-2">
             {footerActions}
             <ModalCloseButton

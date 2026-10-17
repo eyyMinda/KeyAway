@@ -43,30 +43,30 @@ export default function MarkSpammerConfirmModal({
         role="alertdialog"
         aria-labelledby="mark-spammer-title"
         aria-describedby="mark-spammer-desc"
-        className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-2xl text-start"
+        className="relative w-full max-w-md rounded-xl bg-white dark:bg-gray-900 p-6 shadow-2xl text-start"
         onClick={e => e.stopPropagation()}>
         <div className="mb-4 flex items-start justify-between gap-3">
-          <h3 id="mark-spammer-title" className="text-lg font-bold text-gray-900">
+          <h3 id="mark-spammer-title" className="text-lg font-bold text-gray-900 dark:text-gray-100">
             {markingSpammer ? "Mark as spammer?" : "Unmark spammer?"}
           </h3>
           <ModalCloseButton
             onClick={onClose}
             disabled={busy}
-            className="cursor-pointer rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50"
+            className="cursor-pointer rounded-lg p-1.5 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-50"
             iconClassName="h-5 w-5"
             aria-label="Close"
           />
         </div>
-        <p id="mark-spammer-desc" className="text-sm leading-relaxed text-gray-600">
+        <p id="mark-spammer-desc" className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
           {markingSpammer ? (
             <>
-              Are you sure you want to mark visitor <strong className="font-mono text-gray-900">{shortHash}</strong> as
+              Are you sure you want to mark visitor <strong className="font-mono text-gray-900 dark:text-gray-100">{shortHash}</strong> as
               a spammer? They will be blocked from comments, contact messages, key submissions, and negative key
               reports.
             </>
           ) : (
             <>
-              Are you sure you want to unmark visitor <strong className="font-mono text-gray-900">{shortHash}</strong>?
+              Are you sure you want to unmark visitor <strong className="font-mono text-gray-900 dark:text-gray-100">{shortHash}</strong>?
               They will be able to submit again.
             </>
           )}
@@ -76,7 +76,7 @@ export default function MarkSpammerConfirmModal({
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
+            className="cursor-pointer rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 disabled:cursor-not-allowed disabled:opacity-50">
             Cancel
           </button>
           <button

@@ -15,7 +15,7 @@ export default function ModalSection({ title, color, children, className = "" }:
 
   return (
     <div className={`mb-6 ${className}`}>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
         <div className={`w-1 h-6 ${config.bar} rounded-full mr-3`}></div>
         {title}
       </h3>

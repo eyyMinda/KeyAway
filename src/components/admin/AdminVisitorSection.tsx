@@ -59,7 +59,7 @@ export default function AdminVisitorSection({
   }
 
   const panel = loading ? (
-    <p className="text-sm text-gray-500">Loading visitor…</p>
+    <p className="text-sm text-gray-500 dark:text-gray-400">Loading visitor…</p>
   ) : (
     <AdminVisitorPanel ipHash={hash} visitor={visitor ?? undefined} />
   );
@@ -71,7 +71,7 @@ export default function AdminVisitorSection({
       <div className="space-y-4">
         {panel}
         {hash ? (
-          <div className="flex justify-end border-t border-green-200/80 pt-4">
+          <div className="flex justify-end border-t border-green-200/80 dark:border-green-500/30 pt-4">
             <MarkSpammerButton
               visitorHash={hash}
               isSpammer={visitor?.isSpammer === true}

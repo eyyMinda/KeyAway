@@ -18,16 +18,16 @@ function Stat({
   className?: string;
 }) {
   return (
-    <div className={`rounded-lg border border-gray-200 bg-white px-3 py-2 ${className}`.trim()}>
-      <dt className="text-xs font-medium text-gray-500">{label}</dt>
-      <dd className="mt-0.5 text-sm font-semibold text-gray-900">{value}</dd>
+    <div className={`rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 py-2 ${className}`.trim()}>
+      <dt className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</dt>
+      <dd className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-gray-100">{value}</dd>
     </div>
   );
 }
 
 export default function AdminVisitorPanel({ ipHash, visitor }: AdminVisitorPanelProps) {
   if (!ipHash?.trim()) {
-    return <p className="text-sm text-gray-500">No visitor hash recorded.</p>;
+    return <p className="text-sm text-gray-500 dark:text-gray-400">No visitor hash recorded.</p>;
   }
 
   const tier = visitor?.visitTier ?? "new";
@@ -40,7 +40,7 @@ export default function AdminVisitorPanel({ ipHash, visitor }: AdminVisitorPanel
         <span className={visitorTierBadgeClasses(tier, false)}>{tier}</span>
         {isSpam ? <span className={visitorTierBadgeClasses("new", true)}>spammer</span> : null}
       </div>
-      <p className="font-mono text-xs text-gray-500 break-all">{ipHash}</p>
+      <p className="font-mono text-xs text-gray-500 dark:text-gray-400 break-all">{ipHash}</p>
       {visitor ? (
         <dl className="grid grid-cols-2 gap-2 sm:grid-cols-6">
           <Stat label="Visits" value={visitor.visitCount ?? 0} className="sm:col-span-2" />
@@ -63,7 +63,7 @@ export default function AdminVisitorPanel({ ipHash, visitor }: AdminVisitorPanel
           />
         </dl>
       ) : (
-        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+        <p className="text-sm text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-lg px-3 py-2">
           No visitor document in Sanity for this hash yet.
         </p>
       )}
