@@ -31,6 +31,9 @@
     "status": "Status",
     "actions": "Actions"
   },
+  "sortBy": "Sort by {column}",
+  "foundAt": "Found",
+  "scannedAt": "Scanned",
   "possibleMatch": "Possible match",
   "confirm": "Confirm",
   "changeProgram": "Change program…",
@@ -71,7 +74,6 @@
   "validUntil": "Valid until",
   "detectedFlow": "Looks like",
   "flowMismatch": "Program is set to {flow}",
-  "firstSeen": "First seen",
   "changed": "Changed",
   "openSource": "Open giveaway page",
   "openStudio": "Edit program in Studio",

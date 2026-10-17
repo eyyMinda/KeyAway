@@ -1,7 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { FiCopy, FiCheck, FiExternalLink, FiEdit2, FiPlusCircle, FiEye } from "react-icons/fi";
+import { useMemo, useState } from "react";
+import {
+  FiCopy,
+  FiCheck,
+  FiExternalLink,
+  FiEdit2,
+  FiPlusCircle,
+  FiEye,
+  FiChevronUp,
+  FiChevronDown,
+  FiSearch,
+  FiEdit3,
+  FiRefreshCw
+} from "react-icons/fi";
+import type { IconType } from "react-icons";
 import t from "@/src/locales/admin/giveaway-finds/en.json";
 import { formatDateOnly, formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 import type {
@@ -241,7 +254,17 @@ function ProgramCell({
     <div className="space-y-2 min-w-48">
       {find.program ? (
         <div>
-          <div className="font-medium text-gray-900">{find.program.title}</div>
+          {find.program.slug ? (
+            <a
+              href={`/program/${find.program.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-gray-900 hover:text-primary-700 hover:underline">
+              {find.program.title}
+            </a>
+          ) : (
+            <div className="font-medium text-gray-900">{find.program.title}</div>
+          )}
           <div className="flex flex-wrap items-center gap-1.5 mt-1">
             <span className="text-[11px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">
               {flowLabel(find.program.programFlow)}
@@ -289,6 +312,62 @@ function ProgramCell({
   );
 }
 
+type SortKey = "program" | "giveaway" | "found" | "scanned";
+type Sort = { key: SortKey; dir: "asc" | "desc" } | null;
+
+/** Text columns start A→Z, dates start newest first. */
+const DEFAULT_DIR: Record<SortKey, "asc" | "desc"> = {
+  program: "asc",
+  giveaway: "asc",
+  found: "desc",
+  scanned: "desc"
+};
+
+/** Header sort toggle. With `icon`, the label moves to the tooltip to keep the column narrow. */
+function SortButton({
+  label,
+  icon: LabelIcon,
+  sortKey,
+  sort,
+  onSort
+}: {
+  label: string;
+  icon?: IconType;
+  sortKey: SortKey;
+  sort: Sort;
+  onSort: (key: SortKey) => void;
+}) {
+  const active = sort?.key === sortKey;
+  const Icon = active && sort.dir === "asc" ? FiChevronUp : FiChevronDown;
+  return (
+    <button
+      type="button"
+      onClick={() => onSort(sortKey)}
+      title={t.sortBy.replace("{column}", label)}
+      aria-label={t.sortBy.replace("{column}", label)}
+      className={`inline-flex items-center gap-0.5 uppercase tracking-wider cursor-pointer hover:text-gray-900 ${
+        active ? "text-gray-900" : ""
+      }`}>
+      {LabelIcon ? <LabelIcon className="w-3.5 h-3.5" /> : label}
+      <Icon className={`w-3 h-3 ${active ? "" : "opacity-30"}`} />
+    </button>
+  );
+}
+
+/** "3d ago" -> "3d"; the column header icons say what each date is. */
+function shortAgo(iso?: string): string {
+  return formatRelativeTimeCompact(iso).replace(/ ago$/, "").replace("just now", "now");
+}
+
+function SeenRow({ icon: Icon, label, iso, strong }: { icon: IconType; label: string; iso: string; strong?: boolean }) {
+  return (
+    <div className="flex items-center gap-1" title={`${label}: ${new Date(iso).toLocaleString()}`}>
+      <Icon className="w-3 h-3 shrink-0 text-gray-400" aria-label={label} />
+      <span className={strong ? "text-gray-900" : undefined}>{shortAgo(iso)}</span>
+    </div>
+  );
+}
+
 export default function GiveawayFindsTable({
   finds,
   sources,
@@ -299,6 +378,36 @@ export default function GiveawayFindsTable({
   onWatch
 }: GiveawayFindsTableProps) {
   const sourceLabel = (key: string) => sources.find(s => s.key === key)?.label ?? key;
+  // null keeps the API order (most recently changed first).
+  const [sort, setSort] = useState<Sort>(null);
+
+  const onSort = (key: SortKey) =>
+    setSort(prev =>
+      prev?.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: DEFAULT_DIR[key] }
+    );
+
+  const sorted = useMemo(() => {
+    if (!sort) return finds;
+    const label = (f: GiveawayFind) => sources.find(s => s.key === f.sourceId)?.label ?? f.sourceId;
+    const keys = (f: GiveawayFind): (string | undefined)[] => {
+      if (sort.key === "program") return [f.program?.title];
+      if (sort.key === "giveaway") return [label(f), f.sourceTitle];
+      return [sort.key === "found" ? f.firstSeenAt : f.lastSeenAt];
+    };
+    const sign = sort.dir === "asc" ? 1 : -1;
+    // Rows without a value (unmatched program, missing date) always go last.
+    return [...finds].sort((a, b) => {
+      const ka = keys(a);
+      const kb = keys(b);
+      if (!ka[0] || !kb[0]) return ka[0] ? -1 : kb[0] ? 1 : 0;
+      for (let i = 0; i < ka.length; i++) {
+        const diff = (ka[i] ?? "").localeCompare(kb[i] ?? "", undefined, { sensitivity: "base" });
+        if (diff) return diff * sign;
+      }
+      return 0;
+    });
+  }, [finds, sort, sources]);
+
   if (finds.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-soft border border-gray-200 p-12 text-center">
@@ -309,29 +418,40 @@ export default function GiveawayFindsTable({
     );
   }
 
-  const columns = [t.columns.program, t.columns.giveaway, t.columns.found, t.columns.details, t.columns.status, t.columns.actions];
+  const thClass = "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap";
 
   return (
     <div className="bg-white rounded-xl shadow-soft border border-gray-200 overflow-hidden">
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-4 sm:px-6 border-b border-gray-200 flex justify-between items-center gap-4">
         <h3 className="text-lg font-semibold text-gray-900">{t.tableTitle}</h3>
-        <p className="text-sm text-gray-500 mt-1">Total: {finds.length}</p>
+        <p className="text-sm text-gray-500">Total: {finds.length}</p>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              {columns.map(label => (
-                <th
-                  key={label}
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
-                  {label}
-                </th>
-              ))}
+              <th className={thClass}>
+                <SortButton label={t.columns.program} sortKey="program" sort={sort} onSort={onSort} />
+              </th>
+              <th className={thClass}>
+                <SortButton label={t.columns.giveaway} sortKey="giveaway" sort={sort} onSort={onSort} />
+              </th>
+              <th className={thClass}>{t.columns.found}</th>
+              <th className={thClass}>{t.columns.details}</th>
+              <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 whitespace-nowrap">
+                <span className="inline-flex items-center gap-1.5">
+                  <SortButton label={t.foundAt} icon={FiSearch} sortKey="found" sort={sort} onSort={onSort} />
+                  <SortButton label={t.scannedAt} icon={FiRefreshCw} sortKey="scanned" sort={sort} onSort={onSort} />
+                </span>
+              </th>
+              <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                {t.columns.status}
+              </th>
+              <th className={thClass}>{t.columns.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {finds.map(find => {
+            {sorted.map(find => {
               const busy = updatingId === find._id;
               const muted = find.status === "dismissed" || find.status === "added";
               const programFlow = find.program?.programFlow ?? "cd_key";
@@ -432,21 +552,20 @@ export default function GiveawayFindsTable({
                     {flowMismatch && (
                       <div className="text-amber-700">⚠ {t.flowMismatch.replace("{flow}", flowLabel(programFlow))}</div>
                     )}
-                    <div className="pt-1 text-gray-500">
-                      {t.firstSeen} {formatRelativeTimeCompact(find.firstSeenAt)}
-                    </div>
-                    {find.lastChangedAt && find.lastChangedAt !== find.firstSeenAt && (
-                      <div className="text-gray-500">
-                        {t.changed} {formatRelativeTimeCompact(find.lastChangedAt)}
-                      </div>
-                    )}
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-2 py-4 text-[11px] text-gray-500 whitespace-nowrap space-y-0.5 tabular-nums">
+                    <SeenRow icon={FiSearch} label={t.foundAt} iso={find.firstSeenAt} strong />
+                    {find.lastChangedAt && find.lastChangedAt !== find.firstSeenAt && (
+                      <SeenRow icon={FiEdit3} label={t.changed} iso={find.lastChangedAt} />
+                    )}
+                    {find.lastSeenAt && <SeenRow icon={FiRefreshCw} label={t.scannedAt} iso={find.lastSeenAt} />}
+                  </td>
+                  <td className="px-2 py-4">
                     <select
                       value={find.status}
                       disabled={busy}
                       onChange={e => onUpdate(find._id, { status: e.target.value as GiveawayFindStatus })}
-                      className={`px-3 py-1 rounded-full text-xs font-medium border cursor-pointer ${STATUS_COLORS[find.status]} disabled:opacity-50`}>
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer ${STATUS_COLORS[find.status]} disabled:opacity-50`}>
                       {(Object.keys(t.status) as GiveawayFindStatus[]).map(s => (
                         <option key={s} value={s}>
                           {t.status[s]}
@@ -454,7 +573,7 @@ export default function GiveawayFindsTable({
                       ))}
                     </select>
                     {find.status === "dismissed" && find.dismissedReason === "expired" && (
-                      <div className="text-[11px] text-gray-500 mt-1 whitespace-nowrap">{t.dismissedExpired}</div>
+                      <div className="text-[10px] text-gray-500 mt-1 whitespace-nowrap">{t.dismissedExpired}</div>
                     )}
                   </td>
                   <td className="px-4 py-4">
