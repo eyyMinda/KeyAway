@@ -60,15 +60,15 @@ export default function SuggestionDetailsModal({
       <div className="space-y-6">
           {/* Program Info */}
           <div>
-            <label className="block text-sm font-medium text-gray-500 mb-1">Program Name</label>
-            <p className="text-lg font-semibold text-gray-900">{suggestion.programName}</p>
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Program Name</label>
+            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{suggestion.programName}</p>
           </div>
 
           {/* CD Key */}
           <div>
-            <label className="block text-sm font-medium text-gray-500 mb-1">CD Key</label>
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">CD Key</label>
             <div className="flex items-center gap-2">
-              <code className="flex-1 px-4 py-3 bg-gray-100 text-gray-900 rounded-lg font-mono text-lg border border-gray-300">
+              <code className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg font-mono text-lg border border-gray-300 dark:border-gray-700">
                 {suggestion.cdKey}
               </code>
               <button
@@ -83,16 +83,16 @@ export default function SuggestionDetailsModal({
           {/* Version & Link */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Version</label>
-              <p className="text-gray-900 font-semibold">v{suggestion.programVersion}</p>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Version</label>
+              <p className="text-gray-900 dark:text-gray-100 font-semibold">v{suggestion.programVersion}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Program Link</label>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Program Link</label>
               <a
                 href={suggestion.programLink}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-primary-600 hover:text-primary-700">
+                className="flex items-center gap-2 text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300">
                 <span className="truncate">{new URL(suggestion.programLink).hostname}</span>
                 <FaExternalLinkAlt size={12} />
               </a>
@@ -101,16 +101,16 @@ export default function SuggestionDetailsModal({
 
           {/* Additional Message */}
           <div>
-            <label className="block text-sm font-medium text-gray-500 mb-1">Additional Notes</label>
-            <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Additional Notes</label>
+            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
               {suggestion.message?.trim() || "-"}
             </p>
           </div>
 
           {/* Contact Information - always shown */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Contact Name</label>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Contact Name</label>
               <div className="flex gap-2 items-center">
                 <input
                   type="text"
@@ -118,7 +118,7 @@ export default function SuggestionDetailsModal({
                   onChange={e => setNameInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSaveName()}
                   placeholder="Add or edit name..."
-                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 text-sm"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-gray-100 text-sm"
                   disabled={updating}
                 />
                 <button
@@ -129,10 +129,10 @@ export default function SuggestionDetailsModal({
                   {nameSaved ? "Saved" : "Save"}
                 </button>
               </div>
-              {!nameInput.trim() && <p className="mt-1 text-sm text-gray-500">-</p>}
+              {!nameInput.trim() && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">-</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Contact Email</label>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Contact Email</label>
               <div className="flex gap-2 items-center">
                 <input
                   type="email"
@@ -140,7 +140,7 @@ export default function SuggestionDetailsModal({
                   onChange={e => setEmailInput(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && handleSaveEmail()}
                   placeholder="Add or edit email..."
-                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 text-sm"
+                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-gray-100 text-sm"
                   disabled={updating}
                 />
                 <button
@@ -154,27 +154,27 @@ export default function SuggestionDetailsModal({
               {suggestion.email?.trim() && (
                 <a
                   href={`mailto:${suggestion.email}`}
-                  className="mt-1 inline-block text-sm text-primary-600 hover:text-primary-700">
+                  className="mt-1 inline-block text-sm text-primary-600 dark:text-sky-400 hover:text-primary-700 dark:hover:text-sky-300">
                   Send mail
                 </a>
               )}
-              {!suggestion.email?.trim() && !emailInput.trim() && <p className="mt-1 text-sm text-gray-500">-</p>}
+              {!suggestion.email?.trim() && !emailInput.trim() && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">-</p>}
             </div>
           </div>
 
           {/* Metadata */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Submitted</label>
-              <p className="text-gray-900">{new Date(suggestion.createdAt).toLocaleString()}</p>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Submitted</label>
+              <p className="text-gray-900 dark:text-gray-100">{new Date(suggestion.createdAt).toLocaleString()}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Status</label>
+              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
               <select
                 value={suggestion.status}
                 onChange={e => onUpdateSuggestion({ status: e.target.value as KeySuggestion["status"] })}
                 disabled={updating}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer text-gray-900 disabled:opacity-50">
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer text-gray-900 dark:text-gray-100 disabled:opacity-50">
                 <option value="new">New</option>
                 <option value="reviewing">Reviewing</option>
                 <option value="added">Added</option>
