@@ -6,6 +6,7 @@ import VendorLogoFrame from "@/src/components/vendors/VendorLogoFrame";
 import GiveawayVsOfficial from "@/src/components/vendors/GiveawayVsOfficial";
 import RichText from "@/src/components/portableText/RichText";
 import ProgramsGrid from "@/src/components/programs/ProgramsGrid";
+import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getCachedVendorSlugs, getVendorBySlug } from "@/src/lib/vendors/getVendors";
 import { generateVendorPageJsonLd } from "@/src/lib/seo/jsonLd";
@@ -30,7 +31,13 @@ export async function generateMetadata({ params }: VendorPageProps): Promise<Met
   const [store, vendor] = await Promise.all([getCachedStoreDetailsDocument(), getVendorBySlug(slug)]);
   if (!vendor) return { title: "Vendor not found", robots: { index: false, follow: true } };
 
-  const { title, description, pageUrl: url, ogImageUrl, storeTitle } = resolveVendorHubSeo(store, {
+  const {
+    title,
+    description,
+    pageUrl: url,
+    ogImageUrl,
+    storeTitle
+  } = resolveVendorHubSeo(store, {
     name: vendor.name,
     slug: vendor.slug,
     programCount: vendor.programs.length,
@@ -110,14 +117,25 @@ export default async function VendorPage({ params }: VendorPageProps) {
         </div>
       </section>
 
+      <AdSlot className="pt-6">
+        <BannerAd />
+      </AdSlot>
+
       <section className="mx-auto w-full max-w-360 px-4 py-8 sm:px-6 lg:px-8">
         <h2 className="mb-5 text-lg font-semibold text-[#c6d4df] sm:text-xl">
           {vendor.programs.length} program{vendor.programs.length === 1 ? "" : "s"} from {vendor.name}
         </h2>
-        <ProgramsGrid programs={vendor.programs} maxViews={maxViews} maxDownloads={maxDownloads} />
+        <ProgramsGrid programs={vendor.programs} maxViews={maxViews} maxDownloads={maxDownloads} adEvery={6} />
       </section>
 
+      <AdSlot className="pb-6">
+        <BannerAd />
+      </AdSlot>
+
       <GiveawayVsOfficial rows={vendor.giveawayVsOfficial} vendorName={vendor.name} />
+      <AdSlot className="pb-6">
+        <NativeBannerAd />
+      </AdSlot>
     </>
   );
 }
