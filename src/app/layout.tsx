@@ -7,6 +7,8 @@ import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDe
 import Header from "@components/layout/Header";
 import Footer from "@components/layout/Footer";
 import PageViewTracker from "@components/PageViewTracker";
+import { AdScripts } from "@components/ads";
+import AdConsentBanner from "@components/consent/AdConsentBanner";
 import { SessionProvider } from "@components/providers/SessionProvider";
 import { StoreDetailsProvider } from "@components/providers/StoreDetailsProvider";
 import { LogoData, SocialData } from "@/src/types";
@@ -129,6 +131,8 @@ export default async function RootLayout({
           </StoreDetailsProvider>
         </SessionProvider>
         <VercelPublicMetrics />
+        <AdScripts />
+        <AdConsentBanner />
       </body>
     </html>
   );
