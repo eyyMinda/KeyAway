@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last updated: April 20, 2026**
+**Last updated: October 18, 2026**
 
 KeyAway is the service operated at [keyaway.app](https://www.keyaway.app). These terms govern your use of our platform for sharing publicly available giveaway CD keys.
 
@@ -27,6 +27,8 @@ KeyAway provides access to publicly available giveaway CD keys for selected soft
 KeyAway does **not** sell software, licenses, or subscriptions on this website. There is no checkout on keyaway.app—you cannot complete a purchase here.
 
 Some outbound links (for example official **download** links, upgrade or Pro-license offers, or promotional banners) may be **affiliate links** arranged with software vendors or their partners. If you visit a vendor's site through such a link and make a purchase *on that vendor's site*, KeyAway may earn a small commission from the vendor at **no extra cost to you**. Prices and checkout are always controlled by the vendor, not KeyAway.
+
+KeyAway also shows **advertisements** from a third-party ad network, labeled "Advertisement" or "Sponsored". Advertised products and sites are not endorsed or checked by KeyAway, and anything you do on them is between you and the advertiser.
 
 These arrangements help support the operation of the site and keep giveaway listings and content free. Browsing KeyAway and copying publicly listed giveaway keys does not require a purchase.
 

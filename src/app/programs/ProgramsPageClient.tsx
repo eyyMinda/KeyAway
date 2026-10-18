@@ -89,7 +89,7 @@ export default function ProgramsPageClient({
 
   const programs = listData?.programs ?? EMPTY_PROGRAMS;
   const totalPrograms = listData?.totalCount ?? 0;
-  const programsPerPage = listData?.programsPerPage ?? 15;
+  const programsPerPage = listData?.programsPerPage ?? 13;
   const currentPage = listData?.page ?? page;
 
   const loadList = useCallback(async (sp: URLSearchParams) => {
@@ -293,6 +293,7 @@ export default function ProgramsPageClient({
           programs={showLoading ? EMPTY_PROGRAMS : programs}
           maxViews={maxViews}
           maxDownloads={maxDownloads}
+          adEvery={5}
         />
       )}
 

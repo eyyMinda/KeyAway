@@ -19,6 +19,13 @@ const imageProviders: RemotePattern[] = [
   }
 ];
 
+/** Ad network origins (see `src/lib/ads/adConfig.ts`); add any new domain the network serves from here. */
+const AD_ORIGINS = [
+  "https://bauval.org",
+  "https://araplhn.org",
+  "https://*.show-creative1.com"
+].join(" ");
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   images: {
@@ -62,14 +69,14 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.sanity.io https://vercel.live https://va.vercel-scripts.com https://core.sanity-cdn.com",
+              `script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.sanity.io https://vercel.live https://va.vercel-scripts.com https://core.sanity-cdn.com ${AD_ORIGINS}`,
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
               "object-src 'none'",
               "base-uri 'self'",
-              "frame-src 'self' https://vercel.live",
-              "connect-src 'self' https://cdn.sanity.io https://*.sanity.io https://sanity-cdn.com https://sanity-cdn.work https://registry.npmjs.org https://vitals.vercel-insights.com https://va.vercel-scripts.com wss://*.sanity.io",
+              `frame-src 'self' https://vercel.live ${AD_ORIGINS}`,
+              `connect-src 'self' https://cdn.sanity.io https://*.sanity.io https://sanity-cdn.com https://sanity-cdn.work https://registry.npmjs.org https://vitals.vercel-insights.com https://va.vercel-scripts.com wss://*.sanity.io ${AD_ORIGINS}`,
               "media-src 'self'",
               "worker-src 'self' blob:",
               "child-src 'self' blob:",

@@ -24,6 +24,7 @@
 - Analytics and reports use **hashed IPs** and salts; there is no traditional “login” for visitors.
 - Public policies: **Privacy** and **Terms** describe handling of data, comments, and contributions.
 - **Affiliate links:** KeyAway does not operate a store. Outbound links to vendors (downloads, Pro upgrades, promotions) may be affiliate links; purchases occur on third-party sites under their policies—see **Terms** for disclosure.
+- **Ads:** KeyAway shows clearly labeled third-party ads that help fund the site; ads are not endorsements or verified giveaways, and no content requires clicking an ad.
 - Bot and duplicate-request handling reduces noise in metrics; localhost traffic is typically skipped for tracking in development.
 
 ## Automation and freshness

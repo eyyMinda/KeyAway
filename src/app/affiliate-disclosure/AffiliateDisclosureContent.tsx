@@ -23,11 +23,11 @@ export default function AffiliateDisclosureContent() {
         }
         subtitle={
           <>
-            {storeTitle} does not sell software on {storeDomain}. This page explains outbound links and how affiliate
-            relationships support the site.
+            {storeTitle} does not sell software on {storeDomain}. This page explains outbound links, ads, and how
+            affiliate relationships support the site.
           </>
         }
-        lastUpdated="May 25, 2026"
+        lastUpdated="October 18, 2026"
       />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -66,7 +66,21 @@ export default function AffiliateDisclosureContent() {
           </section>
 
           <section>
-            <EnumeratedSectionHeading index={3}>How we label links</EnumeratedSectionHeading>
+            <EnumeratedSectionHeading index={3}>Advertising</EnumeratedSectionHeading>
+            <p className="leading-relaxed">
+              {storeTitle} also shows ads from a third-party ad network, such as banners labeled{" "}
+              <strong className="text-white">Advertisement</strong> or <strong className="text-white">Sponsored</strong>.
+              Ads help pay for hosting and keep the site free. We do not choose individual ads, and an ad is not an
+              endorsement or a verified giveaway.
+            </p>
+            <p className="mt-4 leading-relaxed">
+              You are never required to click an ad to access any part of {storeTitle}. Keys, download links, and all
+              other content are available without interacting with advertisements.
+            </p>
+          </section>
+
+          <section>
+            <EnumeratedSectionHeading index={4}>How we label links</EnumeratedSectionHeading>
             <p className="leading-relaxed">
               Program pages may show a short disclosure near official Pro upgrade buttons. Affiliate outbound links use{" "}
               <code className="rounded bg-[#213246] px-1.5 py-0.5 text-sm text-[#9fc6e3]">rel=&quot;sponsored&quot;</code>{" "}
@@ -77,7 +91,7 @@ export default function AffiliateDisclosureContent() {
           </section>
 
           <section>
-            <EnumeratedSectionHeading index={4}>Third-party sites</EnumeratedSectionHeading>
+            <EnumeratedSectionHeading index={5}>Third-party sites</EnumeratedSectionHeading>
             <div className="rounded-sm border border-[#4a90c4] bg-[#1a2f45] p-4">
               <p className="text-sm leading-relaxed">
                 When you leave {storeTitle}, the vendor&apos;s cookies, analytics, and payment processing apply. We do
@@ -87,7 +101,7 @@ export default function AffiliateDisclosureContent() {
           </section>
 
           <section>
-            <EnumeratedSectionHeading index={5}>Related policies</EnumeratedSectionHeading>
+            <EnumeratedSectionHeading index={6}>Related policies</EnumeratedSectionHeading>
             <ul className="flex flex-wrap gap-4 text-sm">
               <li>
                 <Link href="/terms" className="text-[#66d9ff] underline hover:text-white">

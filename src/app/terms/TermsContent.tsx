@@ -22,7 +22,7 @@ export default function TermsContent() {
             <h1 className="section-title mb-4">
               Terms of <span className="text-gradient-pro">Service</span>
             </h1>
-            <p className="mb-3 text-base text-[#8f98a0]">Last updated: April 20, 2026</p>
+            <p className="mb-3 text-base text-[#8f98a0]">Last updated: October 18, 2026</p>
             <p className="mx-auto max-w-3xl text-[#c6d4df]">
               {storeTitle} is the service operated at{" "}
               <a href={storeWebsiteHref} className="text-[#66d9ff] underline hover:text-white">
@@ -89,6 +89,14 @@ export default function TermsContent() {
                 {`, ${storeTitle} may earn a small commission from the vendor at `}
                 <strong className="text-white">no extra cost to you</strong>
                 {`. Prices and checkout are always controlled by the vendor, not ${storeTitle}.`}
+              </p>
+              <p className="leading-relaxed text-[#c6d4df]">
+                {`${storeTitle} also shows `}
+                <strong className="text-white">advertisements</strong>
+                {
+                  " from a third-party ad network, labeled “Advertisement” or “Sponsored”. Advertised products and sites are not endorsed or checked by "
+                }
+                {`${storeTitle}, and anything you do on them is between you and the advertiser.`}
               </p>
               <p className="text-neutral-100 leading-relaxed">
                 These arrangements help support the operation of the site and keep giveaway listings and content free.

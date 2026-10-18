@@ -17,12 +17,13 @@ import PopularProgramsSection from "@/src/components/home/PopularProgramsSection
 import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
 import StatsSection from "@/src/components/home/StatsSection";
 import CTASection from "@/src/components/home/CTASection";
+import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
 import { SocialData } from "@/src/types";
 import { TAG_HOMEPAGE_PROGRAMS, TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
 /** Must match `PUBLIC_ISR_REVALIDATE_SECONDS` in `@/src/lib/cache/constants` (Next.js requires a literal). */
 export const revalidate = 43200;
 
-const HOMEPAGE_POPULAR_LIMIT = 8;
+const HOMEPAGE_POPULAR_LIMIT = 9;
 
 export async function generateMetadata() {
   return generateHomePageMetadata();
@@ -65,9 +66,19 @@ export default async function HomePage() {
       <JsonLd data={jsonLd} />
       <HeroSection socialData={socialData} stats={stats} />
       <FeaturedProgramSection program={featuredProgram} />
+      <AdSlot className="pt-6 sm:pt-8 lg:pt-10">
+        <BannerAd />
+      </AdSlot>
       <PopularProgramsSection programs={normalizedPopularPrograms} vendors={vendors} />
+      <AdSlot className="pb-6">
+        <BannerAd />
+        <NativeBannerAd />
+      </AdSlot>
       <FeaturesSection />
       <StatsSection stats={stats} />
+      <AdSlot className="static-bg pt-6 sm:pt-8 lg:pt-10">
+        <BannerAd />
+      </AdSlot>
       <CTASection otherLinks={store?.otherLinks ?? []} />
     </>
   );

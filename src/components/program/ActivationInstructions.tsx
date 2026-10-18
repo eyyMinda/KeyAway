@@ -91,7 +91,7 @@ export default function ActivationInstructions({
   }, [pageTitle, programTitle]);
 
   return (
-    <section className="border-t border-[#2a475e] static-bg py-8 sm:py-12 lg:py-16">
+    <section className="border-t border-[#2a475e] static-bg py-6 sm:py-8 lg:py-10">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8 lg:mb-12">
           <div className="section-label mb-3">Activation Guide</div>

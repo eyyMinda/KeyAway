@@ -44,4 +44,6 @@ export interface ProgramsGridProps {
   maxDownloads: number;
   showBrowseAllCTA?: boolean;
   limit?: number;
+  /** Insert a `GridAdCard` roughly every N program cards: gaps of N, N+1, N-1, repeating (never after the last card). */
+  adEvery?: number;
 }

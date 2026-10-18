@@ -16,8 +16,8 @@ import {
 import { TAG_PROGRAM_LISTINGS } from "@/src/lib/cache/cacheTags";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
 
-/** 4-column grid. The last cell on each page is SuggestKeyCTA. */
-export const PROGRAMS_PER_PAGE = 15;
+/** 4-column grid: 13 programs + 2 grid ad cards (`adEvery={5}`: after cards 5 and 11) + SuggestKeyCTA fill four full rows. */
+export const PROGRAMS_PER_PAGE = 13;
 
 export type ProgramsListData = {
   programs: ProgramWithStats[];

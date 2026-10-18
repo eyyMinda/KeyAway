@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import JsonLd from "@/src/components/JsonLd";
 import VendorLogoFrame from "@/src/components/vendors/VendorLogoFrame";
+import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
 import { getCachedStoreDetailsDocument } from "@/src/lib/sanity/getCachedStoreDetails";
 import { getCachedVendorsWithCounts } from "@/src/lib/vendors/getVendors";
 import { generateVendorsPageJsonLd } from "@/src/lib/seo/jsonLd";
@@ -84,6 +85,10 @@ export default async function VendorsPage() {
           </ul>
         )}
       </section>
+
+      <AdSlot className="pb-8 sm:pb-10">
+        <NativeBannerAd />
+      </AdSlot>
     </>
   );
 }

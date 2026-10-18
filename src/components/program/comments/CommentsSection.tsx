@@ -28,10 +28,7 @@ export default function CommentsSection({ program }: CommentsSectionProps) {
   >(undefined);
   const [ownership, setOwnership] = useState<ProgramCommentOwnership | null>(null);
 
-  const ownedCommentKeys = useMemo(
-    () => new Set(ownership?.commentKeys ?? []),
-    [ownership?.commentKeys]
-  );
+  const ownedCommentKeys = useMemo(() => new Set(ownership?.commentKeys ?? []), [ownership?.commentKeys]);
   const ownedReplyKeys = useMemo(
     () => new Set((ownership?.replies ?? []).map(r => replyOwnershipKey(r.commentKey, r.replyKey))),
     [ownership?.replies]
@@ -83,7 +80,7 @@ export default function CommentsSection({ program }: CommentsSectionProps) {
   return (
     <section
       id={PROGRAM_COMMENTS_SECTION_ID}
-      className="relative border-t border-[#2a475e] page-bg py-8 sm:py-12 lg:py-16 overflow-visible">
+      className="relative border-t border-[#2a475e] page-bg py-6 sm:py-8 lg:py-10 overflow-visible">
       <div className="mx-auto max-w-360 px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-8 lg:mb-10">
           <div className="section-label mb-3 text-neutral-100">Discussion</div>
