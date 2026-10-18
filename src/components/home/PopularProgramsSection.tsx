@@ -10,7 +10,7 @@ export default function PopularProgramsSection({ programs, vendors = [] }: Popul
   const maxDownloads = Math.max(...programs.map(p => p.downloadCount), 0);
 
   return (
-    <section id="popular-programs" className="py-10 sm:py-12">
+    <section id="popular-programs" className="py-6 sm:py-8 lg:py-10">
       <div className="mx-auto w-full max-w-360 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 sm:mb-10 lg:mb-12">
@@ -31,7 +31,8 @@ export default function PopularProgramsSection({ programs, vendors = [] }: Popul
           maxViews={maxViews}
           maxDownloads={maxDownloads}
           showBrowseAllCTA={true}
-          limit={8}
+          limit={9}
+          adEvery={4}
         />
 
         <HomeVendorBrowse vendors={vendors} position="bottom" />
