@@ -4,6 +4,7 @@ import ProgramsPageSocialShare from "@/src/components/social-share/ProgramsPageS
 import { getPageShareCounts } from "@/src/lib/share/getPageShareCounts";
 import { resolveSiteBaseUrl, resolveDefaultOgImageUrl } from "@/src/lib/seo/storeSeoResolve";
 import JsonLd from "@/src/components/JsonLd";
+import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
 import { ProgramsHero, ContributeSection, WhyUseSection } from "@/src/components/programs";
 import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
@@ -30,17 +31,25 @@ export async function generateMetadata() {
  * the client reads the URL and loads filter/sort/pagination via cached `/api/v1/programs/list`.
  */
 export default async function ProgramsPage() {
-  const [storeRow, featuredProgram, heroTotals, jsonLdPrograms, initialListData, vendors, categoryOptions, shareCounts] =
-    await Promise.all([
-      getCachedStoreDetailsDocument(),
-      getFeaturedProgram(),
-      getCachedProgramsHeroTotals(),
-      getCachedProgramsForJsonLd(),
-      getProgramsListData(undefined, undefined, undefined, undefined),
-      getCachedVendorsWithCounts(),
-      getCachedProgramCategoryOptions(),
-      getPageShareCounts("/programs")
-    ]);
+  const [
+    storeRow,
+    featuredProgram,
+    heroTotals,
+    jsonLdPrograms,
+    initialListData,
+    vendors,
+    categoryOptions,
+    shareCounts
+  ] = await Promise.all([
+    getCachedStoreDetailsDocument(),
+    getFeaturedProgram(),
+    getCachedProgramsHeroTotals(),
+    getCachedProgramsForJsonLd(),
+    getProgramsListData(undefined, undefined, undefined, undefined),
+    getCachedVendorsWithCounts(),
+    getCachedProgramCategoryOptions(),
+    getPageShareCounts("/programs")
+  ]);
 
   const programsPageUrl = `${resolveSiteBaseUrl(storeRow?.seo)}/programs`;
   const programsShareImageUrl = resolveDefaultOgImageUrl(storeRow?.seo);
@@ -69,10 +78,19 @@ export default async function ProgramsPage() {
         </div>
       </section>
 
+      <AdSlot className="pt-6 sm:pt-8">
+        <BannerAd />
+      </AdSlot>
       <ProgramsPageClient initialListData={initialListData} vendors={vendors} categoryOptions={categoryOptions} />
+      <AdSlot className="pb-8 sm:pb-10">
+        <BannerAd />
+      </AdSlot>
 
       <ContributeSection />
       <FeaturedProgramSection program={featuredProgram} />
+      <AdSlot className="py-6">
+        <NativeBannerAd />
+      </AdSlot>
       <WhyUseSection />
     </>
   );
