@@ -23,7 +23,8 @@ const imageProviders: RemotePattern[] = [
 const AD_ORIGINS = [
   "https://bauval.org",
   "https://araplhn.org",
-  "https://*.show-creative1.com"
+  "https://*.show-creative1.com",
+  "https://*.holdbitter.com"
 ].join(" ");
 
 const nextConfig: NextConfig = {
