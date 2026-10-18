@@ -63,7 +63,7 @@ export default function ProgramInformation({
   const commentCount = countProgramDiscussionPosts(program.programComments);
 
   return (
-    <section className=" py-6 sm:py-10 relative">
+    <section className="py-4 sm:py-6 relative">
       <div className="max-w-3xl lg:max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile: intro → image+FB → body. Desktop: left col image+FB (sticky), right col intro + body. */}
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-12 relative">
@@ -144,8 +144,7 @@ export default function ProgramInformation({
             {communityRating ? (
               <p className="text-xs text-neutral-100 sm:text-sm">
                 <span className="font-semibold text-[#5ba32b]">{communityRating.successPercent}%</span> community
-                success · {communityRating.ratingCount}{" "}
-                {communityRating.ratingCount === 1 ? "report" : "reports"}
+                success · {communityRating.ratingCount} {communityRating.ratingCount === 1 ? "report" : "reports"}
               </p>
             ) : null}
           </div>

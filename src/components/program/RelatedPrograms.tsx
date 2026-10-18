@@ -131,7 +131,7 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
   const showNav = numPages > 1;
 
   return (
-    <section className="overflow-hidden border-t border-[#2d3d52] static-bg py-8 sm:py-10">
+    <section className="overflow-hidden border-t border-[#2d3d52] static-bg py-6 sm:py-8 lg:py-10">
       <div className="max-w-360 mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex w-full items-end justify-between lg:mb-8">
           <div className="flex min-w-0 flex-1 flex-col gap-2">
