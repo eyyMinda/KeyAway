@@ -20,7 +20,7 @@ export default function PrivacyContent() {
             <h1 className="section-title mb-4">
               Privacy <span className="text-gradient-pro">Policy</span>
             </h1>
-            <p className="mb-3 text-base text-[#8f98a0]">Last updated: April 20, 2026</p>
+            <p className="mb-3 text-base text-[#8f98a0]">Last updated: October 18, 2026</p>
             <p className="mx-auto max-w-3xl text-[#c6d4df]">
               {storeDisplayName} is the service described in this policy. Learn how we handle your personal data,
               comments, and contributions while keeping the site transparent.
@@ -77,8 +77,25 @@ export default function PrivacyContent() {
               Cookies and <span className="text-gradient-pro">Analytics</span>
             </EnumeratedSectionHeading>
             <p className="leading-relaxed text-[#c6d4df]">
-              We may use basic analytics or cookies to understand site usage. No personal data is sold or shared with
-              advertisers.
+              To understand how the site is used and to keep out spam and abuse, we record basic visit information:
+              pages viewed and actions such as copying or reporting a key, the referring site, browser type, and an
+              approximate country and city. Your IP address is never stored as-is; it is turned into a one-way code
+              that cannot be turned back into the address, and nothing we record can pinpoint where you are. A
+              temporary visit ID lives in your browser tab and is cleared when you close it. We do this based on our
+              legitimate interest in running and protecting the site, keep the detailed records for up to 12 months,
+              and after that keep only overall numbers such as view counts or top countries to preserve the site&apos;s
+              analytics history. No personal
+              data is sold or shared with advertisers, and you can reach us about your data through the contact
+              details below.
+            </p>
+            <p className="mt-4 leading-relaxed text-[#c6d4df]">
+              {`${storeTitle} shows ads from a third-party ad network. Those ads may set their own cookies or use similar technologies to serve and measure ads, under the ad network's own privacy policy. We do not pass your contact details, comments, or messages to advertisers.`}
+            </p>
+            <p className="mt-4 leading-relaxed text-[#c6d4df]">
+              In the EEA, the UK, and Switzerland, advertising cookies are only used after you accept them. Elsewhere,
+              ads load by default and you can opt out at any time. In every region you can change your choice from{" "}
+              <strong className="text-white">Your privacy choices</strong> in the site footer, and we treat a Global
+              Privacy Control (GPC) signal from your browser as an opt-out.
             </p>
           </section>
 
