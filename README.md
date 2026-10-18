@@ -87,6 +87,7 @@ Short notes on what each part does and why.
 - **Cache & revalidation** — Public pages use a **segment revalidate** window (`PUBLIC_ISR_REVALIDATE_SECONDS`, currently 12h) plus **tagged** Sanity fetches so `revalidateTag` can invalidate data before ISR would. `/programs` stays static: it renders the default list, and the client reads filter/sort/page from the URL and loads them from the cached `/api/v1/programs/list`. The Sanity webhook (`POST /api/v1/webhooks/revalidate`, `SANITY_WEBHOOK_SECRET`) and admin program saves bust tags by document type — e.g. `storeDetails`, `program` / `cdKey` (and sitemap when the URL set changes), `featuredProgramSettings`, `keyReport`.
 - **Header notifications (program activity)** — One **`siteNotificationFeed`** document stores a capped list of “what’s new” rows, rebuilt when programs or CD keys change (webhook or admin program APIs). **One row per program**, roughly the last 30 days by `_updatedAt` with real listing or key activity in that window. The header uses **`GET /api/v1/notifications/recent`**, cached server-side and cleared when the feed is rewritten.
 - **Admin auth** — Auth.js (NextAuth v5) with GitHub (and optional Google). Access to `/admin` is restricted by email allowlist (`ADMIN_ALLOWED_EMAILS`) or Sanity project membership; JWT session (e.g. 2h prod, 7d dev).
+- **Ads** — Third-party ad units live in `src/components/ads` (keys and the on/off switch in `src/lib/ads/adConfig.ts`). Iframe banners run in their own `srcdoc` iframe, the native banner renders once per page, and the program grids can insert an ad card via `adEvery`. Admin and Studio never load ads; new ad domains must be added to `AD_ORIGINS` in `next.config.ts` (CSP). Units load only near the viewport and only with ad consent (`src/lib/consent/adConsent.ts`): opt-in for EEA/UK/CH via `/api/v1/consent-region`, opt-out elsewhere, GPC honoured, choice reopened from the footer "Your privacy choices" link.
 - **Featured program** — One program is pinned as “featured” in Sanity and highlighted on the home page. Auto-rotation cycles through eligible programs over time so each gets exposure and visitors discover new options.
 
 ---
@@ -123,6 +124,7 @@ CRON_SECRET=yourCronSecret                   # Cron routes (e.g. update-expired-
 ANALYTICS_SALT=yourRandomSalt                # IP hashing for analytics
 NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=true    # Turns Vercel Web Analytics back on (off when unset)
 NEXT_PUBLIC_SPEED_INSIGHTS_SAMPLE_RATE=0.15  # Speed Insights sample rate (default 0.15)
+NEXT_PUBLIC_ADS_ENABLED=false                # Ads: on in production, off in dev by default; true/false overrides
 
 # Outbound email (admin message replies via Resend)
 RESEND_API_KEY=re_xxxxxxxx                   # https://resend.com — verify keyaway.app domain first
