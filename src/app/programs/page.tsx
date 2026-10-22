@@ -4,7 +4,7 @@ import ProgramsPageSocialShare from "@/src/components/social-share/ProgramsPageS
 import { getPageShareCounts } from "@/src/lib/share/getPageShareCounts";
 import { resolveSiteBaseUrl, resolveDefaultOgImageUrl } from "@/src/lib/seo/storeSeoResolve";
 import JsonLd from "@/src/components/JsonLd";
-import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
+import { AdRails, AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
 import ProgramsPageClient from "@/src/app/programs/ProgramsPageClient";
 import { ProgramsHero, ContributeSection, WhyUseSection } from "@/src/components/programs";
 import FeaturedProgramSection from "@/src/components/home/FeaturedProgramSection";
@@ -63,6 +63,7 @@ export default async function ProgramsPage() {
   return (
     <>
       <JsonLd data={jsonLd} />
+      <AdRails />
       <ProgramsHero totalCount={heroTotals.totalCount} totalKeys={heroTotals.totalKeys} />
 
       <section className="border-b border-[#2a475e] bg-[#16202d] py-8">

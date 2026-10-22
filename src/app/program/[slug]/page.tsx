@@ -28,7 +28,7 @@ import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramBreadcrumbs from "@/src/components/program/ProgramBreadcrumbs";
 import ProgramSocialShare from "@/src/components/program/social-share/ProgramSocialShare";
-import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
+import { AdRails, AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
 import { getProgramShareCounts } from "@/src/lib/program/getProgramShareCounts";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { urlFor } from "@/src/sanity/lib/image";
@@ -119,6 +119,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     <>
       <JsonLd data={jsonLd} />
       <I18nShell locale={i18n.locale} messages={i18n.messages}>
+        <AdRails />
         <div className="mx-auto max-w-3xl px-4 pt-6 sm:px-6 lg:max-w-360 lg:px-8">
           <ProgramBreadcrumbs program={program} />
         </div>

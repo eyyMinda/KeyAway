@@ -1,3 +1,4 @@
+export { default as AdRails } from "./AdRails";
 export { default as AdScripts } from "./AdScripts";
 export { default as AdSlot } from "./AdSlot";
 export { default as BannerAd } from "./BannerAd";
