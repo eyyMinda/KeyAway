@@ -1,5 +1,6 @@
 import Link from "next/link";
 import NotFoundTracker from "@/src/components/NotFoundTracker";
+import { AdSlot, BannerAd } from "@/src/components/ads";
 
 export type NotFoundVariant = "page" | "program";
 
@@ -67,6 +68,10 @@ export default function NotFoundView({ variant }: { variant: NotFoundVariant }) 
             </Link>
           </div>
         </div>
+
+        <AdSlot placement="not-found" className="mb-8" inset={false}>
+          <BannerAd />
+        </AdSlot>
 
         <div className="text-center">
           <p className="text-neutral-400 text-sm mb-4">Looking for something specific?</p>

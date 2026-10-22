@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HiChartBar, HiViewGrid } from "react-icons/hi";
-import { MdRateReview, MdEventNote } from "react-icons/md";
+import { MdRateReview, MdEventNote, MdAdsClick } from "react-icons/md";
 import { FaKey, FaEnvelopeOpenText, FaCommentDots, FaGift } from "react-icons/fa";
 import { useKeyReportAlerts, KeyReportAlertsDesktop, KeyReportAlertsMobile } from "./KeyReportAlerts";
 import AdminThemeToggle from "./AdminThemeToggle";
@@ -40,6 +40,7 @@ export default function AdminHeader() {
     { href: "/admin/giveaway-finds", label: "Giveaway Finds", icon: FaGift, countKey: "giveaways" },
     { href: "/admin/analytics", label: "Analytics", icon: HiChartBar },
     { href: "/admin/sessions", label: "Sessions", icon: MdEventNote },
+    { href: "/admin/ads", label: "Ads", icon: MdAdsClick },
     { href: "/admin/programs", label: "Programs", icon: HiViewGrid },
     { href: "/admin/key-reports", label: "Key Reports", icon: MdRateReview },
     { href: "/admin/comments", label: "Comments", icon: FaCommentDots },

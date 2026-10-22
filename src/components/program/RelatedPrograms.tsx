@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useLayoutEffect, useMemo } from "react";
+import SponsoredLink from "@/src/components/ads/SponsoredLink";
 import Link from "next/link";
 import { FaChevronLeft, FaChevronRight, FaDesktop } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
@@ -215,6 +216,14 @@ export default function RelatedPrograms({ programs }: RelatedProgramsProps) {
             ))}
           </div>
         ) : null}
+
+        <SponsoredLink
+          placement="program-related-link"
+          className="mt-4 text-center sm:mt-5"
+          linkClassName="text-xs text-[#8f98a0] transition-colors hover:text-white">
+          <span className="section-label-plain mr-1.5 text-[10px] text-neutral-200">Sponsored</span>
+          Explore more software offers →
+        </SponsoredLink>
       </div>
     </section>
   );

@@ -28,7 +28,7 @@ import { generateProgramPageJsonLd } from "@/src/lib/seo/jsonLd";
 import JsonLd from "@/src/components/JsonLd";
 import ProgramBreadcrumbs from "@/src/components/program/ProgramBreadcrumbs";
 import ProgramSocialShare from "@/src/components/program/social-share/ProgramSocialShare";
-import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
+import { AdRails, AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";
 import { getProgramShareCounts } from "@/src/lib/program/getProgramShareCounts";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 import { urlFor } from "@/src/sanity/lib/image";
@@ -119,6 +119,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
     <>
       <JsonLd data={jsonLd} />
       <I18nShell locale={i18n.locale} messages={i18n.messages}>
+        <AdRails />
         <div className="mx-auto max-w-3xl px-4 pt-6 sm:px-6 lg:max-w-360 lg:px-8">
           <ProgramBreadcrumbs program={program} />
         </div>
@@ -138,7 +139,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             imageUrl={shareImageUrl}
             shareCounts={shareCounts}
           />
-          <AdSlot>
+          <AdSlot placement="program-before-keys">
             <BannerAd />
           </AdSlot>
           <CDKeyTable
@@ -151,39 +152,39 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             introVersionConfirmation={introVersionConfirmation}
             versionSummaryLine={versionSummaryLine}
           />
-          <AdSlot className="pb-6">
+          <AdSlot placement="program-after-keys" className="pb-6">
             <NativeBannerAd />
           </AdSlot>
           <KeySourcePanel program={program} totalKeys={totalKeys} />
           <FreeVsProComparison program={program} />
           <AffiliateProCta program={program} />
         </ProgramVisitorProvider>
-        <AdSlot className="pb-6 sm:pb-8">
+        <AdSlot placement="program-after-pro" className="pb-6 sm:pb-8">
           <BannerAd />
         </AdSlot>
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
-        <AdSlot className="static-bg pb-8 sm:pb-12">
+        <AdSlot placement="program-after-activation" className="static-bg pb-8 sm:pb-12">
           <BannerAd />
         </AdSlot>
         <ProgramAboutSection program={program} />
         {hasAboutSections && (
-          <AdSlot className="page-bg pb-8 sm:pb-12">
+          <AdSlot placement="program-after-about" className="page-bg pb-8 sm:pb-12">
             <BannerAd />
           </AdSlot>
         )}
         <ContributeBanner />
-        <AdSlot className="static-bg pb-6 sm:pb-10">
+        <AdSlot placement="program-after-community" className="static-bg pb-6 sm:pb-10">
           <BannerAd />
         </AdSlot>
         <ProgramFaqSection programTitle={program.title} items={faqItems} />
         {hasFaqSection && (
-          <AdSlot className="page-bg pb-8 sm:pb-10">
+          <AdSlot placement="program-after-faq" className="page-bg pb-8 sm:pb-10">
             <BannerAd />
           </AdSlot>
         )}
         <RelatedPrograms programs={relatedProgramsWithKeys} />
         <CommentsSection program={program} />
-        <AdSlot className="static-bg py-4 pb-6">
+        <AdSlot placement="program-bottom" className="static-bg py-4 pb-6">
           <BannerAd />
         </AdSlot>
       </I18nShell>
