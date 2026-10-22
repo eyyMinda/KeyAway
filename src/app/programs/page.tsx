@@ -78,17 +78,17 @@ export default async function ProgramsPage() {
         </div>
       </section>
 
-      <AdSlot className="pt-6 sm:pt-8">
+      <AdSlot placement="programs-top" className="pt-6 sm:pt-8">
         <BannerAd />
       </AdSlot>
       <ProgramsPageClient initialListData={initialListData} vendors={vendors} categoryOptions={categoryOptions} />
-      <AdSlot className="pb-8 sm:pb-10">
+      <AdSlot placement="programs-after-grid" className="pb-8 sm:pb-10">
         <BannerAd />
       </AdSlot>
 
       <ContributeSection />
       <FeaturedProgramSection program={featuredProgram} />
-      <AdSlot className="py-6">
+      <AdSlot placement="programs-after-featured" className="py-6">
         <NativeBannerAd />
       </AdSlot>
       <WhyUseSection />

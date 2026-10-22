@@ -66,17 +66,17 @@ export default async function HomePage() {
       <JsonLd data={jsonLd} />
       <HeroSection socialData={socialData} stats={stats} />
       <FeaturedProgramSection program={featuredProgram} />
-      <AdSlot className="pt-6 sm:pt-8 lg:pt-10">
+      <AdSlot placement="home-after-featured" className="pt-6 sm:pt-8 lg:pt-10">
         <BannerAd />
       </AdSlot>
       <PopularProgramsSection programs={normalizedPopularPrograms} vendors={vendors} />
-      <AdSlot className="pb-6">
+      <AdSlot placement="home-after-popular" className="pb-6">
         <BannerAd />
         <NativeBannerAd />
       </AdSlot>
       <FeaturesSection />
       <StatsSection stats={stats} />
-      <AdSlot className="static-bg pt-6 sm:pt-8 lg:pt-10">
+      <AdSlot placement="home-before-cta" className="static-bg pt-6 sm:pt-8 lg:pt-10">
         <BannerAd />
       </AdSlot>
       <CTASection otherLinks={store?.otherLinks ?? []} />

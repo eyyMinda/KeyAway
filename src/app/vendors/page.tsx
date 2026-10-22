@@ -86,7 +86,7 @@ export default async function VendorsPage() {
         )}
       </section>
 
-      <AdSlot className="pb-8 sm:pb-10">
+      <AdSlot placement="vendors-bottom" className="pb-8 sm:pb-10">
         <NativeBannerAd />
       </AdSlot>
     </>

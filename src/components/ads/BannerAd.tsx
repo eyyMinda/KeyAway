@@ -2,17 +2,22 @@
 
 /**
  * @fileoverview Responsive iframe banner: picks the widest of `formats` (default `BANNER_FORMATS`) that fits
- * the container, and loads only once it nears the viewport with ad consent. Each banner runs in its own `srcdoc` iframe because the banner script reads the global
- * `atOptions` and uses `document.write`, neither of which works for several units (or client-side navigation)
- * in the main document.
+ * the container, and loads only once it nears the viewport with ad consent. Each banner runs in its own `srcdoc`
+ * iframe because the banner script reads the global `atOptions` and uses `document.write`, neither of which works
+ * for several units (or client-side navigation) in the main document. The `srcdoc` frame shares our origin, so we
+ * can look inside it to tell whether an ad actually rendered (an ad blocker leaves it empty).
  */
 import { useEffect, useRef, useState } from "react";
 import { useAdConsent } from "@/src/hooks/useAdConsent";
 import { useNearViewport } from "@/src/hooks/useNearViewport";
 import { BANNER_FORMATS, BANNER_SCRIPT_BASE, type BannerFormat } from "@/src/lib/ads/adConfig";
+import type { AdUnitKind } from "@/src/lib/ads/adPlacements";
+import { hasRenderedAd, useAdUnit } from "./useAdUnit";
 
 /** Upscaling blurs raster creatives, so `fill` stops here. */
 const MAX_FILL_SCALE = 1.5;
+const FILL_POLL_MS = 500;
+const FILL_TIMEOUT_MS = 8_000;
 
 function pickFormat(formats: readonly BannerFormat[], containerWidth: number): BannerFormat {
   return formats.find(f => f.width <= containerWidth) ?? formats[formats.length - 1];
@@ -31,17 +36,21 @@ type BannerAdProps = {
    * absolutely so it never sizes the container, so the parent must give it a height (e.g. `flex-1 min-h-*`).
    */
   fill?: boolean;
+  /** Recorded in ad stats; grid cards and side rails pass their own kind. */
+  unit?: AdUnitKind;
   className?: string;
 };
 
 type Layout = { format: BannerFormat; scale: number };
 
-export default function BannerAd({ formats = BANNER_FORMATS, fill = false, className = "" }: BannerAdProps) {
+export default function BannerAd({ formats = BANNER_FORMATS, fill = false, unit = "banner", className = "" }: BannerAdProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [layout, setLayout] = useState<Layout | null>(null);
   const near = useNearViewport(containerRef);
   const { status } = useAdConsent();
   const shouldLoad = near && status === "granted";
+  const { start, report } = useAdUnit(unit, containerRef);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -61,9 +70,29 @@ export default function BannerAd({ formats = BANNER_FORMATS, fill = false, class
     return () => observer.disconnect();
   }, [formats, fill]);
 
+  const formatKey = layout?.format.key;
+
+  // One request per rendered format: count the load, then watch the frame until an ad shows up or time runs out.
+  useEffect(() => {
+    if (!shouldLoad || !formatKey) return;
+    start();
+    const startedAt = Date.now();
+    const poll = setInterval(() => {
+      if (hasRenderedAd(iframeRef.current?.contentDocument)) {
+        clearInterval(poll);
+        report("filled");
+      } else if (Date.now() - startedAt >= FILL_TIMEOUT_MS) {
+        clearInterval(poll);
+        report("unfilled");
+      }
+    }, FILL_POLL_MS);
+    return () => clearInterval(poll);
+  }, [shouldLoad, formatKey, start, report]);
+
   const fallbackHeight = formats[formats.length - 1].height;
   const iframe = layout && shouldLoad && (
     <iframe
+      ref={iframeRef}
       key={layout.format.key}
       title="Advertisement"
       srcDoc={bannerDocument(layout.format)}

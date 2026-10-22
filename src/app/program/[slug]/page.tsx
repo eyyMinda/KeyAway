@@ -138,7 +138,7 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             imageUrl={shareImageUrl}
             shareCounts={shareCounts}
           />
-          <AdSlot>
+          <AdSlot placement="program-before-keys">
             <BannerAd />
           </AdSlot>
           <CDKeyTable
@@ -151,39 +151,39 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             introVersionConfirmation={introVersionConfirmation}
             versionSummaryLine={versionSummaryLine}
           />
-          <AdSlot className="pb-6">
+          <AdSlot placement="program-after-keys" className="pb-6">
             <NativeBannerAd />
           </AdSlot>
           <KeySourcePanel program={program} totalKeys={totalKeys} />
           <FreeVsProComparison program={program} />
           <AffiliateProCta program={program} />
         </ProgramVisitorProvider>
-        <AdSlot className="pb-6 sm:pb-8">
+        <AdSlot placement="program-after-pro" className="pb-6 sm:pb-8">
           <BannerAd />
         </AdSlot>
         <ActivationInstructions programTitle={program.title} downloadLink={program.downloadLink} />
-        <AdSlot className="static-bg pb-8 sm:pb-12">
+        <AdSlot placement="program-after-activation" className="static-bg pb-8 sm:pb-12">
           <BannerAd />
         </AdSlot>
         <ProgramAboutSection program={program} />
         {hasAboutSections && (
-          <AdSlot className="page-bg pb-8 sm:pb-12">
+          <AdSlot placement="program-after-about" className="page-bg pb-8 sm:pb-12">
             <BannerAd />
           </AdSlot>
         )}
         <ContributeBanner />
-        <AdSlot className="static-bg pb-6 sm:pb-10">
+        <AdSlot placement="program-after-community" className="static-bg pb-6 sm:pb-10">
           <BannerAd />
         </AdSlot>
         <ProgramFaqSection programTitle={program.title} items={faqItems} />
         {hasFaqSection && (
-          <AdSlot className="page-bg pb-8 sm:pb-10">
+          <AdSlot placement="program-after-faq" className="page-bg pb-8 sm:pb-10">
             <BannerAd />
           </AdSlot>
         )}
         <RelatedPrograms programs={relatedProgramsWithKeys} />
         <CommentsSection program={program} />
-        <AdSlot className="static-bg py-4 pb-6">
+        <AdSlot placement="program-bottom" className="static-bg py-4 pb-6">
           <BannerAd />
         </AdSlot>
       </I18nShell>

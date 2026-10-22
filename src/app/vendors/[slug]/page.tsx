@@ -117,7 +117,7 @@ export default async function VendorPage({ params }: VendorPageProps) {
         </div>
       </section>
 
-      <AdSlot className="pt-6">
+      <AdSlot placement="vendor-top" className="pt-6">
         <BannerAd />
       </AdSlot>
 
@@ -128,12 +128,12 @@ export default async function VendorPage({ params }: VendorPageProps) {
         <ProgramsGrid programs={vendor.programs} maxViews={maxViews} maxDownloads={maxDownloads} adEvery={6} />
       </section>
 
-      <AdSlot className="pb-6">
+      <AdSlot placement="vendor-after-grid" className="pb-6">
         <BannerAd />
       </AdSlot>
 
       <GiveawayVsOfficial rows={vendor.giveawayVsOfficial} vendorName={vendor.name} />
-      <AdSlot className="pb-6">
+      <AdSlot placement="vendor-bottom" className="pb-6">
         <NativeBannerAd />
       </AdSlot>
     </>

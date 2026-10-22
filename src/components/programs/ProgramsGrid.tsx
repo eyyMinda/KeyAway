@@ -10,13 +10,13 @@ import BrowseAllCTA from "./BrowseAllCTA";
 /** Gap pattern applied to `adEvery` so ads don't line up in the same column: n, n+1, n-1, n, n+1, … */
 const AD_GAP_OFFSETS = [0, 1, -1] as const;
 
-/** Indexes of the program cards an ad follows; never the last card. */
-function getAdAfterIndexes(programCount: number, adEvery: number | undefined): Set<number> {
-  const indexes = new Set<number>();
+/** Program card index → 1-based ad number for each card an ad follows; never the last card. */
+function getAdAfterIndexes(programCount: number, adEvery: number | undefined): Map<number, number> {
+  const indexes = new Map<number, number>();
   if (!adEvery || adEvery < 2) return indexes;
   let shown = adEvery;
   for (let i = 1; shown < programCount; i++) {
-    indexes.add(shown - 1);
+    indexes.set(shown - 1, i);
     shown += adEvery + AD_GAP_OFFSETS[i % AD_GAP_OFFSETS.length];
   }
   return indexes;
@@ -59,7 +59,7 @@ export default function ProgramsGrid({
             }}
             showStats={true}
           />
-          {adAfterIndexes.has(index) && <GridAdCard />}
+          {adAfterIndexes.has(index) && <GridAdCard index={adAfterIndexes.get(index)!} />}
         </Fragment>
       ))}
 
