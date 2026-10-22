@@ -1,3 +1,4 @@
+import { AdSlot, BannerAd } from "@/src/components/ads";
 import Link from "next/link";
 import JsonLd from "@/src/components/JsonLd";
 import FeedShowMoreButton from "@/src/components/site/FeedShowMoreButton";
@@ -63,6 +64,10 @@ export default async function UpdatesContent({ searchParams }: UpdatesContentPro
           subtitle={`New programs and fresh giveaway keys added to ${storeTitle}, refreshed from our live catalog.`}
           lastUpdated={latestDate ? formatUpdateDate(latestDate) : undefined}
         />
+
+        <AdSlot placement="updates-top" className="pt-6 sm:pt-8" innerClassName="max-w-6xl">
+          <BannerAd />
+        </AdSlot>
 
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-sm border border-[#2a475e] bg-[#1b2838] px-4 py-3 sm:px-5">

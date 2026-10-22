@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AdSlot, BannerAd } from "@/src/components/ads";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { useStoreDetails } from "@/src/components/providers/StoreDetailsProvider";
 import EnumeratedSectionHeading from "@/src/components/site/EnumeratedSectionHeading";
@@ -105,6 +106,10 @@ export default function HowItWorksContent() {
               </div>
             </div>
           </section>
+
+          <AdSlot placement="how-it-works-mid" inset={false}>
+            <BannerAd />
+          </AdSlot>
 
           <section>
             <EnumeratedSectionHeading index={4}>
