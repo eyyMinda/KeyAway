@@ -16,7 +16,8 @@ import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
 import { resolveSupportEmail } from "@/src/lib/site/supportEmail";
-import { ADS_ENABLED, SMARTLINK_URL } from "@/src/lib/ads/adConfig";
+import { ADS_ENABLED } from "@/src/lib/ads/adConfig";
+import SponsoredLink from "@/src/components/ads/SponsoredLink";
 import { openAdConsentPreferences } from "@/src/lib/consent/adConsent";
 
 const TRUST_FOOTER_LINKS = [
@@ -264,15 +265,9 @@ export default function Footer({ logoData, socialData, siteBaseUrl }: FooterProp
                 Your privacy choices
               </button>
             )}
-            {ADS_ENABLED && (
-              <a
-                href={SMARTLINK_URL}
-                target="_blank"
-                rel="sponsored noopener noreferrer"
-                className="text-sm text-[#8f98a0] transition-colors hover:text-white">
-                Sponsored
-              </a>
-            )}
+            <SponsoredLink placement="footer-link" linkClassName="text-sm text-[#8f98a0] transition-colors hover:text-white">
+              Sponsored
+            </SponsoredLink>
             <a
               href="/llms.txt"
               target="_blank"
