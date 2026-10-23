@@ -1,252 +1,225 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
-import SearchInput from "@/src/components/ui/SearchInput";
-import { useState, useEffect, useCallback } from "react";
-import { client } from "@/src/sanity/lib/client";
-import { adminProgramsQuery } from "@/src/lib/sanity/queries";
-import { Program } from "@/src/types";
-import Link from "next/link";
-import { FaWrench } from "react-icons/fa";
-import { IdealImage } from "@/src/components/general/IdealImage";
-import ProgramEditModal from "@/src/components/admin/programs/ProgramEditModal";
-import { portableTextExcerpt } from "@/src/lib/portableText/toPlainText";
 import FeaturedProgramSettings from "@/src/components/admin/programs/FeaturedProgramSettings";
-import { getWorkingKeysCount } from "@/src/lib/admin/adminHelpers";
+import ProgramEditorPanel from "@/src/components/admin/programs/editor/ProgramEditorPanel";
+import type { EditorLookups } from "@/src/components/admin/programs/editor/types";
+import ProgramsTableView, { hasNewVersion } from "@/src/components/admin/programs/ProgramsTableView";
+import VersionsView from "@/src/components/admin/programs/VersionsView";
+import VendorEditorPanel from "@/src/components/admin/vendors/VendorEditorPanel";
+import VendorsView from "@/src/components/admin/vendors/VendorsView";
+import type { ProgramEditorTab } from "@/src/lib/admin/programFields";
+import type { AdminProgramRow, AdminVendorRow } from "@/src/types/admin";
 
-type ProgramFilter = "all" | "no-working-keys" | "has-working-keys";
+type PageData = { programs: AdminProgramRow[]; vendors: AdminVendorRow[]; categories: EditorLookups["categories"] };
+
+/** Programs and vendors (light rows) plus the category options, in one request. */
+async function loadPage(): Promise<PageData | null> {
+  try {
+    const res = await fetch("/api/v1/admin/programs");
+    if (!res.ok) return null;
+    return ((await res.json()) as { data: PageData }).data;
+  } catch (error) {
+    console.error("Error fetching programs:", error);
+    return null;
+  }
+}
+
+type View = "programs" | "vendors" | "versions";
+
+/**
+ * Page state lives in the URL so refresh and back/forward work:
+ * `?view=vendors`, `?edit=<programId>&tab=keys`, `?new=1`, `?vendor=<vendorId>` / `?vendor=new`.
+ */
+interface UrlState {
+  view: View;
+  program: { id: string | null; tab: ProgramEditorTab } | null;
+  /** Vendor being edited; `null` id = new vendor. */
+  vendor: { id: string | null } | null;
+}
+
+function readUrlState(): UrlState {
+  const params = new URLSearchParams(window.location.search);
+  const viewParam = params.get("view");
+  const view: View = viewParam === "vendors" || viewParam === "versions" ? viewParam : "programs";
+  const tab = (params.get("tab") as ProgramEditorTab | null) ?? "basics";
+  const editId = params.get("edit");
+  const vendorParam = params.get("vendor");
+  return {
+    view,
+    program: params.get("new") === "1" ? { id: null, tab } : editId ? { id: editId, tab } : null,
+    vendor: vendorParam ? { id: vendorParam === "new" ? null : vendorParam } : null
+  };
+}
+
+function writeUrlState(state: UrlState, replace = false) {
+  const url = new URL(window.location.href);
+  for (const key of ["view", "edit", "new", "tab", "vendor"]) url.searchParams.delete(key);
+  if (state.view !== "programs") url.searchParams.set("view", state.view);
+  if (state.program) {
+    if (state.program.id) url.searchParams.set("edit", state.program.id);
+    else url.searchParams.set("new", "1");
+    if (state.program.tab !== "basics") url.searchParams.set("tab", state.program.tab);
+  }
+  if (state.vendor) url.searchParams.set("vendor", state.vendor.id ?? "new");
+  window.history[replace ? "replaceState" : "pushState"](null, "", url);
+}
 
 export default function ProgramsPage() {
-  const [programs, setPrograms] = useState<Program[]>([]);
+  const [programs, setPrograms] = useState<AdminProgramRow[]>([]);
+  const [vendors, setVendors] = useState<AdminVendorRow[]>([]);
+  const [categories, setCategories] = useState<EditorLookups["categories"]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<ProgramFilter>("all");
-  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  // The admin layout renders a spinner until the session check finishes, so reading the URL here is hydration-safe.
+  const [ui, setUi] = useState<UrlState>(() =>
+    typeof window === "undefined" ? { view: "programs", program: null, vendor: null } : readUrlState()
+  );
 
-  const fetchPrograms = useCallback(async () => {
-    setLoading(true);
-    try {
-      const programsData: Program[] = await client.fetch(adminProgramsQuery);
-      setPrograms(programsData);
-    } catch (error) {
-      console.error("Error fetching programs:", error);
-    } finally {
-      setLoading(false);
+  const applyPage = useCallback((data: PageData | null) => {
+    if (data) {
+      setPrograms(data.programs ?? []);
+      setVendors(data.vendors ?? []);
+      setCategories(data.categories ?? []);
+      setLoadError(null);
+    } else {
+      setLoadError("Failed to load programs");
     }
+    setLoading(false);
   }, []);
 
+  const refresh = useCallback(() => {
+    setLoading(true);
+    void loadPage().then(applyPage);
+  }, [applyPage]);
+
   useEffect(() => {
-    fetchPrograms();
-  }, [fetchPrograms]);
-
-  const filteredPrograms = programs
-    .filter(
-      program =>
-        program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        program.slug.current.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter(program => {
-      if (filter === "all") return true;
-      const working = getWorkingKeysCount(program.cdKeys);
-      if (filter === "no-working-keys") return working === 0;
-      return working > 0;
+    let cancelled = false;
+    void loadPage().then(data => {
+      if (!cancelled) applyPage(data);
     });
+    const onPop = () => setUi(readUrlState());
+    window.addEventListener("popstate", onPop);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("popstate", onPop);
+    };
+  }, [applyPage]);
 
-  if (loading) {
-    return (
-      <ProtectedAdminLayout title="Programs" subtitle="Manage CD key programs and content">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Loading programs...</p>
-          </div>
-        </div>
-      </ProtectedAdminLayout>
-    );
-  }
+  const navigate = (next: Partial<UrlState>, replace = false) => {
+    setUi(prev => {
+      const state = { ...prev, ...next };
+      writeUrlState(state, replace);
+      return state;
+    });
+  };
+
+  const openProgram = (id: string | null, tab: ProgramEditorTab = "basics") => navigate({ program: { id, tab }, vendor: null });
+  const lookups: EditorLookups = { vendors, categories };
+  const upsert = <T extends { _id: string }>(list: T[], row: T) =>
+    list.some(r => r._id === row._id) ? list.map(r => (r._id === row._id ? row : r)) : [...list, row];
+
+  const newVersions = programs.filter(hasNewVersion).length;
+  const tabs: { id: View; label: string; count?: number; badge?: number }[] = [
+    { id: "programs", label: "Programs", count: programs.length },
+    { id: "vendors", label: "Vendors", count: vendors.length },
+    { id: "versions", label: "Versions", badge: newVersions }
+  ];
 
   return (
-    <ProtectedAdminLayout title="Programs" subtitle="Manage CD key programs and content">
-      {/* Featured Program Settings */}
-      <FeaturedProgramSettings
-        programs={programs}
-        onProgramClick={program => {
-          setSelectedProgram(program);
-          setEditModalOpen(true);
-        }}
-      />
-
-      {/* Search and Actions */}
-      <div className="mb-6">
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex-1 max-w-md">
-              <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Search programs..." />
-            </div>
-            <div className="flex flex-wrap gap-2 items-center">
-              <select
-                value={filter}
-                onChange={e => setFilter(e.target.value as ProgramFilter)}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm cursor-pointer">
-                <option value="all">All programs</option>
-                <option value="no-working-keys">No working keys</option>
-                <option value="has-working-keys">Has working keys</option>
-              </select>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedProgram(null);
-                  setEditModalOpen(true);
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
-                Add Program
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Programs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPrograms.map(program => (
-          <div
-            key={program._id ?? program.slug.current}
-            className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
-            {/* Program Image */}
-            <div className="h-48 bg-linear-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-              {program.image ? (
-                <IdealImage image={program.image} alt={program.title} className="w-full h-full object-cover" />
-              ) : (
-                <div className="text-white text-6xl">🎮</div>
-              )}
-            </div>
-
-            {/* Program Content */}
-            <div className="py-4 sm:py-5 lg:py-6 px-4 sm:px-5 flex flex-col grow bg-linear-to-b from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-900">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">{program.title}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{portableTextExcerpt(program.description, 200)}</p>
-
-              {/* Program Stats */}
-              <div className="flex items-center justify-between mb-4 mt-auto">
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium">{program.cdKeys?.length || 0}</span> CD Keys
-                </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium">{getWorkingKeysCount(program.cdKeys)}</span> Working
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <Link
-                  href={`/program/${program.slug.current}`}
-                  className="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors text-center cursor-pointer">
-                  View
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedProgram(program);
-                    setEditModalOpen(true);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer">
-                  <FaWrench className="shrink-0" size={14} />
-                  Edit
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {filteredPrograms.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-4xl mb-4">🎮</div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-            {searchTerm || filter !== "all" ? "No programs found" : "No programs available"}
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            {searchTerm || filter !== "all"
-              ? "Try adjusting your search or filter."
-              : "Get started by adding your first program."}
-          </p>
-          {!searchTerm && (
+    <ProtectedAdminLayout title="Programs" subtitle="Find programs, manage their keys, vendors and versions">
+      <div className="mb-5 inline-flex rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-1" role="tablist">
+        {tabs.map(t => {
+          const active = ui.view === t.id;
+          return (
             <button
+              key={t.id}
               type="button"
-              onClick={() => {
-                setSelectedProgram(null);
-                setEditModalOpen(true);
-              }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer">
-              Add Program
+              role="tab"
+              aria-selected={active}
+              onClick={() => navigate({ view: t.id })}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer ${
+                active
+                  ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              }`}>
+              {t.label}
+              {t.count !== undefined && <span className="text-xs tabular-nums opacity-60">{t.count}</span>}
+              {!!t.badge && (
+                <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[11px] font-semibold text-white">
+                  {t.badge}
+                </span>
+              )}
             </button>
-          )}
+          );
+        })}
+      </div>
+
+      {/* Kept mounted (hidden) so filters and "show more" survive tab switches. */}
+      <div hidden={ui.view !== "programs"}>
+        <ProgramsTableView
+          programs={programs}
+          lookups={lookups}
+          loading={loading}
+          loadError={loadError}
+          onRefresh={refresh}
+          onOpen={openProgram}
+          onShowVersions={() => navigate({ view: "versions" })}
+        />
+        <div className="mt-6">
+          <FeaturedProgramSettings programs={programs} onProgramClick={program => openProgram(program._id)} />
         </div>
+      </div>
+
+      {ui.view === "vendors" && <VendorsView vendors={vendors} loading={loading} onOpen={id => navigate({ vendor: { id }, program: null })} />}
+
+      {ui.view === "versions" && (
+        <VersionsView
+          programs={programs}
+          onOpen={openProgram}
+          onRefresh={refresh}
+          onRowChange={(id, change) => setPrograms(prev => prev.map(p => (p._id === id ? { ...p, ...change } : p)))}
+        />
       )}
 
-      <ProgramEditModal
-        program={selectedProgram}
-        isOpen={editModalOpen}
-        onClose={() => {
-          setEditModalOpen(false);
-          setSelectedProgram(null);
-        }}
-        onSaved={() => {
-          fetchPrograms();
-          setEditModalOpen(false);
-          setSelectedProgram(null);
-        }}
-        onDeleted={() => {
-          fetchPrograms();
-          setEditModalOpen(false);
-          setSelectedProgram(null);
-        }}
-      />
+      {ui.program && (
+        <ProgramEditorPanel
+          key={ui.program.id ?? "new"}
+          programId={ui.program.id}
+          tab={ui.program.tab}
+          onTabChange={tab => navigate({ program: { id: ui.program!.id, tab } }, true)}
+          lookups={lookups}
+          onClose={() => navigate({ program: null })}
+          onSaved={(row, created) => {
+            if (row) setPrograms(prev => upsert(prev, row));
+            if (created && row) navigate({ program: { id: row._id, tab: ui.program!.tab } }, true);
+          }}
+          onDeleted={id => {
+            setPrograms(prev => prev.filter(p => p._id !== id));
+            navigate({ program: null });
+          }}
+        />
+      )}
 
-      {/* Summary Stats */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-blue-100 dark:bg-blue-500/15 rounded-lg">
-              <span className="text-2xl">📊</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Programs</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{programs.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-green-100 dark:bg-green-500/15 rounded-lg">
-              <span className="text-2xl">🔑</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total CD Keys</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {programs.reduce((total, program) => total + (program.cdKeys?.length || 0), 0)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-900 rounded-xl shadow-soft border border-gray-200 dark:border-gray-800 p-6">
-          <div className="flex items-center">
-            <div className="p-3 bg-purple-100 dark:bg-purple-500/15 rounded-lg">
-              <span className="text-2xl">✅</span>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Working Keys</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {programs.reduce((total, program) => total + getWorkingKeysCount(program.cdKeys), 0)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {ui.vendor && (
+        <VendorEditorPanel
+          key={ui.vendor.id ?? "new"}
+          vendorId={ui.vendor.id}
+          onClose={() => navigate({ vendor: null })}
+          onSaved={(row, created) => {
+            if (row) setVendors(prev => upsert(prev, row).sort((a, b) => a.name.localeCompare(b.name)));
+            if (created && row) navigate({ vendor: { id: row._id } }, true);
+            // Vendor names show on program rows.
+            if (row && !created) setPrograms(prev => prev.map(p => (p.vendor?._id === row._id ? { ...p, vendor: { _id: row._id, name: row.name } } : p)));
+          }}
+          onDeleted={id => {
+            setVendors(prev => prev.filter(v => v._id !== id));
+            navigate({ vendor: null });
+          }}
+          onOpenProgram={id => openProgram(id)}
+        />
+      )}
     </ProtectedAdminLayout>
   );
 }
