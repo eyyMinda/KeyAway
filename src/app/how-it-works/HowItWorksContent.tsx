@@ -32,7 +32,7 @@ export default function HowItWorksContent() {
             in one place, with community reporting to keep listings honest.
           </>
         }
-        lastUpdated="May 25, 2026"
+        lastUpdated="October 23, 2026"
       />
 
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -78,10 +78,15 @@ export default function HowItWorksContent() {
                   <strong className="text-white">Vendor-aligned promos</strong> — official giveaway pages, affiliate
                   campaigns, or time-limited partner offers (labeled per program when configured)
                 </li>
+                <li>
+                  <strong className="text-white">Daily giveaway scan</strong> — an automated check of public giveaway sites
+                  for new promotions of programs we already list; every find is reviewed before it is added
+                </li>
               </ul>
               <p>
                 Each program links to an <strong className="text-white">official vendor download</strong> when we have one.
-                We do not mirror installers or repackage executables.
+                We do not mirror installers or repackage executables. The version shown on each program page is checked
+                daily against the vendor&apos;s own installer or website.
               </p>
             </div>
           </section>
