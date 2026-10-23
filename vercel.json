@@ -3,6 +3,7 @@
     { "path": "/api/v1/cron/prune-cron-runs", "schedule": "15 3 * * *" },
     { "path": "/api/v1/cron/sync-program-stats", "schedule": "0 */6 * * *" },
     { "path": "/api/v1/cron/update-expired-keys", "schedule": "0 22 * * *" },
-    { "path": "/api/v1/cron/discover-giveaways", "schedule": "0 7 * * *" }
+    { "path": "/api/v1/cron/discover-giveaways", "schedule": "0 7 * * *" },
+    { "path": "/api/v1/cron/check-versions", "schedule": "0 6 * * *" }
   ]
 }

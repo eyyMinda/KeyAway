@@ -34,7 +34,8 @@ function JobLabel({ job }: { job: string }) {
     "sync-program-stats": "Program Stats",
     "update-expired-keys": "Update Expired Keys",
     "prune-cron-runs": "Prune Cron Runs",
-    "discover-giveaways": "Discover Giveaways"
+    "discover-giveaways": "Discover Giveaways",
+    "check-versions": "Check Versions"
   };
   return <>{labels[job] ?? job}</>;
 }
@@ -43,7 +44,8 @@ type CronJobKey =
   | "sync-program-stats"
   | "update-expired-keys"
   | "prune-cron-runs"
-  | "discover-giveaways";
+  | "discover-giveaways"
+  | "check-versions";
 
 export default function CronStatusCard() {
   const [runs, setRuns] = useState<CronRun[]>([]);
@@ -91,13 +93,15 @@ export default function CronStatusCard() {
     ),
     "discover-giveaways": runs.find(
       r => r.job === "discover-giveaways" && (r.source === "vercel_cron" || r.source === "bearer")
-    )
+    ),
+    "check-versions": runs.find(r => r.job === "check-versions" && (r.source === "vercel_cron" || r.source === "bearer"))
   };
   const lastByJob: Record<CronJobKey, CronRun | undefined> = {
     "sync-program-stats": runs.find(r => r.job === "sync-program-stats"),
     "update-expired-keys": runs.find(r => r.job === "update-expired-keys"),
     "prune-cron-runs": runs.find(r => r.job === "prune-cron-runs"),
-    "discover-giveaways": runs.find(r => r.job === "discover-giveaways")
+    "discover-giveaways": runs.find(r => r.job === "discover-giveaways"),
+    "check-versions": runs.find(r => r.job === "check-versions")
   };
 
   function JobStatusRow({ job, schedule, label }: { job: CronJobKey; schedule: string; label: string }) {
@@ -149,6 +153,7 @@ export default function CronStatusCard() {
           <JobStatusRow job="update-expired-keys" schedule="Daily at 22:00 UTC" label="Update Expired Keys" />
           <JobStatusRow job="prune-cron-runs" schedule="Daily at 03:15 UTC" label="Prune Cron Runs (7d)" />
           <JobStatusRow job="discover-giveaways" schedule="Daily at 07:00 UTC" label="Discover Giveaways" />
+          <JobStatusRow job="check-versions" schedule="Daily at 06:00 UTC" label="Check Versions" />
         </div>
 
         <div className="min-w-0 lg:border-l lg:pl-8 border-gray-200 dark:border-gray-800">
