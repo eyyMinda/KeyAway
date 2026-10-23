@@ -166,6 +166,97 @@ export const adminProgramsQuery = `
   cdKeys[]
 }
 `;
+/** Admin programs list: one light row per program (no comments or rich content). */
+export const adminProgramListProjection = `{
+  _id,
+  _updatedAt,
+  title,
+  slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
+  latestOfficialVersion,
+  downloadLink,
+  "vendor": vendor->{ _id, name },
+  "categories": categories[]->{ _id, title },
+  "platforms": coalesce(platforms, ["windows"]),
+  image,
+  "aliases": giveawayDiscovery.aliases,
+  "popularity": coalesce(stats.popularityScore, 0),
+  "aboutCount": count(aboutSections),
+  "faqCount": count(faq),
+  "freeVsProCount": count(freeVsProComparison),
+  "hasSeo": defined(seo.metaTitle) || defined(seo.metaDescription),
+  versionCheck,
+  versionStatus,
+  cdKeys[]{ _key, key, status, version, validUntil, createdAt, accountLabel, username, "linkTitles": giveawayLinks[].title }
+}`;
+export const adminProgramListQuery = `*[_type == "program"] | order(title asc) ${adminProgramListProjection}`;
+
+/** Admin program editor: every field the editor can change, plus revision and Studio-draft state. */
+export const adminProgramEditorQuery = `*[_type == "program" && _id == $id][0]{
+  _id,
+  _rev,
+  _updatedAt,
+  title,
+  slug,
+  vendor,
+  categories,
+  platforms,
+  programFlow,
+  latestOfficialVersion,
+  downloadLink,
+  description,
+  "affiliatePro": coalesce(
+    affiliatePro,
+    select(defined(affiliateProUrl) || defined(affiliateProLabel) => {
+      "affiliateProUrl": affiliateProUrl,
+      "affiliateProLabel": affiliateProLabel
+    })
+  ),
+  freeVsProComparison,
+  seo,
+  image,
+  aboutSections,
+  faq,
+  featured,
+  giveawayDiscovery,
+  versionCheck,
+  versionStatus,
+  cdKeys,
+  "hasDraft": defined(*[_id == "drafts." + ^._id][0]._id)
+}`;
+
+/** Admin vendors list row. */
+export const adminVendorListProjection = `{
+  _id,
+  _updatedAt,
+  name,
+  slug,
+  logo,
+  logoBackgroundColor,
+  aliases,
+  "hasDescription": count(description) > 0,
+  "comparisonCount": count(giveawayVsOfficial),
+  "hasSeo": defined(seo.metaTitle) || defined(seo.metaDescription),
+  "programCount": count(*[_type == "program" && vendor._ref == ^._id && !(_id in path("drafts.**"))])
+}`;
+
+/** Admin vendor editor doc. */
+export const adminVendorEditorQuery = `*[_type == "vendor" && _id == $id][0]{
+  _id,
+  _rev,
+  _updatedAt,
+  name,
+  slug,
+  description,
+  logo,
+  logoBackgroundColor,
+  seo,
+  aliases,
+  giveawayVsOfficial,
+  "programs": *[_type == "program" && vendor._ref == ^._id && !(_id in path("drafts.**"))] | order(title asc){ _id, title },
+  "hasDraft": defined(*[_id == "drafts." + ^._id][0]._id)
+}`;
+
 export const adminProgramsWithCommentsQuery = `
 *[_type == "program" && count(programComments) > 0] | order(_updatedAt desc) {
   _id,
@@ -289,7 +380,8 @@ export const cronStatusQuery = `{
     "sync-program-stats": *[_type == "cronRun" && job == "sync-program-stats" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
     "update-expired-keys": *[_type == "cronRun" && job == "update-expired-keys" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
     "prune-cron-runs": *[_type == "cronRun" && job == "prune-cron-runs" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
-    "discover-giveaways": *[_type == "cronRun" && job == "discover-giveaways" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}}
+    "discover-giveaways": *[_type == "cronRun" && job == "discover-giveaways" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}},
+    "check-versions": *[_type == "cronRun" && job == "check-versions" && ranAt >= $since] | order(ranAt desc)[0]{${cronRunFields}}
   }
 }`;
 

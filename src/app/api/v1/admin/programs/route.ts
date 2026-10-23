@@ -1,29 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
-import { revalidateAfterProgramContentWrite } from "@/src/lib/cache/revalidateProgramContent";
-import { rebuildSiteNotificationFeed } from "@/src/lib/notifications/notificationFeed.server";
-import { client } from "@/src/sanity/lib/client";
-import { buildImageReference } from "@/src/lib/admin/adminHelpers";
-import { plainTextToPortableText } from "@/src/lib/portableText/plainTextToPortableText";
+import { normalizeProgramFields, validateProgramFields, type ProgramFields } from "@/src/lib/admin/programFields";
+import { afterProgramWrite, fetchProgramWriteResult, slugTakenByOtherProgram } from "@/src/lib/admin/programWrite";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-import { buildSiteUrl, submitIndexNow } from "@/src/lib/seo/indexnow";
-import type { ProgramFlow } from "@/src/types/program";
+import { mutationClient } from "@/src/lib/sanity/mutationClient";
+import { adminProgramListQuery, adminVendorListProjection } from "@/src/lib/sanity/queries";
 
-const SLUG_REGEX = /^[a-z0-9-]+$/;
-const URL_REGEX = /^https?:\/\/[^\s]+$/;
-const PROGRAM_FLOWS: ProgramFlow[] = ["cd_key", "link_based_cdkey", "account", "link_based_account"];
+/**
+ * GET /api/v1/admin/programs - Programs and vendors list rows, plus the category options for the editor.
+ * Server-side with the token: vendor docs use dotted ids (`vendor.iobit`), which Sanity keeps private
+ * from unauthenticated (browser) queries.
+ */
+export async function GET(req: NextRequest) {
+  const { ok: rateOk } = rateLimitMiddleware(req);
+  if (!rateOk) return Errors.tooManyRequests();
 
-function normalizeSlug(s: string): string {
-  return s
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-    .replace(/^-+|-+$/g, "");
+  const admin = await requireAdminSession();
+  if (admin instanceof Response) return admin;
+
+  try {
+    const data = await mutationClient.fetch(`{
+      "programs": ${adminProgramListQuery},
+      "vendors": *[_type == "vendor" && !(_id in path("drafts.**"))] | order(name asc)${adminVendorListProjection},
+      "categories": *[_type == "programCategory" && !(_id in path("drafts.**"))] | order(title asc){ _id, title }
+    }`);
+    return NextResponse.json({ data, meta: {} });
+  } catch (err) {
+    console.error("[GET /api/v1/admin/programs]", err);
+    return Errors.internal();
+  }
 }
 
-/** POST /api/v1/admin/programs - Create program */
+/**
+ * POST /api/v1/admin/programs - Create program.
+ * Body: `{ fields: { title, slug, vendor, description, … } }` in Sanity shapes (see `programFields.ts`).
+ * Responds with the new editor doc and list row.
+ */
 export async function POST(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
@@ -32,94 +45,24 @@ export async function POST(req: NextRequest) {
   if (admin instanceof Response) return admin;
 
   try {
-    const body = await req.json().catch(() => ({}));
-    if (!body || typeof body !== "object") return Errors.badRequest("Request body is required");
+    const body = (await req.json().catch(() => ({}))) as { fields?: unknown };
+    const { fields, unknown } = normalizeProgramFields(body.fields);
+    if (unknown.length) return Errors.validation(`Unknown fields: ${unknown.join(", ")}`);
 
-    const b = body as Record<string, unknown>;
+    const doc: ProgramFields = { platforms: ["windows"], programFlow: "cd_key", cdKeys: [], ...fields };
+    const errors = validateProgramFields(doc);
+    if (errors.length) return Errors.validation(errors[0].message, errors.map(e => ({ field: e.field, message: e.message })));
 
-    const title = typeof b.title === "string" ? b.title.trim() : "";
-    if (!title) return Errors.validation("title cannot be empty", [{ field: "title", message: "Required" }]);
-
-    const slugRaw = typeof b.slug === "string" ? b.slug.trim() : "";
-    if (!slugRaw) return Errors.validation("slug cannot be empty", [{ field: "slug", message: "Required" }]);
-    const slug = normalizeSlug(slugRaw);
-    if (!SLUG_REGEX.test(slug)) {
-      return Errors.validation("slug must contain only lowercase letters, numbers, and hyphens", [
-        { field: "slug", message: "Invalid format" }
-      ]);
+    const slug = (doc.slug as { current: string }).current;
+    if (await slugTakenByOtherProgram(slug)) {
+      return Errors.validation("A program with this slug already exists", [{ field: "slug", message: "Already exists" }]);
     }
 
-    const description = typeof b.description === "string" ? b.description.trim() : "";
-    if (!description)
-      return Errors.validation("description cannot be empty", [{ field: "description", message: "Required" }]);
+    const values = Object.fromEntries(Object.entries(doc).filter(([, v]) => v !== null));
+    const created = await mutationClient.create({ _type: "program", ...values });
 
-    const programFlow = typeof b.programFlow === "string" ? b.programFlow.trim() : "";
-    if (!programFlow || !PROGRAM_FLOWS.includes(programFlow as ProgramFlow)) {
-      return Errors.validation("programFlow is required and must be a valid flow", [
-        { field: "programFlow", message: "Invalid value" }
-      ]);
-    }
-
-    const featuredCopy = typeof b.featuredCopy === "string" ? b.featuredCopy.trim() : "";
-
-    const latestOfficialVersionRaw =
-      typeof b.latestOfficialVersion === "string" ? b.latestOfficialVersion.trim() : "";
-    const latestOfficialVersion = latestOfficialVersionRaw || undefined;
-
-    const downloadLinkRaw = typeof b.downloadLink === "string" ? b.downloadLink.trim() : "";
-    if (downloadLinkRaw && !URL_REGEX.test(downloadLinkRaw)) {
-      return Errors.validation("downloadLink must be a valid URL", [{ field: "downloadLink", message: "Invalid URL" }]);
-    }
-    const downloadLink = downloadLinkRaw || undefined;
-
-    const imageAssetId =
-      b.imageAssetId === null || b.imageAssetId === ""
-        ? undefined
-        : typeof b.imageAssetId === "string"
-          ? b.imageAssetId.trim() || undefined
-          : undefined;
-
-    const showcaseGifAssetId =
-      b.showcaseGifAssetId === null || b.showcaseGifAssetId === ""
-        ? undefined
-        : typeof b.showcaseGifAssetId === "string"
-          ? b.showcaseGifAssetId.trim() || undefined
-          : undefined;
-
-    const duplicate = await client.fetch<string | null>(`*[_type == "program" && slug.current == $slug][0]._id`, {
-      slug
-    });
-    if (duplicate) {
-      return Errors.validation("A program with this slug already exists", [
-        { field: "slug", message: "Already exists" }
-      ]);
-    }
-
-    const featured: {
-      description?: ReturnType<typeof plainTextToPortableText>;
-      showcaseGif?: NonNullable<ReturnType<typeof buildImageReference>>;
-    } = {};
-    if (featuredCopy) featured.description = plainTextToPortableText(featuredCopy);
-    const showcaseRef = buildImageReference(showcaseGifAssetId);
-    if (showcaseRef) featured.showcaseGif = showcaseRef;
-
-    const doc = await client.create({
-      _type: "program",
-      title,
-      slug: { _type: "slug", current: slug },
-      description: plainTextToPortableText(description),
-      programFlow,
-      ...(Object.keys(featured).length > 0 ? { featured } : {}),
-      ...(latestOfficialVersion && { latestOfficialVersion }),
-      ...(downloadLink && { downloadLink }),
-      ...(buildImageReference(imageAssetId) && { image: buildImageReference(imageAssetId) }),
-      cdKeys: []
-    });
-
-    revalidateAfterProgramContentWrite({ slug, invalidateSitemap: true });
-    await rebuildSiteNotificationFeed();
-    void submitIndexNow([buildSiteUrl(`/program/${slug}`), buildSiteUrl("/programs"), buildSiteUrl("/")]);
-    return NextResponse.json({ data: doc, meta: {} }, { status: 201 });
+    await afterProgramWrite({ slug, sitemapChanged: true });
+    return NextResponse.json({ data: await fetchProgramWriteResult(created._id), meta: {} }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/v1/admin/programs]", err);
     return Errors.internal();

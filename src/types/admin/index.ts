@@ -1,5 +1,5 @@
 // Admin-related types
-import type { CDKeyStatus, ProgramFlow } from "../program";
+import type { CDKeyStatus, ProgramFlow, ProgramPlatform } from "../program";
 
 export interface AdminUser {
   id: string;
@@ -115,4 +115,87 @@ export interface KeyReportNotificationItem {
   /** ISO date of most recent report */
   lastReportAt?: string;
   link: string;
+}
+
+/** One activation entry as shown in the admin programs list (no passwords). */
+export interface AdminProgramKeyRow {
+  _key: string;
+  key?: string;
+  status: CDKeyStatus;
+  version?: string;
+  validUntil?: string;
+  createdAt?: string;
+  accountLabel?: string;
+  username?: string;
+  linkTitles?: string[] | null;
+}
+
+/** Row of the admin programs list (`adminProgramListProjection`). */
+export interface AdminProgramRow {
+  _id: string;
+  _updatedAt: string;
+  title: string;
+  slug: { current: string };
+  programFlow: ProgramFlow;
+  latestOfficialVersion?: string | null;
+  downloadLink?: string | null;
+  vendor?: { _id: string; name: string } | null;
+  categories?: { _id: string; title: string }[] | null;
+  platforms: ProgramPlatform[];
+  image?: { asset?: { _ref?: string } } | null;
+  aliases?: string[] | null;
+  popularity: number;
+  aboutCount?: number | null;
+  faqCount?: number | null;
+  freeVsProCount?: number | null;
+  hasSeo?: boolean;
+  versionCheck?: {
+    source?: string | null;
+    packageId?: string | null;
+    pageUrl?: string | null;
+    installerUrl?: string | null;
+    pattern?: string | null;
+    autoApply?: boolean | null;
+  } | null;
+  versionStatus?: {
+    latestVersion?: string | null;
+    releasedAt?: string | null;
+    error?: string | null;
+    changedAt?: string | null;
+  } | null;
+  cdKeys?: AdminProgramKeyRow[] | null;
+}
+
+/** Program document as loaded into the admin editor (`adminProgramEditorQuery`). */
+export interface AdminProgramDoc {
+  _id: string;
+  _rev: string;
+  _updatedAt: string;
+  hasDraft?: boolean;
+  [field: string]: unknown;
+}
+
+/** Row of the admin vendors list (`adminVendorListProjection`). */
+export interface AdminVendorRow {
+  _id: string;
+  _updatedAt: string;
+  name: string;
+  slug?: { current?: string } | null;
+  logo?: { asset?: { _ref?: string } } | null;
+  logoBackgroundColor?: { hex?: string; alpha?: number; rgb?: { r: number; g: number; b: number; a?: number } } | null;
+  aliases?: string[] | null;
+  hasDescription?: boolean;
+  comparisonCount?: number | null;
+  hasSeo?: boolean;
+  programCount: number;
+}
+
+/** Vendor document as loaded into the admin vendor editor (`adminVendorEditorQuery`). */
+export interface AdminVendorDoc {
+  _id: string;
+  _rev: string;
+  _updatedAt: string;
+  hasDraft?: boolean;
+  programs?: { _id: string; title: string }[];
+  [field: string]: unknown;
 }
