@@ -1,4 +1,4 @@
-import { SanityClient } from "@sanity/client";
+import type { SanityClient } from "next-sanity";
 
 export type CronSource = "vercel_cron" | "bearer" | "manual";
 export type CronJob =

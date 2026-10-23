@@ -1,3 +1,15 @@
+/*
+ * Sanity Studio 6 ships a global reset in `@layer sui` (`* { margin: 0; padding: 0; border: 0 }`). Layers declared
+ * later win, so once /studio loads that CSS it outranked Tailwind utilities site-wide until a full reload. Declaring
+ * `sui` first makes it the lowest layer; Studio's own component styles are unlayered and unaffected.
+ * The placeholder rule is required: the CSS minifier drops bare `@layer a, b;` statements and empty layers.
+ */
+@layer sui {
+  :root {
+    --sui-layer-order: 0;
+  }
+}
+
 @import "tailwindcss";
 
 /*

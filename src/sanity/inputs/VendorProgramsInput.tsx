@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AddIcon, TrashIcon } from "@sanity/icons";
+import { AddIcon } from "@sanity/icons/Add";
+import { TrashIcon } from "@sanity/icons/Trash";
 import { Box, Button, Card, Flex, Select, Spinner, Stack, Text } from "@sanity/ui";
 import { useClient, useFormValue } from "sanity";
 import type { StringInputProps } from "sanity";
@@ -118,7 +119,7 @@ export function VendorProgramsInput(_props: StringInputProps) {
   }
 
   return (
-    <Stack space={3}>
+    <Stack gap={3}>
       <Text muted size={1}>
         Assignments are stored on each program&apos;s <strong>Vendor</strong> field. Only programs without a vendor
         appear in the add list.
@@ -131,7 +132,7 @@ export function VendorProgramsInput(_props: StringInputProps) {
       ) : null}
 
       <Card padding={3} radius={2} border>
-        <Stack space={3}>
+        <Stack gap={3}>
           <Text weight="semibold" size={1}>
             Assigned programs ({assigned.length})
           </Text>
@@ -141,7 +142,7 @@ export function VendorProgramsInput(_props: StringInputProps) {
               No programs linked yet.
             </Text>
           ) : (
-            <Stack space={2}>
+            <Stack gap={2}>
               {assigned.map(program => (
                 <Flex key={program._id} align="center" justify="space-between" gap={3}>
                   <Text size={1}>{program.title}</Text>
@@ -161,7 +162,7 @@ export function VendorProgramsInput(_props: StringInputProps) {
       </Card>
 
       <Card padding={3} radius={2} border>
-        <Stack space={3}>
+        <Stack gap={3}>
           <Text weight="semibold" size={1}>
             Add program
           </Text>
