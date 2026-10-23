@@ -121,6 +121,76 @@ export const program = defineType({
         "Current product version from the vendor site (e.g. 18.5). Used for honest copy and SEO; CD keys keep their own version fields."
     }),
     defineField({
+      name: "versionCheck",
+      title: "Version tracking",
+      type: "object",
+      options: { collapsible: true, collapsed: true },
+      description: "Where the daily check-versions job looks up the newest official version.",
+      fields: [
+        defineField({
+          name: "source",
+          title: "Source",
+          type: "string",
+          options: {
+            list: [
+              { title: "Vendor installer (version inside the .exe)", value: "installer" },
+              { title: "Vendor page (pattern match)", value: "page" },
+              { title: "winget (Windows Package Manager)", value: "winget" },
+              { title: "Chocolatey", value: "chocolatey" },
+              { title: "Homebrew cask (Mac)", value: "homebrew" }
+            ]
+          }
+        }),
+        defineField({
+          name: "packageId",
+          title: "Package id",
+          type: "string",
+          description: 'winget id (e.g. "IObit.DriverBooster"), Chocolatey id or Homebrew cask token.',
+          hidden: ({ parent }) => !parent?.source || parent.source === "page" || parent.source === "installer"
+        }),
+        defineField({
+          name: "installerUrl",
+          title: "Installer URL",
+          type: "url",
+          description: "Direct download link of the Windows installer (.exe). Only the first 1 MB is read.",
+          hidden: ({ parent }) => parent?.source !== "installer"
+        }),
+        defineField({
+          name: "pageUrl",
+          title: "Page URL",
+          type: "url",
+          hidden: ({ parent }) => parent?.source !== "page"
+        }),
+        defineField({
+          name: "pattern",
+          title: "Version pattern (optional)",
+          type: "string",
+          description: 'Regex with one capture group, e.g. "Version:\\s*([\\d.]+)". Empty = look for "Version 1.2.3"-style text.',
+          hidden: ({ parent }) => parent?.source !== "page"
+        }),
+        defineField({
+          name: "autoApply",
+          title: "Apply new versions automatically",
+          type: "boolean",
+          initialValue: false
+        })
+      ]
+    }),
+    defineField({
+      name: "versionStatus",
+      title: "Version check result",
+      type: "object",
+      readOnly: true,
+      options: { collapsible: true, collapsed: true },
+      description: "Written by the check-versions job. Do not edit manually.",
+      fields: [
+        defineField({ name: "latestVersion", title: "Latest version found", type: "string" }),
+        defineField({ name: "releasedAt", title: "Released (installer date)", type: "datetime" }),
+        defineField({ name: "error", title: "Last error", type: "string" }),
+        defineField({ name: "changedAt", title: "Result changed at", type: "datetime" })
+      ]
+    }),
+    defineField({
       name: "downloadLink",
       title: "Download Link",
       type: "url",
