@@ -5,7 +5,8 @@ export type CronJob =
   | "sync-program-stats"
   | "update-expired-keys"
   | "prune-cron-runs"
-  | "discover-giveaways";
+  | "discover-giveaways"
+  | "check-versions";
 
 /** Verifies cron auth (x-vercel-cron or Bearer token). Returns ok + source for logging. */
 export function verifyCronAuth(req: Request): { ok: boolean; source: CronSource } {

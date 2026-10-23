@@ -7,6 +7,6 @@ export function buildImageReference(
   return { _type: "image", asset: { _type: "reference", _ref: assetId } };
 }
 
-export function getWorkingKeysCount(cdKeys?: Array<{ status: string }>): number {
+export function getWorkingKeysCount(cdKeys?: Array<{ status: string }> | null): number {
   return cdKeys?.filter(key => key.status === "active" || key.status === "new").length ?? 0;
 }

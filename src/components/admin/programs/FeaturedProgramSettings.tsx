@@ -8,7 +8,8 @@ import { featuredProgramSettingsQuery } from "@/src/lib/sanity/queries";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { getWorkingKeysCount } from "@/src/lib/admin/adminHelpers";
 import type { PortableTextBlock } from "@portabletext/types";
-import type { Program, ProgramFeatured } from "@/src/types/program";
+import type { ProgramFeatured } from "@/src/types/program";
+import type { AdminProgramRow } from "@/src/types/admin";
 
 interface FeaturedProgramSettingsData {
   _id?: string;
@@ -27,8 +28,8 @@ interface FeaturedProgramSettingsData {
 }
 
 interface FeaturedProgramSettingsProps {
-  programs: Program[];
-  onProgramClick: (program: Program | null) => void;
+  programs: AdminProgramRow[];
+  onProgramClick: (program: AdminProgramRow) => void;
 }
 
 export default function FeaturedProgramSettings({ programs, onProgramClick }: FeaturedProgramSettingsProps) {

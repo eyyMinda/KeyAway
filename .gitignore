@@ -15,6 +15,9 @@ pnpm-workspace.yaml
 # cursor
 .cursor/
 
+# prefill results written by the Claude Code /prefill-* commands
+/.prefill/
+
 # testing
 /coverage
 
