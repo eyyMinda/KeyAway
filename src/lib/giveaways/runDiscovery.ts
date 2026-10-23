@@ -1,4 +1,4 @@
-import type { Transaction } from "@sanity/client";
+import type { Transaction } from "next-sanity";
 import { mutationClient } from "@/src/lib/sanity/mutationClient";
 import type {
   ExtractedGiveaway,
