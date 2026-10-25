@@ -96,6 +96,11 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: PUBLIC_CSP }
         ]
       },
+      // Build assets must stay crawlable for rendering (robots.ts allows /_next/ for Googlebot) but never indexed.
+      {
+        source: "/_next/static/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex" }]
+      },
       // Admin and Studio never show ads: no ad origins, no open connect/frame sources. Overrides the header above.
       ...["/admin", "/admin/:path*", "/studio", "/studio/:path*"].map(source => ({
         source,
