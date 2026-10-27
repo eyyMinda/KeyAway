@@ -136,6 +136,7 @@ export const program = defineType({
               { title: "Vendor installer (version inside the .exe)", value: "installer" },
               { title: "Vendor page (pattern match)", value: "page" },
               { title: "winget (Windows Package Manager)", value: "winget" },
+              { title: "FilePuma (software library)", value: "filepuma" },
               { title: "Chocolatey", value: "chocolatey" },
               { title: "Homebrew cask (Mac)", value: "homebrew" }
             ]
@@ -145,14 +146,15 @@ export const program = defineType({
           name: "packageId",
           title: "Package id",
           type: "string",
-          description: 'winget id (e.g. "IObit.DriverBooster"), Chocolatey id or Homebrew cask token.',
+          description:
+            'FilePuma program name (e.g. "Driver Booster"), winget id (e.g. "IObit.DriverBooster"), Chocolatey id or Homebrew cask token.',
           hidden: ({ parent }) => !parent?.source || parent.source === "page" || parent.source === "installer"
         }),
         defineField({
           name: "installerUrl",
           title: "Installer URL",
           type: "url",
-          description: "Direct download link of the Windows installer (.exe). Only the first 1 MB is read.",
+          description: "Direct download link of the installer: Windows .exe, Mac .pkg, or a .zip with an .exe inside.",
           hidden: ({ parent }) => parent?.source !== "installer"
         }),
         defineField({

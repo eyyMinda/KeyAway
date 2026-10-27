@@ -156,8 +156,8 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             <NativeBannerAd />
           </AdSlot>
           <KeySourcePanel program={program} totalKeys={totalKeys} />
-          <FreeVsProComparison program={program} />
           <AffiliateProCta program={program} />
+          <FreeVsProComparison program={program} />
         </ProgramVisitorProvider>
         <AdSlot placement="program-after-pro" className="pb-6 sm:pb-8">
           <BannerAd />

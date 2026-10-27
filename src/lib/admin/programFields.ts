@@ -9,7 +9,7 @@ import type { ProgramFlow } from "@/src/types/program";
 import { compact, image, isObj, keyed, newKey, portableText, str, strings, type Obj } from "@/src/lib/admin/sanityShapes";
 
 /** Version-check sources (kept in sync with `lib/versions/versionSources.ts`, which is server only). */
-export const VERSION_SOURCES = ["installer", "page", "winget", "chocolatey", "homebrew"] as const;
+export const VERSION_SOURCES = ["installer", "page", "filepuma", "winget", "chocolatey", "homebrew"] as const;
 
 export const PROGRAM_FLOWS: readonly ProgramFlow[] = ["cd_key", "link_based_cdkey", "account", "link_based_account"];
 export const PROGRAM_PLATFORMS = ["windows", "mac"] as const;

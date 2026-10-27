@@ -47,7 +47,7 @@ export default function AboutSectionBlock({ section }: { section: ProgramAboutSe
               ) : (
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#66c0f4]" aria-hidden />
               )}
-              <div className="min-w-0 flex-1 text-sm text-neutral-100 [&_a]:text-[#66d9ff] [&_p]:my-1 [&_p]:leading-relaxed sm:text-base">
+              <div className="min-w-0 flex-1 text-sm text-neutral-100 [&_a]:text-[#66d9ff] [&_p]:my-0 [&_p]:leading-relaxed sm:text-base">
                 <RichText value={p.text} />
               </div>
             </li>
