@@ -4,8 +4,13 @@
  * FileVersion) that installers carry near the start of the file. The file's Last-Modified date is the
  * release date. First-party and same-day, unlike package catalogs.
  *
- * Self-contained (no project imports) so `scripts/prefillScrape.mjs` can run it straight from Node.
+ * Also reads Mac `.pkg` installers (the version in the package's Distribution file, near the start) and
+ * `.zip` downloads that wrap a Windows installer (the whole zip is downloaded, up to 40 MB).
+ *
+ * Only Node built-ins and explicit `.ts` imports, so `scripts/prefillScrape.mjs` can run it straight from Node.
  */
+import { unzipSync } from "node:zlib";
+import { unzip } from "../zip/unzip.ts";
 
 export interface InstallerInfo {
   url: string;
@@ -26,6 +31,7 @@ export interface InstallerInfo {
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 const HEAD_BYTES = 1024 * 1024;
+const MAX_ZIP_BYTES = 40 * 1024 * 1024;
 const MIN_REAL_INSTALLER = 2.5 * 1024 * 1024;
 
 /** First `limit` bytes of a response body, cancelling the rest (for servers that ignore Range). */
@@ -83,7 +89,65 @@ export function normalizeInstallerVersion(raw?: string): string | undefined {
   return m?.[0];
 }
 
-/** Reads version info from an installer URL. Throws on network errors or when the file is not a Windows executable. */
+/** VERSIONINFO strings of a Windows executable. */
+function exeVersionInfo(bytes: Uint8Array) {
+  return {
+    productVersion: normalizeInstallerVersion(versionString(bytes, "ProductVersion")),
+    fileVersion: normalizeInstallerVersion(versionString(bytes, "FileVersion")),
+    productName: versionString(bytes, "ProductName"),
+    fileDescription: versionString(bytes, "FileDescription"),
+    companyName: versionString(bytes, "CompanyName")
+  };
+}
+
+const isExe = (b: Uint8Array) => b[0] === 0x4d && b[1] === 0x5a; // MZ
+const isZip = (b: Uint8Array) => b[0] === 0x50 && b[1] === 0x4b && b[2] === 0x03 && b[3] === 0x04; // PK\3\4
+const isXar = (b: Uint8Array) => b[0] === 0x78 && b[1] === 0x61 && b[2] === 0x72 && b[3] === 0x21; // xar!
+
+/**
+ * Mac `.pkg` (xar archive): header, zlib-compressed XML table of contents, then the file heap. The small
+ * Distribution file near the start of the heap names the app version (`pkg-ref version` or
+ * `CFBundleShortVersionString`).
+ */
+function pkgVersionInfo(bytes: Uint8Array): { productVersion?: string; productName?: string } {
+  const buf = Buffer.from(bytes);
+  const headerSize = buf.readUInt16BE(4);
+  const tocLength = Number(buf.readBigUInt64BE(8));
+  if (headerSize + tocLength > buf.length) return {};
+  const toc = unzipSync(buf.subarray(headerSize, headerSize + tocLength)).toString("utf8");
+  const heap = headerSize + tocLength;
+  for (const m of toc.matchAll(/<file id="\d+">([\s\S]*?)<\/file>/g)) {
+    const body = m[1];
+    if (!/<name>Distribution<\/name>/.test(body)) continue;
+    const offset = Number(/<offset>(\d+)<\/offset>/.exec(body)?.[1]);
+    const length = Number(/<length>(\d+)<\/length>/.exec(body)?.[1]);
+    const start = heap + offset;
+    if (!Number.isFinite(offset) || !Number.isFinite(length) || start + length > buf.length) return {};
+    let data = buf.subarray(start, start + length);
+    if (/<encoding style="[^"]*(gzip|zlib)/.test(body)) data = unzipSync(data);
+    const xml = data.toString("utf8");
+    const version =
+      /CFBundleShortVersionString="([^"]+)"/.exec(xml)?.[1] ??
+      [...xml.matchAll(/<pkg-ref[^>]*\bversion="([^"]+)"/g)].map(v => v[1]).find(v => v !== "1.0") ??
+      /<pkg-ref[^>]*\bversion="([^"]+)"/.exec(xml)?.[1];
+    const title = /<title>([^<]+)<\/title>/.exec(xml)?.[1];
+    return { productVersion: normalizeInstallerVersion(version), productName: title && !/^[A-Z_]+$/.test(title) ? title : undefined };
+  }
+  return {};
+}
+
+function finish(info: InstallerInfo): InstallerInfo {
+  const label = `${info.productName ?? ""} ${info.fileDescription ?? ""}`;
+  if (/online|downloader|web ?installer|bootstrap|stub/i.test(label) || (info.size && info.size < MIN_REAL_INSTALLER)) {
+    info.warning = `Looks like a small web installer (${info.size ? `${(info.size / 1048576).toFixed(1)} MB` : "unknown size"}); its version may not be the program's.`;
+  }
+  return info;
+}
+
+/**
+ * Reads version info from an installer URL: a Windows .exe, a Mac .pkg, or a .zip wrapping an .exe.
+ * Throws on network errors or unsupported files.
+ */
 export async function readInstallerInfo(url: string): Promise<InstallerInfo> {
   const res = await fetch(url, {
     headers: { "User-Agent": UA, Range: `bytes=0-${HEAD_BYTES - 1}` },
@@ -92,27 +156,33 @@ export async function readInstallerInfo(url: string): Promise<InstallerInfo> {
   });
   if (!res.ok) throw new Error(`Installer download returned HTTP ${res.status}`);
   const bytes = await readHead(res, HEAD_BYTES);
-  if (bytes[0] !== 0x4d || bytes[1] !== 0x5a) throw new Error("The URL does not lead to a Windows installer (.exe)");
 
   const range = res.headers.get("content-range")?.match(/\/(\d+)$/)?.[1];
   const size = Number(range ?? (res.status === 200 ? res.headers.get("content-length") : "")) || undefined;
   const modified = res.headers.get("last-modified");
-  const info: InstallerInfo = {
+  const base = {
     url,
     finalUrl: res.url,
-    productVersion: normalizeInstallerVersion(versionString(bytes, "ProductVersion")),
-    fileVersion: normalizeInstallerVersion(versionString(bytes, "FileVersion")),
-    productName: versionString(bytes, "ProductName"),
-    fileDescription: versionString(bytes, "FileDescription"),
-    companyName: versionString(bytes, "CompanyName"),
     releasedAt: modified && !Number.isNaN(Date.parse(modified)) ? new Date(modified).toISOString() : undefined,
     size
   };
-  const label = `${info.productName ?? ""} ${info.fileDescription ?? ""}`;
-  if (/online|downloader|web ?installer|bootstrap|stub/i.test(label) || (size && size < MIN_REAL_INSTALLER)) {
-    info.warning = `Looks like a small web installer (${size ? `${(size / 1048576).toFixed(1)} MB` : "unknown size"}); its version may not be the program's.`;
+
+  if (isExe(bytes)) return finish({ ...base, ...exeVersionInfo(bytes) });
+  if (isXar(bytes)) return { ...base, ...pkgVersionInfo(bytes) };
+  if (isZip(bytes)) {
+    if (size && size > MAX_ZIP_BYTES) throw new Error("The zip is larger than 40 MB");
+    const full = await fetch(res.url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(60_000) });
+    if (!full.ok) throw new Error(`Installer download returned HTTP ${full.status}`);
+    const zipBytes = Buffer.from(await full.arrayBuffer());
+    if (zipBytes.length > MAX_ZIP_BYTES) throw new Error("The zip is larger than 40 MB");
+    // The largest .exe in the zip is the installer.
+    const exe = [...unzip(zipBytes).entries()]
+      .filter(([name, data]) => name.toLowerCase().endsWith(".exe") && isExe(data))
+      .sort((x, y) => y[1].length - x[1].length)[0];
+    if (!exe) throw new Error("The zip does not contain a Windows installer (.exe)");
+    return finish({ ...base, size: exe[1].length, ...exeVersionInfo(exe[1]) });
   }
-  return info;
+  throw new Error("The URL does not lead to an installer (.exe, .pkg or a zip with an .exe)");
 }
 
 /** The program version an installer reports: ProductVersion, else FileVersion. */
