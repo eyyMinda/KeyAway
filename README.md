@@ -90,6 +90,7 @@ A daily job (`/api/v1/cron/check-versions`) looks up each program's newest offic
 
 - **Vendor installer.** Downloads only the first megabyte of the vendor's own `.exe` and reads the version stored inside it, plus the file's date as the release date. It is same-day and first-party, and flags small web-installer stubs whose version isn't the program's.
 - **Vendor page.** Finds "Version 1.2.3"-style text or a custom pattern.
+- **FilePuma.** A software library that lists the latest version of most Windows programs; searched by the program's exact name.
 - **winget, Chocolatey, Homebrew.** Package catalogs, as a fallback.
 
 Versions are compared as major.minor. Results show in Admin → Programs → **Versions** with one-click "Update to X" (or auto-apply per program), and as a badge in the programs list. The job only writes when a result changes. Code: `src/lib/versions/`.

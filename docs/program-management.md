@@ -52,8 +52,9 @@ Settings are stored per program in `versionCheck` (source, URL or package ID, au
 
 | Source | How it works | Use for |
 | --- | --- | --- |
-| `installer` | Reads the version stored inside the vendor's `.exe` from its first 1 MB (HTTP Range); the file's `Last-Modified` is the release date | Vendors with a direct installer link (IObit, iTop) |
+| `installer` | Reads the version stored inside the vendor's `.exe` from its first 1 MB (HTTP Range), from a Mac `.pkg`'s Distribution file, or from the `.exe` inside a downloaded `.zip` (up to 40 MB); the file's `Last-Modified` is the release date | Vendors with a direct installer link (IObit, iTop, MacBooster, iCare) |
 | `page` | Highest "Version x.y" on the page, or a custom regex with one capture group | Vendors whose installer is a small web-installer stub (SoftOrbits) |
+| `filepuma` | Searches FilePuma (GlarySoft's software library) for the program name and reads the version from the exact match; requests are spaced 5 s apart per its robots.txt | Programs without an installer source; can lag the vendor by a release |
 | `winget` | Highest version folder in `microsoft/winget-pkgs` (GitHub API; `GITHUB_TOKEN` raises the rate limit) | Programs with no usable installer |
 | `chocolatey`, `homebrew` | Package catalog APIs | Fallbacks; Homebrew for Mac apps |
 
