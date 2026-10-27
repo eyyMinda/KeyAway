@@ -51,7 +51,7 @@ const components: Partial<PortableTextComponents> = {
     "strike-through": ({ children }) => <span className="line-through opacity-80">{children}</span>
   },
   block: {
-    normal: ({ children }) => <p className="mb-3 last:mb-0 leading-relaxed">{children}</p>,
+    normal: ({ children }) => <p className="my-0 leading-relaxed">{children}</p>,
     h1: ({ children }) => <h4 className="mb-2 mt-4 text-2xl font-bold first:mt-0">{children}</h4>,
     h2: ({ children }) => <h4 className="mb-2 mt-4 text-xl font-bold first:mt-0">{children}</h4>,
     h3: ({ children }) => <h4 className="mb-2 mt-3 text-lg font-semibold first:mt-0">{children}</h4>,
