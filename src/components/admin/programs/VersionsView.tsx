@@ -12,6 +12,7 @@ const SOURCE_LABELS: Record<string, string> = {
   installer: "Installer",
   page: "Vendor page",
   winget: "winget",
+  filepuma: "FilePuma",
   chocolatey: "Chocolatey",
   homebrew: "Homebrew"
 };

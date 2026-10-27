@@ -66,6 +66,47 @@ async function fromWinget(id: string): Promise<VersionLookup> {
     : { ok: false, error: "No version folders in the winget manifest" };
 }
 
+/** FilePuma asks crawlers for 5 s between requests (robots.txt Crawl-delay); lookups queue behind each other. */
+const FILEPUMA_GAP_MS = 5_000;
+let filepumaQueue: Promise<unknown> = Promise.resolve();
+let filepumaLastAt = 0;
+
+function throttleFilepuma<T>(task: () => Promise<T>): Promise<T> {
+  const run = filepumaQueue.then(async () => {
+    const wait = filepumaLastAt + FILEPUMA_GAP_MS - Date.now();
+    if (wait > 0) await new Promise(resolve => setTimeout(resolve, wait));
+    filepumaLastAt = Date.now();
+    return task();
+  });
+  filepumaQueue = run.catch(() => {});
+  return run;
+}
+
+const normName = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+
+/**
+ * FilePuma (GlarySoft's software library) lists programs as "Name 1.2.3" in search results. Its download
+ * URLs change with every version, so the search for the exact name is the stable lookup.
+ */
+async function fromFilepuma(name: string): Promise<VersionLookup> {
+  const url = `https://www.filepuma.com/search/${encodeURIComponent(name.trim())}/`;
+  const res = await throttleFilepuma(() => get(url, { Accept: "text/html" }));
+  if (!res.ok) return { ok: false, error: `FilePuma returned ${res.status}` };
+  const $ = cheerio.load(await res.text());
+  const listed = $(".categories-app-title")
+    .toArray()
+    .map(el => {
+      const title = $(el).text().replace(/\s+/g, " ").trim();
+      const m = /^(.*?)\s+v?(\d+(?:\.\d+)+)\s*$/.exec(title);
+      return m ? { name: m[1], version: m[2] } : null;
+    })
+    .filter((x): x is { name: string; version: string } => !!x);
+  const version = highest(listed.filter(l => normName(l.name) === normName(name)).map(l => l.version));
+  if (version) return { ok: true, version, url };
+  const near = listed.slice(0, 3).map(l => l.name);
+  return { ok: false, error: `"${name}" not found on FilePuma${near.length ? ` (results: ${near.join(", ")})` : ""}` };
+}
+
 async function fromChocolatey(id: string): Promise<VersionLookup> {
   const url = `https://community.chocolatey.org/api/v2/FindPackagesById()?id='${encodeURIComponent(id)}'&$filter=IsLatestVersion`;
   const res = await get(url);
@@ -130,6 +171,8 @@ async function lookupRaw(config: VersionCheckConfig | null | undefined): Promise
         return id ? await fromWinget(id) : { ok: false, error: "Set the winget package id" };
       case "chocolatey":
         return id ? await fromChocolatey(id) : { ok: false, error: "Set the Chocolatey package id" };
+      case "filepuma":
+        return id ? await fromFilepuma(id) : { ok: false, error: "Set the program name as FilePuma lists it" };
       case "page":
         return config?.pageUrl?.trim() ? await fromPage(config.pageUrl.trim(), config.pattern) : { ok: false, error: "Set the page URL" };
       default:

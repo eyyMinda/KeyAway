@@ -11,6 +11,7 @@ const SOURCES: { value: ProgramForm["versionSource"]; label: string }[] = [
   { value: "installer", label: "Vendor installer (most accurate)" },
   { value: "page", label: "Vendor page (find version text)" },
   { value: "winget", label: "winget (Windows Package Manager)" },
+  { value: "filepuma", label: "FilePuma (software library)" },
   { value: "chocolatey", label: "Chocolatey" },
   { value: "homebrew", label: "Homebrew cask (Mac)" }
 ];
@@ -20,6 +21,11 @@ const ID_HINTS: Record<string, { placeholder: string; hint: string; href: string
     placeholder: "IObit.DriverBooster",
     hint: "The winget id (Publisher.Name). Search for the program on winstall.app.",
     href: "https://winstall.app"
+  },
+  filepuma: {
+    placeholder: "Driver Booster",
+    hint: "The program name exactly as FilePuma lists it, without the version. Search filepuma.com to find it.",
+    href: "https://www.filepuma.com/"
   },
   chocolatey: {
     placeholder: "driverbooster",
@@ -123,7 +129,7 @@ export default function VersionTrackingCard({ form, update, errorOf, status }: V
             error={errorOf("versionCheck.installerUrl")}
             placeholder="https://www.iobit.com/downloadcenter.php?product=…"
             onChange={versionInstallerUrl => update({ versionInstallerUrl })}
-            hint="The vendor's direct download link. Only the first 1 MB is read; its file date is the release date."
+            hint="The vendor's direct download link: a Windows .exe, a Mac .pkg, or a .zip with an .exe inside. Only the first 1 MB is read (zips are read whole, up to 40 MB); the file date is the release date."
           />
         )}
         {form.versionSource === "page" && (
