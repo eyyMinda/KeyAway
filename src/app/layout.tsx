@@ -11,6 +11,9 @@ import { AdScripts } from "@components/ads";
 import AdConsentBanner from "@components/consent/AdConsentBanner";
 import { SessionProvider } from "@components/providers/SessionProvider";
 import { StoreDetailsProvider } from "@components/providers/StoreDetailsProvider";
+import { PromotionProvider } from "@components/providers/PromotionProvider";
+import PromotionBanner from "@components/promotions/PromotionBanner";
+import { getCachedPromotions } from "@/src/lib/promotions/getPromotions";
 import { LogoData, SocialData } from "@/src/types";
 import { urlFor } from "../sanity/lib/image";
 import { resolveSanityImageDimensions } from "@/src/lib/sanity/imageDelivery";
@@ -75,7 +78,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const storeData = await getCachedStoreDetailsDocument();
+  const [storeData, { promotions, renderedAt }] = await Promise.all([
+    getCachedStoreDetailsDocument(),
+    getCachedPromotions()
+  ]);
 
   const currentLogo = storeData?.logoLight;
   /** Match header/footer slot (~104×48 CSS px); keeps `/_next/image` width near 128–256 instead of 384+. */
@@ -123,11 +129,14 @@ export default async function RootLayout({
         <SessionProvider>
           <PageViewTracker />
           <StoreDetailsProvider value={storeData}>
-            <div className="mainContent flex min-h-screen flex-col bg-[#0f1923] text-[#c6d4df]">
-              <Header logoData={logoData} socialData={socialData} />
-              <main className="w-full page-bg">{children}</main>
-              <Footer logoData={logoData} socialData={socialData} siteBaseUrl={siteBaseUrl} />
-            </div>
+            <PromotionProvider promotions={promotions} renderedAt={renderedAt}>
+              <div className="mainContent flex min-h-screen flex-col bg-[#0f1923] text-[#c6d4df]">
+                <Header logoData={logoData} socialData={socialData} />
+                <PromotionBanner />
+                <main className="w-full page-bg">{children}</main>
+                <Footer logoData={logoData} socialData={socialData} siteBaseUrl={siteBaseUrl} />
+              </div>
+            </PromotionProvider>
           </StoreDetailsProvider>
         </SessionProvider>
         <VercelPublicMetrics />
