@@ -5,7 +5,9 @@ import Link from "next/link";
 import { FaBell } from "react-icons/fa";
 import { Notification } from "@/src/types/notifications";
 import NotificationItem from "./NotificationItem";
+import PinnedPromotionItem from "./PinnedPromotionItem";
 import { FacebookGroupButton } from "@/src/components/social";
+import { useActivePromotion } from "@components/providers/PromotionProvider";
 import { usePathname } from "next/navigation";
 import { SocialData } from "@/src/types";
 
@@ -20,16 +22,20 @@ export default function AnnouncementNotifications({ notifications, socialData }:
   const dropdownRef = useRef<HTMLDivElement>(null);
   const miniPopupTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
+  const promotion = useActivePromotion();
+  const pinnedPromotion = promotion?.bellTitle ? promotion : null;
+  const popupText = promotion?.popupText || "New updates available!";
+  const unreadCount = notifications.length + (pinnedPromotion ? 1 : 0);
 
   const scheduleMiniPopup = useCallback(
     (delay: number) => {
       if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
 
       miniPopupTimerRef.current = setTimeout(() => {
-        if (notifications.length > 0) setShowMiniPopup(true);
+        if (unreadCount > 0) setShowMiniPopup(true);
       }, delay);
     },
-    [notifications.length]
+    [unreadCount]
   );
 
   useEffect(() => {
@@ -38,7 +44,7 @@ export default function AnnouncementNotifications({ notifications, socialData }:
     return () => {
       if (miniPopupTimerRef.current) clearTimeout(miniPopupTimerRef.current);
     };
-  }, [notifications.length, scheduleMiniPopup]);
+  }, [unreadCount, scheduleMiniPopup]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -53,8 +59,6 @@ export default function AnnouncementNotifications({ notifications, socialData }:
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
-
-  const unreadCount = notifications.length;
 
   const handleOpenDropdown = () => {
     setIsOpen(!isOpen);
@@ -91,7 +95,9 @@ export default function AnnouncementNotifications({ notifications, socialData }:
         <button
           type="button"
           onClick={handleMiniPopupClick}
-          className="absolute right-0 top-full z-110 mt-2 cursor-pointer whitespace-nowrap rounded-sm border border-[#2a475e] bg-[#1b2838] px-3 py-2 text-left text-xs font-medium text-[#c6d4df] shadow-[0_8px_24px_rgba(0,0,0,0.55)] animate-[fadeIn_0.5s_ease-out]"
+          className={`absolute right-0 top-full z-110 mt-2 cursor-pointer whitespace-nowrap rounded-sm border border-[#2a475e] bg-[#1b2838] px-3 py-2 text-left text-xs font-medium text-[#c6d4df] shadow-[0_8px_24px_rgba(0,0,0,0.55)] animate-[fadeIn_0.5s_ease-out] ${
+            promotion?.bannerText ? "max-md:hidden" : ""
+          }`}
           aria-label="New announcements — open list">
           <span
             className="pointer-events-none absolute -top-1 right-4 h-2 w-2 rotate-45 border-l border-t border-[#2a475e] bg-[#1b2838]"
@@ -99,7 +105,7 @@ export default function AnnouncementNotifications({ notifications, socialData }:
           />
           <span className="relative flex items-center gap-2">
             <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[#5ba32b]" aria-hidden />
-            <span>New updates available!</span>
+            <span>{popupText}</span>
           </span>
         </button>
       )}
@@ -115,6 +121,8 @@ export default function AnnouncementNotifications({ notifications, socialData }:
             </h3>
             <p className="mt-0.5 text-xs text-[#8f98a0]">New programs and key drops</p>
           </div>
+
+          {pinnedPromotion ? <PinnedPromotionItem promotion={pinnedPromotion} onClose={() => setIsOpen(false)} /> : null}
 
           <div className="max-h-[min(240px,50dvh)] overflow-y-auto overscroll-contain">
             {notifications.length > 0 ? (
