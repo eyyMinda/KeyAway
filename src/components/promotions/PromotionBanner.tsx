@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { usePathname } from "next/navigation";
 import PromotionMascot from "@components/promotions/PromotionMascot";
 import { useActivePromotion } from "@components/providers/PromotionProvider";

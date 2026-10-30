@@ -4,7 +4,7 @@ import { SanityLink } from "@/src/types";
 import type { FooterProps } from "@/src/types/layout";
 import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
 import { portableTextToPlainText } from "@/src/lib/portableText/toPlainText";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { useState } from "react";
 import { IdealImageClient } from "../general/IdealImageClient";
 import { usePathname } from "next/navigation";

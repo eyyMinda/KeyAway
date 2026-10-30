@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import NotFoundTracker from "@/src/components/NotFoundTracker";
 import { AdSlot, BannerAd } from "@/src/components/ads";
 

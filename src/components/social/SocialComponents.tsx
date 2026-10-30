@@ -12,7 +12,7 @@ import {
 import { SiTrustpilot } from "react-icons/si";
 import { FaXTwitter } from "react-icons/fa6";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 
 // Available social platforms from Sanity schema
 export const SOCIAL_PLATFORMS = {

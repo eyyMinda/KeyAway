@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { useStoreDetails } from "@/src/components/providers/StoreDetailsProvider";
 import EnumeratedSectionHeading from "@/src/components/site/EnumeratedSectionHeading";
 import TrustPageHero from "@/src/components/site/TrustPageHero";

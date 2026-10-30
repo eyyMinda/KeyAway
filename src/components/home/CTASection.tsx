@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { FaGithub, FaHeart, FaCarrot, FaKey, FaArrowRight } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { ContactModalTrigger } from "@/src/components/contact";

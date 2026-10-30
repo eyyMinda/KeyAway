@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import Image from "next/image";
 import { useState } from "react";
 import { Notification } from "@/src/types/notifications";

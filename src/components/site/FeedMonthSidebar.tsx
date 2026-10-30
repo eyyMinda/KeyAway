@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { useEffect } from "react";
 import { buildFeedMonthHref, type FeedKind } from "@/src/lib/site/feedHrefUtils";
 import type { SidebarYear } from "@/src/lib/site/monthSidebarUtils";

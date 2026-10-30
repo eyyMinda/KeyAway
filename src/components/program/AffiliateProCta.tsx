@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { FaCheck, FaExternalLinkAlt } from "react-icons/fa";
 import type { Program } from "@/src/types/program";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";

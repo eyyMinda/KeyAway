@@ -1,5 +1,5 @@
 import { AdSlot, BannerAd } from "@/src/components/ads";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import JsonLd from "@/src/components/JsonLd";
 import FeedShowMoreButton from "@/src/components/site/FeedShowMoreButton";
 import FeedWithMonthSidebar from "@/src/components/site/FeedWithMonthSidebar";

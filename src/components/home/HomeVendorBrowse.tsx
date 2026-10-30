@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import VendorLogoFrame from "@/src/components/vendors/VendorLogoFrame";
 import type { VendorListItem } from "@/src/lib/vendors/getVendors";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { AdSlot, BannerAd } from "@/src/components/ads";
 import { ContactModalTrigger } from "@/src/components/contact";
 import { useStoreDetails } from "@/src/components/providers/StoreDetailsProvider";

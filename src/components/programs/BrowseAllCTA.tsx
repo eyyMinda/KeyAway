@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { FaArrowRight } from "react-icons/fa";
 
 export default function BrowseAllCTA() {

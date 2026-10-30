@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import type { ProgramCategoryRef } from "@/src/types/program";
 
 type ProgramCategoryChipsProps = {

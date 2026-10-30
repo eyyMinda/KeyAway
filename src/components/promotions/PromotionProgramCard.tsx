@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import PromotionMascot from "@/src/components/promotions/PromotionMascot";
 import { getPromotionTheme } from "@/src/lib/promotions/promotionThemes";
 import { resolvePromotionCardTitle, trackPromotionClick } from "@/src/lib/promotions/promotionUtils";
