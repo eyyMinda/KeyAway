@@ -72,7 +72,15 @@ export interface KeyReport {
   resolvedPassword?: string;
   /** Key-like flows: raw `cdKey.key` from program row for admin display. */
   resolvedCdKey?: string;
+  /** Array `_key` of the matched activation row; missing once the key is removed from the program. */
+  keyId?: string;
+  /** Version the activation row is listed for. */
+  keyVersion?: string;
+  /** Newest official version on the program. */
+  latestVersion?: string;
   programSlug: string;
+  /** Sanity id, for the program editor link. */
+  programId?: string;
   programTitle: string;
   reportCount: number;
   firstReported: string;
