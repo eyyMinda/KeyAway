@@ -79,34 +79,36 @@ export default function AdminDetailsModal({
         className={`relative flex h-[90vh] w-full ${maxWidthClass} flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-2xl`}
         onMouseDown={event => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b-2 border-blue-200 dark:border-blue-500/30 bg-white dark:bg-gray-900 px-6 py-4">
-          <div className="min-w-0">
-            <h2 id="admin-details-title" className="flex items-center text-2xl font-bold text-gray-900 dark:text-gray-100">
-              <span className={`mr-3 h-7 w-1 shrink-0 rounded-full ${bar}`} />
-              {title}
-            </h2>
-            {subtitle ? <div className="mt-1 pl-4 text-base font-medium text-primary-800 dark:text-sky-300">{subtitle}</div> : null}
+        <div className="flex items-center justify-between gap-3 border-b border-gray-200 dark:border-gray-800 px-5 py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className={`h-8 w-1 shrink-0 rounded-full ${bar}`} />
+            <div className="min-w-0">
+              <h2 id="admin-details-title" className="truncate text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {title}
+              </h2>
+              {subtitle ? <div className="truncate text-sm text-gray-600 dark:text-gray-300">{subtitle}</div> : null}
+            </div>
           </div>
           <ModalCloseButton
             onClick={onClose}
-            className="cursor-pointer rounded-full p-3 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-950"
-            iconClassName="h-7 w-7"
+            className="cursor-pointer rounded-lg p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+            iconClassName="h-5 w-5"
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 text-gray-900 dark:text-gray-100">
+        <div className="flex-1 overflow-y-auto p-5 text-gray-900 dark:text-gray-100">
           {visitorPosition === "top" ? visitor : null}
           {children}
           {visitorPosition === "bottom" ? visitor : null}
         </div>
 
-        <div className="flex items-center justify-between gap-4 border-t-2 border-blue-200 dark:border-blue-500/30 bg-linear-to-r from-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-800/50 px-6 py-3">
-          <div className="min-w-0 text-sm font-medium text-gray-800 dark:text-gray-200">{footer}</div>
+        <div className="flex items-center justify-between gap-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 px-5 py-2.5">
+          <div className="min-w-0 truncate text-xs text-gray-600 dark:text-gray-300">{footer}</div>
           <div className="flex shrink-0 items-center gap-2">
             {footerActions}
             <ModalCloseButton
               onClick={onClose}
-              className="cursor-pointer rounded-xl border-2 border-blue-600 bg-blue-600 px-8 py-3 text-base font-bold text-white shadow-lg hover:border-blue-700 hover:bg-blue-700"
+              className="cursor-pointer rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-1.5 text-sm font-medium text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
             >
               Close
             </ModalCloseButton>
