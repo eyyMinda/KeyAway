@@ -16,6 +16,7 @@ import { storeDetails } from "./store/storeDetails";
 import { storeOtherLink } from "./store/storeOtherLink";
 import { storeSocialEntry } from "./store/storeSocialEntry";
 import { link } from "./store/link";
+import { sitePromotion } from "./store/sitePromotion";
 
 import { aboutPoint, aboutSection } from "./program/aboutSection";
 import { programComment, programCommentReaction, programCommentReply } from "./program/programComment";
@@ -44,6 +45,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     storeSocialEntry,
     storeOtherLink,
     storeDetails,
+    sitePromotion,
     aboutPoint,
     aboutSection,
     programComment,

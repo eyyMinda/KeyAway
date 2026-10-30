@@ -28,6 +28,8 @@ export const structure: StructureResolver = S =>
 
       docGroup(S, "Store", ["storeDetails"]),
 
+      S.documentTypeListItem("sitePromotion").id("sitePromotion"),
+
       docGroup(S, "Community", ["contactMessage", "keySuggestion"]),
 
       // Private: settings and finds use dotted ids, so the public dataset API never returns them.
