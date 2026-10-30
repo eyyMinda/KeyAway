@@ -259,6 +259,7 @@ npm run dev
 ## Docs
 
 - [Program management](docs/program-management.md): editor, vendors, version checks, prefill
+- [Promotions](docs/promotions.md): scheduled giveaways and sales from the Studio
 - [Key status updates](docs/EXPIRED_KEYS_SYSTEM.md): expiry and new → active
 - [Visitors, tiers and spammers](docs/visitor-tags.md) and [visitor-tier content](docs/tag-based-content.md)
 - [Terms of Service](docs/TERMS_OF_SERVICE.md) · [Privacy Policy](docs/PRIVACY_POLICY.md)
