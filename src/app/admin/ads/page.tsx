@@ -168,14 +168,14 @@ function AdsDashboard() {
         </button>
       </div>
 
-      <nav className="mb-6 -mx-1 flex gap-1 overflow-x-auto border-b border-gray-200 px-1 dark:border-gray-800" aria-label="Ad pages">
+      <nav className="mb-6 -mx-1 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-gray-200 px-1 dark:border-gray-800" aria-label="Ad pages">
         {[{ id: "overview" as Tab, label: "Overview", views: sumCounts(daily).views }, ...pages.map(p => ({ id: p.page as Tab, label: p.label, views: p.totals.views }))].map(t => (
           <button
             key={t.id}
             type="button"
             onClick={() => selectTab(t.id)}
             aria-current={tab === t.id ? "page" : undefined}
-            className={`-mb-px flex shrink-0 cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
+            className={`flex shrink-0 cursor-pointer items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors ${
               tab === t.id
                 ? "border-primary-500 text-gray-900 dark:text-gray-100"
                 : "border-transparent text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
