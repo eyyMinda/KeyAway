@@ -11,7 +11,6 @@ export default function AdminCommentsPage() {
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const fetchRows = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch("/api/v1/admin/comments");
       const json = await res.json();
@@ -47,7 +46,9 @@ export default function AdminCommentsPage() {
         })
       });
       if (res.ok) {
-        await fetchRows();
+        const isGone = (r: AdminProgramCommentRow) =>
+          r.id === row.id || (!row.isReply && r.programId === row.programId && r.parentCommentKey === row.commentKey);
+        setRows(prev => prev.filter(r => !isGone(r)));
         return true;
       }
       console.error(await res.text());
