@@ -39,7 +39,7 @@ It is also a one-person, production full-stack project: a public Next.js site, a
 | Styling   | [Tailwind CSS v4](https://tailwindcss.com/), admin light/dark theme                       |
 | Email     | [Resend](https://resend.com/) (replies to contact messages)                              |
 | Scraping  | [cheerio](https://cheerio.js.org/) (giveaway scanner, prefill, version checks)            |
-| Hosting   | [Vercel](https://vercel.com/) (Cron, Speed Insights)                                      |
+| Hosting   | [Vercel](https://vercel.com/) (Cron)                                                      |
 
 ---
 
@@ -211,7 +211,6 @@ ANALYTICS_SALT=yourRandomSalt                 # IP hashing
 GITHUB_TOKEN=ghp_...                          # Raises the GitHub rate limit for winget version checks
 NEXT_PUBLIC_ADS_ENABLED=false                 # Ads: on in production, off in dev by default
 NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=true     # Vercel Web Analytics (off when unset)
-NEXT_PUBLIC_SPEED_INSIGHTS_SAMPLE_RATE=0.15
 
 # Email replies to contact messages (Resend)
 RESEND_API_KEY=re_xxxxxxxx

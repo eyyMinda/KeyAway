@@ -1,41 +1,25 @@
 "use client";
 
 import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import {
   isVercelAnalyticsEnabled,
   isVercelProductionDeployment,
-  resolveSpeedInsightsSampleRate,
   shouldTrackPublicVercelMetrics
 } from "@/src/lib/vercel/publicMetrics";
 
 /**
- * Production-only Vercel RUM with downsampling and admin/studio/api exclusion.
- * Replaces bare <Analytics /> + <SpeedInsights /> in the root layout.
+ * Production-only Vercel Web Analytics with admin/studio/api exclusion.
  */
 export default function VercelPublicMetrics() {
-  if (!isVercelProductionDeployment()) return null;
-
-  const sampleRate = resolveSpeedInsightsSampleRate();
+  if (!isVercelProductionDeployment() || !isVercelAnalyticsEnabled()) return null;
 
   return (
-    <>
-      {isVercelAnalyticsEnabled() && (
-        <Analytics
-          mode="production"
-          beforeSend={event => {
-            if (!shouldTrackPublicVercelMetrics(event.url)) return null;
-            return event;
-          }}
-        />
-      )}
-      <SpeedInsights
-        sampleRate={sampleRate}
-        beforeSend={event => {
-          if (!shouldTrackPublicVercelMetrics(event.url)) return null;
-          return event;
-        }}
-      />
-    </>
+    <Analytics
+      mode="production"
+      beforeSend={event => {
+        if (!shouldTrackPublicVercelMetrics(event.url)) return null;
+        return event;
+      }}
+    />
   );
 }
