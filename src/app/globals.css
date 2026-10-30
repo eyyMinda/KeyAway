@@ -22,8 +22,27 @@
 html.admin-light {
   color-scheme: light;
 }
+/* Admin chart series, validated in this order against the white and #111827 card surfaces. Assign in slot order. */
+:root {
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-4: #eda100;
+  --viz-5: #e87ba4;
+  --viz-6: #008300;
+  --viz-7: #6250d6;
+  --viz-8: #e34948;
+}
 html.admin-dark {
   color-scheme: dark;
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-7: #9085e9;
+  --viz-8: #e66767;
 }
 html.admin-light select option {
   background-color: #ffffff;
