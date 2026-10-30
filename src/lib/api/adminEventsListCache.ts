@@ -1,3 +1,4 @@
+import type { PromotionThemeId } from "@/src/lib/promotions/promotionThemes";
 import { AnalyticsEventData } from "@/src/types";
 
 export const ADMIN_EVENTS_LIST_CACHE_TTL_MS = 120_000;
@@ -10,10 +11,43 @@ function cacheKey(since: string, until: string): string {
 
 export type AnalyticsTimelineBucket = "hour" | "day" | "week";
 
+/** How a bucket splits: visitors by tier, views by page type, actions by type, promotion clicks by placement. */
+export type TimelineDimension = "tier" | "page" | "action" | "promo";
+
 /** Activity per time bucket (zero-filled). `actions` = every non-page-view click event. */
 export type AnalyticsTimeline = {
   bucket: AnalyticsTimelineBucket;
-  points: Array<{ t: string; visitors: number; views: number; actions: number }>;
+  points: Array<{
+    t: string;
+    visitors: number;
+    views: number;
+    actions: number;
+    breakdown: Record<TimelineDimension, Record<string, number>>;
+  }>;
+  /** Unique visitors per tier across the whole range (one visitor spans many buckets). */
+  tierTotals: Record<string, number>;
+};
+
+/** The running promotion, or the latest ended one, measured across its whole run. */
+export type PromotionCampaignSummary = {
+  title: string;
+  theme?: PromotionThemeId;
+  startsAt: string;
+  endsAt: string;
+  live: boolean;
+  /** Everyone active on the site during the campaign, and so shown the promotion. */
+  reached: number;
+  /** Reached visitors who clicked a promotion button. Each counts once as a success. */
+  converted: number;
+  clicks: number;
+};
+
+export type PromotionClickSummary = {
+  clicks: number;
+  visitors: number;
+  placements: Array<{ key: string; clicks: number; visitors: number }>;
+  pages: Array<{ path: string; clicks: number }>;
+  campaign: PromotionCampaignSummary | null;
 };
 
 export type AnalyticsSummaryCachePayload = {
@@ -24,6 +58,7 @@ export type AnalyticsSummaryCachePayload = {
   sessions: number;
   totals: Record<string, number>;
   timeline: AnalyticsTimeline;
+  promotions: PromotionClickSummary;
   programTable: Array<{ key: string; value: number; label: string }>;
   socialTable: Array<{ key: string; value: number; label: string }>;
   pathTable: Array<{ key: string; value: number; label: string }>;
