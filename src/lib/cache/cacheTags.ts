@@ -30,6 +30,9 @@ export const TAG_BUNDLE_COUNTS = "bundle-counts";
 /** Published changelogRelease documents for /changelog. */
 export const TAG_CHANGELOG = "changelog";
 
+/** Scheduled `sitePromotion` campaigns read by the root layout. */
+export const TAG_PROMOTIONS = "promotions";
+
 export function programDetailTag(slug: string): string {
   return `program-${slug}`;
 }
