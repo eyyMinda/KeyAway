@@ -77,7 +77,8 @@ export async function POST(req: NextRequest) {
       const path = typeof meta.path === "string" ? normalizePath(meta.path) : undefined;
       let programSlug = typeof meta.programSlug === "string" ? meta.programSlug.trim() : undefined;
       const activationUrl = activationUrlFromMeta(meta);
-      const dedupeKey = `session|${item.event}|${ipHash}|${path ?? "/"}|${programSlug ?? "-"}|${activationUrl ?? "-"}`;
+      const socialPart = typeof meta.social === "string" && meta.social ? meta.social : "-";
+      const dedupeKey = `session|${item.event}|${ipHash}|${path ?? "/"}|${programSlug ?? "-"}|${activationUrl ?? "-"}|${socialPart}`;
       if (isRecentDuplicateRequest(dedupeKey)) continue;
 
       if (item.event === "page_viewed" && programSlug) {
