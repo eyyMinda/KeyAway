@@ -109,23 +109,60 @@ export async function getKeyReportFit(id: string): Promise<{ eventType: KeyRepor
   return row ? { eventType: row.eventType, triedVersionFit: row.triedVersionFit ?? undefined } : null;
 }
 
-/** Admin correction of event type and/or tried version. */
+export type AdminKeyReportUpdate = {
+  _id: string;
+  eventType: KeyReportEvent;
+  listedVersion?: string;
+  triedVersionFit?: string;
+  triedVersion?: string;
+};
+
+type AdminKeyReportUpdateRow = {
+  id: string;
+  eventType: KeyReportEvent;
+  listedVersion: string | null;
+  triedVersionFit: string | null;
+  triedVersion: string | null;
+};
+
+const toAdminUpdate = (row: AdminKeyReportUpdateRow): AdminKeyReportUpdate => ({
+  _id: row.id,
+  eventType: row.eventType,
+  listedVersion: row.listedVersion ?? undefined,
+  triedVersionFit: row.triedVersionFit ?? undefined,
+  triedVersion: row.triedVersion ?? undefined
+});
+
+/** Admin correction of event type and/or tried version. Keeps `created_at`: a correction is not a new report. */
 export async function adminUpdateKeyReport(
   id: string,
   update: { eventType?: KeyReportEvent; triedVersion?: string }
-): Promise<{ _id: string; eventType: KeyReportEvent; triedVersion?: string } | null> {
+): Promise<AdminKeyReportUpdate | null> {
   const sql = db();
-  const now = new Date().toISOString();
   const set = {
-    updated_at: now,
-    ...(update.eventType ? { event_type: update.eventType, created_at: now, ...versionFitUpdate(update.eventType, {}) } : {}),
+    updated_at: new Date().toISOString(),
+    ...(update.eventType ? { event_type: update.eventType, ...versionFitUpdate(update.eventType, {}) } : {}),
     ...(update.triedVersion ? { tried_version: update.triedVersion } : {})
   };
-  const [row] = await sql<Array<{ id: string; eventType: KeyReportEvent; triedVersion: string | null }>>`
+  const [row] = await sql<AdminKeyReportUpdateRow[]>`
     update analytics.key_reports set ${sql(set)} where id = ${id}
-    returning id, event_type, tried_version
+    returning id, event_type, listed_version, tried_version_fit, tried_version
   `;
-  return row ? { _id: row.id, eventType: row.eventType, triedVersion: row.triedVersion ?? undefined } : null;
+  return row ? toAdminUpdate(row) : null;
+}
+
+/** Bulk correction of event type. Returns only the rows that changed so the admin list can patch them in place. */
+export async function adminUpdateKeyReports(ids: string[], eventType: KeyReportEvent): Promise<AdminKeyReportUpdate[]> {
+  const valid = ids.filter(id => UUID_RE.test(id));
+  if (!valid.length) return [];
+  const sql = db();
+  const set = { updated_at: new Date().toISOString(), event_type: eventType, ...versionFitUpdate(eventType, {}) };
+  const rows = await sql<AdminKeyReportUpdateRow[]>`
+    update analytics.key_reports set ${sql(set)}
+    where id in ${sql(valid)} and event_type <> ${eventType}
+    returning id, event_type, listed_version, tried_version_fit, tried_version
+  `;
+  return rows.map(toAdminUpdate);
 }
 
 /** Admin key reports table (all reports, newest first). */
