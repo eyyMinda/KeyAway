@@ -1,4 +1,24 @@
 /* ------------ Store ------------ */
+export const sitePromotionsQuery = `*[_type=="sitePromotion" && enabled == true && endsAt > now()] | order(startsAt asc){
+  _id,
+  startsAt,
+  endsAt,
+  theme,
+  ctaLabel,
+  ctaUrl,
+  "mascotUrl": mascot.asset->url,
+  "bannerMascotUrl": bannerMascot.asset->url,
+  bannerText,
+  cardTitle,
+  cardText,
+  cardProgramTitle,
+  "programSlugs": programs[]->slug.current,
+  bellTitle,
+  bellText,
+  popupText,
+  heroText
+}`;
+
 export const storeDetailsQuery = `*[_type=="storeDetails"]{
   title,
   supportEmail,

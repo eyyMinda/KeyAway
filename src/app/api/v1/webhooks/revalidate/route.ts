@@ -9,6 +9,7 @@ import {
   TAG_HOMEPAGE_STATS,
   TAG_PROGRAM_LISTINGS,
   TAG_PROGRAMS_FULL,
+  TAG_PROMOTIONS,
   TAG_SITEMAP_URLS,
   TAG_STORE_DETAILS,
   TAG_VENDORS,
@@ -76,6 +77,8 @@ export async function POST(req: NextRequest) {
 
     if (t === "storeDetails") {
       revalidateTag(TAG_STORE_DETAILS, "max");
+    } else if (t === "sitePromotion") {
+      revalidateTag(TAG_PROMOTIONS, "max");
     } else if (t === "featuredProgramSettings") {
       revalidateTag(TAG_FEATURED_PROGRAM, "max");
     } else if (t === "changelogRelease") {

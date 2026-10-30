@@ -1449,8 +1449,23 @@ body {
     animation: bellRing 4s ease-in-out infinite;
   }
 
+  /* Promotion mascot — gentle float */
+  @keyframes mascotHover {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(8px);
+    }
+  }
+
+  .animate-mascot-hover {
+    animation: mascotHover 600ms ease-in-out infinite alternate;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .animate-bell-ring {
+    .animate-bell-ring,
+    .animate-mascot-hover {
       animation: none;
     }
   }

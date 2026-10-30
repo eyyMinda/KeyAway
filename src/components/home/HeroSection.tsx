@@ -8,6 +8,7 @@ import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
 import type { VisitorHintData } from "@/src/lib/visitors/publicVisitorContext";
 import { scrollToSectionWithHeaderOffset } from "@/src/lib/dom/scrollToSection";
 import { HeroAtAGlanceStrip } from "@/src/components/home/HeroAtAGlanceStrip";
+import PromotionHeroBadge from "@/src/components/promotions/PromotionHeroBadge";
 
 interface HeroSectionProps {
   socialData?: SocialData;
@@ -92,6 +93,7 @@ export default function HeroSection({ socialData, visitorHint, stats }: HeroSect
                 className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,#1b2838_0%,transparent_28%)] opacity-45"
                 aria-hidden
               />
+              <PromotionHeroBadge />
             </div>
           </div>
         </div>
