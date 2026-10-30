@@ -9,6 +9,8 @@ import type { Program } from "@/src/types/program";
 import { formatProgramDisplayTitle } from "@/src/lib/program/formatProgramDisplayTitle";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
 import { FacebookGroupHeroPromo } from "@/src/components/social";
+import PromotionProgramCard from "@/src/components/promotions/PromotionProgramCard";
+import { useActivePromotion } from "@components/providers/PromotionProvider";
 import TrustpilotReviewWidget from "@/src/components/trustpilot/TrustpilotReviewWidget";
 import { getTrustpilotReviewUrl } from "@/src/lib/social/socialUtils";
 import VisitorTierHint from "@/src/components/visitors/VisitorTierHint";
@@ -56,6 +58,7 @@ export default function ProgramInformation({
   const { visitorHint: visitorHintCtx } = useProgramVisitor();
   const visitorHint = visitorHintProp ?? visitorHintCtx;
   const { t } = useI18n("program");
+  const promotion = useActivePromotion();
   const trustpilotUrl = getTrustpilotReviewUrl(socialData);
   const heroSubtitle = t.hero.subtitle({ programTitle: program.title });
   const totalLabel = t.stats.totalLabel();
@@ -86,7 +89,15 @@ export default function ProgramInformation({
 
           <div className="flex w-full flex-col gap-4 lg:sticky lg:top-20 lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:h-fit">
             <ProgramHeroImage program={program} />
-            <FacebookGroupHeroPromo socialData={socialData} />
+            {promotion?.cardText ? (
+              <PromotionProgramCard
+                promotion={promotion}
+                programSlug={program.slug.current}
+                programTitle={program.title}
+              />
+            ) : (
+              <FacebookGroupHeroPromo socialData={socialData} />
+            )}
           </div>
 
           <div className="space-y-4 sm:space-y-6 text-left lg:col-start-2 lg:row-start-2">
