@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { getPromotionTheme } from "@/src/lib/promotions/promotionThemes";
 import { trackPromotionClick } from "@/src/lib/promotions/promotionUtils";
 import type { SitePromotion } from "@/src/types/promotions";
@@ -20,7 +20,7 @@ export default function PinnedPromotionItem({ promotion, onClose }: PinnedPromot
       target="_blank"
       rel="noreferrer"
       onClick={() => {
-        trackPromotionClick("bell");
+        trackPromotionClick("bell", promotion._id);
         onClose();
       }}
       className={`group flex items-center gap-3 border-b border-l-4 border-b-[#2a475e] bg-[#213246] px-4 py-3 transition-colors hover:bg-[#2a3f57] ${theme.bellEdge}`}>

@@ -2,7 +2,7 @@
 
 import { useState, useLayoutEffect, useMemo } from "react";
 import SponsoredLink from "@/src/components/ads/SponsoredLink";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { FaChevronLeft, FaChevronRight, FaDesktop } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { MacGlyph, WindowsGlyph } from "@/src/components/program/PlatformGlyphs";

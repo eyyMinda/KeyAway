@@ -2,7 +2,7 @@
 
 import { FaUsers } from "react-icons/fa";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { SocialData } from "@/src/types";
 import { hasFacebookSocialLink, getFacebookSocialLink } from "@/src/lib/social/socialUtils";
 

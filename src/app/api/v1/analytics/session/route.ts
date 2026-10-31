@@ -77,7 +77,8 @@ export async function POST(req: NextRequest) {
       const path = typeof meta.path === "string" ? normalizePath(meta.path) : undefined;
       let programSlug = typeof meta.programSlug === "string" ? meta.programSlug.trim() : undefined;
       const activationUrl = activationUrlFromMeta(meta);
-      const dedupeKey = `session|${item.event}|${ipHash}|${path ?? "/"}|${programSlug ?? "-"}|${activationUrl ?? "-"}`;
+      const socialPart = typeof meta.social === "string" && meta.social ? meta.social : "-";
+      const dedupeKey = `session|${item.event}|${ipHash}|${path ?? "/"}|${programSlug ?? "-"}|${activationUrl ?? "-"}|${socialPart}`;
       if (isRecentDuplicateRequest(dedupeKey)) continue;
 
       if (item.event === "page_viewed" && programSlug) {
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
         programSlug: notFound ? undefined : programSlug,
         notFound: item.event === "page_viewed" ? notFound : undefined,
         key: keyData?.hash,
-        label: keyData?.identifier,
+        label: keyData?.identifier ?? (typeof meta.campaign === "string" ? meta.campaign : undefined),
         social: typeof meta.social === "string" ? meta.social : undefined,
         activationUrl,
         programFlow: typeof meta.programFlow === "string" ? meta.programFlow : undefined

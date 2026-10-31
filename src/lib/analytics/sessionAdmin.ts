@@ -3,8 +3,13 @@ import { db } from "@/src/lib/db/postgres";
 import type {
   AnalyticsSummaryCachePayload,
   AnalyticsTimeline,
-  AnalyticsTimelineBucket
+  AnalyticsTimelineBucket,
+  PromotionCampaignSummary,
+  PromotionClickSummary,
+  TimelineDimension
 } from "@/src/lib/api/adminEventsListCache";
+import type { PromotionThemeId } from "@/src/lib/promotions/promotionThemes";
+import { client } from "@/src/sanity/lib/client";
 import {
   transformCountryData,
   transformPathActivityTable,
@@ -178,7 +183,11 @@ const CHART_EXCLUDED = ["comment", "comment_reply", "key_suggestion", "contact"]
 /** Before this, "all time" ranges start at the epoch; the timeline starts at the first real activity instead. */
 const EPOCH_RANGE_CUTOFF = Date.parse("2001-01-01");
 
-/** Visitors, page views and actions per hour (≤ 2 days), day (≤ 120 days) or week, zero-filled. */
+/** Stored on `social` for promotion buttons; the rest of the value is the placement. */
+const PROMO_SOCIAL_PREFIX = "promo-";
+const PROMO_SOCIAL_LIKE = `${PROMO_SOCIAL_PREFIX}%`;
+
+/** Visitors, page views and actions per hour (≤ 2 days), day (≤ 120 days) or week, zero-filled, with how each one splits. */
 async function buildTimeline(since: string, until: string): Promise<AnalyticsTimeline> {
   const sql = db();
   const endMs = Math.min(Date.parse(until), Date.now());
@@ -190,14 +199,14 @@ async function buildTimeline(since: string, until: string): Promise<AnalyticsTim
     `;
     startMs = row?.first ? Date.parse(row.first) : endMs;
   }
-  if (!(endMs > startMs)) return { bucket: "day", points: [] };
+  if (!(endMs > startMs)) return { bucket: "day", points: [], tierTotals: {} };
 
   const spanHours = (endMs - startMs) / HOUR_MS;
   const bucket: AnalyticsTimelineBucket = spanHours <= 48 ? "hour" : spanHours <= 24 * 120 ? "day" : "week";
   const start = new Date(startMs).toISOString();
   const end = new Date(endMs).toISOString();
 
-  const points = await sql<AnalyticsTimeline["points"]>`
+  const pointsQuery = sql<Array<Omit<AnalyticsTimeline["points"][number], "breakdown">>>`
     with buckets as (
       select generate_series(date_trunc(${bucket}, ${start}::timestamptz), ${end}::timestamptz, ${`1 ${bucket}`}::interval) as t
     ), ev as (
@@ -216,13 +225,133 @@ async function buildTimeline(since: string, until: string): Promise<AnalyticsTim
     group by b.t
     order by b.t
   `;
-  return { bucket, points: points.map(p => ({ ...p })) };
+
+  const breakdownQuery = sql<Array<{ t: string | null; dim: TimelineDimension | "tierTotal"; key: string; n: number }>>`
+    with ev as materialized (
+      select date_trunc(${bucket}, e.created_at) as t, e.event, e.social, s.visitor_hash,
+             coalesce(v.visit_tier, 'new') as tier,
+             case
+               when e.event <> 'page_viewed' then null
+               when e.path = '/' then 'home'
+               when e.path = '/programs' then 'catalog'
+               when e.path like '/program/%' then 'program'
+               when e.path like '/vendors%' then 'vendor'
+               else 'other'
+             end as page_type
+      from analytics.events e
+      join analytics.sessions s on s.id = e.session_id
+      left join analytics.visitors v on v.visitor_hash = s.visitor_hash
+      where e.created_at >= ${start} and e.created_at <= ${end}
+        and e.event not like 'report\\_%' and e.event not in ${sql(CHART_EXCLUDED)}
+    )
+    select t, 'tier' as dim, tier as key, count(distinct visitor_hash)::int as n from ev group by t, tier
+    union all
+    select null, 'tierTotal', tier, count(distinct visitor_hash)::int from ev group by tier
+    union all
+    select t, 'page', page_type, count(*)::int from ev where page_type is not null group by t, page_type
+    union all
+    select t, 'action', case when social like ${PROMO_SOCIAL_LIKE} then 'promo_click' else event end, count(*)::int
+    from ev where event <> 'page_viewed' group by 1, 3
+    union all
+    select t, 'promo', substr(social, ${PROMO_SOCIAL_PREFIX.length + 1}), count(*)::int
+    from ev where social like ${PROMO_SOCIAL_LIKE} group by 1, 3
+  `;
+
+  const [points, breakdownRows] = await Promise.all([pointsQuery, breakdownQuery]);
+
+  const byBucket = new Map(
+    points.map(p => [
+      new Date(p.t).getTime(),
+      { ...p, breakdown: { tier: {}, page: {}, action: {}, promo: {} } } as AnalyticsTimeline["points"][number]
+    ])
+  );
+  const tierTotals: Record<string, number> = {};
+  for (const row of breakdownRows) {
+    if (row.dim === "tierTotal") tierTotals[row.key] = row.n;
+    else if (row.t) {
+      const point = byBucket.get(new Date(row.t).getTime());
+      if (point) point.breakdown[row.dim][row.key] = row.n;
+    }
+  }
+
+  return { bucket, points: [...byBucket.values()], tierTotals };
+}
+
+/** Promotion button clicks by placement and page. Views of a promotion are not tracked, so there is no click rate. */
+async function buildPromotionClicks(since: string, until: string): Promise<PromotionClickSummary> {
+  const sql = db();
+  const [[totals], placements, pages] = await Promise.all([
+    sql<Array<{ clicks: number; visitors: number }>>`
+      select count(*)::int as clicks, count(distinct s.visitor_hash)::int as visitors
+      from analytics.events e
+      join analytics.sessions s on s.id = e.session_id
+      where e.created_at >= ${since} and e.created_at <= ${until} and e.social like ${PROMO_SOCIAL_LIKE}
+    `,
+    sql<PromotionClickSummary["placements"]>`
+      select substr(e.social, ${PROMO_SOCIAL_PREFIX.length + 1}) as key, count(*)::int as clicks,
+             count(distinct s.visitor_hash)::int as visitors
+      from analytics.events e
+      join analytics.sessions s on s.id = e.session_id
+      where e.created_at >= ${since} and e.created_at <= ${until} and e.social like ${PROMO_SOCIAL_LIKE}
+      group by 1
+      order by clicks desc
+    `,
+    sql<PromotionClickSummary["pages"]>`
+      select coalesce(e.path, '/') as path, count(*)::int as clicks
+      from analytics.events e
+      where e.created_at >= ${since} and e.created_at <= ${until} and e.social like ${PROMO_SOCIAL_LIKE}
+      group by 1
+      order by clicks desc
+      limit 5
+    `
+  ]);
+  return {
+    clicks: totals.clicks,
+    visitors: totals.visitors,
+    placements: [...placements],
+    pages: [...pages],
+    campaign: await buildPromotionCampaign()
+  };
+}
+
+/** Whole-run numbers for the running promotion, else the latest ended one. Unaffected by the page's date filter. */
+async function buildPromotionCampaign(): Promise<PromotionCampaignSummary | null> {
+  try {
+    const nowIso = new Date().toISOString();
+    const promotion = await client.fetch<{ _id: string; title: string; theme?: PromotionThemeId; startsAt: string; endsAt: string } | null>(
+      `*[_type == "sitePromotion" && enabled == true && startsAt <= $now] | order(endsAt desc)[0]{ _id, title, theme, startsAt, endsAt }`,
+      { now: nowIso },
+      { cache: "no-store" }
+    );
+    if (!promotion) return null;
+
+    const { _id: campaignId, ...details } = promotion;
+    const until = promotion.endsAt < nowIso ? promotion.endsAt : nowIso;
+    // Clicks without a label predate campaign tracking; the date range attributes those.
+    const [row] = await db()<Array<{ reached: number; converted: number; clicks: number }>>`
+      with ev as (
+        select e.created_at, s.visitor_hash,
+               e.social like ${PROMO_SOCIAL_LIKE} and coalesce(e.label, ${campaignId}) = ${campaignId} as clicked
+        from analytics.events e
+        join analytics.sessions s on s.id = e.session_id
+        where e.created_at >= ${promotion.startsAt} and e.created_at <= ${until}
+      )
+      select count(distinct visitor_hash)::int as reached,
+             count(distinct visitor_hash) filter (where clicked)::int as converted,
+             count(*) filter (where clicked)::int as clicks
+      from ev
+    `;
+    return { ...details, live: promotion.endsAt > nowIso, ...row };
+  } catch (err) {
+    console.error("[buildPromotionCampaign]", err);
+    return null;
+  }
 }
 
 /** Dashboard aggregates for a range. Key report events are excluded (own overview). */
 export async function buildAnalyticsSummary(since: string, until: string): Promise<AnalyticsSummaryCachePayload> {
   const sql = db();
-  const [[agg], recent, sources, timeline] = await Promise.all([
+  const [[agg], recent, sources, timeline, promotions] = await Promise.all([
     sql<
       Array<{
         totalEvents: number;
@@ -251,7 +380,9 @@ export async function buildAnalyticsSummary(since: string, until: string): Promi
           where program_slug is not null and not (event = 'page_viewed' and not_found)
           group by program_slug) t) as by_program,
         (select jsonb_object_agg(social, n) from (
-          select social, count(*) as n from ev where event = 'social_click' and social is not null group by social) t) as by_social,
+          select social, count(*) as n from ev
+          where event = 'social_click' and social is not null and social not like ${PROMO_SOCIAL_LIKE}
+          group by social) t) as by_social,
         (select jsonb_object_agg(path, n) from (
           select path, count(*) as n from ev
           where path is not null and not (event = 'page_viewed' and not_found)
@@ -277,7 +408,8 @@ export async function buildAnalyticsSummary(since: string, until: string): Promi
       where started_at >= ${since} and started_at <= ${until}
       group by entry, referrer
     `,
-    buildTimeline(since, until)
+    buildTimeline(since, until),
+    buildPromotionClicks(since, until)
   ]);
 
   const toMap = (m: CountMap | null) => new Map(Object.entries(m ?? {}));
@@ -291,6 +423,7 @@ export async function buildAnalyticsSummary(since: string, until: string): Promi
     sessions: sources.reduce((n, s) => n + s.count, 0),
     totals: Object.fromEntries(totals),
     timeline,
+    promotions,
     programTable: transformProgramData(toMap(agg.byProgram)),
     socialTable: transformSocialData(toMap(agg.bySocial)),
     pathTable: transformPathActivityTable(toMap(agg.byPath), agg.notFound),

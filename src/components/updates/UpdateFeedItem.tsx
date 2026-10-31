@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import Image from "next/image";
 import { formatUpdateDay } from "@/src/lib/updates/updatesPageUtils";
 import type { Notification } from "@/src/types/notifications";

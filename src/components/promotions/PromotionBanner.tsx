@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { usePathname } from "next/navigation";
 import PromotionMascot from "@components/promotions/PromotionMascot";
 import { useActivePromotion } from "@components/providers/PromotionProvider";
@@ -30,7 +30,7 @@ export default function PromotionBanner() {
             href={promotion.ctaUrl}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackPromotionClick("banner")}
+            onClick={() => trackPromotionClick("banner", promotion._id)}
             className={`inline-block rounded-sm px-3 py-1 text-xs font-bold transition-colors ${theme.button}`}>
             {promotion.ctaLabel}
           </Link>

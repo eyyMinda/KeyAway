@@ -1,369 +1,189 @@
 "use client";
 
-/** @fileoverview Admin key reports: aggregate key reports by program+key, filters, modal detail. */
-import { Suspense, useState, useEffect, useRef } from "react";
+/** @fileoverview Admin key reports: keys ranked by what their reports say, bulk status edits, per-report details. */
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { FaArrowsRotate } from "react-icons/fa6";
 import { client } from "@/src/sanity/lib/client";
-import { allProgramsQuery } from "@/src/lib/sanity/queries";
+import { adminKeyReportProgramsQuery } from "@/src/lib/sanity/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
-import ReportDetailsModal from "@/src/components/admin/ReportDetailsModal";
+import KeyReportDetailsModal from "@/src/components/admin/key-reports/KeyReportDetailsModal";
 import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";
-import type { CDKey, Program, ProgramFlow } from "@/src/types/program";
-import { KeyReport } from "@/src/types";
-import { getKeyData, normalizeKey } from "@/src/lib/keyHashing";
 import {
-  getActivationEntryDisplayLabel,
-  getActivationEntryIdentityString,
-  isAccountFlow,
-  isKeyLikeFlow,
-  isLinkAccountFlow,
-  normalizeProgramFlow
-} from "@/src/lib/program/activationEntry";
-import { logger } from "@/src/lib/logger";
-import { useStatusChange } from "@/src/hooks/useStatusChange";
-import { I18nProvider } from "@/src/contexts/i18n";
-import adminKeyReportsEn from "@/src/locales/admin/key-reports/en.json";
-import { applyKeyReportEvent, emptyReportData } from "@/src/lib/program/keyReportVersionFit";
-import { mergeUniqueVersionLabels } from "@/src/lib/program/versionFitLabel";
+  buildKeyReports,
+  keyReportId,
+  keyQueryMatchesReport,
+  patchReportRows,
+  type KeyReportProgram,
+  type KeyReportRowUpdate
+} from "@/src/lib/admin/keyReportGroups";
+import { normalizeProgramFlow } from "@/src/lib/program/activationEntry";
+import type { KeyReport, KeyReportEvent } from "@/src/types";
+import type { CDKeyStatus } from "@/src/types/program";
 
-/** `?key=` filter: row storage is plaintext CD key, lowercase username, or link digest — not CD-key SHA. */
-function keyQueryMatchesRowStorage(
-  flow: ProgramFlow,
-  storageKey: string,
-  displayKey: string | undefined,
-  raw: string
-): boolean {
-  const r = raw.trim();
-  const sk = storageKey.trim();
-  if (!r || !sk) return false;
-  if (sk === r || sk.toLowerCase() === r.toLowerCase()) return true;
-  if (isKeyLikeFlow(flow) && normalizeKey(sk) === normalizeKey(r)) return true;
-  const dk = (displayKey ?? "").trim();
-  if (dk && dk !== "Unknown Key" && dk !== "Unknown") {
-    if (isKeyLikeFlow(flow) && normalizeKey(dk) === normalizeKey(r)) return true;
-    if ((isAccountFlow(flow) || isLinkAccountFlow(flow)) && dk.toLowerCase() === r.toLowerCase()) return true;
-  }
-  return false;
-}
+const TITLE = "Key Reports";
+const SUBTITLE = "What visitors say about each key, and what to do about it";
 
-function keyQueryMatchesActivationRow(flow: ProgramFlow, k: CDKey, raw: string): boolean {
-  const kd = getKeyData({ ...(k as CDKey), programFlow: flow }, flow);
-  if (!kd?.hash) return false;
-  const r = raw.trim();
-  if (kd.hash === r || kd.hash.toLowerCase() === r.toLowerCase()) return true;
-  if (isKeyLikeFlow(flow) && normalizeKey(kd.hash) === normalizeKey(r)) return true;
-  return false;
+async function sendPatch(url: string, body: unknown): Promise<KeyReportRowUpdate[]> {
+  const res = await fetch(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body)
+  });
+  const json = (await res.json().catch(() => null)) as { data?: unknown; error?: { message?: string } } | null;
+  if (!res.ok) throw new Error(json?.error?.message ?? `Request failed (${res.status})`);
+  return Array.isArray(json?.data) ? (json.data as KeyReportRowUpdate[]) : [];
 }
 
 function KeyReportsPageContent() {
   const searchParams = useSearchParams();
   const [reports, setReports] = useState<KeyReport[]>([]);
-  const [programs, setPrograms] = useState<Program[]>([]);
+  const [programs, setPrograms] = useState<KeyReportProgram[]>([]);
+  const [loadedAt, setLoadedAt] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [selectedProgram, setSelectedProgram] = useState<string>("all");
-  const [selectedReport, setSelectedReport] = useState<KeyReport | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [reportReloadToken, setReportReloadToken] = useState(0);
-  const hasAppliedProgramParam = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [savingKeys, setSavingKeys] = useState<Set<string>>(new Set());
 
-  const { pendingChanges, saving, handleStatusChange, saveStatusChange, cancelStatusChange } = useStatusChange({
-    programs,
-    setReports,
-    setPrograms
-  });
-
-  const selectedReportKey = selectedReport ? `${selectedReport.programSlug}:${selectedReport.storageKey}` : null;
-
-  useEffect(() => {
-    if (!selectedReportKey || !isModalOpen) return;
-    const updated = reports.find(r => `${r.programSlug}:${r.storageKey}` === selectedReportKey);
-    if (updated) setSelectedReport(updated);
-  }, [reports, isModalOpen, selectedReportKey]);
+  const load = useCallback(async () => {
+    const [programData, res] = await Promise.all([
+      client.fetch<KeyReportProgram[]>(adminKeyReportProgramsQuery),
+      fetch("/api/v1/admin/key-reports")
+    ]);
+    if (!res.ok) throw new Error(`Could not load reports (${res.status})`);
+    const events = ((await res.json()) as { data?: Array<Record<string, unknown>> }).data ?? [];
+    setPrograms(programData);
+    setReports(buildKeyReports(events, programData));
+    setLoadedAt(Date.now());
+  }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const programsData: Program[] = await client.fetch(allProgramsQuery);
-        setPrograms(programsData);
-
-        const res = await fetch("/api/v1/admin/key-reports");
-        if (!res.ok) throw new Error(`key reports ${res.status}`);
-        const keyReportEvents = ((await res.json()) as { data?: Array<Record<string, unknown>> }).data ?? [];
-        const keyReports = new Map<string, KeyReport>();
-
-        for (const report of keyReportEvents) {
-          const programSlug = (report.programSlug as string) || "unknown";
-          const storageKey = String((report as { key?: string }).key ?? "").trim() || "unknown";
-          const storedLabel = String((report as { label?: string }).label ?? "").trim() || "unknown";
-          const program = programsData.find(p => p.slug?.current === programSlug);
-
-          let actualKey: CDKey | null = null;
-          const flow = normalizeProgramFlow(program?.programFlow);
-          if (program?.cdKeys) {
-            actualKey =
-              program.cdKeys.find(
-                k => getKeyData({ ...(k as CDKey), programFlow: flow }, flow)?.hash === storageKey
-              ) ?? null;
-
-            if (!actualKey) {
-              logger.collapse(
-                `No matching activation row for storage key: ${storageKey} in program: ${program?.title}`,
-                "Missing activation row",
-                "warning"
-              );
-            }
-          }
-
-          const groupKey = `${programSlug}:${storageKey}`;
-
-          if (!keyReports.has(groupKey)) {
-            const display =
-              actualKey != null
-                ? getActivationEntryDisplayLabel(actualKey, flow)
-                : storedLabel !== "unknown"
-                  ? storedLabel
-                  : "Unknown";
-
-            let resolvedUsername: string | undefined;
-            let resolvedPassword: string | undefined;
-            let resolvedCdKey: string | undefined;
-            if (actualKey) {
-              if (isAccountFlow(flow)) {
-                const u = (actualKey.username ?? "").trim();
-                const p = (actualKey.password ?? "").trim();
-                if (u) resolvedUsername = u;
-                if (p) resolvedPassword = p;
-              } else if (isKeyLikeFlow(flow)) {
-                const k = (actualKey.key ?? "").trim();
-                if (k) resolvedCdKey = k;
-              }
-            }
-
-            const newReport = {
-              key: display,
-              storageKey,
-              programFlow: flow,
-              ...(resolvedUsername ? { resolvedUsername } : {}),
-              ...(resolvedPassword ? { resolvedPassword } : {}),
-              ...(resolvedCdKey ? { resolvedCdKey } : {}),
-              programSlug,
-              programTitle: program?.title || "Unknown Program",
-              reportCount: 0,
-              firstReported: report.createdAt as string,
-              lastReported: report.createdAt as string,
-              status: actualKey?.status || "active",
-              validFrom: actualKey?.validFrom,
-              validTo: actualKey?.validUntil,
-              reportData: emptyReportData(),
-              reports: []
-            };
-
-            keyReports.set(groupKey, newReport);
-          }
-
-          const keyReport = keyReports.get(groupKey)!;
-
-          const eventType = report.eventType as string;
-          const triedVersionFit = (report as { triedVersionFit?: string }).triedVersionFit;
-          keyReport.reportData = applyKeyReportEvent(
-            keyReport.reportData,
-            eventType,
-            triedVersionFit,
-            (report as { triedVersion?: string }).triedVersion
-          );
-
-          keyReport.reportCount++;
-          keyReport.lastReported = report.createdAt as string;
-
-          // Debug: Log the report data to see what's available
-          logger.collapse(
-            {
-              country: report.country,
-              city: report.city,
-              createdAt: report.createdAt,
-              programSlug: report.programSlug,
-              eventType
-            },
-            "Processing report data",
-            "info"
-          );
-
-          keyReport.reports.push({
-            _id: (report._id as string) || "",
-            ipHash: (report.ipHash as string) || undefined,
-            referrer: (report.referrer as string) || undefined,
-            createdAt: report.createdAt as string,
-            country: (report.country as string) || "Unknown",
-            city: (report.city as string) || "Unknown",
-            eventType: eventType as "report_key_working" | "report_key_expired" | "report_key_limit_reached",
-            listedVersion: (report as { listedVersion?: string }).listedVersion,
-            triedVersionFit: triedVersionFit === "listed" || triedVersionFit === "other" ? triedVersionFit : undefined,
-            triedVersion: (report as { triedVersion?: string }).triedVersion
-          });
-
-          if (new Date(report.createdAt as string) < new Date(keyReport.firstReported)) {
-            keyReport.firstReported = report.createdAt as string;
-          }
-          if (new Date(report.createdAt as string) > new Date(keyReport.lastReported)) {
-            keyReport.lastReported = report.createdAt as string;
-          }
-        }
-
-        for (const row of keyReports.values()) {
-          row.reportData = {
-            ...row.reportData,
-            otherVersionLabels: mergeUniqueVersionLabels(row.reportData.otherVersionLabels)
-          };
-        }
-
-        const finalReports = Array.from(keyReports.values()).sort((a, b) => b.reportCount - a.reportCount);
-        setReports(finalReports);
-        logger.collapse(`Loaded ${finalReports.length} key reports`, "Reports Loaded", "success");
-      } catch (error) {
-        logger.collapse(error, "Error fetching key reports", "error");
-      } finally {
-        setLoading(false);
-      }
+    let cancelled = false;
+    load()
+      .catch(e => !cancelled && setError(e instanceof Error ? e.message : "Could not load reports"))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
     };
+  }, [load]);
 
-    fetchData();
-  }, [reportReloadToken]);
-
-  useEffect(() => {
-    const programSlug = searchParams.get("program");
-    const keyParam = searchParams.get("key");
-    const raw = keyParam?.trim() ?? "";
-
-    if (programs.length === 0) return;
-
-    if (programSlug) {
-      const valid = programs.some(p => p.slug?.current === programSlug);
-      if (valid && !hasAppliedProgramParam.current) {
-        setSelectedProgram(programSlug);
-        hasAppliedProgramParam.current = true;
-      }
-      return;
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
+    setError(null);
+    try {
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not load reports");
+    } finally {
+      setRefreshing(false);
     }
+  }, [load]);
 
-    if (!raw) return;
-
-    for (const p of programs) {
-      const flow = normalizeProgramFlow(p.programFlow);
-      for (const k of p.cdKeys ?? []) {
-        const id = getActivationEntryIdentityString(k as CDKey, flow);
-        if (id && isKeyLikeFlow(flow) && normalizeKey(id) === normalizeKey(raw)) {
-          setSelectedProgram(p.slug?.current || "all");
-          return;
-        }
-        if (keyQueryMatchesActivationRow(flow, k as CDKey, raw)) {
-          setSelectedProgram(p.slug?.current || "all");
-          return;
-        }
-      }
+  const setKeyStatus = useCallback(async (targets: KeyReport[], status: CDKeyStatus) => {
+    const editable = targets.filter(r => r.keyId && r.status !== status);
+    if (!editable.length) return;
+    const ids = new Set(editable.map(keyReportId));
+    setError(null);
+    setSavingKeys(prev => new Set([...prev, ...ids]));
+    try {
+      await sendPatch("/api/v1/admin/key-reports", {
+        updates: editable.map(r => ({ programSlug: r.programSlug, keyId: r.keyId, newStatus: status }))
+      });
+      setReports(prev => prev.map(r => (ids.has(keyReportId(r)) ? { ...r, status } : r)));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not update the key status");
+    } finally {
+      setSavingKeys(prev => new Set([...prev].filter(id => !ids.has(id))));
     }
+  }, []);
+
+  /** Applies only what the server changed to the one key, so nothing else reloads or moves. */
+  const applyRowUpdates = useCallback((id: string, updates: KeyReportRowUpdate[]) => {
+    if (updates.length) setReports(prev => prev.map(r => (keyReportId(r) === id ? patchReportRows(r, updates) : r)));
+  }, []);
+
+  const setReportEvents = useCallback(
+    async (id: string, reportIds: string[], eventType: KeyReportEvent) => {
+      applyRowUpdates(id, await sendPatch("/api/v1/admin/key-report-event", { reportIds, eventType }));
+    },
+    [applyRowUpdates]
+  );
+
+  const setTriedVersion = useCallback(
+    async (id: string, reportId: string, triedVersion: string) => {
+      applyRowUpdates(id, await sendPatch("/api/v1/admin/key-report-event", { reportId, triedVersion }));
+    },
+    [applyRowUpdates]
+  );
+
+  const requestedProgram = useMemo(() => {
+    const slug = searchParams.get("program");
+    return slug && programs.some(p => p.slug?.current === slug) ? slug : "all";
   }, [programs, searchParams]);
 
   const keyParam = searchParams.get("key");
+  const scoped = useMemo(() => {
+    if (!keyParam) return reports;
+    const flowBySlug = new Map(programs.map(p => [p.slug?.current, normalizeProgramFlow(p.programFlow)]));
+    return reports.filter(r => keyQueryMatchesReport(flowBySlug.get(r.programSlug) ?? "cd_key", r, keyParam));
+  }, [keyParam, programs, reports]);
 
-  const filteredReports = reports.filter(report => {
-    if (selectedProgram !== "all") {
-      const program = programs.find(p => p.slug?.current === selectedProgram || p._id === selectedProgram);
-      if (!program || report.programSlug !== program.slug?.current) return false;
-    }
-    if (keyParam) {
-      const prog = programs.find(p => p.slug?.current === report.programSlug);
-      const flow = normalizeProgramFlow(prog?.programFlow);
-      if (!keyQueryMatchesRowStorage(flow, report.storageKey, report.key, keyParam)) return false;
-    }
-    return true;
-  });
-
-  if (loading) {
-    return (
-      <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Loading key reports...</p>
-          </div>
-        </div>
-      </ProtectedAdminLayout>
-    );
-  }
+  const openReport = openId ? (reports.find(r => keyReportId(r) === openId) ?? null) : null;
 
   return (
-    <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
-      <div className="space-y-6">
-        {/* Filter */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-4">
-          <div className="flex items-center space-x-4">
-            <label htmlFor="program-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Filter by Program:
-            </label>
-            <select
-              id="program-filter"
-              value={selectedProgram}
-              onChange={e => setSelectedProgram(e.target.value)}
-              className="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100">
-              <option key="all" value="all">
-                All Programs
-              </option>
-              {programs.map((program, index) => (
-                <option key={`program-${program._id}-${index}`} value={program.slug?.current || program._id}>
-                  {program.title}
-                </option>
-              ))}
-            </select>
+    <ProtectedAdminLayout title={TITLE} subtitle={SUBTITLE}>
+      {loading ? (
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600" />
+        </div>
+      ) : (
+        <>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <p className="min-w-0 text-sm text-red-700 dark:text-red-300" role={error ? "alert" : undefined}>
+              {error}
+            </p>
+            <button
+              type="button"
+              onClick={() => void refresh()}
+              disabled={refreshing}
+              title="Refresh"
+              aria-label="Refresh"
+              className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800">
+              <FaArrowsRotate className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            </button>
           </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow overflow-hidden">
           <KeyReportsTable
-            reports={filteredReports}
-            pendingChanges={pendingChanges}
-            saving={saving}
-            onStatusChange={handleStatusChange}
-            onSaveStatusChange={saveStatusChange}
-            onCancelStatusChange={cancelStatusChange}
-            onViewDetails={report => {
-              setSelectedReport(report);
-              setIsModalOpen(true);
-            }}
+            reports={scoped}
+            initialProgram={requestedProgram}
+            loadedAt={loadedAt}
+            savingKeys={savingKeys}
+            onSetStatus={setKeyStatus}
+            onOpen={report => setOpenId(keyReportId(report))}
           />
-        </div>
-      </div>
+        </>
+      )}
 
-      <ReportDetailsModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedReport(null);
-        }}
-        report={selectedReport}
-        onReportPatched={() => setReportReloadToken(t => t + 1)}
-      />
+      {openReport ? (
+        <KeyReportDetailsModal
+          key={openId}
+          report={openReport}
+          savingStatus={savingKeys.has(keyReportId(openReport))}
+          onClose={() => setOpenId(null)}
+          onSetStatus={status => void setKeyStatus([openReport], status)}
+          onSetEvents={setReportEvents}
+          onSetTriedVersion={setTriedVersion}
+        />
+      ) : null}
     </ProtectedAdminLayout>
   );
 }
 
-const KeyReportsFallback = () => (
-  <ProtectedAdminLayout title="Key Reports" subtitle="Manage all CD key reports (working, expired, limit reached)">
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <p className="text-gray-600 dark:text-gray-400">Loading key reports...</p>
-      </div>
-    </div>
-  </ProtectedAdminLayout>
-);
-
 export default function KeyReportsPage() {
   return (
-    <I18nProvider locale="en" messages={{ adminKeyReports: adminKeyReportsEn }}>
-      <Suspense fallback={<KeyReportsFallback />}>
-        <KeyReportsPageContent />
-      </Suspense>
-    </I18nProvider>
+    <Suspense fallback={<ProtectedAdminLayout title={TITLE} subtitle={SUBTITLE}>{null}</ProtectedAdminLayout>}>
+      <KeyReportsPageContent />
+    </Suspense>
   );
 }

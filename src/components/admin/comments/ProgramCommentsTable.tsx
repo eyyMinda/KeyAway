@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import DeleteCommentConfirmModal from "@/src/components/admin/comments/DeleteCommentConfirmModal";
-import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import ProgramCommentDetailsModal from "@/src/components/admin/comments/ProgramCommentDetailsModal";
 import { FaTrash } from "react-icons/fa";
+import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import {
-  AdminEmptyRows,
   AdminFilterBar,
   AdminListCard,
   AdminPagination,
@@ -16,9 +15,6 @@ import {
   Chip,
   RelativeDate,
   adminRow,
-  adminTd,
-  adminTh,
-  adminTheadRow,
   programOptions,
   usePagedList
 } from "@/src/components/admin/list/AdminListKit";
@@ -118,9 +114,17 @@ export default function ProgramCommentsTable({ rows, busyId, onDelete, onSpammer
       : [];
 
   const spamCount = rows.filter(isSpam).length;
+  const replyTotal = rows.filter(r => r.isReply).length;
 
   return (
     <div>
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <AnalyticsCard label="Comments" value={rows.length - replyTotal} />
+        <AnalyticsCard label="Replies" value={replyTotal} />
+        <AnalyticsCard label="Pinned" value={rows.filter(r => r.isPinned).length} />
+        <AnalyticsCard label="From flagged visitors" value={spamCount} />
+      </div>
+
       <AdminFilterBar>
         <AdminSearch
           value={search}
@@ -182,96 +186,77 @@ export default function ProgramCommentsTable({ rows, busyId, onDelete, onSpammer
             />
           )
         }>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className={adminTheadRow}>
-              <tr>
-                <th className={adminTh}>Comment</th>
-                <th className={`${adminTh} hidden md:table-cell`}>Program</th>
-                <th className={adminTh}>Author</th>
-                <th className={adminTh}>Posted</th>
-                <th className={adminTh} />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {paged.pageItems.length === 0 ? (
-                <AdminEmptyRows colSpan={5}>No comments match these filters.</AdminEmptyRows>
-              ) : (
-                paged.pageItems.map(row => {
-                  const busy = busyId === row.id;
-                  const tier = row.visitor?.visitTier ?? row.visitorVisitTier ?? "new";
-                  const replyCount = row.isReply
-                    ? 0
-                    : (repliesByParent.get(`${row.programId}:${row.commentKey}`)?.length ?? 0);
-                  return (
-                    <tr key={row.id} className={adminRow}>
-                      <td className={`${adminTd} max-w-lg`}>
-                        {(row.isReply || row.isPinned || replyCount > 0) && (
-                          <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                            {row.isReply && <Chip tone="gray">↳ Reply</Chip>}
-                            {row.isPinned && <Chip tone="amber">Pinned</Chip>}
-                            {replyCount > 0 && (
-                              <span className="text-[11px] text-gray-500 dark:text-gray-400">
-                                {replyCount} repl{replyCount === 1 ? "y" : "ies"}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => setDetailsRow(row)}
-                          title="Open thread"
-                          className="text-left text-gray-800 dark:text-gray-200 line-clamp-2 cursor-pointer hover:text-gray-950 dark:hover:text-white">
-                          {truncateBody(row.body, 240)}
-                        </button>
-                        <Link
-                          href={`/program/${row.programSlug}`}
-                          target="_blank"
-                          className="md:hidden mt-1 block text-xs text-primary-600 dark:text-sky-400 hover:underline">
-                          {row.programTitle}
-                        </Link>
-                      </td>
-                      <td className={`${adminTd} hidden md:table-cell max-w-48`}>
-                        <Link
-                          href={`/program/${row.programSlug}`}
-                          target="_blank"
-                          className="font-medium text-gray-900 dark:text-gray-100 hover:text-primary-700 dark:hover:text-sky-300 hover:underline truncate block">
-                          {row.programTitle}
-                        </Link>
-                      </td>
-                      <td className={adminTd}>
-                        <div className="text-gray-900 dark:text-gray-100 truncate max-w-40">{row.authorName}</div>
-                        {row.ipHash ? (
-                          <div className="mt-1 flex flex-wrap items-center gap-1" title={row.ipHash}>
-                            <span className={visitorTierBadgeClasses(tier, false)}>{tier}</span>
-                            {isSpam(row) && <span className={visitorTierBadgeClasses("new", true)}>spammer</span>}
-                          </div>
-                        ) : null}
-                      </td>
-                      <td className={`${adminTd} text-xs text-gray-500 dark:text-gray-400`}>
+        {paged.pageItems.length === 0 ? (
+          <p className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No comments match these filters.</p>
+        ) : (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            {paged.pageItems.map(row => {
+              const busy = busyId === row.id;
+              const tier = row.visitor?.visitTier ?? row.visitorVisitTier ?? "new";
+              const replyCount = row.isReply ? 0 : (repliesByParent.get(`${row.programId}:${row.commentKey}`)?.length ?? 0);
+              return (
+                <li key={row.id} className={`${adminRow} flex gap-3 px-4 py-3 sm:px-5`}>
+                  <span
+                    aria-hidden
+                    className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold uppercase text-gray-600 dark:bg-gray-800 dark:text-gray-300 ${row.isReply ? "sm:ml-6" : ""}`}>
+                    {row.authorName.trim().charAt(0) || "?"}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                      <span className="max-w-48 truncate text-sm font-semibold text-gray-900 dark:text-gray-100">{row.authorName}</span>
+                      {row.ipHash ? <span className={visitorTierBadgeClasses(tier, false)}>{tier}</span> : null}
+                      {isSpam(row) && <span className={visitorTierBadgeClasses("new", true)}>spammer</span>}
+                      {row.isReply && <Chip tone="gray">Reply</Chip>}
+                      {row.isPinned && <Chip tone="amber">Pinned</Chip>}
+                      <span className="text-gray-400 dark:text-gray-500">·</span>
+                      <Link
+                        href={`/program/${row.programSlug}`}
+                        target="_blank"
+                        className="max-w-64 truncate text-gray-600 hover:underline dark:text-gray-300">
+                        {row.programTitle}
+                      </Link>
+                      <span className="text-gray-400 dark:text-gray-500">·</span>
+                      <span className="text-gray-500 dark:text-gray-400">
                         <RelativeDate iso={row.createdAt} />
-                      </td>
-                      <td className={`${adminTd} text-right`}>
-                        <div className="inline-flex items-center gap-1.5">
-                          <AdminViewDetailsButton onClick={() => setDetailsRow(row)} />
-                          <button
-                            type="button"
-                            disabled={busy}
-                            onClick={() => setDeleteTarget(row)}
-                            title={`Delete ${row.isReply ? "reply" : "comment"}`}
-                            aria-label={`Delete ${row.isReply ? "reply" : "comment"}`}
-                            className="cursor-pointer rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 p-2 text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50">
-                            <FaTrash className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDetailsRow(row)}
+                      title="Open thread"
+                      className="mt-1 block w-full cursor-pointer text-left text-sm leading-relaxed text-gray-700 hover:text-gray-950 dark:text-gray-300 dark:hover:text-white">
+                      <span className="line-clamp-2">{truncateBody(row.body, 240)}</span>
+                    </button>
+                    {replyCount > 0 && (
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {replyCount} {replyCount === 1 ? "reply" : "replies"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex shrink-0 items-start gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setDetailsRow(row)}
+                      className="cursor-pointer rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+                      Open
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setDeleteTarget(row)}
+                      title={`Delete ${row.isReply ? "reply" : "comment"}`}
+                      aria-label={`Delete ${row.isReply ? "reply" : "comment"}`}
+                      className="cursor-pointer rounded-md p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-500 dark:hover:bg-red-500/10 dark:hover:text-red-400">
+                      <FaTrash className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </AdminListCard>
 
       {detailsRow ? (

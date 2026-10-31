@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { FaEye, FaDownload, FaKey, FaChevronRight } from "react-icons/fa";
 import { ProgramCardProps } from "@/src/types/home";

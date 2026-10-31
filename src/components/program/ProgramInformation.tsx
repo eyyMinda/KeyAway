@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import type { ProgramInformationProps } from "@/src/types/program";

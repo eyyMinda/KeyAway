@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { FaStar, FaCheckCircle, FaDownload } from "react-icons/fa";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { trackEvent } from "@/src/lib/analytics/trackEvent";

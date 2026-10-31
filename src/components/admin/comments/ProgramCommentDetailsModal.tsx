@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
-import ModalSection from "@/src/components/admin/ModalSection";
+import { Chip } from "@/src/components/admin/list/AdminListKit";
 import type { AdminProgramCommentRow } from "@/src/types/admin/programComments";
 
 type ProgramCommentDetailsModalProps = {
@@ -21,29 +21,38 @@ function formatDate(iso?: string) {
 }
 
 function CommentBlock({
-  label,
   authorName,
   authorRole,
   body,
-  createdAt
+  createdAt,
+  active = false,
+  indented = false
 }: {
-  label: string;
   authorName: string;
   authorRole?: string;
   body: string;
   createdAt?: string;
+  active?: boolean;
+  indented?: boolean;
 }) {
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
-      <div className="mb-2 flex flex-wrap items-baseline gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{label}</span>
-        <span className="font-semibold text-gray-900 dark:text-gray-100">{authorName}</span>
-        {authorRole?.trim() ? (
-          <span className="text-xs text-gray-500 dark:text-gray-400">{authorRole.trim()}</span>
-        ) : null}
-        <span className="text-xs text-gray-400 dark:text-gray-500">{formatDate(createdAt)}</span>
+    <div className={`flex gap-3 ${indented ? "ml-5 border-l-2 border-gray-200 pl-4 dark:border-gray-700" : ""}`}>
+      <span
+        aria-hidden
+        className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold uppercase text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+        {authorName.trim().charAt(0) || "?"}
+      </span>
+      <div
+        className={`min-w-0 flex-1 rounded-xl border px-3.5 py-2.5 ${
+          active ? "border-sky-300 bg-sky-50/60 dark:border-sky-500/40 dark:bg-sky-500/5" : "border-gray-200 dark:border-gray-800"
+        }`}>
+        <div className="flex flex-wrap items-baseline gap-x-2 text-xs">
+          <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{authorName}</span>
+          {authorRole?.trim() ? <span className="text-gray-500 dark:text-gray-400">{authorRole.trim()}</span> : null}
+          <span className="text-gray-500 dark:text-gray-400">{formatDate(createdAt)}</span>
+        </div>
+        <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-800 dark:text-gray-200">{body}</p>
       </div>
-      <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-gray-800 dark:text-gray-200">{body}</p>
     </div>
   );
 }
@@ -65,7 +74,7 @@ export default function ProgramCommentDetailsModal({
       title={row.isReply ? "Reply details" : "Comment details"}
       accent="purple"
       subtitle={
-        <Link href={`/program/${row.programSlug}`} target="_blank" className="cursor-pointer text-primary-800 dark:text-sky-300 hover:underline">
+        <Link href={`/program/${row.programSlug}`} target="_blank" className="cursor-pointer hover:underline">
           {row.programTitle}
         </Link>
       }
@@ -77,60 +86,48 @@ export default function ProgramCommentDetailsModal({
           type="button"
           disabled={busy}
           onClick={() => onRequestDelete(row)}
-          className="cursor-pointer rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Delete {row.isReply ? "reply" : "comment"}
         </button>
       }
     >
-      <div className="space-y-6">
-          {row.isReply && parentComment ? (
-            <ModalSection title="Parent comment" color="gray">
-              <CommentBlock
-                label="Thread"
-                authorName={parentComment.authorName}
-                authorRole={parentComment.authorRole}
-                body={parentComment.body}
-                createdAt={parentComment.createdAt}
-              />
-            </ModalSection>
-          ) : null}
+      <div className="space-y-3">
+        {displayRow.isPinned ? <Chip tone="amber">Pinned on program page</Chip> : null}
 
-          <ModalSection title={row.isReply ? "Reply" : "Comment"} color="blue">
+        {row.isReply && parentComment ? (
+          <CommentBlock
+            authorName={parentComment.authorName}
+            authorRole={parentComment.authorRole}
+            body={parentComment.body}
+            createdAt={parentComment.createdAt}
+          />
+        ) : null}
+
+        <CommentBlock
+          authorName={row.authorName}
+          authorRole={row.authorRole}
+          body={row.body}
+          createdAt={row.createdAt}
+          active
+          indented={row.isReply && Boolean(parentComment)}
+        />
+
+        {!row.isReply &&
+          threadReplies.map(reply => (
             <CommentBlock
-              label={row.isReply ? "Reply" : "Comment"}
-              authorName={row.authorName}
-              authorRole={row.authorRole}
-              body={row.body}
-              createdAt={row.createdAt}
+              key={reply.id}
+              authorName={reply.authorName}
+              authorRole={reply.authorRole}
+              body={reply.body}
+              createdAt={reply.createdAt}
+              indented
             />
-            {displayRow.isPinned ? (
-              <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-300">Pinned on program page</p>
-            ) : null}
-          </ModalSection>
+          ))}
 
-          {!row.isReply && threadReplies.length > 0 ? (
-            <ModalSection title={`Replies (${threadReplies.length})`} color="purple">
-              <ul className="space-y-3">
-                {threadReplies.map(reply => (
-                  <li key={reply.id}>
-                    <CommentBlock
-                      label="Reply"
-                      authorName={reply.authorName}
-                      authorRole={reply.authorRole}
-                      body={reply.body}
-                      createdAt={reply.createdAt}
-                    />
-                  </li>
-                ))}
-              </ul>
-            </ModalSection>
-          ) : null}
-
-          {!row.isReply && threadReplies.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">No replies on this comment.</p>
-          ) : null}
-
+        {!row.isReply && threadReplies.length === 0 ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">No replies on this comment.</p>
+        ) : null}
       </div>
     </AdminDetailsModal>
   );

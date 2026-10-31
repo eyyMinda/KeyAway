@@ -27,6 +27,8 @@ export interface GiveawayLink {
 }
 
 export interface CDKey {
+  /** Sanity array item id. */
+  _key?: string;
   /** CD key string (cd_key / link_based_cdkey flows). */
   key?: string;
   status: CDKeyStatus;

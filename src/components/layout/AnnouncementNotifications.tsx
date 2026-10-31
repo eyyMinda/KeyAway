@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { FaBell } from "react-icons/fa";
 import { Notification } from "@/src/types/notifications";
 import NotificationItem from "./NotificationItem";

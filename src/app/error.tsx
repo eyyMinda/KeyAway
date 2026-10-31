@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { useMemo } from "react";
 import { useStoreDetails } from "@components/providers/StoreDetailsProvider";
 import { resolveSupportEmail } from "@/src/lib/site/supportEmail";

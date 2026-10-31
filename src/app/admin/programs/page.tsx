@@ -108,11 +108,9 @@ export default function ProgramsPage() {
   }, [applyPage]);
 
   const navigate = (next: Partial<UrlState>, replace = false) => {
-    setUi(prev => {
-      const state = { ...prev, ...next };
-      writeUrlState(state, replace);
-      return state;
-    });
+    const state = { ...ui, ...next };
+    setUi(state);
+    writeUrlState(state, replace);
   };
 
   const openProgram = (id: string | null, tab: ProgramEditorTab = "basics") => navigate({ program: { id, tab }, vendor: null });

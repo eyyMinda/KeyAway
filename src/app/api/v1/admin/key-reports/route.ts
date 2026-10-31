@@ -6,6 +6,8 @@ import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { listKeyReportsForAdmin } from "@/src/lib/analytics/keyReportStore";
 
 const VALID_STATUSES = ["new", "active", "expired", "limit"] as const;
+const MAX_KEY_UPDATES = 200;
+const KEY_ID_RE = /^[\w-]{1,64}$/;
 
 /** GET /api/v1/admin/key-reports - Every key report, newest first (admin table). */
 export async function GET(req: NextRequest) {
@@ -24,7 +26,28 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/** PATCH /api/v1/admin/key-reports - Update CD key status by programSlug + keyIndex */
+type KeyStatusUpdate = { programSlug: string; keyId: string; newStatus: string };
+
+function parseUpdates(value: unknown): KeyStatusUpdate[] | null {
+  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_KEY_UPDATES) return null;
+  const updates: KeyStatusUpdate[] = [];
+  for (const item of value) {
+    const u = (item ?? {}) as Record<string, unknown>;
+    const programSlug = typeof u.programSlug === "string" ? u.programSlug.trim() : "";
+    const keyId = typeof u.keyId === "string" ? u.keyId.trim() : "";
+    const newStatus = typeof u.newStatus === "string" ? u.newStatus.trim() : "";
+    if (!programSlug || !KEY_ID_RE.test(keyId) || !VALID_STATUSES.includes(newStatus as (typeof VALID_STATUSES)[number])) {
+      return null;
+    }
+    updates.push({ programSlug, keyId, newStatus });
+  }
+  return updates;
+}
+
+/**
+ * PATCH /api/v1/admin/key-reports - Set the status of one or more activation rows by array `_key`.
+ * Each row is patched on its own path, so a stale read can never write older keys back over a program.
+ */
 export async function PATCH(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
@@ -33,39 +56,29 @@ export async function PATCH(req: NextRequest) {
   if (admin instanceof Response) return admin;
 
   try {
-    const body = await req.json().catch(() => ({}));
-    if (!body || typeof body !== "object") return Errors.badRequest("Request body is required");
+    const body = (await req.json().catch(() => ({}))) as { updates?: unknown };
+    const updates = parseUpdates(body?.updates);
+    if (!updates) return Errors.validation(`updates must list 1 to ${MAX_KEY_UPDATES} { programSlug, keyId, newStatus } rows`);
 
-    const b = body as Record<string, unknown>;
-    const programSlug = typeof b.programSlug === "string" ? b.programSlug.trim() : "";
-    const keyIndex =
-      typeof b.keyIndex === "number" ? b.keyIndex : parseInt(String(b.keyIndex ?? ""), 10);
-    const newStatus = typeof b.newStatus === "string" ? b.newStatus.trim() : "";
+    const slugs = [...new Set(updates.map(u => u.programSlug))];
+    const programs = await client
+      .withConfig({ useCdn: false })
+      .fetch<Array<{ _id: string; slug: string; keyIds: string[] | null }>>(
+        `*[_type == "program" && slug.current in $slugs]{ _id, "slug": slug.current, "keyIds": cdKeys[]._key }`,
+        { slugs }
+      );
 
-    if (!programSlug || keyIndex < 0 || Number.isNaN(keyIndex) || !newStatus) {
-      return Errors.validation("Missing required fields: programSlug, keyIndex, newStatus");
+    const bySlug = new Map(programs.map(p => [p.slug, p]));
+    const transaction = client.transaction();
+    for (const update of updates) {
+      const program = bySlug.get(update.programSlug);
+      if (!program) return Errors.notFound(`Program not found for slug: ${update.programSlug}`);
+      if (!program.keyIds?.includes(update.keyId)) return Errors.notFound(`Key not found in ${update.programSlug}`);
+      transaction.patch(program._id, patch => patch.set({ [`cdKeys[_key=="${update.keyId}"].status`]: update.newStatus }));
     }
-    if (!VALID_STATUSES.includes(newStatus as (typeof VALID_STATUSES)[number])) {
-      return Errors.validation(`Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`);
-    }
+    await transaction.commit();
 
-    const programDoc = await client.fetch<{ _id: string; cdKeys?: Array<{ key?: string; status?: string; _key?: string }> } | null>(
-      `*[_type == "program" && slug.current == $slug][0]{ _id, cdKeys }`,
-      { slug: programSlug }
-    );
-    if (!programDoc) return Errors.notFound(`Program not found for slug: ${programSlug}`);
-
-    const cdKeys = programDoc.cdKeys ?? [];
-    if (keyIndex < 0 || keyIndex >= cdKeys.length) {
-      return Errors.validation(`Invalid keyIndex: ${keyIndex} (program has ${cdKeys.length} keys)`);
-    }
-
-    const updatedKeys = cdKeys.map((k, i) =>
-      i === keyIndex ? { ...k, status: newStatus } : k
-    );
-    const result = await client.patch(programDoc._id).set({ cdKeys: updatedKeys }).commit();
-
-    return NextResponse.json({ data: result, meta: {} });
+    return NextResponse.json({ data: { updated: updates.length }, meta: {} });
   } catch (err) {
     console.error("[PATCH /api/v1/admin/key-reports]", err);
     return Errors.internal();

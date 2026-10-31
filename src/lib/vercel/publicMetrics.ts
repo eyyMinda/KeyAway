@@ -26,15 +26,3 @@ export function isVercelProductionDeployment(): boolean {
 export function isVercelAnalyticsEnabled(): boolean {
   return process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED === "true";
 }
-
-const DEFAULT_SPEED_INSIGHTS_SAMPLE_RATE = 0.15;
-
-export function resolveSpeedInsightsSampleRate(): number {
-  const raw = process.env.NEXT_PUBLIC_SPEED_INSIGHTS_SAMPLE_RATE;
-  if (raw == null || raw.trim() === "") return DEFAULT_SPEED_INSIGHTS_SAMPLE_RATE;
-
-  const parsed = Number.parseFloat(raw);
-  if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_SPEED_INSIGHTS_SAMPLE_RATE;
-  if (parsed >= 1) return 1;
-  return parsed;
-}

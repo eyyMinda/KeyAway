@@ -136,6 +136,17 @@ export const allProgramsQuery = `
   image, cdKeys[]
 }
 `;
+/** Key reports page: only what it needs to resolve reported keys, unlike `allProgramsQuery`. */
+export const adminKeyReportProgramsQuery = `
+*[_type == "program"]{
+  _id,
+  title,
+  slug,
+  "programFlow": coalesce(programFlow, "cd_key"),
+  latestOfficialVersion,
+  cdKeys[]
+}
+`;
 export const adminProgramsQuery = `
 *[_type == "program"]{
   _id,

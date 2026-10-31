@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { SanityLink, SocialData } from "@/src/types";
 import AdminNavIcons from "@components/layout/AdminNavIcons";
 import { usePathname } from "next/navigation";

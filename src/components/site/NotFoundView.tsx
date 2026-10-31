@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import NotFoundTracker from "@/src/components/NotFoundTracker";
 import { AdSlot, BannerAd } from "@/src/components/ads";
 
@@ -23,7 +23,7 @@ export default function NotFoundView({ variant }: { variant: NotFoundVariant }) 
   const { heading, lead, browseLabel, browseHref } = copy[variant];
 
   return (
-    <div className="flex items-center justify-center px-4">
+    <div className="flex items-center justify-center px-4 py-16">
       <NotFoundTracker />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="mb-8">

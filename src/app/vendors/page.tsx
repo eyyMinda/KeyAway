@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import JsonLd from "@/src/components/JsonLd";
 import VendorLogoFrame from "@/src/components/vendors/VendorLogoFrame";
 import { AdSlot, BannerAd, NativeBannerAd } from "@/src/components/ads";

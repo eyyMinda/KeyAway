@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import type { Program } from "@/src/types/program";
 import { resolveFreeVsProRows } from "@/src/lib/program/resolveFreeVsProRows";
 

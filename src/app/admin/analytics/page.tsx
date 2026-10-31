@@ -8,15 +8,15 @@ import {
   type AnalyticsSummaryData,
   type VisitorTagAggregateRow
 } from "@/src/lib/analytics/eventsApi";
-import { visitorTierSwatchBgClass } from "@/src/theme/colorSchema";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import DataTable from "@/src/components/admin/DataTable";
-import ActivityChart from "@/src/components/admin/ActivityChart";
-import ActionBreakdown, { actionRows } from "@/src/components/admin/ActionBreakdown";
+import ActivityOverview from "@/src/components/admin/ActivityOverview";
+import PromotionTracking from "@/src/components/admin/PromotionTracking";
 import TimeFilter from "@/src/components/admin/TimeFilter";
 import RecentActivity from "@/src/components/admin/RecentActivity";
 import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
+import { VISITOR_TIER_SWATCH, countActions } from "@/src/lib/analytics/activitySeries";
 
 export default function AnalyticsPage() {
   const [summary, setSummary] = useState<AnalyticsSummaryData | null>(null);
@@ -89,10 +89,11 @@ export default function AnalyticsPage() {
   }
 
   const totals = summary?.totals ?? {};
-  const timeline = summary?.timeline ?? { bucket: "day" as const, points: [] };
+  const timeline = summary?.timeline ?? { bucket: "day" as const, points: [], tierTotals: {} };
+  const promotions = summary?.promotions ?? { clicks: 0, visitors: 0, placements: [], pages: [], campaign: null };
   const sessions = summary?.sessions ?? 0;
   const pageViews = totals.page_viewed ?? 0;
-  const actions = actionRows(totals).reduce((n, [, v]) => n + v, 0);
+  const actions = countActions(totals);
   const spark = (key: "visitors" | "views" | "actions") => timeline.points.map(p => p[key]);
   const programData = summary?.programTable ?? [];
   const socialData = summary?.socialTable ?? [];
@@ -144,11 +145,9 @@ export default function AnalyticsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 min-w-0">
-          <ActivityChart timeline={timeline} />
-        </div>
-        <ActionBreakdown totals={totals} />
+      <div className="space-y-6 mb-8">
+        <ActivityOverview timeline={timeline} uniqueVisitors={summary?.uniqueVisitors ?? 0} pageViews={pageViews} />
+        <PromotionTracking timeline={timeline} promotions={promotions} pageViews={pageViews} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -197,7 +196,7 @@ export default function AnalyticsPage() {
             key: r.key,
             value: r.value,
             label: r.label,
-            swatchClass: visitorTierSwatchBgClass(r.key)
+            swatchClass: VISITOR_TIER_SWATCH[r.key] ?? "bg-neutral-400"
           }))}
           showPercentage={true}
         />

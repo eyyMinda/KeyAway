@@ -5,7 +5,7 @@
  * "Your privacy choices" link. Non-blocking: the site stays usable while it is open.
  */
 import { useEffect } from "react";
-import Link from "next/link";
+import Link from "@/src/components/ui/HoverPrefetchLink";
 import { usePathname } from "next/navigation";
 import { useAdConsent } from "@/src/hooks/useAdConsent";
 import { ADS_ENABLED, isAdExcludedPath } from "@/src/lib/ads/adConfig";
