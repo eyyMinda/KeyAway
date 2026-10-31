@@ -27,7 +27,7 @@ Everything disappears at **Ends**, with no redeploy. To stop sooner, turn off **
 
 ## Analytics
 
-Clicks show in the **Promotions** section of `/admin/analytics`, under Activity. They are stored as `social_click` with `social` set to `promo-banner`, `promo-program`, `promo-bell` or `promo-home`. A click counts as a success: conversion is the visitors who clicked, out of everyone active on the site during the campaign.
+Clicks show in the **Promotions** section of `/admin/analytics`, under Activity. They are stored as `social_click` with `social` set to `promo-banner`, `promo-program`, `promo-bell` or `promo-home`, and `label` set to the promotion's id. A click counts as a success: conversion is the visitors who clicked, out of everyone active on the site during the campaign.
 
 ## Add a theme or preset
 

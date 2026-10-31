@@ -27,6 +27,6 @@ export function resolvePromotionCardTitle(promotion: SitePromotion, programSlug:
   return promotion.cardTitle;
 }
 
-export function trackPromotionClick(placement: PromotionPlacement) {
-  void trackEvent("social_click", { social: `promo-${placement}`, path: window.location.pathname });
+export function trackPromotionClick(placement: PromotionPlacement, campaign: string) {
+  void trackEvent("social_click", { social: `promo-${placement}`, campaign, path: window.location.pathname });
 }

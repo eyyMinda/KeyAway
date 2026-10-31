@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
         programSlug: notFound ? undefined : programSlug,
         notFound: item.event === "page_viewed" ? notFound : undefined,
         key: keyData?.hash,
-        label: keyData?.identifier,
+        label: keyData?.identifier ?? (typeof meta.campaign === "string" ? meta.campaign : undefined),
         social: typeof meta.social === "string" ? meta.social : undefined,
         activationUrl,
         programFlow: typeof meta.programFlow === "string" ? meta.programFlow : undefined

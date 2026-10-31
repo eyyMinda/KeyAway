@@ -30,7 +30,7 @@ export default function PromotionBanner() {
             href={promotion.ctaUrl}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackPromotionClick("banner")}
+            onClick={() => trackPromotionClick("banner", promotion._id)}
             className={`inline-block rounded-sm px-3 py-1 text-xs font-bold transition-colors ${theme.button}`}>
             {promotion.ctaLabel}
           </Link>

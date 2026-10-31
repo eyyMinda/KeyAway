@@ -318,23 +318,30 @@ async function buildPromotionClicks(since: string, until: string): Promise<Promo
 async function buildPromotionCampaign(): Promise<PromotionCampaignSummary | null> {
   try {
     const nowIso = new Date().toISOString();
-    const promotion = await client.fetch<{ title: string; theme?: PromotionThemeId; startsAt: string; endsAt: string } | null>(
-      `*[_type == "sitePromotion" && enabled == true && startsAt <= $now] | order(endsAt desc)[0]{ title, theme, startsAt, endsAt }`,
+    const promotion = await client.fetch<{ _id: string; title: string; theme?: PromotionThemeId; startsAt: string; endsAt: string } | null>(
+      `*[_type == "sitePromotion" && enabled == true && startsAt <= $now] | order(endsAt desc)[0]{ _id, title, theme, startsAt, endsAt }`,
       { now: nowIso },
       { cache: "no-store" }
     );
     if (!promotion) return null;
 
+    const { _id: campaignId, ...details } = promotion;
     const until = promotion.endsAt < nowIso ? promotion.endsAt : nowIso;
+    // Clicks without a label predate campaign tracking; the date range attributes those.
     const [row] = await db()<Array<{ reached: number; converted: number; clicks: number }>>`
-      select count(distinct s.visitor_hash)::int as reached,
-             count(distinct s.visitor_hash) filter (where e.social like ${PROMO_SOCIAL_LIKE})::int as converted,
-             count(*) filter (where e.social like ${PROMO_SOCIAL_LIKE})::int as clicks
-      from analytics.events e
-      join analytics.sessions s on s.id = e.session_id
-      where e.created_at >= ${promotion.startsAt} and e.created_at <= ${until}
+      with ev as (
+        select e.created_at, s.visitor_hash,
+               e.social like ${PROMO_SOCIAL_LIKE} and coalesce(e.label, ${campaignId}) = ${campaignId} as clicked
+        from analytics.events e
+        join analytics.sessions s on s.id = e.session_id
+        where e.created_at >= ${promotion.startsAt} and e.created_at <= ${until}
+      )
+      select count(distinct visitor_hash)::int as reached,
+             count(distinct visitor_hash) filter (where clicked)::int as converted,
+             count(*) filter (where clicked)::int as clicks
+      from ev
     `;
-    return { ...promotion, live: promotion.endsAt > nowIso, ...row };
+    return { ...details, live: promotion.endsAt > nowIso, ...row };
   } catch (err) {
     console.error("[buildPromotionCampaign]", err);
     return null;

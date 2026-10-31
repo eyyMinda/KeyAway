@@ -32,7 +32,7 @@ export default function PromotionProgramCard({ promotion, programSlug, programTi
             href={promotion.ctaUrl}
             target="_blank"
             rel="noreferrer"
-            onClick={() => trackPromotionClick("program")}
+            onClick={() => trackPromotionClick("program", promotion._id)}
             className={`inline-flex w-full items-center justify-center rounded-sm px-3 py-2 text-xs font-bold transition-colors sm:w-auto ${
               promotion.mascotUrl ? "sm:pr-8" : ""
             } ${theme.button}`}>

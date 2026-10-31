@@ -73,6 +73,8 @@ export interface TrackEventMeta {
   clickButton?: "left" | "right" | "aux";
   path?: string;
   social?: string;
+  /** `sitePromotion` id, on promotion clicks. */
+  campaign?: string;
   copyMethod?: "button_click" | "keyboard_or_context_menu";
   referrer?: string;
   /** Open visit id. Landing source is stored once on the session, not on each event. */
