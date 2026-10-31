@@ -165,20 +165,16 @@ export async function adminUpdateKeyReports(ids: string[], eventType: KeyReportE
   return rows.map(toAdminUpdate);
 }
 
-/** Admin key reports table (all reports, newest first). */
+/** Admin key reports table (all reports, newest first), with only the columns the page shows. */
 export async function listKeyReportsForAdmin(): Promise<Array<Record<string, unknown>>> {
   const rows = await db()<Array<Record<string, unknown>>>`
-    select id, event_type, program_slug, path, referrer, country, city, user_agent, ip_hash,
-           utm_source, utm_medium, utm_campaign, created_at, key, label, listed_version, tried_version_fit, tried_version
+    select id, event_type, program_slug, referrer, country, city, ip_hash, created_at, key, label,
+           listed_version, tried_version_fit, tried_version
     from analytics.key_reports
     order by created_at desc
   `;
-  return rows.map(({ id, utmSource, utmMedium, utmCampaign, ...rest }) =>
-    Object.fromEntries(
-      Object.entries({ _id: id, ...rest, utm_source: utmSource, utm_medium: utmMedium, utm_campaign: utmCampaign }).filter(
-        ([, v]) => v !== null
-      )
-    )
+  return rows.map(({ id, ...rest }) =>
+    Object.fromEntries(Object.entries({ _id: id, ...rest }).filter(([, v]) => v !== null))
   );
 }
 
