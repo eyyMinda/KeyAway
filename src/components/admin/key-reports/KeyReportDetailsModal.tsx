@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { FaSpinner } from "react-icons/fa";
 import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
-import KeyReportRow, { type ReportVisitor } from "@/src/components/admin/key-reports/KeyReportRow";
+import KeyReportRow, { type ReportVisitor, type VersionFit } from "@/src/components/admin/key-reports/KeyReportRow";
 import {
   CopyButton,
   KEY_STATUS_OPTIONS,
@@ -34,7 +34,7 @@ type KeyReportDetailsModalProps = {
   onClose: () => void;
   onSetStatus: (status: CDKeyStatus) => void;
   onSetEvents: (keyId: string, reportIds: string[], eventType: KeyReportEvent) => Promise<void>;
-  onSetTriedVersion: (keyId: string, reportId: string, version: string) => Promise<void>;
+  onSetVersionFit: (keyId: string, reportId: string, fit: VersionFit) => Promise<void>;
 };
 
 const shortDate = (iso?: string) => (iso ? new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" }) : "—");
@@ -69,7 +69,7 @@ export default function KeyReportDetailsModal({
   onClose,
   onSetStatus,
   onSetEvents,
-  onSetTriedVersion
+  onSetVersionFit
 }: KeyReportDetailsModalProps) {
   const keyId = keyReportId(report);
   const rows = report.reports;
@@ -145,16 +145,16 @@ export default function KeyReportDetailsModal({
 
   const setOneEvent = useCallback((id: string, eventType: KeyReportEvent) => void setRowsEvent([id], eventType), [setRowsEvent]);
 
-  const setVersion = useCallback(
-    async (id: string, version: string) => {
+  const setVersionFit = useCallback(
+    async (id: string, fit: VersionFit) => {
       setError(null);
       try {
-        await onSetTriedVersion(keyId, id, version);
+        await onSetVersionFit(keyId, id, fit);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Could not update the version");
       }
     },
-    [keyId, onSetTriedVersion]
+    [keyId, onSetVersionFit]
   );
 
   const toggleRow = useCallback((id: string) => {
@@ -387,7 +387,7 @@ export default function KeyReportDetailsModal({
                   saving={savingRows.has(row._id)}
                   onToggle={toggleRow}
                   onSetEvent={setOneEvent}
-                  onSetTriedVersion={setVersion}
+                  onSetVersionFit={setVersionFit}
                   onSpammerChange={setSpammer}
                 />
               ))}

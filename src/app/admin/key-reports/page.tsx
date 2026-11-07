@@ -8,6 +8,7 @@ import { client } from "@/src/sanity/lib/client";
 import { adminKeyReportProgramsQuery } from "@/src/lib/sanity/queries";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import KeyReportDetailsModal from "@/src/components/admin/key-reports/KeyReportDetailsModal";
+import type { VersionFit } from "@/src/components/admin/key-reports/KeyReportRow";
 import KeyReportsTable from "@/src/components/admin/key-reports/KeyReportsTable";
 import {
   buildKeyReports,
@@ -111,9 +112,13 @@ function KeyReportsPageContent() {
     [applyRowUpdates]
   );
 
-  const setTriedVersion = useCallback(
-    async (id: string, reportId: string, triedVersion: string) => {
-      applyRowUpdates(id, await sendPatch("/api/v1/admin/key-report-event", { reportId, triedVersion }));
+  const setVersionFit = useCallback(
+    async (id: string, reportId: string, fit: VersionFit) => {
+      const body =
+        fit.fit === "other"
+          ? { reportId, triedVersionFit: "other", triedVersion: fit.version }
+          : { reportId, triedVersionFit: "listed" };
+      applyRowUpdates(id, await sendPatch("/api/v1/admin/key-report-event", body));
     },
     [applyRowUpdates]
   );
@@ -173,7 +178,7 @@ function KeyReportsPageContent() {
           onClose={() => setOpenId(null)}
           onSetStatus={status => void setKeyStatus([openReport], status)}
           onSetEvents={setReportEvents}
-          onSetTriedVersion={setTriedVersion}
+          onSetVersionFit={setVersionFit}
         />
       ) : null}
     </ProtectedAdminLayout>
