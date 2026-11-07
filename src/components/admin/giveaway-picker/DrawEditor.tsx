@@ -12,6 +12,7 @@ import { drawPool, pickWinner, type PickOptions } from "@/src/lib/giveaways/pick
 import type { DrawEntrant, DrawPrize, DrawWinner, GiveawayDraw } from "@/src/types/giveawayDraws";
 import EntrantImport from "./EntrantImport";
 import { PrizeToggles } from "./PrizeToggles";
+import WinnerMessages from "./WinnerMessages";
 
 export const GIVEAWAY_KINDS = ["Comment to win", "Holiday", "Milestone", "Partner giveaway", "Quiz"];
 
@@ -595,6 +596,7 @@ export default function DrawEditor({
             </pre>
           </div>
         )}
+        <WinnerMessages title={draft.title} prizes={draft.prizes} winners={draft.winners} />
         {draft.winners.some(w => !draft.prizes.some(p => p.id === w.prize)) && (
           <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
             Some winners belong to a prize that was removed (
