@@ -3,8 +3,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { client } from "@/src/sanity/lib/client";
-import { featuredProgramSettingsQuery } from "@/src/lib/sanity/queries";
 import { IdealImage } from "@/src/components/general/IdealImage";
 import { getWorkingKeysCount } from "@/src/lib/admin/adminHelpers";
 import type { PortableTextBlock } from "@portabletext/types";
@@ -48,7 +46,9 @@ export default function FeaturedProgramSettings({ programs, onProgramClick }: Fe
     setLoading(true);
     setError(null);
     try {
-      const data: FeaturedProgramSettingsData | null = await client.fetch(featuredProgramSettingsQuery);
+      const res = await fetch("/api/v1/admin/featured-program-settings");
+      if (!res.ok) throw new Error(String(res.status));
+      const data = ((await res.json()) as { data: FeaturedProgramSettingsData | null }).data;
       setSettings(data);
       if (data) {
         setLocalRotationSchedule(data.rotationSchedule || "weekly");

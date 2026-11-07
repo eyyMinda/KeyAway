@@ -4,8 +4,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FaArrowsRotate } from "react-icons/fa6";
-import { client } from "@/src/sanity/lib/client";
-import { adminKeyReportProgramsQuery } from "@/src/lib/sanity/queries";
+import { fetchAdminContent } from "@/src/lib/admin/adminContent";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
 import KeyReportDetailsModal from "@/src/components/admin/key-reports/KeyReportDetailsModal";
 import type { VersionFit } from "@/src/components/admin/key-reports/KeyReportRow";
@@ -50,7 +49,7 @@ function KeyReportsPageContent() {
 
   const load = useCallback(async () => {
     const [programData, res] = await Promise.all([
-      client.fetch<KeyReportProgram[]>(adminKeyReportProgramsQuery),
+      fetchAdminContent<KeyReportProgram[]>("keyReportPrograms"),
       fetch("/api/v1/admin/key-reports")
     ]);
     if (!res.ok) throw new Error(`Could not load reports (${res.status})`);

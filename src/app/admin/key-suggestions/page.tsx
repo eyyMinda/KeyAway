@@ -14,7 +14,7 @@ import {
   usePagedList
 } from "@/src/components/admin/list/AdminListKit";
 import { KeySuggestion } from "@/src/types/contact";
-import { client } from "@/src/sanity/lib/client";
+import { fetchAdminContent } from "@/src/lib/admin/adminContent";
 
 type StatusView = "open" | KeySuggestion["status"] | "all";
 
@@ -40,12 +40,7 @@ const programKey = (s: KeySuggestion) => s.programName.trim().toLowerCase();
 
 async function loadSuggestions(): Promise<KeySuggestion[] | null> {
   try {
-    return await client.fetch<KeySuggestion[]>(
-      `*[_type == "keySuggestion"] | order(createdAt desc) {
-        _id, _createdAt, cdKey, programName, programVersion, programLink, name, email, message, status, ipHash, createdAt,
-        lastRepliedAt, replies[]{ _key, body, subject, sentTo, sentBy, sentAt, resendId }
-      }`
-    );
+    return await fetchAdminContent<KeySuggestion[]>("keySuggestions");
   } catch (error) {
     console.error("Error fetching suggestions:", error);
     return null;

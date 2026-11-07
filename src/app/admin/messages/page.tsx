@@ -14,35 +14,13 @@ import {
   type MessageView
 } from "@/src/lib/admin/contactMessages";
 import { ContactMessage } from "@/src/types/contact";
-import { client } from "@/src/sanity/lib/client";
-
-const MESSAGES_QUERY = `*[_type == "contactMessage"] | order(createdAt desc) {
-  _id,
-  _createdAt,
-  title,
-  message,
-  name,
-  email,
-  ipHash,
-  status,
-  createdAt,
-  lastRepliedAt,
-  replies[]{
-    _key,
-    body,
-    subject,
-    sentTo,
-    sentBy,
-    sentAt,
-    resendId
-  }
-}`;
+import { fetchAdminContent } from "@/src/lib/admin/adminContent";
 
 type SortKey = "newest" | "oldest" | "last_reply";
 
 async function loadMessages(): Promise<ContactMessage[] | null> {
   try {
-    return await client.fetch<ContactMessage[]>(MESSAGES_QUERY);
+    return await fetchAdminContent<ContactMessage[]>("messages");
   } catch (error) {
     console.error("Error fetching messages:", error);
     return null;
