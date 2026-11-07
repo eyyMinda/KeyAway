@@ -1,5 +1,6 @@
 /** @fileoverview Batched visit writes: appended to the visitor's open session, landing referrer only. */
 import { NextRequest, NextResponse } from "next/server";
+import { carryOverVisitorHash } from "@/src/lib/visitors/carryOverVisitorHash";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
@@ -63,6 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     const ip = getClientIp(req);
+    await carryOverVisitorHash(ip);
     const ipHash = hashIp(ip) ?? "unknown";
     const ua = req.headers.get("user-agent") || undefined;
 

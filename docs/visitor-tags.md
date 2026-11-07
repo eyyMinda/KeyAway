@@ -5,6 +5,13 @@ How visitor identity, visit counts, tiers ("tags") and the spammer flag work. Vi
 ## Identity
 
 - A visitor is identified by `visitor_hash`: a SHA-256 hash of the client IP plus `ANALYTICS_SALT` (`src/lib/api/requestGeo.ts`). The raw IP is never stored.
+- `ANALYTICS_SALT` must stay secret and differ from `NEXT_PUBLIC_ANALYTICS_SALT` (which ships to browsers): with the salt, an
+  IPv4 address can be recovered from its hash by trying every address.
+- **Rotating the salt:** set `ANALYTICS_SALT_PREVIOUS` to the current value and `ANALYTICS_SALT` to a new one
+  (`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`). On each tracked visit,
+  `carryOverVisitorHash` moves a returning visitor from the old hash to the new one: visitor row (merged if needed),
+  sessions, key reports, and the `ipHash` on their Sanity comments, replies, reactions, messages and suggestions.
+  Visitors who never return keep the old hash. Remove `ANALYTICS_SALT_PREVIOUS` after a few months.
 - Sessions, events and key reports store the same hash, so admin views can join them to the visitor.
 - It is not a cookie or an account: people on one network can share a hash, and a VPN or mobile IP change gives a new one.
 

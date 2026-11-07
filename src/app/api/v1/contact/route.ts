@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { privateDocId } from "@/src/lib/sanity/privateDocId";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await client.create({
+      _id: privateDocId("contactMessage"),
       _type: "contactMessage",
       title,
       message,
