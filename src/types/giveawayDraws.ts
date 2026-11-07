@@ -5,6 +5,8 @@ export type DrawPrize = {
   name: string;
   /** How many winners this prize gets. */
   qty: number;
+  /** Key or code handed to the winners, shown in the announcement. */
+  key?: string;
   /** Extra words that count as asking for this prize in a comment ("ASC", "systemcare"). */
   aliases: string[];
 };

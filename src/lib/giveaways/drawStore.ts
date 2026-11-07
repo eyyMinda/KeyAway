@@ -81,6 +81,7 @@ export function parseDrawUpdate(body: unknown): GiveawayDrawUpdate {
         id: text(p.id, 40) ?? `p${i + 1}`,
         name,
         qty: Math.min(100, Math.max(1, Math.floor(Number(p.qty) || 1))),
+        ...(text(p.key, 120) ? { key: text(p.key, 120) } : {}),
         aliases: Array.isArray(p.aliases) ? p.aliases.flatMap(a => text(a, 40) ?? []).slice(0, 10) : []
       };
     });

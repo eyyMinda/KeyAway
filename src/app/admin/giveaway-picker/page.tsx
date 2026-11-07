@@ -31,7 +31,11 @@ function GiveawayPickerContent() {
     fetch("/api/v1/admin/giveaway-draws")
       .then(res => (res.ok ? res.json() : Promise.reject(new Error("Could not load giveaways"))))
       .then((json: { data: GiveawayDrawSummary[] }) => !cancelled && setDraws(json.data))
-      .catch(e => !cancelled && setError(e instanceof Error ? e.message : "Could not load giveaways"));
+      .catch(e => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : "Could not load giveaways");
+        setDraws([]);
+      });
     return () => {
       cancelled = true;
     };

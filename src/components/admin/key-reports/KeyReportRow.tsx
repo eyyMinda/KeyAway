@@ -139,7 +139,7 @@ function KeyReportRowInner({
 
   return (
     <li
-      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 px-3 py-2 text-xs sm:grid-cols-[auto_9.5rem_minmax(0,1.2fr)_minmax(0,1fr)_auto] ${
+      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 px-3 py-2 text-xs sm:grid-cols-[auto_9.5rem_minmax(0,1fr)_16rem_13.5rem] ${
         selected ? "bg-sky-50/70 dark:bg-sky-500/5" : ""
       }`}>
       <input
@@ -185,7 +185,9 @@ function KeyReportRowInner({
 
       <div className="col-start-2 min-w-0 sm:col-start-auto">
         {row.eventType === "report_key_working" ? (
-          <span className="text-gray-400 dark:text-gray-500">—</span>
+          <span className="text-gray-400 dark:text-gray-500" title="Only failed reports ask which version was tried">
+            —
+          </span>
         ) : (
           <VersionFitControl
             key={`${row.triedVersionFit}-${row.triedVersion}`}

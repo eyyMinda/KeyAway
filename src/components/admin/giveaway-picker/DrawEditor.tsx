@@ -218,11 +218,12 @@ export default function DrawEditor({
   const prizeName = (id: string) => draft.prizes.find(p => p.id === id)?.name ?? "Removed prize";
   const announcement = [
     `🎉 ${draft.title} winners`,
+    // Same shape as the winners post: "Prize - KEY", then one winner per line.
     ...draft.prizes
-      .map(p => [p.name, draft.winners.filter(w => w.prize === p.id).map(w => w.name)] as const)
+      .map(p => [p, draft.winners.filter(w => w.prize === p.id).map(w => w.name)] as const)
       .filter(([, names]) => names.length)
-      .map(([name, names]) => `• ${name}: ${names.join(", ")}`)
-  ].join("\n");
+      .map(([prize, names]) => [`${prize.name}${prize.key ? ` - ${prize.key}` : ""}`, ...names].join("\n"))
+  ].join("\n\n");
 
   const copyAnnouncement = async () => {
     await navigator.clipboard.writeText(announcement);
@@ -320,7 +321,7 @@ export default function DrawEditor({
               return (
                 <li
                   key={prize.id}
-                  className="grid grid-cols-[1fr_4.5rem_auto] gap-2 sm:grid-cols-[minmax(0,1.4fr)_4.5rem_minmax(0,1fr)_auto]">
+                  className="grid grid-cols-[1fr_4.5rem_auto] gap-2 sm:grid-cols-[minmax(0,1.3fr)_4.5rem_minmax(0,1fr)_minmax(0,1fr)_auto]">
                   <input
                     className={input}
                     value={prize.name}
@@ -339,6 +340,13 @@ export default function DrawEditor({
                     onChange={e => updatePrize(prize.id, { qty: Math.max(1, Number(e.target.value) || 1) })}
                   />
                   <input
+                    className={`${input} col-span-2 font-mono sm:col-span-1`}
+                    value={prize.key ?? ""}
+                    placeholder="Key for the winners"
+                    aria-label="Prize key"
+                    onChange={e => updatePrize(prize.id, { key: e.target.value || undefined })}
+                  />
+                  <input
                     className={`${input} col-span-2 sm:col-span-1`}
                     value={prize.aliases.join(", ")}
                     placeholder="Also matches: ASC, systemcare"
@@ -352,7 +360,7 @@ export default function DrawEditor({
                     disabled={hasWinners}
                     title={hasWinners ? "Remove its winners first" : "Remove prize"}
                     onClick={() => removePrize(prize.id)}
-                    className="row-start-1 col-start-3 cursor-pointer rounded-lg px-2 text-gray-400 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 sm:col-start-4">
+                    className="row-start-1 col-start-3 cursor-pointer rounded-lg px-2 text-gray-400 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40 sm:col-start-5">
                     <FaTrash className="h-3.5 w-3.5" />
                   </button>
                 </li>
