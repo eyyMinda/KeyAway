@@ -9,7 +9,7 @@ import {
   type SessionEntry
 } from "@/src/lib/analytics/sessionConstants";
 import { classifySessionReferrer } from "@/src/lib/analytics/sessionEntry";
-import { SECOND_MS } from "@/src/lib/time";
+import { DAY_MS, SECOND_MS } from "@/src/lib/time";
 
 export type SessionEventInput = {
   event: string;
@@ -50,10 +50,13 @@ function clean(value: string | undefined): string | undefined {
   return t ? t : undefined;
 }
 
-/** Client clocks can be wrong; a future timestamp is clamped to now. */
+/**
+ * Client clocks can be wrong; a timestamp in the future or more than a day old is clamped to now. Old days are folded
+ * into the daily rollups, and a raw row landing on one afterwards would never be counted.
+ */
 function eventTime(createdAt: string | undefined, now: number): string {
   const ts = createdAt ? new Date(createdAt).getTime() : NaN;
-  return new Date(Number.isFinite(ts) && ts <= now ? ts : now).toISOString();
+  return new Date(Number.isFinite(ts) && ts <= now && ts >= now - DAY_MS ? ts : now).toISOString();
 }
 
 function toRow(event: SessionEventInput, now: number) {

@@ -33,3 +33,28 @@ script lives in git history (`scripts/migrateAnalyticsToSupabase.mjs`); the expo
 
 The free plan allows 500 MB. The admin dashboard shows the database size and row growth per table
 (`/api/v1/admin/analytics-db`).
+
+### Rollups and the raw window
+
+Raw sessions and events are kept for 30 days (`RAW_RETENTION_DAYS` in `src/lib/analytics/sessionConstants.ts`).
+[`migrations/20261107000000_analytics_rollups.sql`](migrations/20261107000000_analytics_rollups.sql) adds:
+
+| Table | Holds |
+|---|---|
+| `analytics.daily_stats` | Per UTC day: event totals, top programs / paths / socials / countries, session sources, timeline splits, program views and downloads, pruned one-time visitors per tier |
+| `analytics.daily_sketches` | Per UTC day: distinct visitors as HyperLogLog sketches (1 KB), so multi-day unique visitors can be counted (~3% error) |
+| `analytics.rollup_state` | `rolled_until`: every earlier day is in the rollups |
+
+The daily `prune-cron-runs` cron calls `runAnalyticsRollup` (`src/lib/analytics/rollupStore.ts`). For each day older
+than the window, oldest first, `analytics.rollup_next_day` writes that day's rollups, then deletes its page views, key
+copies and downloads plus sessions left empty. Reports, comments, suggestions, contact messages, social / promo /
+affiliate clicks and pro account copies are never deleted, nor are their sessions. `analytics.prune_visitors` deletes
+one-time visitors with no contributions after the same window (spammers and contributors are kept).
+
+Admin readers split a range into rolled days (from the rollups) and the raw remainder, so totals and top lists match
+what raw rows gave. Rolled days count as whole days: a range that covers less than half of its first or last day
+leaves that day out. Distinct visitors over several rolled days are estimates.
+
+Deleted rows free space for new rows but do not shrink the files. After the first big rollup, run
+`vacuum full analytics.events, analytics.sessions, analytics.visitors;` once in the SQL editor (it locks those tables
+for a few seconds) so the reported database size drops.

@@ -16,9 +16,10 @@ import {
   transformProgramData,
   transformSocialData
 } from "@/src/lib/analytics/analyticsUtils";
+import { decodeSourceKey, getRolledUntil, rollupWindow, sumDailyStats } from "@/src/lib/analytics/rollupStore";
 import { SESSION_ID_RE } from "@/src/lib/analytics/sessionConstants";
 import { sessionSourceLabel } from "@/src/lib/analytics/sessionEntry";
-import { HOUR_MS } from "@/src/lib/time";
+import { DAY_MS, HOUR_MS } from "@/src/lib/time";
 import type { AnalyticsEventData } from "@/src/types";
 
 export type AdminSessionSummary = {
@@ -187,24 +188,62 @@ const EPOCH_RANGE_CUTOFF = Date.parse("2001-01-01");
 const PROMO_SOCIAL_PREFIX = "promo-";
 const PROMO_SOCIAL_LIKE = `${PROMO_SOCIAL_PREFIX}%`;
 
-/** Visitors, page views and actions per hour (≤ 2 days), day (≤ 120 days) or week, zero-filled, with how each one splits. */
-async function buildTimeline(since: string, until: string): Promise<AnalyticsTimeline> {
+/** Rolled-up timeline metrics (see `rollup_day` in the analytics rollups migration). */
+const TIMELINE_METRICS = ["tl_visitors", "tl_views", "tl_actions", "tl_tier", "tl_page", "tl_action", "tl_promo"];
+
+/** A few clients send bogus old dates; skip the earliest 0.1% of activity so the axis starts where it really does. */
+async function firstActivityMs(rolledUntil: string | null, fallbackMs: number): Promise<number> {
   const sql = db();
-  const endMs = Math.min(Date.parse(until), Date.now());
-  let startMs = Date.parse(since);
-  if (startMs < EPOCH_RANGE_CUTOFF) {
-    // A few clients send bogus old dates; skip the earliest 0.1% so the axis starts where activity does.
+  if (!rolledUntil) {
     const [row] = await sql<Array<{ first: string | null }>>`
       select percentile_disc(0.001) within group (order by created_at) as first from analytics.events
     `;
-    startMs = row?.first ? Date.parse(row.first) : endMs;
+    return row?.first ? Date.parse(row.first) : fallbackMs;
   }
+  const [row] = await sql<Array<{ first: string | null }>>`
+    with days as (
+      select day, sum(n) as n from analytics.daily_stats where metric = 'event' group by day
+      union all
+      select (created_at at time zone 'UTC')::date, count(*)
+      from analytics.events
+      where created_at >= ${`${rolledUntil}T00:00:00Z`} and event not like 'report\\_%'
+      group by 1
+    ), running as (
+      select day, sum(n) over (order by day) as cum, sum(n) over () as total from days
+    )
+    select to_char(min(day), 'YYYY-MM-DD') as first from running where cum >= total * 0.001
+  `;
+  return row?.first ? Date.parse(`${row.first}T00:00:00Z`) : fallbackMs;
+}
+
+/** Monday 00:00 UTC after the week that holds `day`, matching Postgres `date_trunc('week', …)`. */
+function weekEndAfter(day: string): string {
+  const ms = Date.parse(`${day}T00:00:00Z`);
+  const monday = ms - ((new Date(ms).getUTCDay() + 6) % 7) * DAY_MS;
+  return new Date(monday + 7 * DAY_MS).toISOString();
+}
+
+/**
+ * Visitors, page views and actions per hour (≤ 2 days), day (≤ 120 days) or week, zero-filled, with how each one
+ * splits. Days older than the raw window come from the daily rollups; their distinct visitors per week and per tier
+ * are merged from sketches, so those are estimates (~3%).
+ */
+async function buildTimeline(since: string, until: string, rolledUntil: string | null): Promise<AnalyticsTimeline> {
+  const sql = db();
+  const endMs = Math.min(Date.parse(until), Date.now());
+  let startMs = Date.parse(since);
+  if (startMs < EPOCH_RANGE_CUTOFF) startMs = await firstActivityMs(rolledUntil, endMs);
   if (!(endMs > startMs)) return { bucket: "day", points: [], tierTotals: {} };
 
-  const spanHours = (endMs - startMs) / HOUR_MS;
-  const bucket: AnalyticsTimelineBucket = spanHours <= 48 ? "hour" : spanHours <= 24 * 120 ? "day" : "week";
-  const start = new Date(startMs).toISOString();
   const end = new Date(endMs).toISOString();
+  const { rolled, rawSince } = rollupWindow(new Date(startMs).toISOString(), end, rolledUntil);
+  // A rolled first day the range covers less than half of is left out; start the axis after it, not on an empty bucket.
+  if (rolled) startMs = Math.max(startMs, Date.parse(`${rolled.from}T00:00:00Z`));
+  const start = new Date(startMs).toISOString();
+  const spanHours = (endMs - startMs) / HOUR_MS;
+  // Rolled days only have daily numbers, so a range that reaches them is never split by hour.
+  const bucket: AnalyticsTimelineBucket =
+    spanHours <= 48 && !rolled ? "hour" : spanHours <= 24 * 120 ? "day" : "week";
 
   const pointsQuery = sql<Array<Omit<AnalyticsTimeline["points"][number], "breakdown">>>`
     with buckets as (
@@ -213,7 +252,7 @@ async function buildTimeline(since: string, until: string): Promise<AnalyticsTim
       select date_trunc(${bucket}, e.created_at) as t, e.event, s.visitor_hash
       from analytics.events e
       join analytics.sessions s on s.id = e.session_id
-      where e.created_at >= ${start} and e.created_at <= ${end}
+      where e.created_at >= ${rawSince} and e.created_at <= ${end}
         and e.event not like 'report\\_%' and e.event not in ${sql(CHART_EXCLUDED)}
     )
     select b.t,
@@ -241,7 +280,7 @@ async function buildTimeline(since: string, until: string): Promise<AnalyticsTim
       from analytics.events e
       join analytics.sessions s on s.id = e.session_id
       left join analytics.visitors v on v.visitor_hash = s.visitor_hash
-      where e.created_at >= ${start} and e.created_at <= ${end}
+      where e.created_at >= ${rawSince} and e.created_at <= ${end}
         and e.event not like 'report\\_%' and e.event not in ${sql(CHART_EXCLUDED)}
     )
     select t, 'tier' as dim, tier as key, count(distinct visitor_hash)::int as n from ev group by t, tier
@@ -257,7 +296,11 @@ async function buildTimeline(since: string, until: string): Promise<AnalyticsTim
     from ev where social like ${PROMO_SOCIAL_LIKE} group by 1, 3
   `;
 
-  const [points, breakdownRows] = await Promise.all([pointsQuery, breakdownQuery]);
+  const [points, breakdownRows, rolledRows] = await Promise.all([
+    pointsQuery,
+    breakdownQuery,
+    rolled ? rolledTimelineRows(bucket, rolled, rawSince, end) : null
+  ]);
 
   const byBucket = new Map(
     points.map(p => [
@@ -265,7 +308,7 @@ async function buildTimeline(since: string, until: string): Promise<AnalyticsTim
       { ...p, breakdown: { tier: {}, page: {}, action: {}, promo: {} } } as AnalyticsTimeline["points"][number]
     ])
   );
-  const tierTotals: Record<string, number> = {};
+  let tierTotals: Record<string, number> = {};
   for (const row of breakdownRows) {
     if (row.dim === "tierTotal") tierTotals[row.key] = row.n;
     else if (row.t) {
@@ -274,11 +317,99 @@ async function buildTimeline(since: string, until: string): Promise<AnalyticsTim
     }
   }
 
+  if (rolledRows) {
+    const add = (record: Record<string, number>, key: string, n: number) => (record[key] = (record[key] ?? 0) + n);
+    for (const row of rolledRows.counts) {
+      const point = byBucket.get(new Date(row.t).getTime());
+      if (!point) continue;
+      if (row.metric === "tl_views") point.views += row.n;
+      else if (row.metric === "tl_actions") point.actions += row.n;
+      else if (row.metric === "tl_page") add(point.breakdown.page, row.key, row.n);
+      else if (row.metric === "tl_action") add(point.breakdown.action, row.key, row.n);
+      else if (row.metric === "tl_promo") add(point.breakdown.promo, row.key, row.n);
+      // A rolled day has no raw rows, so its exact daily distinct counts stand as they are.
+      else if (bucket === "day" && row.metric === "tl_visitors") point.visitors = row.n;
+      else if (bucket === "day" && row.metric === "tl_tier") point.breakdown.tier[row.key] = row.n;
+    }
+    for (const row of rolledRows.weeks) {
+      const point = byBucket.get(new Date(row.t).getTime());
+      if (!point) continue;
+      if (row.metric === "tl_visitors") point.visitors = row.n;
+      else point.breakdown.tier[row.key] = row.n;
+    }
+    tierTotals = rolledRows.tierTotals;
+  }
+
   return { bucket, points: [...byBucket.values()], tierTotals };
 }
 
+type RolledTimelineRow = { t: string; metric: string; key: string; n: number };
+
+/**
+ * Timeline numbers for rolled days, per bucket. Distinct visitors per week, and per tier over the whole range, merge
+ * the daily sketches with the raw rows they overlap (for weeks, only the week the raw window starts in).
+ */
+async function rolledTimelineRows(
+  bucket: AnalyticsTimelineBucket,
+  rolled: { from: string; to: string },
+  rawSince: string,
+  end: string
+): Promise<{ counts: RolledTimelineRow[]; weeks: RolledTimelineRow[]; tierTotals: Record<string, number> }> {
+  const sql = db();
+  const rawEvents = (until: string) => sql`
+    select date_trunc('week', e.created_at) as t, s.visitor_hash, coalesce(v.visit_tier, 'new') as tier
+    from analytics.events e
+    join analytics.sessions s on s.id = e.session_id
+    left join analytics.visitors v on v.visitor_hash = s.visitor_hash
+    where e.created_at >= ${rawSince} and e.created_at <= ${until}
+      and e.event not like 'report\\_%' and e.event not in ${sql(CHART_EXCLUDED)}
+  `;
+  const lastRolledDay = new Date(Date.parse(`${rolled.to}T00:00:00Z`) - DAY_MS).toISOString().slice(0, 10);
+  const boundaryEnd = [weekEndAfter(lastRolledDay), end].sort()[0];
+
+  const [counts, weeks, tiers] = await Promise.all([
+    sql<RolledTimelineRow[]>`
+      select date_trunc(${bucket}, day::timestamp) at time zone 'UTC' as t, metric, key, sum(n)::int as n
+      from analytics.daily_stats
+      where metric in ${sql(TIMELINE_METRICS)} and day >= ${rolled.from} and day < ${rolled.to}
+      group by 1, 2, 3
+    `,
+    bucket === "week"
+      ? sql<RolledTimelineRow[]>`
+          with raw as (${rawEvents(boundaryEnd)}), sketches as (
+            select date_trunc('week', day::timestamp) at time zone 'UTC' as t, metric, key, regs
+            from analytics.daily_sketches
+            where metric in ('tl_visitors', 'tl_tier') and day >= ${rolled.from} and day < ${rolled.to}
+            union all
+            select t, 'tl_visitors', '', analytics.hll_sketch(array_agg(distinct visitor_hash)) from raw group by t
+            union all
+            select t, 'tl_tier', tier, analytics.hll_sketch(array_agg(distinct visitor_hash)) from raw group by t, tier
+          )
+          select t, metric, key, analytics.hll_count(analytics.hll_union(regs)) as n from sketches group by 1, 2, 3
+        `
+      : [],
+    sql<Array<{ key: string; n: number }>>`
+      with raw as (${rawEvents(end)})
+      select key, analytics.hll_count(analytics.hll_union(regs)) as n
+      from (
+        select key, regs from analytics.daily_sketches
+        where metric = 'tl_tier' and day >= ${rolled.from} and day < ${rolled.to}
+        union all
+        select tier, analytics.hll_sketch(array_agg(distinct visitor_hash)) from raw group by tier
+      ) t
+      group by key
+    `
+  ]);
+
+  return { counts: [...counts], weeks: [...weeks], tierTotals: Object.fromEntries(tiers.map(r => [r.key, r.n])) };
+}
+
 /** Promotion button clicks by placement and page. Views of a promotion are not tracked, so there is no click rate. */
-async function buildPromotionClicks(since: string, until: string): Promise<PromotionClickSummary> {
+async function buildPromotionClicks(
+  since: string,
+  until: string,
+  rolledUntil: string | null
+): Promise<PromotionClickSummary> {
   const sql = db();
   const [[totals], placements, pages] = await Promise.all([
     sql<Array<{ clicks: number; visitors: number }>>`
@@ -310,12 +441,12 @@ async function buildPromotionClicks(since: string, until: string): Promise<Promo
     visitors: totals.visitors,
     placements: [...placements],
     pages: [...pages],
-    campaign: await buildPromotionCampaign()
+    campaign: await buildPromotionCampaign(rolledUntil)
   };
 }
 
 /** Whole-run numbers for the running promotion, else the latest ended one. Unaffected by the page's date filter. */
-async function buildPromotionCampaign(): Promise<PromotionCampaignSummary | null> {
+async function buildPromotionCampaign(rolledUntil: string | null): Promise<PromotionCampaignSummary | null> {
   try {
     const nowIso = new Date().toISOString();
     const promotion = await client.fetch<{ _id: string; title: string; theme?: PromotionThemeId; startsAt: string; endsAt: string } | null>(
@@ -327,8 +458,9 @@ async function buildPromotionCampaign(): Promise<PromotionCampaignSummary | null
 
     const { _id: campaignId, ...details } = promotion;
     const until = promotion.endsAt < nowIso ? promotion.endsAt : nowIso;
+    const sql = db();
     // Clicks without a label predate campaign tracking; the date range attributes those.
-    const [row] = await db()<Array<{ reached: number; converted: number; clicks: number }>>`
+    const [row] = await sql<Array<{ reached: number; converted: number; clicks: number }>>`
       with ev as (
         select e.created_at, s.visitor_hash,
                e.social like ${PROMO_SOCIAL_LIKE} and coalesce(e.label, ${campaignId}) = ${campaignId} as clicked
@@ -341,6 +473,24 @@ async function buildPromotionCampaign(): Promise<PromotionCampaignSummary | null
              count(*) filter (where clicked)::int as clicks
       from ev
     `;
+
+    // Promotion clicks are never pruned, but most of the audience is: past the raw window, merge the daily sketches.
+    const { rolled, rawSince } = rollupWindow(promotion.startsAt, until, rolledUntil);
+    if (rolled) {
+      const [reach] = await sql<Array<{ n: number }>>`
+        select analytics.hll_count(analytics.hll_union(regs)) as n
+        from (
+          select regs from analytics.daily_sketches
+          where metric = 'visitors' and key = '' and day >= ${rolled.from} and day < ${rolled.to}
+          union all
+          select analytics.hll_sketch(array_agg(distinct s.visitor_hash))
+          from analytics.events e
+          join analytics.sessions s on s.id = e.session_id
+          where e.created_at >= ${rawSince} and e.created_at <= ${until}
+        ) t
+      `;
+      row.reached = Math.max(reach?.n ?? 0, row.converted);
+    }
     return { ...details, live: promotion.endsAt > nowIso, ...row };
   } catch (err) {
     console.error("[buildPromotionCampaign]", err);
@@ -348,10 +498,35 @@ async function buildPromotionCampaign(): Promise<PromotionCampaignSummary | null
   }
 }
 
-/** Dashboard aggregates for a range. Key report events are excluded (own overview). */
+/** Summary metrics in the daily rollups (see `rollup_day` in the analytics rollups migration). */
+const SUMMARY_METRICS = ["event", "not_found", "program", "path", "social", "country", "source"];
+
+/** Unique visitors over rolled days plus the raw remainder, merged from sketches (an estimate, ~3%). */
+async function rolledUniqueVisitors(rolled: { from: string; to: string }, rawSince: string, until: string) {
+  const [row] = await db()<Array<{ n: number }>>`
+    select analytics.hll_count(analytics.hll_union(regs)) as n
+    from (
+      select regs from analytics.daily_sketches
+      where metric = 'visitors' and key = '' and day >= ${rolled.from} and day < ${rolled.to}
+      union all
+      select analytics.hll_sketch(array_agg(distinct s.visitor_hash))
+      from analytics.events e
+      join analytics.sessions s on s.id = e.session_id
+      where e.created_at >= ${rawSince} and e.created_at <= ${until} and e.event not like 'report\\_%'
+    ) t
+  `;
+  return row?.n ?? 0;
+}
+
+/**
+ * Dashboard aggregates for a range. Key report events are excluded (own overview). Days past the raw window come
+ * from the daily rollups; unique visitors across them are an estimate.
+ */
 export async function buildAnalyticsSummary(since: string, until: string): Promise<AnalyticsSummaryCachePayload> {
   const sql = db();
-  const [[agg], recent, sources, timeline, promotions] = await Promise.all([
+  const rolledUntil = await getRolledUntil();
+  const { rolled, rawSince } = rollupWindow(since, until, rolledUntil);
+  const [[agg], recent, sources, timeline, promotions, rolledStats, rolledVisitors] = await Promise.all([
     sql<
       Array<{
         totalEvents: number;
@@ -368,7 +543,7 @@ export async function buildAnalyticsSummary(since: string, until: string): Promi
         select e.event, e.program_slug, e.social, e.path, e.not_found, s.country, s.visitor_hash
         from analytics.events e
         join analytics.sessions s on s.id = e.session_id
-        where e.created_at >= ${since} and e.created_at <= ${until} and e.event not like 'report\\_%'
+        where e.created_at >= ${rawSince} and e.created_at <= ${until} and e.event not like 'report\\_%'
       )
       select
         (select count(*)::int from ev) as total_events,
@@ -405,31 +580,42 @@ export async function buildAnalyticsSummary(since: string, until: string): Promi
     sql<Array<{ entry: string | null; referrer: string | null; count: number }>>`
       select entry, referrer, count(*)::int as count
       from analytics.sessions
-      where started_at >= ${since} and started_at <= ${until}
+      where started_at >= ${rawSince} and started_at <= ${until}
       group by entry, referrer
     `,
-    buildTimeline(since, until),
-    buildPromotionClicks(since, until)
+    buildTimeline(since, until, rolledUntil),
+    buildPromotionClicks(since, until, rolledUntil),
+    rolled ? sumDailyStats(SUMMARY_METRICS, rolled) : null,
+    rolled ? rolledUniqueVisitors(rolled, rawSince, until) : null
   ]);
 
-  const toMap = (m: CountMap | null) => new Map(Object.entries(m ?? {}));
-  const totals = toMap(agg.totals);
-  const byCountry = toMap(agg.byCountry);
+  const toMap = (m: CountMap | null, metric: string) => {
+    const map = new Map(Object.entries(m ?? {}));
+    for (const [key, n] of rolledStats?.get(metric) ?? []) map.set(key, (map.get(key) ?? 0) + n);
+    return map;
+  };
+  const totals = toMap(agg.totals, "event");
+  const byCountry = toMap(agg.byCountry, "country");
+  const notFound = agg.notFound + (rolledStats?.get("not_found")?.get("") ?? 0);
+  const allSources = [
+    ...sources,
+    ...[...(rolledStats?.get("source") ?? [])].map(([key, count]) => ({ ...decodeSourceKey(key), count }))
+  ];
 
   return {
-    totalEvents: agg.totalEvents,
-    uniqueVisitors: agg.uniqueVisitors,
+    totalEvents: [...totals.values()].reduce((n, v) => n + v, 0),
+    uniqueVisitors: rolledVisitors ?? agg.uniqueVisitors,
     uniqueCountries: byCountry.size,
-    sessions: sources.reduce((n, s) => n + s.count, 0),
+    sessions: allSources.reduce((n, s) => n + s.count, 0),
     totals: Object.fromEntries(totals),
     timeline,
     promotions,
-    programTable: transformProgramData(toMap(agg.byProgram)),
-    socialTable: transformSocialData(toMap(agg.bySocial)),
-    pathTable: transformPathActivityTable(toMap(agg.byPath), agg.notFound),
+    programTable: transformProgramData(toMap(agg.byProgram, "program")),
+    socialTable: transformSocialData(toMap(agg.bySocial, "social")),
+    pathTable: transformPathActivityTable(toMap(agg.byPath, "path"), notFound),
     countryTable: transformCountryData(byCountry),
     referrerTable: buildSessionSourceTable(
-      sources.map(s => ({ entry: s.entry ?? undefined, referrer: s.referrer ?? undefined, count: s.count }))
+      allSources.map(s => ({ entry: s.entry ?? undefined, referrer: s.referrer ?? undefined, count: s.count }))
     ),
     recentEvents: recent.map(r => compact(r)) as unknown as AnalyticsEventData[]
   };

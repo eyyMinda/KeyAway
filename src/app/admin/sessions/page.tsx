@@ -11,6 +11,7 @@ import { sessionSourceLabel } from "@/src/lib/analytics/sessionEntry";
 import { getDateRange } from "@/src/lib/analytics/analyticsUtils";
 import { adminChrome, visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import type { AdminSessionSummary } from "@/src/lib/analytics/sessionAdmin";
+import { RAW_RETENTION_DAYS } from "@/src/lib/analytics/sessionConstants";
 import { useCallback, useEffect, useState } from "react";
 
 type SessionRow = AdminSessionSummary & { visitTier?: string; visitorIsSpammer?: boolean };
@@ -86,7 +87,7 @@ export default function SessionsPage() {
   return (
     <ProtectedAdminLayout
       title="Sessions"
-      subtitle="One row per visit. Open a session to see every click and contribution.">
+      subtitle={`One row per visit. Open a session to see every click and contribution. After ${RAW_RETENTION_DAYS} days, only visits with a contribution or a share, promo or affiliate click stay listed.`}>
       <div className="mb-6">
         <TimeFilter
           selectedPeriod={selectedPeriod}
