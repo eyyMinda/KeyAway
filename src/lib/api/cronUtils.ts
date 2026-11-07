@@ -8,9 +8,11 @@ export type CronJob =
   | "discover-giveaways"
   | "check-versions";
 
-/** Verifies cron auth (x-vercel-cron or Bearer token). Returns ok + source for logging. */
+/**
+ * Verifies cron auth: `Authorization: Bearer CRON_SECRET`, which Vercel cron sends when CRON_SECRET is set.
+ * A plain `x-vercel-cron` header is not trusted: any client can send it.
+ */
 export function verifyCronAuth(req: Request): { ok: boolean; source: CronSource } {
-  if (req.headers.get("x-vercel-cron") === "1") return { ok: true, source: "vercel_cron" };
   const auth = req.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret && auth === `Bearer ${cronSecret}`) return { ok: true, source: "bearer" };

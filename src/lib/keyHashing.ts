@@ -6,7 +6,11 @@ import {
 } from "@/src/lib/program/activationEntry";
 import type { CDKey, ProgramFlow } from "@/src/types/program";
 
-const SALT = process.env.ANALYTICS_SALT || process.env.NEXT_PUBLIC_ANALYTICS_SALT || "keyaway-default-salt";
+/**
+ * Link-identity digests must match in the browser and on the server, so this salt is public by design. It only
+ * dedupes activation links. Visitor IP hashing uses the server-only ANALYTICS_SALT (requestGeo.ts), which must differ.
+ */
+const SALT = process.env.NEXT_PUBLIC_ANALYTICS_SALT || "keyaway-default-salt";
 
 export function normalizeKey(key: string): string {
   return key.replace(/\s+/g, "").toUpperCase();

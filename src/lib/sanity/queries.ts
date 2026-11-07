@@ -342,11 +342,11 @@ export const programBySlugQuery = `
     })
   ),
   freeVsProComparison,
+  // No ipHash: this page is public; own comments are resolved by /api/v1/program-comments/viewer.
   programComments[]{
     _key,
     authorName,
     authorRole,
-    ipHash,
     body,
     createdAt,
     editedAt,
@@ -356,7 +356,6 @@ export const programBySlugQuery = `
       _key,
       authorName,
       authorRole,
-      ipHash,
       body,
       createdAt,
       editedAt,
