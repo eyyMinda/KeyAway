@@ -207,7 +207,8 @@ ADMIN_ALLOWED_EMAILS=you@example.com          # Or use Sanity Access (SANITY_ACC
 # Optional
 NEXT_PUBLIC_SITE_URL=https://keyaway.app      # Canonical URLs, sitemap, IndexNow
 CRON_SECRET=yourCronSecret                    # Bearer auth for /api/v1/cron/*
-ANALYTICS_SALT=yourRandomSalt                 # IP hashing
+ANALYTICS_SALT=yourRandomSalt                 # IP hashing; server only, keep it secret and different from NEXT_PUBLIC_ANALYTICS_SALT
+# ANALYTICS_SALT_PREVIOUS=oldSalt             # only while rotating ANALYTICS_SALT (see docs/visitor-tags.md)
 GITHUB_TOKEN=ghp_...                          # Raises the GitHub rate limit for winget version checks
 NEXT_PUBLIC_ADS_ENABLED=false                 # Ads: on in production, off in dev by default
 NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=true     # Vercel Web Analytics (off when unset)

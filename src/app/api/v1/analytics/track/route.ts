@@ -1,5 +1,6 @@
 /** @fileoverview Public POST tracking: appends a visit session, or creates a key report plus a session row. */
 import { NextRequest, NextResponse } from "next/server";
+import { carryOverVisitorHash } from "@/src/lib/visitors/carryOverVisitorHash";
 import { TrackRequestBody } from "@/src/types";
 import { getKeyData } from "@/src/lib/keyHashing";
 import { Errors } from "@/src/lib/api/errors";
@@ -111,6 +112,7 @@ export async function POST(req: NextRequest) {
     }
 
     const ip = getClientIp(req);
+    await carryOverVisitorHash(ip);
     const ipHashEarly = hashIp(ip) ?? "unknown";
 
     if (isRecentDuplicateRequest(buildAnalyticsEventDedupeKey(body.event, body, ipHashEarly))) {

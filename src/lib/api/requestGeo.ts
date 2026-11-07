@@ -12,10 +12,8 @@ export function getClientIpFromForwardedHeaders(h: Headers): string | undefined 
   return xff.split(",")[0]?.trim() || undefined;
 }
 
-/** Hash IP with ANALYTICS_SALT for privacy-preserving visitor identification. */
-export function hashIp(ip: string | undefined): string | undefined {
+function hashIpWithSalt(ip: string | undefined, salt: string): string | undefined {
   try {
-    const salt = process.env.ANALYTICS_SALT || "";
     return crypto
       .createHash("sha256")
       .update((ip || "") + salt)
@@ -23,6 +21,20 @@ export function hashIp(ip: string | undefined): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/** Hash IP with ANALYTICS_SALT for privacy-preserving visitor identification. */
+export function hashIp(ip: string | undefined): string | undefined {
+  return hashIpWithSalt(ip, process.env.ANALYTICS_SALT || "");
+}
+
+/**
+ * The visitor's hash under the salt used before the last rotation (ANALYTICS_SALT_PREVIOUS), or undefined when no
+ * rotation is in progress. Used to carry returning visitors over to their new hash.
+ */
+export function previousIpHash(ip: string | undefined): string | undefined {
+  const previous = process.env.ANALYTICS_SALT_PREVIOUS;
+  return previous && ip ? hashIpWithSalt(ip, previous) : undefined;
 }
 
 const regionNames = new Intl.DisplayNames(["en"], { type: "region" });

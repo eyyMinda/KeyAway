@@ -1,4 +1,5 @@
 import type { SanityClient } from "next-sanity";
+import { privateDocId } from "@/src/lib/sanity/privateDocId";
 
 export type CronSource = "vercel_cron" | "bearer" | "manual";
 export type CronJob =
@@ -25,6 +26,7 @@ export async function logCronRun(
 ): Promise<void> {
   try {
     await client.create({
+      _id: privateDocId("cronRun"),
       _type: "cronRun",
       job: opts.job,
       source: opts.source,
