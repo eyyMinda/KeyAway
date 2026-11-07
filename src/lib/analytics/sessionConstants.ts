@@ -39,3 +39,9 @@ export function isContributionEvent(event: string): boolean {
     event === "contact"
   );
 }
+
+/**
+ * Raw sessions/events are kept this long; older days are folded into daily rollups (`src/lib/analytics/rollupStore.ts`).
+ * Must match `p_raw_days` passed to the SQL rollup functions.
+ */
+export const RAW_RETENTION_DAYS = 30;

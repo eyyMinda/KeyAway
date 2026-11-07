@@ -133,15 +133,20 @@ const toAdminUpdate = (row: AdminKeyReportUpdateRow): AdminKeyReportUpdate => ({
   triedVersion: row.triedVersion ?? undefined
 });
 
-/** Admin correction of event type and/or tried version. Keeps `created_at`: a correction is not a new report. */
+/**
+ * Admin correction of event type, version fit and/or tried version. Keeps `created_at`: a correction is not a new
+ * report. Switching the fit to "listed" clears the tried version.
+ */
 export async function adminUpdateKeyReport(
   id: string,
-  update: { eventType?: KeyReportEvent; triedVersion?: string }
+  update: { eventType?: KeyReportEvent; triedVersionFit?: "listed" | "other"; triedVersion?: string }
 ): Promise<AdminKeyReportUpdate | null> {
   const sql = db();
   const set = {
     updated_at: new Date().toISOString(),
     ...(update.eventType ? { event_type: update.eventType, ...versionFitUpdate(update.eventType, {}) } : {}),
+    ...(update.triedVersionFit ? { tried_version_fit: update.triedVersionFit } : {}),
+    ...(update.triedVersionFit === "listed" ? { tried_version: null } : {}),
     ...(update.triedVersion ? { tried_version: update.triedVersion } : {})
   };
   const [row] = await sql<AdminKeyReportUpdateRow[]>`

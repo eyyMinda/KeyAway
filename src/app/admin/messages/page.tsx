@@ -2,10 +2,17 @@
 
 import { useState, useEffect, useMemo } from "react";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
+import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import MessagesTable from "@/src/components/admin/messages/MessagesTable";
 import ReplyEmailTemplatePreview from "@/src/components/admin/messages/ReplyEmailTemplatePreview";
 import { AdminFilterBar, AdminSearch, AdminSelect, usePagedList } from "@/src/components/admin/list/AdminListKit";
-import { filterMessagesByView, messageViewOptions, type MessageView } from "@/src/lib/admin/contactMessages";
+import {
+  filterMessagesByView,
+  messageHasNoEmail,
+  messageNeedsReply,
+  messageViewOptions,
+  type MessageView
+} from "@/src/lib/admin/contactMessages";
 import { ContactMessage } from "@/src/types/contact";
 import { client } from "@/src/sanity/lib/client";
 
@@ -90,6 +97,13 @@ export default function MessagesPage() {
 
   return (
     <ProtectedAdminLayout title="Messages" subtitle="Contact form messages and your replies">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <AnalyticsCard label="New" value={messages.filter(m => m.status === "new").length} />
+        <AnalyticsCard label="Needs reply" value={messages.filter(messageNeedsReply).length} />
+        <AnalyticsCard label="Replied" value={messages.filter(m => m.status === "replied").length} />
+        <AnalyticsCard label="No email" value={messages.filter(messageHasNoEmail).length} />
+      </div>
+
       <AdminFilterBar>
         <AdminSearch
           value={search}

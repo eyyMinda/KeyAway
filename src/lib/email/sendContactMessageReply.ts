@@ -1,5 +1,9 @@
 import { client } from "@/src/sanity/lib/client";
-import { buildAdminReplyTemplate, type AdminReplyMailtoOptions } from "@/src/lib/email/adminReplyMailto";
+import {
+  MAX_REPLY_BODY_LENGTH,
+  buildAdminReplyTemplate,
+  type AdminReplyMailtoOptions
+} from "@/src/lib/email/adminReplyMailto";
 import {
   getResendClient,
   getResendFromAddress,
@@ -28,15 +32,21 @@ const MESSAGE_FOR_REPLY_QUERY = `*[_type == "contactMessage" && _id == $id][0]{
   status
 }`;
 
-export const MAX_REPLY_BODY_LENGTH = 10000;
+export { MAX_REPLY_BODY_LENGTH };
 
-type StoreForReply = {
+export type StoreForReply = {
   title?: string;
   supportEmail?: string;
   seo?: { siteUrl?: string };
   socialLinks?: Array<{ platform: string; url: string }>;
   otherLinks?: Array<{ kind: string; url?: string }>;
 };
+
+/** What a reply needs besides the store's links and branding. */
+export type ReplyContent = Pick<
+  AdminReplyMailtoOptions,
+  "subject" | "originalMessage" | "recipientName" | "openingLine"
+>;
 
 export class ReplySendError extends Error {
   constructor(
@@ -49,14 +59,12 @@ export class ReplySendError extends Error {
 }
 
 export function buildReplyTemplateOptions(
-  message: Pick<ContactMessage, "title" | "message" | "name">,
+  content: ReplyContent,
   store: StoreForReply | null | undefined,
   adminReply: string
 ): Omit<AdminReplyMailtoOptions, "to"> {
   return {
-    subject: message.title ?? "",
-    originalMessage: message.message,
-    recipientName: message.name,
+    ...content,
     adminReply,
     siteBaseUrl: resolveSiteBaseUrl(store?.seo),
     storeTitle: store?.title,
@@ -64,11 +72,18 @@ export function buildReplyTemplateOptions(
   };
 }
 
-export async function sendContactMessageReply(opts: {
-  messageId: string;
+export function fetchStoreForReply(): Promise<StoreForReply | null> {
+  return client.fetch<StoreForReply | null>(STORE_FOR_REPLY_QUERY);
+}
+
+/** Sends one admin reply through Resend and returns the record to append to the document's `replies`. */
+export async function deliverAdminReply(opts: {
+  to: string | undefined;
+  content: ReplyContent;
+  store: StoreForReply | null;
   replyText: string;
   adminEmail: string;
-}): Promise<{ reply: ContactMessageReply; message: ContactMessage }> {
+}): Promise<ContactMessageReply> {
   if (!isResendConfigured()) {
     throw new ReplySendError(
       "Email sending is not configured. Set RESEND_API_KEY and RESEND_FROM in your environment.",
@@ -84,24 +99,14 @@ export async function sendContactMessageReply(opts: {
     throw new ReplySendError(`Reply too long (max ${MAX_REPLY_BODY_LENGTH} characters).`, "SEND_FAILED");
   }
 
-  const [message, store] = await Promise.all([
-    client.fetch<ContactMessage | null>(MESSAGE_FOR_REPLY_QUERY, { id: opts.messageId }),
-    client.fetch<StoreForReply | null>(STORE_FOR_REPLY_QUERY)
-  ]);
-
-  if (!message?._id) {
-    throw new ReplySendError("Message not found.", "NOT_FOUND");
-  }
-
-  const to = message.email?.trim();
+  const to = opts.to?.trim();
   if (!to) {
-    throw new ReplySendError("This message has no email address. Add one before sending a reply.", "NO_EMAIL");
+    throw new ReplySendError("No email address on file. Add one before sending a reply.", "NO_EMAIL");
   }
 
-  const templateOptions = buildReplyTemplateOptions(message, store, replyBody);
-  const template = buildAdminReplyTemplate(templateOptions);
+  const template = buildAdminReplyTemplate(buildReplyTemplateOptions(opts.content, opts.store, replyBody));
   const from = getResendFromAddress()!;
-  const replyTo = getResendReplyToAddress(resolveSupportEmail(store));
+  const replyTo = getResendReplyToAddress(resolveSupportEmail(opts.store));
 
   const resend = getResendClient()!;
   const { data, error } = await resend.emails.send({
@@ -114,31 +119,52 @@ export async function sendContactMessageReply(opts: {
   });
 
   if (error) {
-    console.error("[sendContactMessageReply] Resend error:", error);
+    console.error("[deliverAdminReply] Resend error:", error);
     throw new ReplySendError(error.message || "Failed to send email.", "SEND_FAILED");
   }
 
-  const sentAt = new Date().toISOString();
-  const replyKey = crypto.randomUUID().replace(/-/g, "").slice(0, 12);
-  const replyRecord: ContactMessageReply = {
-    _key: replyKey,
+  return {
+    _key: crypto.randomUUID().replace(/-/g, "").slice(0, 12),
     body: replyBody,
     subject: template.subject,
     sentTo: to,
     sentBy: opts.adminEmail,
-    sentAt,
+    sentAt: new Date().toISOString(),
     ...(data?.id ? { resendId: data.id } : {})
   };
+}
+
+export async function sendContactMessageReply(opts: {
+  messageId: string;
+  replyText: string;
+  adminEmail: string;
+}): Promise<{ reply: ContactMessageReply; message: ContactMessage }> {
+  const [message, store] = await Promise.all([
+    client.fetch<ContactMessage | null>(MESSAGE_FOR_REPLY_QUERY, { id: opts.messageId }),
+    fetchStoreForReply()
+  ]);
+
+  if (!message?._id) {
+    throw new ReplySendError("Message not found.", "NOT_FOUND");
+  }
+
+  const reply = await deliverAdminReply({
+    to: message.email,
+    content: { subject: message.title ?? "", originalMessage: message.message, recipientName: message.name },
+    store,
+    replyText: opts.replyText,
+    adminEmail: opts.adminEmail
+  });
 
   const updated = await client
     .patch(message._id)
-    .set({ status: "replied", lastRepliedAt: sentAt })
+    .set({ status: "replied", lastRepliedAt: reply.sentAt })
     .setIfMissing({ replies: [] })
-    .append("replies", [{ ...replyRecord, _type: "contactMessageReply" }])
+    .append("replies", [{ ...reply, _type: "contactMessageReply" }])
     .commit({ returnDocuments: true });
 
   return {
-    reply: replyRecord,
+    reply,
     message: updated as unknown as ContactMessage
   };
 }

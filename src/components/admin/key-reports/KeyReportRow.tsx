@@ -19,6 +19,8 @@ import type { KeyReportEvent } from "@/src/types";
 
 export type ReportVisitor = { visitTier?: string; isSpammer?: boolean };
 
+export type VersionFit = { fit: "listed" } | { fit: "other"; version: string };
+
 type KeyReportRowProps = {
   row: Row;
   visitor?: ReportVisitor;
@@ -28,46 +30,93 @@ type KeyReportRowProps = {
   saving: boolean;
   onToggle: (id: string) => void;
   onSetEvent: (id: string, eventType: KeyReportEvent) => void;
-  onSetTriedVersion: (id: string, version: string) => Promise<void>;
+  onSetVersionFit: (id: string, fit: VersionFit) => Promise<void>;
   onSpammerChange: (hash: string, isSpammer: boolean) => void;
 };
 
-function TriedVersion({ row, onSave }: { row: Row; onSave: (version: string) => Promise<void> }) {
+const fitButton = (active: boolean) =>
+  `h-6 cursor-pointer px-1.5 text-[11px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+    active
+      ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+      : "bg-white text-gray-600 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+  }`;
+
+/** Which version the visitor tried: the listed one (counts against the key) or another one, with its number. */
+function VersionFitControl({ row, onSave }: { row: Row; onSave: (fit: VersionFit) => Promise<void> }) {
   const stored = row.triedVersion ?? "";
+  const isOther = row.triedVersionFit === "other";
+  const [editingOther, setEditingOther] = useState(false);
   const [draft, setDraft] = useState(stored);
   const [saving, setSaving] = useState(false);
+  const showOther = isOther || editingOther;
   const draftValue = normalizeTriedVersionForStorage(draft.trim());
   const storedValue = isValidTriedVersionInput(stored) ? normalizeTriedVersionForStorage(stored) : stored;
-  const dirty = Boolean(draftValue) && draftValue !== storedValue;
+  const dirty = Boolean(draftValue) && (!isOther || draftValue !== storedValue);
 
-  const save = async () => {
+  const save = async (fit: VersionFit) => {
     setSaving(true);
     try {
-      await onSave(draft.trim());
+      await onSave(fit);
+      setEditingOther(false);
     } finally {
       setSaving(false);
     }
   };
 
+  const chooseListed = () => {
+    if (isOther) void save({ fit: "listed" });
+    setEditingOther(false);
+  };
+
   return (
-    <span className="inline-flex items-center gap-1">
-      <span className="text-gray-500 dark:text-gray-400">Tried v</span>
-      <input
-        aria-label="Tried version"
-        value={draft}
-        maxLength={4}
-        placeholder={formatVersionLabelDisplay(stored || "?")}
-        onChange={e => setDraft(filterTriedVersionInput(e.target.value))}
-        className="h-6 w-11 rounded border border-gray-300 bg-white px-1 text-xs text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-      />
-      {dirty && (
+    <span className="inline-flex flex-wrap items-center gap-1">
+      <span
+        role="group"
+        aria-label="Version tried"
+        className="inline-flex overflow-hidden rounded border border-gray-300 dark:border-gray-700">
         <button
           type="button"
           disabled={saving}
-          onClick={() => void save()}
-          className="h-6 cursor-pointer rounded bg-gray-900 px-1.5 text-[11px] font-medium text-white disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900">
-          {saving ? "…" : "Save"}
+          aria-pressed={!showOther}
+          onClick={chooseListed}
+          className={fitButton(!showOther)}>
+          Listed{row.listedVersion ? ` v${row.listedVersion}` : ""}
         </button>
+        <button
+          type="button"
+          disabled={saving}
+          aria-pressed={showOther}
+          onClick={() => setEditingOther(true)}
+          className={`border-l border-gray-300 dark:border-gray-700 ${fitButton(showOther)}`}>
+          Other
+        </button>
+      </span>
+      {showOther && (
+        <>
+          <span className="text-gray-500 dark:text-gray-400">v</span>
+          <input
+            aria-label="Tried version"
+            value={draft}
+            maxLength={4}
+            autoFocus={editingOther && !isOther}
+            placeholder={formatVersionLabelDisplay(stored || "?")}
+            onChange={e => setDraft(filterTriedVersionInput(e.target.value))}
+            onKeyDown={e => {
+              if (e.key === "Enter" && dirty && draftValue) void save({ fit: "other", version: draftValue });
+              if (e.key === "Escape" && !isOther) setEditingOther(false);
+            }}
+            className="h-6 w-11 rounded border border-gray-300 bg-white px-1 text-xs text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          />
+          {dirty && draftValue && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => void save({ fit: "other", version: draftValue })}
+              className="h-6 cursor-pointer rounded bg-gray-900 px-1.5 text-[11px] font-medium text-white disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900">
+              {saving ? "…" : "Save"}
+            </button>
+          )}
+        </>
       )}
     </span>
   );
@@ -81,7 +130,7 @@ function KeyReportRowInner({
   saving,
   onToggle,
   onSetEvent,
-  onSetTriedVersion,
+  onSetVersionFit,
   onSpammerChange
 }: KeyReportRowProps) {
   const hash = row.ipHash?.trim();
@@ -90,7 +139,7 @@ function KeyReportRowInner({
 
   return (
     <li
-      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 px-3 py-2 text-xs sm:grid-cols-[auto_9.5rem_minmax(0,1.2fr)_minmax(0,1fr)_auto] ${
+      className={`grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 px-3 py-2 text-xs sm:grid-cols-[auto_9.5rem_minmax(0,1fr)_16rem_13.5rem] ${
         selected ? "bg-sky-50/70 dark:bg-sky-500/5" : ""
       }`}>
       <input
@@ -135,14 +184,16 @@ function KeyReportRowInner({
       </div>
 
       <div className="col-start-2 min-w-0 sm:col-start-auto">
-        {row.triedVersionFit === "other" ? (
-          <TriedVersion row={row} onSave={version => onSetTriedVersion(row._id, version)} />
-        ) : row.triedVersionFit === "listed" ? (
-          <span className="text-gray-500 dark:text-gray-400">
-            Listed version{row.listedVersion ? ` ${row.listedVersion}` : ""} or older
+        {row.eventType === "report_key_working" ? (
+          <span className="text-gray-400 dark:text-gray-500" title="Only failed reports ask which version was tried">
+            —
           </span>
         ) : (
-          <span className="text-gray-400 dark:text-gray-500">—</span>
+          <VersionFitControl
+            key={`${row.triedVersionFit}-${row.triedVersion}`}
+            row={row}
+            onSave={fit => onSetVersionFit(row._id, fit)}
+          />
         )}
       </div>
 

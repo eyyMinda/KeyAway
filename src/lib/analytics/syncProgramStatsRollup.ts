@@ -6,24 +6,37 @@ import {
   TAG_PROGRAM_LISTINGS
 } from "@/src/lib/cache/cacheTags";
 import { db } from "@/src/lib/db/postgres";
+import { getRolledUntil } from "@/src/lib/analytics/rollupStore";
 import { mutationClient } from "@/src/lib/sanity/mutationClient";
 import { revalidateTag } from "next/cache";
 
 type ProgramStats = { viewCount?: number; downloadCount?: number; popularityScore?: number };
 
-/** Views exclude not-found page views (invalid slugs). */
-async function aggregateEventStats(slugs: string[]): Promise<Map<string, { views: number; downloads: number }>> {
+/** All-time views (excluding not-found page views) and downloads: daily rollups plus the raw days after them. */
+export async function aggregateEventStats(slugs: string[]): Promise<Map<string, { views: number; downloads: number }>> {
   if (!slugs.length) return new Map();
   const sql = db();
+  const rawSince = `${(await getRolledUntil()) ?? "1970-01-01"}T00:00:00Z`;
   const rows = await sql<Array<{ programSlug: string; views: number; downloads: number }>>`
-    select program_slug,
-           count(*) filter (where event = 'page_viewed' and not not_found)::int as views,
-           count(*) filter (where event = 'download_click')::int as downloads
-    from analytics.events
-    where program_slug in ${sql(slugs)} and event in ('page_viewed', 'download_click')
+    select program_slug, sum(views)::int as views, sum(downloads)::int as downloads
+    from (
+      select program_slug,
+             count(*) filter (where event = 'page_viewed' and not not_found) as views,
+             count(*) filter (where event = 'download_click') as downloads
+      from analytics.events
+      where program_slug in ${sql(slugs)} and event in ('page_viewed', 'download_click') and created_at >= ${rawSince}
+      group by program_slug
+      union all
+      select key,
+             sum(n) filter (where metric = 'prog_view'),
+             sum(n) filter (where metric = 'prog_download')
+      from analytics.daily_stats
+      where metric in ('prog_view', 'prog_download') and key in ${sql(slugs)} and day < ${rawSince.slice(0, 10)}
+      group by key
+    ) t
     group by program_slug
   `;
-  return new Map(rows.map(r => [r.programSlug, { views: r.views, downloads: r.downloads }]));
+  return new Map(rows.map(r => [r.programSlug, { views: r.views ?? 0, downloads: r.downloads ?? 0 }]));
 }
 
 export interface SyncProgramStatsRollupResult {

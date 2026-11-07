@@ -3,37 +3,18 @@
 import { useState } from "react";
 import { ContactMessage } from "@/src/types/contact";
 import { messageHasNoEmail, messageNeedsReply } from "@/src/lib/admin/contactMessages";
-import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import MessageDetailsModal from "./MessageDetailsModal";
 import {
-  AdminEmptyRows,
   AdminListCard,
   AdminPagination,
   Chip,
   RelativeDate,
   StatusPill,
-  adminRow,
-  adminTd,
-  adminTh,
-  adminTheadRow,
-  pillTones
+  adminRow
 } from "@/src/components/admin/list/AdminListKit";
+import { MESSAGE_STATUS_OPTIONS, MESSAGE_STATUS_TONES } from "@/src/components/admin/messages/messageStatus";
 
 export type MessageUpdatePayload = Partial<Pick<ContactMessage, "status" | "email" | "name">>;
-
-const STATUS_OPTIONS: Array<{ value: ContactMessage["status"]; label: string }> = [
-  { value: "new", label: "New" },
-  { value: "read", label: "Read" },
-  { value: "replied", label: "Replied" },
-  { value: "archived", label: "Archived" }
-];
-
-const STATUS_TONES: Record<ContactMessage["status"], string> = {
-  new: pillTones.blue,
-  read: pillTones.gray,
-  replied: pillTones.green,
-  archived: pillTones.purple
-};
 
 interface MessagesTableProps {
   /** Current page. */
@@ -86,84 +67,75 @@ export default function MessagesTable({ messages, all, total, loading, paging, o
             />
           )
         }>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className={adminTheadRow}>
-              <tr>
-                <th className={adminTh}>Message</th>
-                <th className={`${adminTh} hidden md:table-cell`}>From</th>
-                <th className={adminTh}>Status</th>
-                <th className={`${adminTh} hidden lg:table-cell`}>Replies</th>
-                <th className={adminTh}>Received</th>
-                <th className={adminTh} />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {loading ? (
-                <AdminEmptyRows colSpan={6}>Loading messages…</AdminEmptyRows>
-              ) : messages.length === 0 ? (
-                <AdminEmptyRows colSpan={6}>No messages match these filters.</AdminEmptyRows>
-              ) : (
-                messages.map(message => {
-                  const replyCount = message.replies?.length ?? 0;
-                  const needsReply = messageNeedsReply(message);
-                  const noEmail = messageHasNoEmail(message);
-                  return (
-                    <tr key={message._id} className={adminRow}>
-                      <td className={`${adminTd} max-w-md`}>
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {message.title || "(no title)"}
-                          </span>
-                          {needsReply && <Chip tone="amber">Needs reply</Chip>}
-                        </div>
-                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{message.message}</p>
-                      </td>
-                      <td className={`${adminTd} hidden md:table-cell max-w-56`}>
-                        <div className="text-gray-900 dark:text-gray-100 truncate">{message.name || "—"}</div>
-                        {noEmail ? (
-                          <Chip tone="red">No email</Chip>
-                        ) : (
-                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{message.email}</div>
-                        )}
-                      </td>
-                      <td className={adminTd}>
-                        <StatusPill
-                          value={message.status ?? "new"}
-                          options={STATUS_OPTIONS}
-                          tones={STATUS_TONES}
-                          disabled={updating === message._id}
-                          onChange={status => handleUpdateMessage(message._id, { status })}
-                        />
-                      </td>
-                      <td className={`${adminTd} hidden lg:table-cell text-xs text-gray-500 dark:text-gray-400`}>
-                        {replyCount > 0 ? (
-                          <>
-                            <span className="font-medium text-gray-900 dark:text-gray-100">{replyCount}</span>
-                            {message.lastRepliedAt && (
-                              <span>
-                                {" "}
-                                · <RelativeDate iso={message.lastRepliedAt} />
-                              </span>
-                            )}
-                          </>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td className={`${adminTd} text-xs text-gray-500 dark:text-gray-400`}>
-                        <RelativeDate iso={message.createdAt} />
-                      </td>
-                      <td className={`${adminTd} text-right`}>
-                        <AdminViewDetailsButton onClick={() => setSelectedId(message._id)} />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <p className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">Loading messages…</p>
+        ) : messages.length === 0 ? (
+          <p className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No messages match these filters.</p>
+        ) : (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            {messages.map(message => {
+              const replyCount = message.replies?.length ?? 0;
+              const sender = message.name?.trim() || message.email?.trim() || "Anonymous";
+              return (
+                <li key={message._id} className={`${adminRow} flex gap-3 px-4 py-3 sm:px-5`}>
+                  <span
+                    aria-hidden
+                    className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold uppercase ${
+                      message.status === "new"
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                    }`}>
+                    {sender.charAt(0)}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(message._id)}
+                    className="min-w-0 flex-1 cursor-pointer text-left">
+                    <span className="flex min-w-0 flex-wrap items-center gap-1.5">
+                      <span
+                        className={`truncate text-sm text-gray-900 dark:text-gray-100 ${message.status === "new" ? "font-semibold" : "font-medium"}`}>
+                        {message.title || "(no title)"}
+                      </span>
+                      {messageNeedsReply(message) && <Chip tone="amber">Needs reply</Chip>}
+                      {messageHasNoEmail(message) && <Chip tone="red">No email</Chip>}
+                    </span>
+                    <span className="mt-0.5 block text-sm text-gray-600 line-clamp-2 dark:text-gray-400">{message.message}</span>
+                    <span className="mt-1 block truncate text-xs text-gray-500 dark:text-gray-400">
+                      {sender}
+                      {message.email && message.name ? ` · ${message.email}` : ""}
+                      {replyCount > 0 && (
+                        <>
+                          {" · "}
+                          {replyCount} {replyCount === 1 ? "reply" : "replies"}
+                          {message.lastRepliedAt && (
+                            <>
+                              {", last "}
+                              <RelativeDate iso={message.lastRepliedAt} />
+                            </>
+                          )}
+                        </>
+                      )}
+                    </span>
+                  </button>
+
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <StatusPill
+                      value={message.status ?? "new"}
+                      options={MESSAGE_STATUS_OPTIONS}
+                      tones={MESSAGE_STATUS_TONES}
+                      disabled={updating === message._id}
+                      onChange={status => handleUpdateMessage(message._id, { status })}
+                    />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      <RelativeDate iso={message.createdAt} />
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </AdminListCard>
 
       {selected && (

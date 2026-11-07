@@ -1,5 +1,6 @@
 /** @fileoverview `analytics.visitors`: one row per hashed IP with visit tier, contribution counters and spam flag. */
 import { db } from "@/src/lib/db/postgres";
+import { rollupDays } from "@/src/lib/analytics/rollupStore";
 import { MINUTE_MS } from "@/src/lib/time";
 
 export type Visitor = {
@@ -149,13 +150,26 @@ export interface VisitorTagAggregateRow {
 
 const TIER_ORDER = ["new", "returning", "regular", "star"] as const;
 
-/** Visitors active in range: count per tier plus flagged spammers. */
+/**
+ * Visitors active in range: count per tier plus flagged spammers. One-time visitors pruned after the raw window are
+ * counted from the daily `visitor_pruned` tally (by their last activity day); spammers are never pruned.
+ */
 export async function fetchVisitorTagAggregates(since: string, until: string): Promise<VisitorTagAggregateRow[]> {
+  const prunedDays = rollupDays(since, until);
   const rows = await db()<Array<{ tier: string; count: number; spammers: number }>>`
-    select coalesce(lower(visit_tier), 'new') as tier, count(*)::int as count, count(*) filter (where is_spammer)::int as spammers
-    from analytics.visitors
-    where last_activity_at >= ${since} and last_activity_at <= ${until}
-    group by 1
+    select tier, sum(count)::int as count, sum(spammers)::int as spammers
+    from (
+      select coalesce(lower(visit_tier), 'new') as tier, count(*) as count, count(*) filter (where is_spammer) as spammers
+      from analytics.visitors
+      where last_activity_at >= ${since} and last_activity_at <= ${until}
+      group by 1
+      union all
+      select key, sum(n), 0
+      from analytics.daily_stats
+      where metric = 'visitor_pruned' and day >= ${prunedDays.from} and day < ${prunedDays.to}
+      group by key
+    ) t
+    group by tier
   `;
   const counts = new Map(rows.map(r => [r.tier, r.count]));
   const out: VisitorTagAggregateRow[] = TIER_ORDER.map(t => ({

@@ -17,9 +17,14 @@ const EMAIL_HEAD_STYLES = `<style type="text/css">
 
 const FOOTER_CTA_MAX_WIDTH = 300;
 
+/** Longest reply body an admin can send (messages and key suggestions). */
+export const MAX_REPLY_BODY_LENGTH = 10000;
+
 export interface AdminReplyMailtoOptions {
   to: string;
   subject: string;
+  /** Line after the greeting; defaults to "Thanks for reaching out!". */
+  openingLine?: string;
   originalMessage?: string | null;
   adminReply?: string | null;
   recipientName?: string | null;
@@ -61,14 +66,14 @@ function buildSignOffHtml(storeTitle: string): string {
   return `<p style="font-family:Segoe UI,Arial,sans-serif;font-size:14px;color:#333;margin:0 0 16px;line-height:1.5;">Kind regards,<br />${escapeHtml(storeTitle)} Support</p>`;
 }
 
-function buildOpeningPlain(recipientName?: string | null): string[] {
-  return [buildGreetingPlain(recipientName), "", OPENING_THANKS, ""];
+function buildOpeningPlain(recipientName?: string | null, openingLine = OPENING_THANKS): string[] {
+  return [buildGreetingPlain(recipientName), "", openingLine, ""];
 }
 
-function buildOpeningHtml(recipientName?: string | null): string {
+function buildOpeningHtml(recipientName?: string | null, openingLine = OPENING_THANKS): string {
   return [
     `<p style="font-family:Segoe UI,Arial,sans-serif;font-size:14px;color:#333;margin:0 0 12px;">${buildGreetingHtml(recipientName)}</p>`,
-    `<p style="font-family:Segoe UI,Arial,sans-serif;font-size:14px;color:#333;margin:0 0 16px;line-height:1.5;">${escapeHtml(OPENING_THANKS)}</p>`
+    `<p style="font-family:Segoe UI,Arial,sans-serif;font-size:14px;color:#333;margin:0 0 16px;line-height:1.5;">${escapeHtml(openingLine)}</p>`
   ].join("");
 }
 
@@ -305,7 +310,7 @@ export function buildAdminReplyPlainTextBody(options: Omit<AdminReplyMailtoOptio
   const storeTitle = options.storeTitle?.trim() || DEFAULT_STORE_TITLE;
   const programsUrl = `${baseUrl}/programs`;
   const footerLinks = options.footerLinks ?? {};
-  const opening = buildOpeningPlain(options.recipientName);
+  const opening = buildOpeningPlain(options.recipientName, options.openingLine);
   const adminContent = buildAdminReplyContentPlain(options.adminReply, storeTitle);
   const quotedMessage = buildQuotedMessagePlain(options.originalMessage, options.recipientName);
   const footerLinkLines = buildFooterLinksPlain(footerLinks);
@@ -336,7 +341,7 @@ export function buildAdminReplyHtmlBody(options: Omit<AdminReplyMailtoOptions, "
   const logoUrl = `${baseUrl}${LOGO_PATH}`;
   const trustpilotLogoUrl = `${baseUrl}${TRUSTPILOT_LOGO_PATH}`;
   const footerLinks = options.footerLinks ?? {};
-  const openingHtml = buildOpeningHtml(options.recipientName);
+  const openingHtml = buildOpeningHtml(options.recipientName, options.openingLine);
   const adminContentHtml = buildAdminReplyContentHtml(options.adminReply, storeTitle);
   const quotedMessageHtml = buildQuotedMessageHtml(options.originalMessage, options.recipientName);
   const footerHtml = buildEmailFooterHtml(baseUrl, storeTitle, programsUrl, logoUrl, trustpilotLogoUrl, footerLinks);

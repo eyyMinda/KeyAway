@@ -42,6 +42,8 @@ export interface KeySuggestion {
   ipHash?: string;
   status: "new" | "reviewing" | "added" | "rejected";
   createdAt: string;
+  lastRepliedAt?: string;
+  replies?: ContactMessageReply[];
 }
 
 export interface KeySuggestionFormData {

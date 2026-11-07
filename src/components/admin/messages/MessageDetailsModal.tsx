@@ -1,15 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { createPortal } from "react-dom";
-import { useStoreDetails } from "@/src/components/providers/StoreDetailsProvider";
-import Toast from "@/src/components/ui/Toast";
+import { useEffect, useMemo, useRef } from "react";
 import AdminDetailsModal from "@/src/components/admin/AdminDetailsModal";
-import { openAdminReplyEmail } from "@/src/lib/email/openAdminReplyEmail";
-import { resolveEmailFooterLinks } from "@/src/lib/email/resolveEmailFooterLinks";
-import { MAX_REPLY_BODY_LENGTH } from "@/src/lib/email/sendContactMessageReply";
-import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
-import { NOTIFICATION_DURATION } from "@/src/lib/notifications/notificationUtils";
+import ContactField from "@/src/components/admin/email/ContactField";
+import { EmailReplyComposer, EmailReplyHistory } from "@/src/components/admin/email/EmailReplyPanel";
+import { RelativeDate, StatusPill } from "@/src/components/admin/list/AdminListKit";
+import { MESSAGE_STATUS_OPTIONS, MESSAGE_STATUS_TONES } from "@/src/components/admin/messages/messageStatus";
 import { ContactMessage } from "@/src/types/contact";
 import type { MessageUpdatePayload } from "./MessagesTable";
 
@@ -21,6 +17,9 @@ interface MessageDetailsModalProps {
   updating?: boolean;
 }
 
+const fullDate = (iso?: string) =>
+  iso ? new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "—";
+
 export default function MessageDetailsModal({
   message,
   onClose,
@@ -29,49 +28,10 @@ export default function MessageDetailsModal({
   updating
 }: MessageDetailsModalProps) {
   const markedReadRef = useRef<string | null>(null);
-  const storeData = useStoreDetails();
-  const [emailInput, setEmailInput] = useState(message.email ?? "");
-  const [emailSaved, setEmailSaved] = useState(false);
-  const [replyText, setReplyText] = useState("");
-  const [sending, setSending] = useState(false);
-  const [resendConfigured, setResendConfigured] = useState<boolean | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
-
-  const replyEmailOptions = useMemo(() => {
-    const to = message.email?.trim();
-    if (!to) return null;
-
-    return {
-      to,
-      subject: message.title ?? "",
-      originalMessage: message.message,
-      adminReply: replyText.trim() || undefined,
-      recipientName: message.name,
-      siteBaseUrl: resolveSiteBaseUrl(storeData?.seo),
-      storeTitle: storeData?.title,
-      footerLinks: resolveEmailFooterLinks(storeData)
-    };
-  }, [
-    message.email,
-    message.message,
-    message.name,
-    message.title,
-    replyText,
-    storeData?.seo,
-    storeData?.socialLinks,
-    storeData?.otherLinks,
-    storeData?.title
-  ]);
-
-  const replies = message.replies ?? [];
-  const canSendReply = Boolean(message.email?.trim()) && replyText.trim().length > 0 && !sending && !updating;
-
-  useEffect(() => {
-    fetch("/api/v1/admin/messages/reply/status")
-      .then(res => res.json())
-      .then(data => setResendConfigured(Boolean(data?.data?.configured)))
-      .catch(() => setResendConfigured(false));
-  }, []);
+  const content = useMemo(
+    () => ({ subject: message.title ?? "", originalMessage: message.message, recipientName: message.name }),
+    [message.title, message.message, message.name]
+  );
 
   useEffect(() => {
     if (message.status !== "new") return;
@@ -80,217 +40,75 @@ export default function MessageDetailsModal({
     onUpdateMessage({ status: "read" });
   }, [message._id, message.status, onUpdateMessage]);
 
-  useEffect(() => {
-    setEmailInput(message.email ?? "");
-  }, [message._id, message.email]);
-
-  const handleSaveEmail = useCallback(() => {
-    const trimmed = emailInput.trim();
-    if (trimmed === (message.email ?? "").trim()) return;
-    onUpdateMessage({ email: trimmed || undefined });
-    setEmailSaved(true);
-    setTimeout(() => setEmailSaved(false), 2000);
-  }, [emailInput, message.email, onUpdateMessage]);
-
-  const handleSendViaResend = useCallback(async () => {
-    if (!canSendReply) return;
-
-    setSending(true);
-    try {
-      const res = await fetch(`/api/v1/admin/messages/${message._id}/reply`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ replyText: replyText.trim() })
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const msg = data?.error?.message ?? "Failed to send reply";
-        throw new Error(msg);
-      }
-
-      setReplyText("");
-      setToast({ message: "Reply sent — status updated to Replied.", type: "success" });
-      onReplySent();
-    } catch (error) {
-      setToast({
-        message: error instanceof Error ? error.message : "Failed to send reply",
-        type: "error"
-      });
-    } finally {
-      setSending(false);
-    }
-  }, [canSendReply, message._id, onReplySent, replyText]);
-
-  const handleOpenMailApp = useCallback(async () => {
-    if (!replyEmailOptions) return;
-
-    const copied = await openAdminReplyEmail(replyEmailOptions);
-    setToast({
-      message: copied
-        ? "Opening mail app — formatted reply copied. Paste into the body (Ctrl+V) for styling."
-        : "Opening mail app — plain-text body was prefilled.",
-      type: "info"
-    });
-  }, [replyEmailOptions]);
-
   return (
-    <>
     <AdminDetailsModal
-      title="Message Details"
+      title="Message"
+      subtitle={message.name?.trim() || message.email?.trim() || "Anonymous visitor"}
       onClose={onClose}
       visitorHash={message.ipHash}
       visitorPosition="bottom"
-      maxWidthClass="max-w-2xl"
-    >
-      <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Subject</label>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{message.title ?? "-"}</p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Message</label>
-            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-800">
-              {message.message ?? "-"}
+      maxWidthClass="max-w-3xl"
+      footer={
+        <span>
+          Received {fullDate(message.createdAt)}
+          {message.lastRepliedAt ? ` · last replied ${fullDate(message.lastRepliedAt)}` : ""}
+        </span>
+      }>
+      <div className="space-y-5">
+        <header className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold leading-snug text-gray-900 dark:text-gray-100">
+              {message.title || "(no title)"}
+            </h2>
+            <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+              <RelativeDate iso={message.createdAt} />
+              {message.replies?.length
+                ? ` · ${message.replies.length} sent ${message.replies.length === 1 ? "reply" : "replies"}`
+                : ""}
             </p>
           </div>
+          <StatusPill
+            value={message.status ?? "new"}
+            options={MESSAGE_STATUS_OPTIONS}
+            tones={MESSAGE_STATUS_TONES}
+            disabled={updating}
+            onChange={status => onUpdateMessage({ status })}
+          />
+        </header>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Name</label>
-              <p className="text-gray-900 dark:text-gray-100">{message.name?.trim() ? message.name : "-"}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Email</label>
-              <div className="flex gap-2 items-center">
-                <input
-                  type="email"
-                  value={emailInput}
-                  onChange={e => setEmailInput(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleSaveEmail()}
-                  placeholder="Add or edit email..."
-                  className="flex-1 min-w-0 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-gray-100 text-sm"
-                  disabled={updating || sending}
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveEmail}
-                  disabled={updating || sending || emailInput.trim() === (message.email ?? "").trim()}
-                  className="shrink-0 cursor-pointer px-3 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                  {emailSaved ? "Saved" : "Save"}
-                </button>
-              </div>
-              {!message.email?.trim() && !emailInput.trim() ? (
-                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">Add an email address to send a reply.</p>
-              ) : null}
-            </div>
-          </div>
+        <blockquote className="whitespace-pre-wrap break-words rounded-xl border-l-4 border-primary-500 bg-gray-50 px-4 py-3 text-sm leading-relaxed text-gray-800 dark:bg-gray-800/50 dark:text-gray-200">
+          {message.message || "—"}
+        </blockquote>
 
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <label htmlFor="admin-reply-text" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Your reply
-              </label>
-              {resendConfigured === false ? (
-                <span className="text-xs text-amber-600 dark:text-amber-400">Resend not configured — use mail app fallback</span>
-              ) : resendConfigured ? (
-                <span className="text-xs text-green-600 dark:text-green-400">HTML email via Resend</span>
-              ) : null}
-            </div>
-            <textarea
-              id="admin-reply-text"
-              value={replyText}
-              onChange={e => setReplyText(e.target.value)}
-              rows={5}
-              maxLength={MAX_REPLY_BODY_LENGTH}
-              placeholder="Write your reply here. The original message and KeyAway footer are added automatically."
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 dark:text-gray-100 text-sm resize-y min-h-[120px]"
-              disabled={sending || updating}
-            />
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleSendViaResend}
-                disabled={!canSendReply || resendConfigured === false}
-                className="px-4 py-2 text-sm font-medium rounded-lg bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                {sending ? "Sending…" : "Send HTML reply"}
-              </button>
-              {replyEmailOptions ? (
-                <button
-                  type="button"
-                  onClick={handleOpenMailApp}
-                  disabled={sending || updating}
-                  className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                  Open in mail app
-                </button>
-              ) : null}
-            </div>
-          </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <ContactField
+            label="Name"
+            value={message.name}
+            placeholder="Add a name…"
+            disabled={updating}
+            onSave={name => onUpdateMessage({ name })}
+          />
+          <ContactField
+            label="Email"
+            type="email"
+            value={message.email}
+            placeholder="Add an email to reply…"
+            disabled={updating}
+            onSave={email => onUpdateMessage({ email })}
+          />
+        </div>
 
-          {replies.length > 0 ? (
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                Reply history ({replies.length})
-              </h3>
-              <ul className="space-y-3">
-                {[...replies].reverse().map(reply => (
-                  <li
-                    key={reply._key ?? `${reply.sentAt}-${reply.sentBy}`}
-                    className="rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-4">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                      <span>{reply.sentBy}</span>
-                      <span>→ {reply.sentTo}</span>
-                      <span>{reply.sentAt ? new Date(reply.sentAt).toLocaleString() : ""}</span>
-                      {reply.resendId ? <span className="font-mono">#{reply.resendId.slice(0, 8)}</span> : null}
-                    </div>
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{reply.subject}</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{reply.body}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+        <EmailReplyComposer
+          email={message.email}
+          sendUrl={`/api/v1/admin/messages/${message._id}/reply`}
+          content={content}
+          disabled={updating}
+          sentMessage="Reply sent — status updated to Replied."
+          onSent={onReplySent}
+        />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-            <div>
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Received</label>
-              <p className="text-gray-900 dark:text-gray-100">{message.createdAt ? new Date(message.createdAt).toLocaleString() : "-"}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Last replied</label>
-              <p className="text-gray-900 dark:text-gray-100">
-                {message.lastRepliedAt ? new Date(message.lastRepliedAt).toLocaleString() : "-"}
-              </p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Status</label>
-              <select
-                value={message.status ?? "new"}
-                onChange={e => onUpdateMessage({ status: e.target.value as ContactMessage["status"] })}
-                disabled={updating || sending}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent cursor-pointer text-gray-900 dark:text-gray-100 disabled:opacity-50">
-                <option value="new">New</option>
-                <option value="read">Read</option>
-                <option value="replied">Replied</option>
-                <option value="archived">Archived</option>
-              </select>
-            </div>
-          </div>
-
+        <EmailReplyHistory replies={message.replies} />
       </div>
     </AdminDetailsModal>
-
-      {toast && typeof document !== "undefined"
-        ? createPortal(
-            <Toast
-              message={toast.message}
-              type={toast.type}
-              duration={NOTIFICATION_DURATION.MEDIUM}
-              onClose={() => setToast(null)}
-            />,
-            document.body
-          )
-        : null}
-    </>
   );
 }

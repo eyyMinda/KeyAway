@@ -69,6 +69,20 @@ export default defineType({
       title: "Visitor Hash",
       type: "string",
       description: "Hashed IP + salt. Used to attribute suggestions to visitor records."
+    }),
+    defineField({
+      name: "lastRepliedAt",
+      title: "Last Replied At",
+      type: "datetime",
+      readOnly: true
+    }),
+    defineField({
+      name: "replies",
+      title: "Email Replies",
+      type: "array",
+      readOnly: true,
+      of: [{ type: "contactMessageReply" }],
+      description: "Replies sent from the admin key suggestions page."
     })
   ],
   preview: {

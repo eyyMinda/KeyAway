@@ -6,29 +6,35 @@ import { buildAdminReplyHtmlBody, buildReplySubject } from "@/src/lib/email/admi
 import { resolveEmailFooterLinks } from "@/src/lib/email/resolveEmailFooterLinks";
 import { resolveSiteBaseUrl } from "@/src/lib/seo/storeSeoResolve";
 
-const SAMPLE = {
+type ReplySample = {
+  recipientName: string;
+  subject: string;
+  adminReply: string;
+  originalMessage: string;
+  openingLine?: string;
+};
+
+const MESSAGE_SAMPLE: ReplySample = {
   recipientName: "Alex",
   subject: "Example program",
   adminReply: "Here is the info you asked for — let us know if you need anything else.",
   originalMessage: "Do you have a working key for Example Pro?"
 };
 
-export default function ReplyEmailTemplatePreview() {
+/** Sample reply email rendered with the live store settings. Defaults to a contact message reply. */
+export default function ReplyEmailTemplatePreview({ sample = MESSAGE_SAMPLE }: { sample?: ReplySample }) {
   const storeData = useStoreDetails();
 
-  const subject = useMemo(() => buildReplySubject(SAMPLE.subject), []);
+  const subject = useMemo(() => buildReplySubject(sample.subject), [sample.subject]);
   const htmlBody = useMemo(
     () =>
       buildAdminReplyHtmlBody({
-        subject: SAMPLE.subject,
-        recipientName: SAMPLE.recipientName,
-        adminReply: SAMPLE.adminReply,
-        originalMessage: SAMPLE.originalMessage,
+        ...sample,
         siteBaseUrl: resolveSiteBaseUrl(storeData?.seo),
         storeTitle: storeData?.title,
         footerLinks: resolveEmailFooterLinks(storeData)
       }),
-    [storeData]
+    [sample, storeData]
   );
 
   return (
