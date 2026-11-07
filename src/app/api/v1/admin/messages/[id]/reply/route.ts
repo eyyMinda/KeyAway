@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-import { MAX_REPLY_BODY_LENGTH, ReplySendError, sendContactMessageReply } from "@/src/lib/email/sendContactMessageReply";
+import { MAX_REPLY_BODY_LENGTH } from "@/src/lib/email/adminReplyMailto";
+import { ReplySendError, sendContactMessageReply } from "@/src/lib/email/sendContactMessageReply";
 
 /** POST /api/v1/admin/messages/[id]/reply - Send HTML reply via Resend */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

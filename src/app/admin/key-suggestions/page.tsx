@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
+import AnalyticsCard from "@/src/components/admin/AnalyticsCard";
 import KeySuggestionsTable from "@/src/components/admin/key-suggestions/KeySuggestionsTable";
+import ReplyEmailTemplatePreview from "@/src/components/admin/messages/ReplyEmailTemplatePreview";
+import { keySuggestionReplyContent } from "@/src/lib/email/keySuggestionReply";
 import {
   AdminFilterBar,
   AdminSearch,
@@ -14,6 +17,19 @@ import { KeySuggestion } from "@/src/types/contact";
 import { client } from "@/src/sanity/lib/client";
 
 type StatusView = "open" | KeySuggestion["status"] | "all";
+
+const REPLY_SAMPLE = {
+  ...keySuggestionReplyContent({
+    programName: "Example Pro",
+    programVersion: "12.1",
+    programLink: "https://example.com/download",
+    cdKey: "ABCDE-12345-FGHIJ-67890",
+    message: "Works on the latest build too.",
+    name: "Alex"
+  }),
+  recipientName: "Alex",
+  adminReply: "Thanks! The key is now listed on the Example Pro page."
+};
 type SortKey = "newest" | "oldest" | "program";
 
 /** Open = still needs a decision. Added / rejected leave the default view like resolved giveaway finds. */
@@ -26,7 +42,8 @@ async function loadSuggestions(): Promise<KeySuggestion[] | null> {
   try {
     return await client.fetch<KeySuggestion[]>(
       `*[_type == "keySuggestion"] | order(createdAt desc) {
-        _id, _createdAt, cdKey, programName, programVersion, programLink, name, email, message, status, ipHash, createdAt
+        _id, _createdAt, cdKey, programName, programVersion, programLink, name, email, message, status, ipHash, createdAt,
+        lastRepliedAt, replies[]{ _key, body, subject, sentTo, sentBy, sentAt, resendId }
       }`
     );
   } catch (error) {
@@ -91,7 +108,19 @@ export default function KeySuggestionsPage() {
   const paged = usePagedList(filtered, `${search}|${status}|${program}|${sort}`);
 
   return (
-    <ProtectedAdminLayout title="Key Suggestions" subtitle="Keys visitors suggested for programs">
+    <ProtectedAdminLayout
+      title="Key Suggestions"
+      subtitle="Keys visitors suggested for programs. Open one to review it and email the visitor back.">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <AnalyticsCard label="Open" value={suggestions.filter(s => OPEN.includes(s.status)).length} />
+        <AnalyticsCard label="New" value={countOf("new")} />
+        <AnalyticsCard label="Added" value={countOf("added")} />
+        <AnalyticsCard
+          label="Awaiting email reply"
+          value={suggestions.filter(s => OPEN.includes(s.status) && s.email?.trim() && !s.replies?.length).length}
+        />
+      </div>
+
       <AdminFilterBar>
         <AdminSearch
           value={search}
@@ -127,6 +156,8 @@ export default function KeySuggestionsPage() {
         paging={paged}
         onUpdate={fetchSuggestions}
       />
+
+      <ReplyEmailTemplatePreview sample={REPLY_SAMPLE} />
     </ProtectedAdminLayout>
   );
 }

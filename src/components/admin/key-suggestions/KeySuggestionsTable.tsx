@@ -2,36 +2,18 @@
 
 import { useState } from "react";
 import { KeySuggestion } from "@/src/types/contact";
-import AdminViewDetailsButton from "@/src/components/admin/AdminViewDetailsButton";
 import SuggestionDetailsModal from "./SuggestionDetailsModal";
 import {
-  AdminEmptyRows,
   AdminListCard,
   AdminPagination,
+  Chip,
   RelativeDate,
   StatusPill,
-  adminRow,
-  adminTd,
-  adminTh,
-  adminTheadRow,
-  pillTones
+  adminRow
 } from "@/src/components/admin/list/AdminListKit";
+import { SUGGESTION_STATUS_OPTIONS, SUGGESTION_STATUS_TONES } from "@/src/components/admin/key-suggestions/suggestionStatus";
 
 export type SuggestionUpdatePayload = Partial<Pick<KeySuggestion, "status" | "email" | "name">>;
-
-const STATUS_OPTIONS: Array<{ value: KeySuggestion["status"]; label: string }> = [
-  { value: "new", label: "New" },
-  { value: "reviewing", label: "Reviewing" },
-  { value: "added", label: "Added" },
-  { value: "rejected", label: "Rejected" }
-];
-
-const STATUS_TONES: Record<KeySuggestion["status"], string> = {
-  new: pillTones.blue,
-  reviewing: pillTones.amber,
-  added: pillTones.green,
-  rejected: pillTones.gray
-};
 
 function hostOf(url?: string): string {
   if (!url) return "";
@@ -100,71 +82,61 @@ export default function KeySuggestionsTable({
             />
           )
         }>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className={adminTheadRow}>
-              <tr>
-                <th className={adminTh}>Program</th>
-                <th className={adminTh}>Key</th>
-                <th className={`${adminTh} hidden lg:table-cell`}>From</th>
-                <th className={adminTh}>Status</th>
-                <th className={adminTh}>Submitted</th>
-                <th className={adminTh} />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {loading ? (
-                <AdminEmptyRows colSpan={6}>Loading suggestions…</AdminEmptyRows>
-              ) : suggestions.length === 0 ? (
-                <AdminEmptyRows colSpan={6}>No suggestions match these filters.</AdminEmptyRows>
-              ) : (
-                suggestions.map(s => (
-                  <tr key={s._id} className={adminRow}>
-                    <td className={`${adminTd} max-w-64`}>
-                      <div className="font-medium text-gray-900 dark:text-gray-100 truncate">{s.programName}</div>
+        {loading ? (
+          <p className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">Loading suggestions…</p>
+        ) : suggestions.length === 0 ? (
+          <p className="px-4 py-12 text-center text-sm text-gray-500 dark:text-gray-400">No suggestions match these filters.</p>
+        ) : (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            {suggestions.map(s => {
+              const replyCount = s.replies?.length ?? 0;
+              const sender = s.name?.trim() || s.email?.trim();
+              return (
+                <li key={s._id} className={`${adminRow} flex gap-3 px-4 py-3 sm:px-5`}>
+                  <button type="button" onClick={() => setSelectedId(s._id)} className="min-w-0 flex-1 cursor-pointer text-left">
+                    <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span
+                        className={`truncate text-sm text-gray-900 dark:text-gray-100 ${s.status === "new" ? "font-semibold" : "font-medium"}`}>
+                        {s.programName}
+                      </span>
+                      {s.programVersion && <span className="text-xs text-gray-500 dark:text-gray-400">v{s.programVersion}</span>}
                       {s.programLink && (
-                        <a
-                          href={s.programLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary-600 dark:text-sky-400 hover:underline truncate block">
-                          {hostOf(s.programLink)}
-                        </a>
+                        <span className="truncate text-xs text-sky-700 dark:text-sky-300">{hostOf(s.programLink)}</span>
                       )}
-                    </td>
-                    <td className={adminTd}>
-                      <code className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-xs font-mono text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                        {s.cdKey}
-                      </code>
-                      {s.programVersion && (
-                        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">v{s.programVersion}</div>
-                      )}
-                    </td>
-                    <td className={`${adminTd} hidden lg:table-cell max-w-56`}>
-                      <div className="text-gray-900 dark:text-gray-100 truncate">{s.name || "—"}</div>
-                      {s.email && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{s.email}</div>}
-                    </td>
-                    <td className={adminTd}>
-                      <StatusPill
-                        value={s.status}
-                        options={STATUS_OPTIONS}
-                        tones={STATUS_TONES}
-                        disabled={updating === s._id}
-                        onChange={status => handleUpdateSuggestion(s._id, { status })}
-                      />
-                    </td>
-                    <td className={`${adminTd} text-xs text-gray-500 dark:text-gray-400`}>
+                    </span>
+                    <code className="mt-1 inline-block max-w-full truncate rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-900 dark:bg-gray-800 dark:text-gray-100">
+                      {s.cdKey}
+                    </code>
+                    <span className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      <span className="truncate">{sender ? `From ${sender}` : "Anonymous"}</span>
+                      {s.email && s.name && <span className="truncate">· {s.email}</span>}
+                      {replyCount > 0 ? (
+                        <Chip tone="green">
+                          {replyCount} {replyCount === 1 ? "reply" : "replies"} sent
+                        </Chip>
+                      ) : s.email ? (
+                        <Chip tone="gray">Not replied</Chip>
+                      ) : null}
+                    </span>
+                  </button>
+
+                  <div className="flex shrink-0 flex-col items-end gap-1.5">
+                    <StatusPill
+                      value={s.status}
+                      options={SUGGESTION_STATUS_OPTIONS}
+                      tones={SUGGESTION_STATUS_TONES}
+                      disabled={updating === s._id}
+                      onChange={status => handleUpdateSuggestion(s._id, { status })}
+                    />
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       <RelativeDate iso={s.createdAt} />
-                    </td>
-                    <td className={`${adminTd} text-right`}>
-                      <AdminViewDetailsButton onClick={() => setSelectedId(s._id)} />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </AdminListCard>
 
       {selected && (
@@ -172,6 +144,7 @@ export default function KeySuggestionsTable({
           suggestion={selected}
           onClose={() => setSelectedId(null)}
           onUpdateSuggestion={updates => handleUpdateSuggestion(selected._id, updates)}
+          onReplySent={onUpdate}
           updating={updating === selected._id}
         />
       )}
