@@ -58,6 +58,19 @@ export default function AdminCommentsPage() {
     }
   }
 
+  async function handleReply(parent: AdminProgramCommentRow, body: string): Promise<void> {
+    const res = await fetch("/api/v1/program-comments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ programSlug: parent.programSlug, body, parentCommentKey: parent.commentKey })
+    });
+    if (!res.ok) {
+      const json = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+      throw new Error(json?.error?.message ?? "Could not post the reply");
+    }
+    await fetchRows();
+  }
+
   if (loading) {
     return (
       <ProtectedAdminLayout title="Comments" subtitle="Moderate program page comments">
@@ -69,11 +82,12 @@ export default function AdminCommentsPage() {
   return (
     <ProtectedAdminLayout
       title="Comments"
-      subtitle={`${rows.length} comment${rows.length === 1 ? "" : "s"} across programs`}>
+      subtitle="Threads with the newest activity first. Reply as KeyAway to any comment or reply.">
       <ProgramCommentsTable
         rows={rows}
         busyId={busyId}
         onDelete={handleDelete}
+        onReply={handleReply}
         onSpammerChanged={fetchRows}
       />
     </ProtectedAdminLayout>

@@ -73,7 +73,8 @@ export async function POST(req: NextRequest) {
       ]);
     }
 
-    const commentRate = checkCommentRateLimit(req, programSlug);
+    // Staff answer many threads in a row from the admin comments page.
+    const commentRate = isStaffComment ? { ok: true } : checkCommentRateLimit(req, programSlug);
     if (!commentRate.ok) {
       return Errors.validation(commentRate.reason ?? "Rate limit exceeded", [
         { field: "body", message: commentRate.reason ?? "Rate limit exceeded" }
