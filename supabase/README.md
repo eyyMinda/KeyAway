@@ -9,6 +9,7 @@ visitors, and key reports. Editorial content (programs, vendors, store details, 
 | `analytics.visitors` (+ `visitor_snapshots` for older bundled copies) | `visitor`, `visitorBundle` |
 | `analytics.key_reports` | `keyReport`, `keyReportBundle` |
 | `analytics.legacy_documents` | `analyticsMigration` (kept verbatim) |
+| `analytics.giveaway_draws` | — (Facebook giveaways on /admin/giveaway-picker: prizes, entrant names, winners; one small row each) |
 
 The app connects with [`postgres`](https://github.com/porsager/postgres) (`src/lib/db/postgres.ts`) through the
 Supavisor **transaction pooler**. The schema is not exposed to the Data API, and RLS without policies blocks the

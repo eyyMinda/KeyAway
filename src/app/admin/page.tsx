@@ -5,6 +5,7 @@ import DatasetDocCounts from "@/src/components/admin/DatasetDocCounts";
 import AnalyticsDbUsage from "@/src/components/admin/AnalyticsDbUsage";
 import WelcomeHeader from "@/src/components/admin/WelcomeHeader";
 import IndexNowSubmitCard from "@/src/components/admin/IndexNowSubmitCard";
+import GiveawayPickerCard from "@/src/components/admin/GiveawayPickerCard";
 
 export default function AdminHomePage() {
   return (
@@ -78,6 +79,13 @@ export default function AdminHomePage() {
         <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">SEO</h3>
         <div className="grid grid-cols-1 gap-4 md:gap-6">
           <IndexNowSubmitCard />
+        </div>
+      </div>
+
+      <div className="mt-8 md:mt-12">
+        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">Giveaway</h3>
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
+          <GiveawayPickerCard />
         </div>
       </div>
 
