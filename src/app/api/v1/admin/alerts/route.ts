@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
-import { getCachedKeyReportNotifications } from "@/src/lib/admin/keyReportNotifications.server";
+import { loadDashboardAlerts } from "@/src/lib/admin/dashboardAlerts.server";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 
-/** GET /api/v1/admin/key-report-notifications - Keys needing attention (negative reports, alert window) */
+/** GET /api/v1/admin/alerts - Dashboard alerts (jobs, keys, inbox, versions, usage) and count tiles (admin only) */
 export async function GET(req: NextRequest) {
   const { ok: rateOk } = rateLimitMiddleware(req);
   if (!rateOk) return Errors.tooManyRequests();
@@ -13,10 +13,9 @@ export async function GET(req: NextRequest) {
   if (admin instanceof Response) return admin;
 
   try {
-    const items = await getCachedKeyReportNotifications();
-    return NextResponse.json({ data: items, meta: {} });
+    return NextResponse.json({ data: await loadDashboardAlerts(), meta: {} });
   } catch (err) {
-    console.error("[GET /api/v1/admin/key-report-notifications]", err);
+    console.error("[GET /api/v1/admin/alerts]", err);
     return Errors.internal();
   }
 }

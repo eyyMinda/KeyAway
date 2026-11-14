@@ -21,9 +21,36 @@ An empty `validUntil` means a lifetime key that never expires by date. `limit` i
 ## Triggering a run manually
 
 - `POST /api/v1/cron/update-expired-keys` with an admin session, or with `Authorization: Bearer $CRON_SECRET`.
-- Vercel's scheduled runs authenticate with the `x-vercel-cron` header.
+- Vercel's scheduled runs send the same `Authorization: Bearer $CRON_SECRET` header (Vercel adds it when `CRON_SECRET` is set).
 
 ## Related
 
-- Visitor reports (`/api/v1/key-reports`) flag keys that stopped working before their date. Admin → Key reports lists them, and the admin header shows alerts for keys with negative reports that are still marked working.
+- Visitor reports (`/api/v1/key-reports`) flag keys that stopped working before their date. Admin → Key reports lists them; the dashboard's key report review (below) points out which keys need a status change.
 - The giveaway finder and the admin Keys tab add new entries with status `new` and a `createdAt` date, so they move to `active` after 30 days.
+
+## Key report review (dashboard)
+
+`src/lib/admin/keyReview.ts` reads the last 30 days of reports and answers two questions. The dashboard alerts open
+the review dialog, where a suggested status can be applied in one click.
+
+**Weighting.** Each report counts by how recent it is (half-life 10 days) and how far its visitor can be trusted:
+flagged spammers count for nothing, new visitors 0.7, returning 0.9, regular 1, star 1.2, and a visitor who reported
+many keys broken within a day half as much. Each visitor counts once per key (a renewed report replaces the old one).
+
+**Keys that need a status change** (needs reports from at least 3 different visitors):
+
+- *Broken on its listed version:* expired / limit reached reports on the listed version make up 60%+ of the weighted
+  reports, or the 3 most recent reports all fail. Suggests whichever of expired / limit reached weighs more.
+- *Outdated for the latest version:* visitors tried the program's latest official version, the key is listed for an
+  older one, and it failed (40%+ against the working reports). Most people download the latest version, so this is a
+  reason to update the key, not a sign of false reports.
+- *Valid-until passed* while the key is still active.
+- *Reactivate:* a key marked expired / limit reached that recent visitors (70%+, including the 3 most recent) report
+  working.
+
+High confidence needs a clear majority from more visitors (80%+ and 5+ visitors, or 8+ on the latest version).
+
+**Doubtful reports:** from a flagged spammer; from a visitor who reported 6+ keys broken in a day, or 4+ across 3+
+programs; a failure on the listed version that 5+ other visitors contradicted afterwards while the key works for 85%+
+of the weighted reports (mixed results are normal for shared keys); or a "tried version" newer than the latest
+official one (or the recorded latest version is out of date).

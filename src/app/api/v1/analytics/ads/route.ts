@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { normalizePath } from "@/src/lib/api/inputNormalize";
-import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
+import { isBlockedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { isKnownAdPlacement, type AdUnitKind } from "@/src/lib/ads/adPlacements";
 import { recordAdStats, type AdStatInput } from "@/src/lib/analytics/adStatsStore";
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
   const host = req.headers.get("host") || "";
   if (host.startsWith("localhost") || host.includes("127.0.0.1")) return new NextResponse(null, { status: 204 });
-  if (isAutomatedAnalyticsRequest(req, "ad_stats")) return new NextResponse(null, { status: 204 });
+  if (await isBlockedAnalyticsRequest(req, "ad_stats")) return new NextResponse(null, { status: 204 });
   if (await getAdminSession()) return new NextResponse(null, { status: 204 });
 
   let body: unknown;

@@ -1,94 +1,51 @@
 import ProtectedAdminLayout from "@/src/components/admin/ProtectedAdminLayout";
-import DashboardCard from "@/src/components/admin/DashboardCard";
 import CronStatusCard from "@/src/components/admin/CronStatusCard";
 import DatasetDocCounts from "@/src/components/admin/DatasetDocCounts";
 import AnalyticsDbUsage from "@/src/components/admin/AnalyticsDbUsage";
 import WelcomeHeader from "@/src/components/admin/WelcomeHeader";
 import IndexNowSubmitCard from "@/src/components/admin/IndexNowSubmitCard";
 import GiveawayPickerCard from "@/src/components/admin/GiveawayPickerCard";
+import DashboardAlerts from "@/src/components/admin/DashboardAlerts";
+import UsageInsights from "@/src/components/admin/UsageInsights";
 
+function SectionHeading({ id, title, subtitle }: { id: string; title: string; subtitle: string }) {
+  return (
+    <div id={id} className="mb-4 scroll-mt-24 md:mb-6">
+      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+      <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
+    </div>
+  );
+}
+
+/** Admin home: what needs attention first, then usage, seasonal tools, and scheduled jobs at the bottom. */
 export default function AdminHomePage() {
   return (
     <ProtectedAdminLayout headerContent={<WelcomeHeader />}>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        <DashboardCard
-          href="/admin/analytics"
-          title="Analytics"
-          subtitle="View user behavior and engagement metrics"
-          icon="📊"
-          color="blue"
-        />
-        <DashboardCard
-          href="/admin/programs"
-          title="Programs"
-          subtitle="Manage CD key programs and content"
-          icon="🎮"
-          color="green"
-        />
-        <DashboardCard
-          href="/admin/sessions"
-          title="Sessions"
-          subtitle="Visits, clicks, and key reports in one timeline"
-          icon="📈"
-          color="purple"
-        />
-        <DashboardCard
-          href="/admin/key-reports"
-          title="Key Reports"
-          subtitle="Manage all CD key reports (working, expired, limit reached)"
-          icon="🔄"
-          color="orange"
-        />
-        <DashboardCard
-          href="/admin/key-suggestions"
-          title="Key Suggestions"
-          subtitle="Review user-submitted CD keys"
-          icon="🔑"
-          color="yellow"
-        />
-        <DashboardCard
-          href="/admin/messages"
-          title="Messages"
-          subtitle="View and respond to contact messages"
-          icon="📬"
-          color="pink"
-        />
-        <DashboardCard
-          href="/admin/comments"
-          title="Comments"
-          subtitle="Moderate program comments, delete spam, mark spammers"
-          icon="💬"
-          color="blue"
-        />
-      </div>
+      <DashboardAlerts />
 
-      <div className="mt-8 md:mt-12 grid gap-6 lg:grid-cols-2 items-start">
-        <DatasetDocCounts />
-        <AnalyticsDbUsage />
-      </div>
+      <section className="mt-10 md:mt-14">
+        <SectionHeading id="usage" title="Usage" subtitle="Database size and traffic against the free plan limits." />
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+          <AnalyticsDbUsage />
+          <DatasetDocCounts />
+        </div>
+        <div className="mt-6">
+          <UsageInsights />
+        </div>
+      </section>
 
-      <div className="mt-8 md:mt-12">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">Giveaway</h3>
-        <div className="grid grid-cols-1 gap-4 md:gap-6">
+      <section className="mt-10 md:mt-14">
+        <SectionHeading id="seasonal" title="Seasonal" subtitle="Giveaways and search engine submissions." />
+        <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           <GiveawayPickerCard />
-        </div>
-      </div>
-
-      {/* Cron Status */}
-      <div className="mt-8 md:mt-12">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">System</h3>
-        <div className="grid grid-cols-1 gap-4 md:gap-6">
-          <CronStatusCard />
-        </div>
-      </div>
-
-      <div className="mt-8 md:mt-12">
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 md:mb-6">SEO</h3>
-        <div className="grid grid-cols-1 gap-4 md:gap-6">
           <IndexNowSubmitCard />
         </div>
-      </div>
+      </section>
 
+      <section className="mt-10 md:mt-14">
+        <SectionHeading id="system" title="System" subtitle="Scheduled jobs: last runs and recent history." />
+        <CronStatusCard />
+      </section>
     </ProtectedAdminLayout>
   );
 }

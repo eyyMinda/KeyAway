@@ -1,5 +1,7 @@
 /** @fileoverview Admin PATCH: set a visitor's spam flag by visitorHash (blocks negative public key reports). */
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { TAG_KEY_REVIEW } from "@/src/lib/admin/keyReview.server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
@@ -23,6 +25,7 @@ export async function PATCH(req: NextRequest) {
     const found = await setVisitorSpammer(visitorHash, isSpammer);
     if (!found) return Errors.notFound("No visitor for this hash");
 
+    revalidateTag(TAG_KEY_REVIEW, { expire: 0 });
     return NextResponse.json({ data: { ok: true, visitorHash, isSpammer }, meta: {} });
   } catch (err) {
     console.error("[PATCH /api/v1/admin/visitor-spammer]", err);

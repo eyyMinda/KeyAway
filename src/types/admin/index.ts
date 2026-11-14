@@ -110,21 +110,6 @@ export interface KeyReport {
 }
 
 /** Admin header key-report notification item (from GET /api/v1/admin/key-report-notifications). */
-export interface KeyReportNotificationItem {
-  programSlug: string;
-  programTitle: string;
-  label: string;
-  negativeCount: number;
-  positiveCount: number;
-  working: number;
-  expired: number;
-  limit_reached: number;
-  ratioLabel: string;
-  /** ISO date of most recent report */
-  lastReportAt?: string;
-  link: string;
-}
-
 /** One activation entry as shown in the admin programs list (no passwords). */
 export interface AdminProgramKeyRow {
   _key: string;

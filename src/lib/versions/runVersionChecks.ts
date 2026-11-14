@@ -19,6 +19,8 @@ export interface VersionCheckProgram {
     releasedAt?: string | null;
     error?: string | null;
     changedAt?: string | null;
+    autoAppliedVersion?: string | null;
+    autoAppliedAt?: string | null;
   } | null;
 }
 
@@ -51,7 +53,10 @@ export async function checkProgramVersion(program: VersionCheckProgram): Promise
   const next = {
     latestVersion: found ?? prev.latestVersion ?? undefined,
     releasedAt: lookup.ok ? (lookup.releasedAt ?? undefined) : (prev.releasedAt ?? undefined),
-    error: lookup.ok ? undefined : lookup.error
+    error: lookup.ok ? undefined : lookup.error,
+    // Kept so the dashboard can list what a trusted source applied without review.
+    autoAppliedVersion: prev.autoAppliedVersion ?? undefined,
+    autoAppliedAt: prev.autoAppliedAt ?? undefined
   };
   const changed =
     (prev.latestVersion ?? undefined) !== next.latestVersion ||
@@ -60,9 +65,14 @@ export async function checkProgramVersion(program: VersionCheckProgram): Promise
   const autoApply = newer && !!found && config?.autoApply === true;
 
   if (changed || autoApply) {
+    const now = new Date().toISOString();
     const patch = mutationClient.patch(program._id);
-    if (changed) patch.set({ versionStatus: { ...next, changedAt: new Date().toISOString() } });
-    if (autoApply) patch.set({ latestOfficialVersion: found });
+    if (autoApply) {
+      patch.set({
+        latestOfficialVersion: found,
+        versionStatus: { ...next, changedAt: changed ? now : prev.changedAt ?? now, autoAppliedVersion: found, autoAppliedAt: now }
+      });
+    } else patch.set({ versionStatus: { ...next, changedAt: now } });
     await patch.commit();
     if (autoApply) {
       applied = true;
