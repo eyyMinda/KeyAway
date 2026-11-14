@@ -4,6 +4,7 @@
  */
 import { unstable_cache } from "next/cache";
 import { db } from "@/src/lib/db/postgres";
+import { DAY_MS } from "@/src/lib/time";
 
 const CACHE_SECONDS = 600;
 export const TAG_USAGE_INSIGHTS = "admin-usage-insights";
@@ -16,6 +17,8 @@ export type QueryTraffic = { query: string; calls: number; rows: number; rowsPer
 export type DbTraffic = {
   available: boolean;
   since: string | null;
+  /** Days the statistics cover (since their last reset). */
+  days: number;
   totalRows: number;
   estBytes: number;
   top: QueryTraffic[];
@@ -61,7 +64,7 @@ function supabaseProjectUrl(): string | null {
 }
 
 /** Collapses whitespace and Postgres placeholders so a query reads as one line. */
-const queryLabel = (query: string) => query.replace(/\s+/g, " ").trim().slice(0, 220);
+const queryLabel = (query: string) => query.replace(/\s+/g, " ").trim().slice(0, 1000);
 
 async function loadTraffic(): Promise<DbTraffic> {
   const sql = db();
@@ -70,7 +73,7 @@ async function loadTraffic(): Promise<DbTraffic> {
     const rows = await sql<Array<{ query: string; calls: number; rows: number }>>`
       select query, calls::int as calls, rows::int as rows
       from pg_stat_statements
-      where query !~* 'pg_stat_statements|pg_catalog' and rows > 0
+      where query !~* 'pg_stat_statements' and rows > 0
       order by rows desc
       limit 8
     `;
@@ -80,6 +83,7 @@ async function loadTraffic(): Promise<DbTraffic> {
     return {
       available: true,
       since: info?.since ?? null,
+      days: info?.since ? (Date.now() - Date.parse(info.since)) / DAY_MS : 0,
       totalRows: total.rows,
       estBytes: total.rows * BYTES_PER_ROW_ESTIMATE,
       top: rows.map(r => ({
@@ -93,7 +97,7 @@ async function loadTraffic(): Promise<DbTraffic> {
   } catch (err) {
     // pg_stat_statements may be missing or not readable by this role.
     console.error("[usageInsights] pg_stat_statements", err);
-    return { available: false, since: null, totalRows: 0, estBytes: 0, top: [] };
+    return { available: false, since: null, days: 0, totalRows: 0, estBytes: 0, top: [] };
   }
 }
 

@@ -9,7 +9,8 @@ import { useCallback, useEffect, useState } from "react";
 import { FaExternalLinkAlt, FaRobot } from "react-icons/fa";
 import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 import { describeUserAgent } from "@/src/lib/analytics/describeUserAgent";
-import type { UsageInsights as Payload, UserAgentTraffic } from "@/src/lib/admin/usageInsights.server";
+import type { QueryTraffic, UsageInsights as Payload, UserAgentTraffic } from "@/src/lib/admin/usageInsights.server";
+import { describeQuery, type QueryDescription } from "@/src/lib/admin/describeQuery";
 
 const card = "rounded-xl border border-gray-200 bg-white p-6 shadow-soft dark:border-gray-800 dark:bg-gray-900";
 
@@ -22,32 +23,59 @@ function formatBytes(bytes: number): string {
 const compact = (n: number) => new Intl.NumberFormat(undefined, { notation: "compact" }).format(n);
 const percent = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : "—");
 
+/** Supabase free plan egress per billing period. */
+const EGRESS_QUOTA_BYTES = 5 * 1024 ** 3;
+const MIN_PROJECTION_DAYS = 2;
+
+type QueryGroup = QueryDescription & { bytes: number; calls: number; rows: number; sql: string[] };
+
+/** Top queries under plain names; several statements can share one (e.g. both ad statistics writes). */
+function groupQueries(top: QueryTraffic[]): QueryGroup[] {
+  const groups = new Map<string, QueryGroup>();
+  for (const q of top) {
+    const description = describeQuery(q.query);
+    const group = groups.get(description.name) ?? { ...description, bytes: 0, calls: 0, rows: 0, sql: [] };
+    group.bytes += q.estBytes;
+    group.calls += q.calls;
+    group.rows += q.rows;
+    group.sql.push(q.query);
+    groups.set(description.name, group);
+  }
+  return [...groups.values()].sort((a, b) => b.bytes - a.bytes);
+}
+
+function quotaTone(ratio: number) {
+  if (ratio >= 0.9) return { bar: "bg-red-500", text: "text-red-700 dark:text-red-300" };
+  if (ratio >= 0.7) return { bar: "bg-amber-500", text: "text-amber-700 dark:text-amber-300" };
+  return { bar: "bg-green-500", text: "text-green-700 dark:text-green-300" };
+}
+
+const smallButton =
+  "inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800";
+
 function DbTrafficCard({ data, onReset, resetting }: { data: Payload; onReset: () => void; resetting: boolean }) {
   const { traffic, supabaseProjectUrl } = data;
+  const days = traffic.days ?? 0;
+  const monthly = days >= MIN_PROJECTION_DAYS ? ((traffic.estBytes ?? 0) / days) * 30 : null;
+  const ratio = monthly != null ? monthly / EGRESS_QUOTA_BYTES : 0;
+  const tone = quotaTone(ratio);
+  const groups = groupQueries(traffic.top ?? []);
+  const shown = groups.reduce((n, g) => n + g.bytes, 0);
+
   return (
     <div className={card}>
-      <div className="mb-3 flex items-start gap-3">
+      <div className="mb-4 flex flex-wrap items-start gap-2">
         <div className="min-w-0 flex-1">
           <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Database traffic</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {traffic.available ? (
-              <>
-                ~{formatBytes(traffic.estBytes ?? 0)} returned
-                {traffic.since && ` since ${new Date(traffic.since).toLocaleDateString()}`} (
-                {compact(traffic.totalRows ?? 0)} rows). An estimate: Supabase&apos;s usage page has the billed egress.
-              </>
-            ) : (
-              "Query statistics are not available."
-            )}
-          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Data sent from the database to the site (egress).</p>
         </div>
-        {data.traffic.available && (
+        {traffic.available && (
           <button
             type="button"
             onClick={onReset}
             disabled={resetting}
-            title="Start the counts over, e.g. after fixing a heavy query"
-            className="shrink-0 cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+            className={smallButton}
+            title="Start counting again from now, e.g. after fixing a heavy query">
             {resetting ? "Resetting…" : "Reset counters"}
           </button>
         )}
@@ -56,25 +84,81 @@ function DbTrafficCard({ data, onReset, resetting }: { data: Payload; onReset: (
             href={supabaseProjectUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
-            Supabase <FaExternalLinkAlt className="h-3 w-3" />
+            className={smallButton}
+            title="The billed egress is on Supabase's usage page">
+            Supabase <FaExternalLinkAlt className="h-2.5 w-2.5" />
           </a>
         )}
       </div>
-      {(traffic.top ?? []).length > 0 && (
-        <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 text-sm dark:divide-gray-800 dark:border-gray-800">
-          {(traffic.top ?? []).map(q => (
-            <li key={q.query} className="px-3 py-2">
-              <p className="truncate font-mono text-xs text-gray-700 dark:text-gray-300" title={q.query}>
-                {q.query}
+
+      {!traffic.available ? (
+        <p className="text-sm text-gray-500 dark:text-gray-400">Query statistics are not available.</p>
+      ) : (
+        <>
+          <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800/50">
+            {monthly != null ? (
+              <>
+                <p className="flex flex-wrap items-baseline gap-x-2">
+                  <span className={`text-2xl font-semibold tabular-nums ${tone.text}`}>~{formatBytes(monthly)}</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">per month at the current rate</span>
+                </p>
+                <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                  <div
+                    className={`h-full rounded-full ${tone.bar}`}
+                    style={{ width: `${Math.min(100, Math.max(2, ratio * 100))}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 flex justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span>{Math.round(ratio * 100)}% of the 5 GB free quota</span>
+                  <span>
+                    estimate from {Math.round(days)} days
+                    {traffic.since && ` (since ${new Date(traffic.since).toLocaleDateString()})`}
+                  </span>
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Counting since {traffic.since ? new Date(traffic.since).toLocaleString() : "recently"}. A monthly
+                estimate appears after {MIN_PROJECTION_DAYS} days.
               </p>
-              <p className="mt-0.5 text-xs tabular-nums text-gray-500 dark:text-gray-400">
-                ~{formatBytes(q.estBytes)} · {compact(q.rows)} rows · {compact(q.calls)} calls · {q.rowsPerCall}{" "}
-                rows/call
+            )}
+          </div>
+
+          {groups.length > 0 && (
+            <>
+              <p className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Where it goes
               </p>
-            </li>
-          ))}
-        </ul>
+              <ul className="space-y-3">
+                {groups.map(group => {
+                  const share = shown ? group.bytes / shown : 0;
+                  return (
+                    <li key={group.name} title={group.sql.join(" | ")}>
+                      <div className="flex items-baseline justify-between gap-3 text-sm">
+                        <span className="min-w-0 truncate font-medium text-gray-900 dark:text-gray-100">
+                          {group.name}
+                        </span>
+                        <span className="shrink-0 tabular-nums text-gray-700 dark:text-gray-300">
+                          {formatBytes(group.bytes)} <span className="text-gray-400">· {Math.round(share * 100)}%</span>
+                        </span>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                        <div
+                          className="h-full rounded-full bg-primary-500"
+                          style={{ width: `${Math.max(1, share * 100)}%` }}
+                        />
+                      </div>
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {group.about} {compact(group.calls)} times, ~
+                        {compact(group.calls ? group.rows / group.calls : 0)} rows each.
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </>
       )}
     </div>
   );
