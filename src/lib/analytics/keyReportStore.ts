@@ -2,7 +2,10 @@
 import { unstable_cache } from "next/cache";
 import { db } from "@/src/lib/db/postgres";
 import { PUBLIC_ISR_REVALIDATE_SECONDS } from "@/src/lib/cache/constants";
-import { TAG_HOMEPAGE_STATS, programDetailTag } from "@/src/lib/cache/cacheTags";
+import { TAG_HOMEPAGE_STATS, programDetailTag, programKeyReportsTag } from "@/src/lib/cache/cacheTags";
+
+/** Fallback refresh for report counts; a new report expires them at once (see POST /api/v1/key-reports). */
+const PROGRAM_KEY_REPORTS_REVALIDATE_SECONDS = 3600;
 import type { KeyReportEvent } from "@/src/types";
 
 export type VersionFitFields = { listedVersion?: string; triedVersionFit?: string; triedVersion?: string };
@@ -194,21 +197,41 @@ export async function listKeyReportsSince(since: string) {
   `;
 }
 
-export type ProgramKeyReportRow = { eventType: string; key: string; triedVersionFit?: string; triedVersion?: string };
+/** `n` reports with the same key, outcome and version fit. */
+export type ProgramKeyReportRow = {
+  eventType: string;
+  key: string;
+  triedVersionFit?: string;
+  triedVersion?: string;
+  n: number;
+};
 
-/** Program page progress bars: slug-scoped rows, no PII. */
-export async function listProgramKeyReportRows(programSlug: string): Promise<ProgramKeyReportRow[]> {
-  const rows = await db()<Array<{ eventType: string; key: string; triedVersionFit: string | null; triedVersion: string | null }>>`
-    select event_type, key, tried_version_fit, tried_version
-    from analytics.key_reports
-    where program_slug = ${programSlug} and key is not null
-  `;
-  return rows.map(r => ({
-    eventType: r.eventType,
-    key: r.key,
-    ...(r.triedVersionFit ? { triedVersionFit: r.triedVersionFit } : {}),
-    ...(r.triedVersion ? { triedVersion: r.triedVersion } : {})
-  }));
+/**
+ * Program page progress bars: report counts per key, outcome and version fit (no PII). Grouped and cached because
+ * every program page view asks for them: returning one row per report was most of the database egress.
+ */
+export function listProgramKeyReportRows(programSlug: string): Promise<ProgramKeyReportRow[]> {
+  return unstable_cache(
+    async () => {
+      const rows = await db()<
+        Array<{ eventType: string; key: string; triedVersionFit: string | null; triedVersion: string | null; n: number }>
+      >`
+        select event_type, key, tried_version_fit, tried_version, count(*)::int as n
+        from analytics.key_reports
+        where program_slug = ${programSlug} and key is not null
+        group by 1, 2, 3, 4
+      `;
+      return rows.map(r => ({
+        eventType: r.eventType,
+        key: r.key,
+        ...(r.triedVersionFit ? { triedVersionFit: r.triedVersionFit } : {}),
+        ...(r.triedVersion ? { triedVersion: r.triedVersion } : {}),
+        n: r.n
+      }));
+    },
+    ["program-key-report-rows", programSlug],
+    { tags: [programKeyReportsTag(programSlug)], revalidate: PROGRAM_KEY_REPORTS_REVALIDATE_SECONDS }
+  )();
 }
 
 /** Public pages render without analytics rather than fail; the fallback is not cached. */

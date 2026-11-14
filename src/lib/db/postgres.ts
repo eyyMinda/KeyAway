@@ -14,6 +14,9 @@ function createClient() {
   return postgres(url, {
     // Supavisor transaction pooler (port 6543) does not support prepared statements.
     prepare: false,
+    // Skip reading pg_type on every new connection (~360 rows each, and serverless opens many): no array types are
+    // sent or read, so the built-in types are enough. This was the second-largest source of egress.
+    fetch_types: false,
     max: 5,
     idle_timeout: 20,
     connect_timeout: 10,

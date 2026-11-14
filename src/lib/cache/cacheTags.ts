@@ -37,6 +37,11 @@ export function programDetailTag(slug: string): string {
   return `program-${slug}`;
 }
 
+/** Key report counts behind a program page's progress bars; expired on every new report for that program. */
+export function programKeyReportsTag(slug: string): string {
+  return `program-key-reports-${slug}`;
+}
+
 /** Comment threads with visitor hashes (reactions + ownership), expired immediately on every comment/reaction write. */
 export function programCommentsTag(slug: string): string {
   return `program-comments-${slug}`;
