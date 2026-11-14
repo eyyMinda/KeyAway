@@ -2,7 +2,9 @@
  * @fileoverview Admin PATCH to fix key reports: `eventType` for one or many (`reportIds`); `triedVersionFit`
  * (listed / other) and `triedVersion` for one.
  */
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { TAG_KEY_REVIEW } from "@/src/lib/admin/keyReview.server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { adminUpdateKeyReport, adminUpdateKeyReports, getKeyReportFit } from "@/src/lib/analytics/keyReportStore";
 import { Errors } from "@/src/lib/api/errors";
@@ -33,6 +35,7 @@ export async function PATCH(req: NextRequest) {
       if (ids.length > MAX_BULK_REPORTS) return Errors.validation(`At most ${MAX_BULK_REPORTS} reports at once`);
       if (!REPORT_EVENTS.has(eventType as KeyReportEvent)) return Errors.validation("Invalid eventType");
       const updated = await adminUpdateKeyReports(ids, eventType as KeyReportEvent);
+      revalidateTag(TAG_KEY_REVIEW, { expire: 0 });
       return NextResponse.json({ data: updated, meta: { count: updated.length } });
     }
 
@@ -86,6 +89,7 @@ export async function PATCH(req: NextRequest) {
       triedVersion
     });
     if (!updated) return Errors.notFound("Report not found");
+    revalidateTag(TAG_KEY_REVIEW, { expire: 0 });
     return NextResponse.json({ data: [updated], meta: { count: 1 } });
   } catch (err) {
     console.error("[PATCH /api/v1/admin/key-report-event]", err);

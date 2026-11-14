@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { HiChartBar, HiViewGrid } from "react-icons/hi";
 import { MdRateReview, MdEventNote, MdAdsClick } from "react-icons/md";
 import { FaKey, FaEnvelopeOpenText, FaCommentDots, FaGift } from "react-icons/fa";
-import { useKeyReportAlerts, KeyReportAlertsDesktop, KeyReportAlertsMobile } from "./KeyReportAlerts";
 import AdminThemeToggle from "./AdminThemeToggle";
 
 export default function AdminHeader() {
@@ -16,7 +15,6 @@ export default function AdminHeader() {
     newSuggestions: number;
     newGiveawayFinds: number;
   } | null>(null);
-  const { alerts: keyReportAlerts } = useKeyReportAlerts();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -74,7 +72,6 @@ export default function AdminHeader() {
 
           {/* Desktop Navigation - Icons Only */}
           <nav className="hidden md:flex items-center space-x-2">
-            <KeyReportAlertsDesktop alerts={keyReportAlerts} />
             {navLinks.map(link => {
               const Icon = link.icon;
               const active = isActive(link.href);
@@ -125,7 +122,6 @@ export default function AdminHeader() {
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-200 dark:border-gray-800 py-4">
-            <KeyReportAlertsMobile alerts={keyReportAlerts} onLinkClick={() => setIsMobileMenuOpen(false)} />
             <nav className="flex flex-col space-y-2">
               {navLinks.map(link => {
                 const Icon = link.icon;

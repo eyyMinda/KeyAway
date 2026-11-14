@@ -7,19 +7,23 @@ import { unstable_cache } from "next/cache";
 import { client } from "@/src/sanity/lib/client";
 import { loadAdminAttention, type AdminAttention } from "@/src/lib/admin/attention.server";
 import { getInboxCounts, type InboxCounts } from "@/src/lib/admin/inboxCounts.server";
-import { getCachedKeyReportNotifications } from "@/src/lib/admin/keyReportNotifications.server";
+import { getCachedKeyReview } from "@/src/lib/admin/keyReview.server";
+import type { KeyReview } from "@/src/lib/admin/keyReview";
 import { getCachedAnalyticsDbUsage } from "@/src/lib/admin/analyticsDbUsage.server";
 import { getCachedUsageInsights, type UsageInsights } from "@/src/lib/admin/usageInsights.server";
 import { describeUserAgent } from "@/src/lib/analytics/describeUserAgent";
 import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
 import { DAY_MS, WEEK_MS } from "@/src/lib/time";
-import type { KeyReportNotificationItem } from "@/src/types/admin";
 
 export type AlertSeverity = "critical" | "warning" | "info";
 export type AlertCategory = "system" | "keys" | "inbox" | "content" | "usage";
 
+/** Alerts that open a dialog on the dashboard instead of navigating. */
+export type DashboardAlertAction = "key-review-keys" | "key-review-reports";
+
 export type DashboardAlert = {
   id: string;
+  action?: DashboardAlertAction;
   severity: AlertSeverity;
   category: AlertCategory;
   title: string;
@@ -50,6 +54,12 @@ export type DashboardAlerts = {
 const EGRESS_QUOTA_BYTES = 5 * 1024 ** 3;
 /** Query stats younger than this are too short to project a month from. */
 const MIN_PROJECTION_DAYS = 2;
+const STATUS_LABELS: Record<string, string> = {
+  new: "new",
+  active: "active",
+  expired: "expired",
+  limit: "limit reached"
+};
 const SEVERITY_ORDER: Record<AlertSeverity, number> = { critical: 0, warning: 1, info: 2 };
 
 const USAGE_HREF = "/admin#usage";
@@ -58,8 +68,13 @@ const TRAFFIC_HREF = "/admin#traffic-quality";
 const VERSIONS_HREF = "/admin/programs?view=versions";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
-const names = (items: string[], max = 3) =>
-  items.slice(0, max).join(", ") + (items.length > max ? ` and ${items.length - max} more` : "");
+/** "A ×2, B and 3 more": repeated names (several keys of one program) are grouped. */
+const names = (items: string[], max = 3) => {
+  const counts = new Map<string, number>();
+  for (const item of items) counts.set(item, (counts.get(item) ?? 0) + 1);
+  const unique = [...counts].map(([name, n]) => (n > 1 ? `${name} ×${n}` : name));
+  return unique.slice(0, max).join(", ") + (unique.length > max ? ` and ${unique.length - max} more` : "");
+};
 
 type CommentItem = { authorName?: string; authorRole?: string; createdAt?: string };
 
@@ -118,18 +133,34 @@ function systemAlerts(attention: AdminAttention): DashboardAlert[] {
   return alerts;
 }
 
-function keyAlerts(items: KeyReportNotificationItem[]): DashboardAlert[] {
-  if (!items.length) return [];
-  return [
-    {
-      id: "key-reports",
+function keyAlerts(review: KeyReview): DashboardAlert[] {
+  const alerts: DashboardAlert[] = [];
+  if (review.keys.length) {
+    const sure = review.keys.filter(k => k.confidence === "high").length;
+    alerts.push({
+      id: "key-status",
+      action: "key-review-keys",
       severity: "warning",
       category: "keys",
-      title: `${plural(items.length, "key")} reported as not working`,
-      detail: names(items.map(i => `${i.programTitle} (${i.label})`)),
-      href: items.length === 1 ? items[0].link : "/admin/key-reports"
-    }
-  ];
+      title: `${plural(review.keys.length, "key")} probably need a status update`,
+      detail:
+        (sure ? `${sure} with high confidence · ` : "") +
+        names(review.keys.map(k => `${k.programTitle} → ${STATUS_LABELS[k.suggested]}`)),
+      href: "/admin/key-reports"
+    });
+  }
+  if (review.reports.length) {
+    alerts.push({
+      id: "key-doubtful",
+      action: "key-review-reports",
+      severity: "info",
+      category: "keys",
+      title: `${plural(review.reports.length, "key report")} look doubtful`,
+      detail: "Spammers, mass reporting, or reports contradicted by many others.",
+      href: "/admin/key-reports"
+    });
+  }
+  return alerts;
 }
 
 function inboxAlerts(inbox: InboxCounts, comments: number | null, attention: AdminAttention | null): DashboardAlert[] {
@@ -229,10 +260,10 @@ function usageAlerts(
 }
 
 export async function loadDashboardAlerts(): Promise<DashboardAlerts> {
-  const [attention, inbox, keyItems, comments, dbSize, insights] = await Promise.all([
+  const [attention, inbox, review, comments, dbSize, insights] = await Promise.all([
     settle(loadAdminAttention()),
     settle(getInboxCounts()),
-    settle(getCachedKeyReportNotifications()),
+    settle(getCachedKeyReview()),
     settle(getRecentComments()),
     settle(getCachedAnalyticsDbUsage()),
     settle(getCachedUsageInsights())
@@ -240,7 +271,7 @@ export async function loadDashboardAlerts(): Promise<DashboardAlerts> {
 
   const alerts = [
     ...(attention ? systemAlerts(attention) : []),
-    ...(keyItems ? keyAlerts(keyItems) : []),
+    ...(review ? keyAlerts(review) : []),
     ...(inbox ? inboxAlerts(inbox, comments, attention) : []),
     ...usageAlerts(dbSize, insights)
   ].sort((a, b) => SEVERITY_ORDER[a.severity] - SEVERITY_ORDER[b.severity]);
@@ -266,7 +297,7 @@ export async function loadDashboardAlerts(): Promise<DashboardAlerts> {
       tile("messages", "Messages", inbox?.newMessages, "new", "/admin/messages"),
       tile("suggestions", "Key suggestions", inbox?.newSuggestions, "new", "/admin/key-suggestions"),
       tile("comments", "Comments", comments, "new this week", "/admin/comments"),
-      tile("keys", "Key reports", keyItems?.length, "keys reported broken", "/admin/key-reports"),
+      tile("keys", "Key reports", review?.keys.length, "keys to update", "/admin/key-reports"),
       tile("finds", "Giveaway finds", inbox?.newGiveawayFinds, "new", "/admin/giveaway-finds")
     ],
     versions: attention
@@ -276,6 +307,6 @@ export async function loadDashboardAlerts(): Promise<DashboardAlerts> {
           versionChecksFailed: attention.versionChecksFailed
         }
       : null,
-    partial: [attention, inbox, keyItems, comments, dbSize, insights].some(v => v === null)
+    partial: [attention, inbox, review, comments, dbSize, insights].some(v => v === null)
   };
 }

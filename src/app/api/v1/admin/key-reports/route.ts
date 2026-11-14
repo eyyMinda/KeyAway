@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { TAG_KEY_REVIEW } from "@/src/lib/admin/keyReview.server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
 import { client } from "@/src/sanity/lib/client";
 import { Errors } from "@/src/lib/api/errors";
@@ -78,6 +80,7 @@ export async function PATCH(req: NextRequest) {
     }
     await transaction.commit();
 
+    revalidateTag(TAG_KEY_REVIEW, { expire: 0 });
     return NextResponse.json({ data: { updated: updates.length }, meta: {} });
   } catch (err) {
     console.error("[PATCH /api/v1/admin/key-reports]", err);

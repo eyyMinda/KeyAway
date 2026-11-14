@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 import { FaArrowsRotate } from "react-icons/fa6";
 import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
+import KeyReviewModal, { type KeyReviewTab } from "@/src/components/admin/KeyReviewModal";
 import type {
   AlertSeverity,
   DashboardAlerts as Payload,
@@ -44,8 +45,25 @@ const SEVERITY_STYLES: Record<AlertSeverity, { row: string; icon: string; Icon: 
     }
   };
 
-/** Same-page anchors (#usage) scroll instead of navigating. */
-function AlertLink({ href, className, children }: { href: string; className: string; children: React.ReactNode }) {
+/** Alerts with an action open a dialog; same-page anchors (#usage) scroll; the rest navigate. */
+function AlertLink({
+  href,
+  onOpen,
+  className,
+  children
+}: {
+  href: string;
+  onOpen?: () => void;
+  className: string;
+  children: React.ReactNode;
+}) {
+  if (onOpen) {
+    return (
+      <button type="button" onClick={onOpen} className={`w-full cursor-pointer text-left ${className}`}>
+        {children}
+      </button>
+    );
+  }
   if (href.startsWith("/admin#")) {
     return (
       <a href={href.slice("/admin".length)} className={className}>
@@ -127,6 +145,7 @@ export default function DashboardAlerts() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadedAt, setLoadedAt] = useState<string | null>(null);
+  const [reviewTab, setReviewTab] = useState<KeyReviewTab | null>(null);
 
   const apply = useCallback((payload: Payload | null) => {
     if (payload) {
@@ -201,6 +220,11 @@ export default function DashboardAlerts() {
                 <li key={alert.id}>
                   <AlertLink
                     href={alert.href}
+                    onOpen={
+                      alert.action
+                        ? () => setReviewTab(alert.action === "key-review-keys" ? "keys" : "reports")
+                        : undefined
+                    }
                     className={`flex items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${style.row}`}>
                     <style.Icon className={`mt-0.5 h-4 w-4 shrink-0 ${style.icon}`} aria-label={style.label} />
                     <span className="min-w-0 flex-1">
@@ -255,6 +279,15 @@ export default function DashboardAlerts() {
           {data?.versions && <VersionsTile versions={data.versions} />}
         </div>
       </div>
+      {reviewTab && (
+        <KeyReviewModal
+          tab={reviewTab}
+          onClose={() => {
+            setReviewTab(null);
+            void refresh();
+          }}
+        />
+      )}
     </section>
   );
 }
