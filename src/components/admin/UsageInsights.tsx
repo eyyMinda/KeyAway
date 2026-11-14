@@ -32,9 +32,9 @@ function DbTrafficCard({ data }: { data: Payload }) {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {traffic.available ? (
               <>
-                ~{formatBytes(traffic.estBytes)} returned
+                ~{formatBytes(traffic.estBytes ?? 0)} returned
                 {traffic.since && ` since ${new Date(traffic.since).toLocaleDateString()}`} (
-                {compact(traffic.totalRows)} rows). An estimate: Supabase&apos;s usage page has the billed egress.
+                {compact(traffic.totalRows ?? 0)} rows). An estimate: Supabase&apos;s usage page has the billed egress.
               </>
             ) : (
               "Query statistics are not available."
@@ -51,9 +51,9 @@ function DbTrafficCard({ data }: { data: Payload }) {
           </a>
         )}
       </div>
-      {traffic.top.length > 0 && (
+      {(traffic.top ?? []).length > 0 && (
         <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200 text-sm dark:divide-gray-800 dark:border-gray-800">
-          {traffic.top.map(q => (
+          {(traffic.top ?? []).map(q => (
             <li key={q.query} className="px-3 py-2">
               <p className="truncate font-mono text-xs text-gray-700 dark:text-gray-300" title={q.query}>
                 {q.query}
@@ -72,6 +72,14 @@ function DbTrafficCard({ data }: { data: Payload }) {
 
 function RollupStatusCard({ data }: { data: Payload }) {
   const { rollup } = data;
+  if (!rollup) {
+    return (
+      <div className={card}>
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Analytics rollup</h4>
+        <p className="text-sm text-gray-500 dark:text-gray-400">The rollup tables could not be read.</p>
+      </div>
+    );
+  }
   return (
     <div className={card}>
       <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Analytics rollup</h4>
@@ -90,7 +98,7 @@ function RollupStatusCard({ data }: { data: Payload }) {
         <div>
           <dt className="text-xs text-gray-500 dark:text-gray-400">Days in daily totals</dt>
           <dd className="font-medium tabular-nums text-gray-900 dark:text-gray-100">
-            {rollup.daysRolled.toLocaleString()}
+            {(rollup.daysRolled ?? 0).toLocaleString()}
           </dd>
         </div>
         <div>
@@ -102,7 +110,7 @@ function RollupStatusCard({ data }: { data: Payload }) {
         <div>
           <dt className="text-xs text-gray-500 dark:text-gray-400">Daily totals size</dt>
           <dd className="font-medium tabular-nums text-gray-900 dark:text-gray-100">
-            {formatBytes(rollup.rollupBytes)}
+            {formatBytes(rollup.rollupBytes ?? 0)}
           </dd>
         </div>
       </dl>
@@ -126,6 +134,11 @@ function TrafficQualityCard({
         Browsers with the most one-page visits in the last {data.trafficDays} days. One page alone is normal; many
         visits per visitor that only ever load the homepage are not. Flag a browser as a bot to stop recording it.
       </p>
+      {data.userAgents === null && (
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Browser data appears once the <code>user_agents</code> migration has run.
+        </p>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
@@ -141,7 +154,7 @@ function TrafficQualityCard({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-            {data.userAgents.map(agent => {
+            {(data.userAgents ?? []).map(agent => {
               const perVisitor = agent.visitors ? agent.sessions / agent.visitors : 0;
               return (
                 <tr key={agent.id} className={agent.isBot ? "opacity-60" : ""}>
@@ -215,7 +228,9 @@ export default function UsageInsights() {
       });
       if (!res.ok) throw new Error();
       setData(prev =>
-        prev ? { ...prev, userAgents: prev.userAgents.map(a => (a.id === agent.id ? { ...a, isBot } : a)) } : prev
+        prev?.userAgents
+          ? { ...prev, userAgents: prev.userAgents.map(a => (a.id === agent.id ? { ...a, isBot } : a)) }
+          : prev
       );
     } catch {
       setError("Could not save the change");

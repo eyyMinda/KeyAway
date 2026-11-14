@@ -40,8 +40,10 @@ export type UserAgentTraffic = {
 
 export type UsageInsights = {
   traffic: DbTraffic;
-  rollup: RollupStatus;
-  userAgents: UserAgentTraffic[];
+  /** Null when the rollup tables could not be read. */
+  rollup: RollupStatus | null;
+  /** Null when user agents could not be read (e.g. before the user_agents migration). */
+  userAgents: UserAgentTraffic[] | null;
   trafficDays: number;
   /** Supabase dashboard page for this project (real egress lives there), when the pooler URL names it. */
   supabaseProjectUrl: string | null;
@@ -106,9 +108,9 @@ async function loadRollup(): Promise<RollupStatus> {
   `;
   return {
     rolledUntil: row.rolledUntil && row.rolledUntil > "1970-01-01" ? row.rolledUntil : null,
-    daysRolled: row.daysRolled,
-    rawSince: row.rawSince,
-    rollupBytes: Number(row.rollupBytes)
+    rawSince: row.rawSince ?? null,
+    daysRolled: row.daysRolled ?? 0,
+    rollupBytes: Number(row.rollupBytes) || 0
   };
 }
 
@@ -129,8 +131,20 @@ async function loadUserAgents(): Promise<UserAgentTraffic[]> {
   `;
 }
 
+/** Logs and falls back, so one failing part (e.g. user_agents before its migration) leaves the others working. */
+function orFallback<T>(label: string, fallback: T) {
+  return (err: unknown): T => {
+    console.error(`[usageInsights] ${label}`, err);
+    return fallback;
+  };
+}
+
 async function loadUsageInsights(): Promise<UsageInsights> {
-  const [traffic, rollup, userAgents] = await Promise.all([loadTraffic(), loadRollup(), loadUserAgents()]);
+  const [traffic, rollup, userAgents] = await Promise.all([
+    loadTraffic(),
+    loadRollup().catch(orFallback<RollupStatus | null>("rollup", null)),
+    loadUserAgents().catch(orFallback<UserAgentTraffic[] | null>("user agents", null))
+  ]);
   return { traffic, rollup, userAgents, trafficDays: TRAFFIC_DAYS, supabaseProjectUrl: supabaseProjectUrl() };
 }
 
