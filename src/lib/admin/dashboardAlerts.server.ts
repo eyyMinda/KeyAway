@@ -12,7 +12,7 @@ import { getCachedAnalyticsDbUsage } from "@/src/lib/admin/analyticsDbUsage.serv
 import { getCachedUsageInsights, type UsageInsights } from "@/src/lib/admin/usageInsights.server";
 import { describeUserAgent } from "@/src/lib/analytics/describeUserAgent";
 import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
-import { DAY_MS } from "@/src/lib/time";
+import { DAY_MS, WEEK_MS } from "@/src/lib/time";
 import type { KeyReportNotificationItem } from "@/src/types/admin";
 
 export type AlertSeverity = "critical" | "warning" | "info";
@@ -53,27 +53,27 @@ const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString
 const names = (items: string[], max = 3) =>
   items.slice(0, max).join(", ") + (items.length > max ? ` and ${items.length - max} more` : "");
 
-type CommentThread = {
-  authorName?: string;
-  authorRole?: string;
-  last?: { authorName?: string; authorRole?: string } | null;
-};
+type CommentItem = { authorName?: string; authorRole?: string; createdAt?: string };
 
-/** Threads whose last word is from a visitor (same rule as the comments page's "Awaiting reply"). */
-const getCommentsAwaitingReply = unstable_cache(
+/** Visitor comments and replies from the last week: worth a look, though most need no reply. */
+const getRecentComments = unstable_cache(
   async (): Promise<number> => {
-    const threads = await client.fetch<CommentThread[]>(
-      `*[_type == "program" && count(programComments) > 0].programComments[]{
-        authorName, authorRole, "last": replies[-1]{ authorName, authorRole }
+    // One row per program; comments and replies are flattened here (GROQ keeps them grouped per document).
+    const programs = await client.fetch<Array<{ comments: CommentItem[] | null; replies: CommentItem[] | null }>>(
+      `*[_type == "program" && count(programComments) > 0]{
+        "comments": programComments[]{ authorName, authorRole, createdAt },
+        "replies": programComments[].replies[]{ authorName, authorRole, createdAt }
       }`,
       {},
       { useCdn: false }
     );
-    const isStaff = (a?: { authorName?: string; authorRole?: string } | null) =>
-      a?.authorName === STAFF_COMMENT_AUTHOR_NAME && a?.authorRole === STAFF_COMMENT_AUTHOR_ROLE;
-    return threads.filter(t => !isStaff(t.last ?? t)).length;
+    const items = programs.flatMap(p => [...(p.comments ?? []), ...(p.replies ?? [])]).filter(Boolean);
+    const since = Date.now() - WEEK_MS;
+    const isStaff = (a: CommentItem) =>
+      a.authorName === STAFF_COMMENT_AUTHOR_NAME && a.authorRole === STAFF_COMMENT_AUTHOR_ROLE;
+    return items.filter(c => !isStaff(c) && c.createdAt && Date.parse(c.createdAt) >= since).length;
   },
-  ["admin-comments-awaiting"],
+  ["admin-recent-comments"],
   { revalidate: 60 }
 );
 
@@ -147,7 +147,7 @@ function inboxAlerts(inbox: InboxCounts, comments: number | null, attention: Adm
       id: "comments",
       severity: "info",
       category: "inbox",
-      title: `${plural(comments, "comment thread")} awaiting a reply`,
+      title: `${plural(comments, "new comment")} this week`,
       href: "/admin/comments"
     });
   if (attention?.versionsWaiting.length)
@@ -195,10 +195,11 @@ function usageAlerts(
       if (ratio >= 0.7)
         alerts.push({
           id: "egress",
-          severity: ratio >= 0.9 ? "critical" : "warning",
+          severity: "warning", // An estimate from query statistics, so never critical on its own.
           category: "usage",
           title: `Database egress trending to ~${Math.round(ratio * 100)}% of the 5 GB monthly quota`,
-          detail: "Estimated from query statistics; check the top queries.",
+          detail:
+            "Estimated from query statistics since their last reset; check the top queries, or reset the counters after a fix.",
           href: USAGE_HREF
         });
     }
@@ -224,7 +225,7 @@ export async function loadDashboardAlerts(): Promise<DashboardAlerts> {
     settle(loadAdminAttention()),
     settle(getInboxCounts()),
     settle(getCachedKeyReportNotifications()),
-    settle(getCommentsAwaitingReply()),
+    settle(getRecentComments()),
     settle(getCachedAnalyticsDbUsage()),
     settle(getCachedUsageInsights())
   ]);
@@ -256,7 +257,7 @@ export async function loadDashboardAlerts(): Promise<DashboardAlerts> {
     tiles: [
       tile("messages", "Messages", inbox?.newMessages, "new", "/admin/messages"),
       tile("suggestions", "Key suggestions", inbox?.newSuggestions, "new", "/admin/key-suggestions"),
-      tile("comments", "Comments", comments, "awaiting reply", "/admin/comments"),
+      tile("comments", "Comments", comments, "new this week", "/admin/comments"),
       tile("keys", "Key reports", keyItems?.length, "keys reported broken", "/admin/key-reports"),
       tile("versions", "Versions", attention?.versionsWaiting.length, "to review", VERSIONS_HREF),
       tile("finds", "Giveaway finds", inbox?.newGiveawayFinds, "new", "/admin/giveaway-finds")

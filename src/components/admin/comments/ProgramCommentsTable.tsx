@@ -23,6 +23,7 @@ import {
 } from "@/src/components/admin/list/AdminListKit";
 import { MAX_COMMENT_BODY } from "@/src/lib/program/commentBody";
 import { STAFF_COMMENT_AUTHOR_NAME, STAFF_COMMENT_AUTHOR_ROLE } from "@/src/lib/program/staffCommentIdentity";
+import { WEEK_MS } from "@/src/lib/time";
 import { visitorTierBadgeClasses } from "@/src/theme/colorSchema";
 import type { AdminProgramCommentRow as Row } from "@/src/types/admin/programComments";
 
@@ -40,16 +41,18 @@ type Thread = {
   comment: Row;
   replies: Row[];
   lastActivity: number;
-  /** The last word is not ours: a visitor commented or replied after the team. */
-  awaiting: boolean;
+  /** A visitor commented or replied in the last week (worth a look; replying is optional). */
+  recent: boolean;
   hasSpam: boolean;
 };
 
-type StatusFilter = "all" | "new" | "awaiting" | "pinned" | "spam";
+type StatusFilter = "all" | "new" | "recent" | "pinned" | "spam";
 type SortKey = "activity" | "newest" | "oldest" | "program";
 
 /** Replies hidden behind "show earlier" once a thread has more than this many. */
 const VISIBLE_REPLIES = 3;
+/** A visitor comment within this window makes a thread "active this week". */
+const RECENT_MS = WEEK_MS;
 const SEEN_STORAGE_KEY = "keyaway:admin-comments-seen";
 
 type SeenState = { since: number; threads: Record<string, number> };
@@ -88,7 +91,7 @@ function buildThreads(rows: Row[]): Thread[] {
       comment: row,
       replies: [],
       lastActivity: time(row.createdAt),
-      awaiting: false,
+      recent: false,
       hasSpam: false
     });
   }
@@ -100,7 +103,7 @@ function buildThreads(rows: Row[]): Thread[] {
     thread.replies.sort((a, b) => time(a.createdAt) - time(b.createdAt));
     const items = [thread.comment, ...thread.replies];
     thread.lastActivity = Math.max(...items.map(r => time(r.createdAt)));
-    thread.awaiting = !isStaff(items[items.length - 1]);
+    thread.recent = items.some(r => !isStaff(r) && time(r.createdAt) >= Date.now() - RECENT_MS);
     thread.hasSpam = items.some(isSpam);
   }
   return [...byId.values()];
@@ -320,7 +323,6 @@ function ThreadCard({
           {comment.programTitle}
         </Link>
         {comment.isPinned && <Chip tone="amber">Pinned</Chip>}
-        {thread.awaiting && <Chip tone="red">Awaiting reply</Chip>}
         {newCount > 0 && (
           <button
             type="button"
@@ -397,7 +399,7 @@ export default function ProgramCommentsTable({
     const list = threads.filter(t => {
       if (program !== "all" && t.comment.programSlug !== program) return false;
       if (status === "new" && newCountOf(t) === 0) return false;
-      if (status === "awaiting" && !t.awaiting) return false;
+      if (status === "recent" && !t.recent) return false;
       if (status === "pinned" && !t.comment.isPinned) return false;
       if (status === "spam" && !t.hasSpam) return false;
       if (!q) return true;
@@ -416,7 +418,7 @@ export default function ProgramCommentsTable({
   const paged = usePagedList(filtered, `${search}|${program}|${status}|${sort}`, 15);
 
   const unreadThreads = threads.filter(t => newCountOf(t) > 0);
-  const awaitingCount = threads.filter(t => t.awaiting).length;
+  const recentCount = threads.filter(t => t.recent).length;
   const spamCount = threads.filter(t => t.hasSpam).length;
   const replyTotal = rows.filter(r => r.isReply).length;
 
@@ -448,7 +450,7 @@ export default function ProgramCommentsTable({
       <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <AnalyticsCard label="Threads" value={threads.length} />
         <AnalyticsCard label="Replies" value={replyTotal} />
-        <AnalyticsCard label="Awaiting reply" value={awaitingCount} />
+        <AnalyticsCard label="Active this week" value={recentCount} />
         <AnalyticsCard label="New since last read" value={unreadThreads.length} />
       </div>
 
@@ -473,7 +475,7 @@ export default function ProgramCommentsTable({
           options={[
             { value: "all", label: "All threads", count: threads.length },
             { value: "new", label: "New", count: unreadThreads.length },
-            { value: "awaiting", label: "Awaiting reply", count: awaitingCount },
+            { value: "recent", label: "Active this week", count: recentCount },
             { value: "pinned", label: "Pinned", count: threads.filter(t => t.comment.isPinned).length },
             { value: "spam", label: "With spammers", count: spamCount }
           ]}

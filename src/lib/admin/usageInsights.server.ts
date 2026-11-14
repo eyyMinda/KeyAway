@@ -162,3 +162,8 @@ export async function setUserAgentBot(id: number, isBot: boolean): Promise<boole
   `;
   return rows.length > 0;
 }
+
+/** Clears pg_stat_statements so the traffic card and egress projection start over (e.g. after fixing a heavy query). */
+export async function resetQueryStats(): Promise<void> {
+  await db()`select pg_stat_statements_reset()`;
+}

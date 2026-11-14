@@ -22,7 +22,7 @@ function formatBytes(bytes: number): string {
 const compact = (n: number) => new Intl.NumberFormat(undefined, { notation: "compact" }).format(n);
 const percent = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : "—");
 
-function DbTrafficCard({ data }: { data: Payload }) {
+function DbTrafficCard({ data, onReset, resetting }: { data: Payload; onReset: () => void; resetting: boolean }) {
   const { traffic, supabaseProjectUrl } = data;
   return (
     <div className={card}>
@@ -41,6 +41,16 @@ function DbTrafficCard({ data }: { data: Payload }) {
             )}
           </p>
         </div>
+        {data.traffic.available && (
+          <button
+            type="button"
+            onClick={onReset}
+            disabled={resetting}
+            title="Start the counts over, e.g. after fixing a heavy query"
+            className="shrink-0 cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">
+            {resetting ? "Resetting…" : "Reset counters"}
+          </button>
+        )}
         {supabaseProjectUrl && (
           <a
             href={supabaseProjectUrl}
@@ -204,6 +214,7 @@ export default function UsageInsights() {
   const [data, setData] = useState<Payload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState<number | null>(null);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,6 +226,21 @@ export default function UsageInsights() {
       cancelled = true;
     };
   }, []);
+
+  const resetCounters = async () => {
+    if (!confirm("Reset the query statistics? The traffic card and egress estimate start counting from now.")) return;
+    setResetting(true);
+    try {
+      const res = await fetch("/api/v1/admin/usage-insights/reset", { method: "POST" });
+      if (!res.ok) throw new Error();
+      const fresh = await fetch("/api/v1/admin/usage-insights");
+      if (fresh.ok) setData(((await fresh.json()) as { data: Payload }).data);
+    } catch {
+      setError("Could not reset the counters");
+    } finally {
+      setResetting(false);
+    }
+  };
 
   const flag = useCallback(async (agent: UserAgentTraffic) => {
     const isBot = !agent.isBot;
@@ -240,11 +266,23 @@ export default function UsageInsights() {
   }, []);
 
   if (error && !data) return <p className="text-sm text-red-600 dark:text-red-400">{error}</p>;
-  if (!data) return <p className="text-sm text-gray-500 dark:text-gray-400">Loading usage…</p>;
+  if (!data) {
+    // Placeholders in the final layout, so the section does not jump when the data arrives.
+    return (
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2" aria-busy="true" aria-label="Loading usage">
+        {["h-56", "h-56", "h-64 lg:col-span-2"].map(size => (
+          <div key={size} className={`${card} ${size} animate-pulse`}>
+            <div className="h-5 w-40 rounded bg-gray-200 dark:bg-gray-800" />
+            <div className="mt-3 h-3 w-64 max-w-full rounded bg-gray-100 dark:bg-gray-800/60" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-      <DbTrafficCard data={data} />
+      <DbTrafficCard data={data} onReset={() => void resetCounters()} resetting={resetting} />
       <RollupStatusCard data={data} />
       <div id="traffic-quality" className="scroll-mt-24 lg:col-span-2">
         <TrafficQualityCard data={data} onFlag={flag} saving={saving} />
