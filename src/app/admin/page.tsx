@@ -6,7 +6,6 @@ import WelcomeHeader from "@/src/components/admin/WelcomeHeader";
 import IndexNowSubmitCard from "@/src/components/admin/IndexNowSubmitCard";
 import GiveawayPickerCard from "@/src/components/admin/GiveawayPickerCard";
 import DashboardAlerts from "@/src/components/admin/DashboardAlerts";
-import { VersionUpdates } from "@/src/components/admin/AttentionPanel";
 import UsageInsights from "@/src/components/admin/UsageInsights";
 
 function SectionHeading({ id, title, subtitle }: { id: string; title: string; subtitle: string }) {
@@ -18,7 +17,7 @@ function SectionHeading({ id, title, subtitle }: { id: string; title: string; su
   );
 }
 
-/** Admin home: what needs attention first, then usage and system health, then seasonal tools. */
+/** Admin home: what needs attention first, then usage, seasonal tools, and scheduled jobs at the bottom. */
 export default function AdminHomePage() {
   return (
     <ProtectedAdminLayout headerContent={<WelcomeHeader />}>
@@ -36,19 +35,16 @@ export default function AdminHomePage() {
       </section>
 
       <section className="mt-10 md:mt-14">
-        <SectionHeading id="system" title="System" subtitle="Scheduled jobs and program version tracking." />
-        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-          <CronStatusCard />
-          <VersionUpdates />
-        </div>
-      </section>
-
-      <section className="mt-10 md:mt-14">
         <SectionHeading id="seasonal" title="Seasonal" subtitle="Giveaways and search engine submissions." />
         <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
           <GiveawayPickerCard />
           <IndexNowSubmitCard />
         </div>
+      </section>
+
+      <section className="mt-10 md:mt-14">
+        <SectionHeading id="system" title="System" subtitle="Scheduled jobs: last runs and recent history." />
+        <CronStatusCard />
       </section>
     </ProtectedAdminLayout>
   );

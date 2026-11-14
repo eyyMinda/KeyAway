@@ -11,11 +11,16 @@ import {
   FaChevronRight,
   FaExclamationCircle,
   FaExclamationTriangle,
-  FaInfoCircle
+  FaInfoCircle,
+  FaShieldAlt
 } from "react-icons/fa";
 import { FaArrowsRotate } from "react-icons/fa6";
 import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
-import type { AlertSeverity, DashboardAlerts as Payload } from "@/src/lib/admin/dashboardAlerts.server";
+import type {
+  AlertSeverity,
+  DashboardAlerts as Payload,
+  DashboardVersions
+} from "@/src/lib/admin/dashboardAlerts.server";
 
 const SEVERITY_STYLES: Record<AlertSeverity, { row: string; icon: string; Icon: typeof FaInfoCircle; label: string }> =
   {
@@ -62,6 +67,59 @@ async function fetchAlerts(): Promise<Payload | null> {
   } catch {
     return null;
   }
+}
+
+const VERSIONS_HREF = "/admin/programs?view=versions";
+
+/** Two-column inbox card: versions waiting for review, and versions trusted sources applied this week. */
+function VersionsTile({ versions }: { versions: DashboardVersions }) {
+  const { versionsWaiting: waiting, autoApplied, versionChecksFailed: failing } = versions;
+  const attention = waiting.length > 0 || failing > 0;
+  return (
+    <Link
+      href={VERSIONS_HREF}
+      className={`col-span-2 rounded-xl border p-4 transition-colors ${
+        attention
+          ? "border-sky-200 bg-sky-50 hover:bg-sky-100/70 dark:border-sky-500/30 dark:bg-sky-500/10 dark:hover:bg-sky-500/15"
+          : "border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/60"
+      }`}>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Versions</p>
+        {failing > 0 && <span className="text-xs text-red-600 dark:text-red-400">{failing} checks failing</span>}
+      </div>
+      <p className="flex flex-wrap items-baseline gap-x-3">
+        <span
+          className={`text-2xl font-semibold tabular-nums ${waiting.length ? "text-sky-700 dark:text-sky-300" : "text-gray-400 dark:text-gray-500"}`}>
+          {waiting.length}
+        </span>
+        <span className="text-xs text-gray-500 dark:text-gray-400">
+          to review · {autoApplied.length} applied automatically this week
+        </span>
+      </p>
+      {waiting.length + autoApplied.length > 0 && (
+        <ul className="mt-2 space-y-1 text-xs">
+          {waiting.slice(0, 3).map(v => (
+            <li key={`w-${v.id}`} className="flex items-center gap-2">
+              <span className="min-w-0 flex-1 truncate text-gray-800 dark:text-gray-200">{v.title}</span>
+              <span className="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">
+                {v.current ?? "?"} → <span className="font-semibold text-sky-700 dark:text-sky-300">{v.found}</span>
+              </span>
+            </li>
+          ))}
+          {autoApplied.slice(0, 2).map(v => (
+            <li key={`a-${v.id}`} className="flex items-center gap-2">
+              <FaShieldAlt
+                className="h-2.5 w-2.5 shrink-0 text-green-600 dark:text-green-400"
+                aria-label="Trusted source"
+              />
+              <span className="min-w-0 flex-1 truncate text-gray-600 dark:text-gray-400">{v.title}</span>
+              <span className="shrink-0 tabular-nums text-gray-500 dark:text-gray-400">{v.found}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Link>
+  );
 }
 
 export default function DashboardAlerts() {
@@ -174,11 +232,14 @@ export default function DashboardAlerts() {
       <div>
         <h3 className="mb-3 text-xl font-semibold text-gray-900 dark:text-gray-100">Inbox</h3>
         <div className="grid grid-cols-2 gap-3">
-          {(data?.tiles ?? []).map(tile => (
+          {(data?.tiles ?? []).map((tile, i, tiles) => (
             <Link
               key={tile.id}
               href={tile.href}
               className={`rounded-xl border p-4 transition-colors ${
+                // An odd last tile fills the row instead of leaving a gap.
+                tiles.length % 2 && i === tiles.length - 1 ? "col-span-2" : ""
+              } ${
                 tile.attention
                   ? "border-sky-200 bg-sky-50 hover:bg-sky-100/70 dark:border-sky-500/30 dark:bg-sky-500/10 dark:hover:bg-sky-500/15"
                   : "border-gray-200 bg-white hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800/60"
@@ -191,6 +252,7 @@ export default function DashboardAlerts() {
               <p className="text-xs text-gray-500 dark:text-gray-400">{tile.hint}</p>
             </Link>
           ))}
+          {data?.versions && <VersionsTile versions={data.versions} />}
         </div>
       </div>
     </section>

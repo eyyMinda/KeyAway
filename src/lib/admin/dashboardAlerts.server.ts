@@ -36,7 +36,15 @@ export type DashboardTile = {
   attention: boolean;
 };
 
-export type DashboardAlerts = { alerts: DashboardAlert[]; tiles: DashboardTile[]; partial: boolean };
+/** Program versions for the inbox card: waiting for review, and applied from trusted sources this week. */
+export type DashboardVersions = Pick<AdminAttention, "versionsWaiting" | "autoApplied" | "versionChecksFailed">;
+
+export type DashboardAlerts = {
+  alerts: DashboardAlert[];
+  tiles: DashboardTile[];
+  versions: DashboardVersions | null;
+  partial: boolean;
+};
 
 /** Supabase free plan egress per billing period. */
 const EGRESS_QUOTA_BYTES = 5 * 1024 ** 3;
@@ -259,9 +267,15 @@ export async function loadDashboardAlerts(): Promise<DashboardAlerts> {
       tile("suggestions", "Key suggestions", inbox?.newSuggestions, "new", "/admin/key-suggestions"),
       tile("comments", "Comments", comments, "new this week", "/admin/comments"),
       tile("keys", "Key reports", keyItems?.length, "keys reported broken", "/admin/key-reports"),
-      tile("versions", "Versions", attention?.versionsWaiting.length, "to review", VERSIONS_HREF),
       tile("finds", "Giveaway finds", inbox?.newGiveawayFinds, "new", "/admin/giveaway-finds")
     ],
+    versions: attention
+      ? {
+          versionsWaiting: attention.versionsWaiting,
+          autoApplied: attention.autoApplied,
+          versionChecksFailed: attention.versionChecksFailed
+        }
+      : null,
     partial: [attention, inbox, keyItems, comments, dbSize, insights].some(v => v === null)
   };
 }
