@@ -270,8 +270,12 @@ export default function UsageInsights() {
     // Placeholders in the final layout, so the section does not jump when the data arrives.
     return (
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2" aria-busy="true" aria-label="Loading usage">
-        {["h-56", "h-56", "h-64 lg:col-span-2"].map(size => (
-          <div key={size} className={`${card} ${size} animate-pulse`}>
+        {[
+          { id: "traffic", size: "h-56" },
+          { id: "rollup", size: "h-56" },
+          { id: "quality", size: "h-64 lg:col-span-2" }
+        ].map(({ id, size }) => (
+          <div key={id} className={`${card} ${size} animate-pulse`}>
             <div className="h-5 w-40 rounded bg-gray-200 dark:bg-gray-800" />
             <div className="mt-3 h-3 w-64 max-w-full rounded bg-gray-100 dark:bg-gray-800/60" />
           </div>
