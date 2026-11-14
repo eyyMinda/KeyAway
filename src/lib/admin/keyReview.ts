@@ -53,6 +53,22 @@ export type ReviewKey = {
 
 export type ReviewVisitor = { tier?: string; spammer?: boolean };
 
+/** Why a key's status should change, for the dialog's chips (each has a matching sentence in `reasons`). */
+export type KeySignal =
+  | { kind: "broken-listed"; share: number; reporters: number }
+  | { kind: "recent-failures"; count: number }
+  | { kind: "fails-latest"; reporters: number; version: string }
+  | { kind: "past-valid-until"; date: string }
+  | { kind: "works-again"; share: number; reporters: number }
+  | { kind: "still-working"; reporters: number };
+
+/** Why a report looks doubtful, for the dialog's chips. */
+export type ReportFlag =
+  | { kind: "spammer" }
+  | { kind: "mass-reporter"; count: number; programs: number }
+  | { kind: "contradicted"; confirmations: number }
+  | { kind: "impossible-version"; tried: string; latest: string };
+
 export type KeySuggestion = {
   programSlug: string;
   programTitle: string;
@@ -63,6 +79,7 @@ export type KeySuggestion = {
   suggested: CDKeyStatus;
   confidence: "high" | "medium";
   reasons: string[];
+  signals: KeySignal[];
   counts: { working: number; failedListed: number; failedLatest: number; reporters: number };
   keyVersion?: string;
   latestVersion?: string;
@@ -82,6 +99,7 @@ export type DoubtfulReport = {
   ipHash?: string;
   visitorTier?: string;
   reasons: string[];
+  flags: ReportFlag[];
 };
 
 export type KeyReview = { keys: KeySuggestion[]; reports: DoubtfulReport[]; windowDays: number };
@@ -101,7 +119,7 @@ const brokenStatus = (expiredWeight: number, limitWeight: number): CDKeyStatus =
  * Visitors who reported many keys broken within a day (or several across different programs). Trying a few keys of
  * one program and finding them used up is normal; reporting keys of many programs broken in a day is not.
  */
-function massReporters(reports: ReviewReport[]): Map<string, string> {
+function massReporters(reports: ReviewReport[]): Map<string, { count: number; programs: number }> {
   const byVisitor = new Map<string, Array<{ at: number; program: string }>>();
   for (const r of reports) {
     if (!r.ipHash || !isNegative(r)) continue;
@@ -110,7 +128,7 @@ function massReporters(reports: ReviewReport[]): Map<string, string> {
       { at: Date.parse(r.createdAt), program: r.programSlug }
     ]);
   }
-  const result = new Map<string, string>();
+  const result = new Map<string, { count: number; programs: number }>();
   for (const [visitor, events] of byVisitor) {
     events.sort((a, b) => a.at - b.at);
     for (let i = 0, j = 0; j < events.length; j++) {
@@ -121,10 +139,7 @@ function massReporters(reports: ReviewReport[]): Map<string, string> {
         window.length >= MASS_REPORT_COUNT ||
         (window.length >= MASS_REPORT_SPREAD.count && programs >= MASS_REPORT_SPREAD.programs)
       ) {
-        result.set(
-          visitor,
-          `The same visitor reported ${window.length} keys of ${plural(programs, "program")} as not working within a day.`
-        );
+        result.set(visitor, { count: window.length, programs });
         break;
       }
     }
@@ -224,10 +239,12 @@ export function reviewKeyReports(
         ...base,
         suggested: "expired",
         confidence: "high",
-        reasons: [`Its valid-until date passed on ${new Date(key.validUntil).toLocaleDateString("en-GB")}.`]
+        reasons: [`Its valid-until date passed on ${new Date(key.validUntil).toLocaleDateString("en-GB")}.`],
+        signals: [{ kind: "past-valid-until", date: key.validUntil }]
       };
     } else if (live) {
       const reasons: string[] = [];
+      const signals: KeySignal[] = [];
       let suggested: CDKeyStatus | null = null;
       let high = false;
       const listedShare = sums.listed / (sums.listed + sums.works || 1);
@@ -238,7 +255,11 @@ export function reviewKeyReports(
           `${plural(counts.failedListed, "visitor")} report it not working on its listed version` +
             `${key.version ? ` (v${key.version})` : ""}: ${pct(listedShare)} of the weighted reports.`
         );
-        if (streak) reasons.push(`The ${MIN_REPORTERS} most recent reports all say it no longer works.`);
+        signals.push({ kind: "broken-listed", share: listedShare, reporters: counts.failedListed });
+        if (streak) {
+          reasons.push(`The ${MIN_REPORTERS} most recent reports all say it no longer works.`);
+          signals.push({ kind: "recent-failures", count: MIN_REPORTERS });
+        }
         high = listedShare >= 0.8 && counts.failedListed >= 5;
       }
       const latestShare = sums.latest / (sums.latest + sums.works || 1);
@@ -248,12 +269,15 @@ export function reviewKeyReports(
           `${plural(counts.failedLatest, "visitor")} tried the latest v${key.latestVersion} and it failed; ` +
             `the key is listed for v${key.version}. Most people download the latest version.`
         );
+        signals.push({ kind: "fails-latest", reporters: counts.failedLatest, version: key.latestVersion! });
         high ||= counts.failedLatest >= 8 && latestShare >= 0.6;
       }
       if (suggested) {
-        if (counts.working)
+        if (counts.working) {
           reasons.push(`${plural(counts.working, "visitor")} still reported it working in this period.`);
-        suggestion = { ...base, suggested, confidence: high ? "high" : "medium", reasons };
+          signals.push({ kind: "still-working", reporters: counts.working });
+        }
+        suggestion = { ...base, suggested, confidence: high ? "high" : "medium", reasons, signals };
       }
     } else if (key.status === "expired" || key.status === "limit") {
       const worksShare = sums.works / (sums.works + sums.listed || 1);
@@ -266,7 +290,8 @@ export function reviewKeyReports(
           reasons: [
             `It is marked ${key.status === "limit" ? "limit reached" : "expired"}, but ${plural(counts.working, "visitor")} ` +
               `reported it working (${pct(worksShare)} of the weighted reports), including the ${MIN_REPORTERS} most recent.`
-          ]
+          ],
+          signals: [{ kind: "works-again", share: worksShare, reporters: counts.working }]
         };
       }
     }
@@ -276,14 +301,26 @@ export function reviewKeyReports(
     // --- Doubtful reports on this key ------------------------------------------------------------------------
     for (const [i, r] of keyReports.entries()) {
       const reasons: string[] = [];
+      const flags: ReportFlag[] = [];
       const visitor = r.ipHash ? visitors.get(r.ipHash) : undefined;
-      if (visitor?.spammer) reasons.push("The visitor is flagged as a spammer.");
-      if (r.ipHash && mass.has(r.ipHash) && isNegative(r)) reasons.push(mass.get(r.ipHash)!);
+      if (visitor?.spammer) {
+        reasons.push("The visitor is flagged as a spammer.");
+        flags.push({ kind: "spammer" });
+      }
+      const massReport = r.ipHash ? mass.get(r.ipHash) : undefined;
+      if (massReport && isNegative(r)) {
+        reasons.push(
+          `The same visitor reported ${massReport.count} keys of ${plural(massReport.programs, "program")} as not working within a day.`
+        );
+        flags.push({ kind: "mass-reporter", ...massReport });
+      }
       const tried = tenths(r.triedVersion);
-      if (r.fit === "other" && tried != null && latest != null && tried > latest)
+      if (r.fit === "other" && tried != null && latest != null && tried > latest) {
         reasons.push(
           `Says it tried v${r.triedVersion}, newer than the latest official v${key.latestVersion} (or the recorded latest version is out of date).`
         );
+        flags.push({ kind: "impossible-version", tried: r.triedVersion!, latest: key.latestVersion! });
+      }
       // Mixed results are normal for shared keys; only an overwhelming working majority makes a failure doubtful.
       if (isNegative(r) && r.fit !== "other") {
         const confirmedAfter = new Set(
@@ -296,8 +333,10 @@ export function reviewKeyReports(
           !suggestion &&
           overallWorking >= CONTRADICTED_MIN_WORKING_SHARE &&
           confirmedAfter.size >= CONTRADICTED_MIN_CONFIRMATIONS
-        )
+        ) {
           reasons.push(`${plural(confirmedAfter.size, "visitor")} reported it working afterwards.`);
+          flags.push({ kind: "contradicted", confirmations: confirmedAfter.size });
+        }
       }
       if (reasons.length) {
         doubtful.push({
@@ -312,7 +351,8 @@ export function reviewKeyReports(
           fit: r.fit,
           ipHash: r.ipHash,
           visitorTier: visitor?.tier,
-          reasons
+          reasons,
+          flags
         });
       }
     }
