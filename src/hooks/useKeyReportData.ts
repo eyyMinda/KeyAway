@@ -11,6 +11,8 @@ type KeyReportFetched = {
   key?: string;
   triedVersionFit?: string | null;
   triedVersion?: string | null;
+  /** Reports in this group (key, outcome, version fit). */
+  n?: number;
 };
 
 /** `rowStorageIds[i]` aligns with `cdKeys[i]` (plaintext key, username, or link digest — same as server `getRowStorageHash`). */
@@ -46,11 +48,11 @@ export function useKeyReportData(programSlug: string, rowStorageIds: string[]) {
             keyReportData.set(storageKey, emptyReportData());
           }
 
-          const currentData = keyReportData.get(storageKey)!;
-          keyReportData.set(
-            storageKey,
-            applyKeyReportEvent(currentData, eventType, event.triedVersionFit, event.triedVersion)
-          );
+          let data = keyReportData.get(storageKey)!;
+          for (let i = 0; i < (event.n ?? 1); i++) {
+            data = applyKeyReportEvent(data, eventType, event.triedVersionFit, event.triedVersion);
+          }
+          keyReportData.set(storageKey, data);
         }
 
         for (const [storageKey, data] of keyReportData) {

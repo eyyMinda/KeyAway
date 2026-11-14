@@ -7,7 +7,7 @@ import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/re
 import { isVisitorSpammerByHash, upsertVisitorContribution } from "@/src/lib/visitors/visitorStore";
 import { createKeyReport, listProgramKeyReportRows, renewOwnReport } from "@/src/lib/analytics/keyReportStore";
 import { revalidateTag } from "next/cache";
-import { TAG_HOMEPAGE_STATS } from "@/src/lib/cache/cacheTags";
+import { TAG_HOMEPAGE_STATS, programKeyReportsTag } from "@/src/lib/cache/cacheTags";
 import type { KeyReportEvent } from "@/src/types";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
 import { parseVersionFitInput } from "@/src/lib/program/keyReportVersionFit";
@@ -18,7 +18,7 @@ const REPORT_EVENTS = new Set<KeyReportEvent>(["report_key_working", "report_key
 /** Program page bars refresh after a visitor's own report by adding `fresh=<ts>`, which skips the CDN copy. */
 const PROGRAM_ROWS_CACHE = "public, s-maxage=60, stale-while-revalidate=300";
 
-/** GET /api/v1/key-reports?programSlug= - Report rows for a program's progress bars (no PII). */
+/** GET /api/v1/key-reports?programSlug= - Report counts per key for a program's progress bars (no PII). */
 export async function GET(req: NextRequest) {
   const programSlug = req.nextUrl.searchParams.get("programSlug")?.trim() ?? "";
   if (!/^[a-z0-9-]{1,120}$/i.test(programSlug)) return Errors.validation("programSlug is required");
@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
         console.error("[POST /api/v1/key-reports] visitor contribution upsert failed (renew)", e);
       }
       revalidateTag(TAG_HOMEPAGE_STATS, "max");
+      revalidateTag(programKeyReportsTag(renewProgramSlug), { expire: 0 });
       return NextResponse.json({ data: { updatedReport: updated }, meta: {} });
     }
 
@@ -151,6 +152,8 @@ export async function POST(req: NextRequest) {
       ...version.fields
     });
     revalidateTag(TAG_HOMEPAGE_STATS, "max");
+    // The reporter's bars refetch right away (with `fresh`), so the counts must not be served stale.
+    revalidateTag(programKeyReportsTag(programSlug), { expire: 0 });
     const sessionId = typeof meta?.sessionId === "string" ? meta.sessionId : undefined;
     try {
       await appendTrackingSession({
