@@ -7,7 +7,7 @@ import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
 import { normalizePath } from "@/src/lib/api/inputNormalize";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
-import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
+import { isBlockedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/requestGeo";
 import { appendTrackingSession } from "@/src/lib/analytics/appendTrackingSession";
 import { isSessionEntry } from "@/src/lib/analytics/sessionConstants";
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     }
 
     const ua = req.headers.get("user-agent") || undefined;
-    if (isAutomatedAnalyticsRequest(req, body.event)) {
+    if (await isBlockedAnalyticsRequest(req, body.event)) {
       return NextResponse.json({ data: { accepted: true, skipped: true, reason: "automated" }, meta: {} });
     }
 

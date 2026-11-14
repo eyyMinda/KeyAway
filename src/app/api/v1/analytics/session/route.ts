@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { carryOverVisitorHash } from "@/src/lib/visitors/carryOverVisitorHash";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-import { isAutomatedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
+import { isBlockedAnalyticsRequest } from "@/src/lib/api/isAutomatedAnalyticsRequest";
 import { isRecentDuplicateRequest } from "@/src/lib/api/shortRequestDedupe";
 import { getClientIp, hashIp, locationFromVercelHeaders } from "@/src/lib/api/requestGeo";
 import { getAdminSession } from "@/src/lib/admin/adminAuth";
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     const incoming = Array.isArray(body.events) ? body.events.slice(0, 30) : [];
     const hasPageView = incoming.some(e => e.event === "page_viewed");
-    if (isAutomatedAnalyticsRequest(req, hasPageView ? "page_viewed" : "download_click")) {
+    if (await isBlockedAnalyticsRequest(req, hasPageView ? "page_viewed" : "download_click")) {
       return NextResponse.json({ data: { accepted: true, skipped: true, reason: "automated" }, meta: {} });
     }
 

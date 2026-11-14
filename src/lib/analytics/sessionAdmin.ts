@@ -141,10 +141,11 @@ export async function readSessionDetail(id: string): Promise<(AdminSessionDetail
   const sql = db();
   const [session] = await sql<Array<Record<string, unknown>>>`
     select s.id, s.visitor_hash, s.started_at, s.last_event_at, s.entry, s.referrer, s.landing_path, s.country, s.city,
-           s.event_count, s.report_count, s.contribution_count, s.user_agent,
+           s.event_count, s.report_count, s.contribution_count, ua.ua as user_agent,
            s.utm_source, s.utm_medium, s.utm_campaign,
            v.visit_tier, v.is_spammer as visitor_is_spammer
     from analytics.sessions s
+    left join analytics.user_agents ua on ua.id = s.user_agent_id
     left join analytics.visitors v on v.visitor_hash = s.visitor_hash
     where s.id = ${id}
   `;

@@ -189,7 +189,9 @@ export const program = defineType({
         defineField({ name: "latestVersion", title: "Latest version found", type: "string" }),
         defineField({ name: "releasedAt", title: "Released (installer date)", type: "datetime" }),
         defineField({ name: "error", title: "Last error", type: "string" }),
-        defineField({ name: "changedAt", title: "Result changed at", type: "datetime" })
+        defineField({ name: "changedAt", title: "Result changed at", type: "datetime" }),
+        defineField({ name: "autoAppliedVersion", title: "Last version applied automatically", type: "string" }),
+        defineField({ name: "autoAppliedAt", title: "Applied automatically at", type: "datetime" })
       ]
     }),
     defineField({

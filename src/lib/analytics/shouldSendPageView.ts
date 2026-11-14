@@ -10,7 +10,10 @@ export function shouldSkipClientPageView(): boolean {
 
 const ENGAGEMENT_EVENTS = ["pointerdown", "keydown", "scroll", "touchstart", "click"] as const;
 
-/** Human engagement or dwell — link-preview bots rarely wait or interact. */
+/**
+ * Human engagement or dwell: link-preview bots rarely wait or interact. Dwell only counts while the page is visible,
+ * so a tab loaded in the background (or a page rendered off-screen) is not a view until someone actually sees it.
+ */
 const PAGE_VIEW_DWELL_MS = 8_000;
 
 /**
@@ -53,9 +56,29 @@ export function waitForPageViewEngagement(signal: AbortSignal): Promise<void> {
 
     const onEngage = () => finish();
 
+    // Visible time left before the dwell counts as a view; paused while the page is hidden.
+    let remaining = PAGE_VIEW_DWELL_MS;
+    let visibleSince = 0;
+    let dwellTimer: ReturnType<typeof setTimeout> | undefined;
+    const resumeDwell = () => {
+      visibleSince = Date.now();
+      dwellTimer = setTimeout(finish, remaining);
+    };
+    const pauseDwell = () => {
+      clearTimeout(dwellTimer);
+      dwellTimer = undefined;
+      remaining = Math.max(0, remaining - (Date.now() - visibleSince));
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        if (!dwellTimer) resumeDwell();
+      } else if (dwellTimer) pauseDwell();
+    };
+
     const cleanup = () => {
       signal.removeEventListener("abort", onAbort);
       clearTimeout(dwellTimer);
+      document.removeEventListener("visibilitychange", onVisibility);
       for (const ev of ENGAGEMENT_EVENTS) {
         document.removeEventListener(ev, onEngage);
       }
@@ -66,6 +89,7 @@ export function waitForPageViewEngagement(signal: AbortSignal): Promise<void> {
       document.addEventListener(ev, onEngage, { once: true, passive: true });
     }
 
-    const dwellTimer = setTimeout(finish, PAGE_VIEW_DWELL_MS);
+    document.addEventListener("visibilitychange", onVisibility);
+    if (document.visibilityState === "visible") resumeDwell();
   });
 }
