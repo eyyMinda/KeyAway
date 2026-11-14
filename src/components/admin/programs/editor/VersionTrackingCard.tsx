@@ -193,8 +193,8 @@ export default function VersionTrackingCard({ form, update, errorOf, status }: V
       {form.versionSource && (
         <>
           <Toggle
-            label="Apply new versions automatically"
-            hint="Otherwise a new version waits for your click in the Versions tab."
+            label="Trust this source"
+            hint="New versions it finds are applied automatically. Otherwise they wait for your click in the Versions tab."
             checked={form.versionAutoApply}
             onChange={versionAutoApply => update({ versionAutoApply })}
           />

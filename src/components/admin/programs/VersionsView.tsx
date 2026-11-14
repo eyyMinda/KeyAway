@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaSyncAlt } from "react-icons/fa";
+import { FaShieldAlt, FaSyncAlt } from "react-icons/fa";
 import type { ProgramEditorTab } from "@/src/lib/admin/programFields";
 import type { AdminProgramRow } from "@/src/types/admin";
 import { hasNewVersion, relativeTime } from "./ProgramsTableView";
 
-type Filter = "updates" | "tracked" | "errors" | "untracked";
+type Filter = "updates" | "tracked" | "trusted" | "errors" | "untracked";
 
 const SOURCE_LABELS: Record<string, string> = {
   installer: "Installer",
@@ -43,7 +43,7 @@ interface VersionsViewProps {
 export default function VersionsView({ programs, onOpen, onRowChange, onRefresh }: VersionsViewProps) {
   const updates = programs.filter(hasNewVersion);
   const [filter, setFilter] = useState<Filter>(updates.length ? "updates" : "tracked");
-  const [busy, setBusy] = useState<Record<string, "check" | "apply">>({});
+  const [busy, setBusy] = useState<Record<string, "check" | "apply" | "trust">>({});
   const [checkingAll, setCheckingAll] = useState(false);
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [lastRun, setLastRun] = useState<{ ranAt: string; details?: string; status: string } | null>(null);
@@ -63,13 +63,22 @@ export default function VersionsView({ programs, onOpen, onRowChange, onRefresh 
   }, []);
 
   const tracked = programs.filter(p => p.versionCheck?.source);
+  const trusted = tracked.filter(p => p.versionCheck?.autoApply);
   const errors = tracked.filter(p => p.versionStatus?.error);
   const untracked = programs.filter(p => !p.versionCheck?.source);
-  const rows = (filter === "updates" ? updates : filter === "errors" ? errors : filter === "untracked" ? untracked : tracked).sort((a, b) =>
-    a.title.localeCompare(b.title)
-  );
+  const rows = (
+    filter === "updates"
+      ? updates
+      : filter === "errors"
+        ? errors
+        : filter === "untracked"
+          ? untracked
+          : filter === "trusted"
+            ? trusted
+            : tracked
+  ).sort((a, b) => a.title.localeCompare(b.title));
 
-  const setRowBusy = (id: string, state?: "check" | "apply") =>
+  const setRowBusy = (id: string, state?: "check" | "apply" | "trust") =>
     setBusy(prev => {
       const next = { ...prev };
       if (state) next[id] = state;
@@ -111,6 +120,45 @@ export default function VersionsView({ programs, onOpen, onRowChange, onRefresh 
     } catch (err) {
       setMessage({ tone: "error", text: `${p.title}: ${err instanceof Error ? err.message : "Update failed"}` });
       return false;
+    } finally {
+      setRowBusy(p._id);
+    }
+  };
+
+  /**
+   * A trusted source has new versions applied by the daily check without review (`versionCheck.autoApply`).
+   * Trusting a program that already has a newer version waiting can apply that one right away too.
+   */
+  const toggleTrust = async (p: AdminProgramRow) => {
+    if (!p.versionCheck?.source) return;
+    const trust = !p.versionCheck.autoApply;
+    const pending = trust && hasNewVersion(p) ? p.versionStatus?.latestVersion : null;
+    const applyNow = pending
+      ? confirm(`Trust ${p.title}'s version source? Also update to ${pending} now? (Cancel trusts it without updating.)`)
+      : false;
+    setRowBusy(p._id, "trust");
+    try {
+      const res = await fetch(`/api/v1/admin/programs/${p._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fields: {
+            versionCheck: { ...p.versionCheck, autoApply: trust },
+            ...(applyNow && pending ? { latestOfficialVersion: pending } : {})
+          }
+        })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error?.message ?? "Update failed");
+      if (data.data?.row) onRowChange(p._id, data.data.row as AdminProgramRow);
+      setMessage({
+        tone: "ok",
+        text: trust
+          ? `${p.title}: new versions will be applied automatically${applyNow ? `, updated to ${pending}` : ""}.`
+          : `${p.title}: new versions will wait for your review.`
+      });
+    } catch (err) {
+      setMessage({ tone: "error", text: `${p.title}: ${err instanceof Error ? err.message : "Update failed"}` });
     } finally {
       setRowBusy(p._id);
     }
@@ -162,6 +210,7 @@ export default function VersionsView({ programs, onOpen, onRowChange, onRefresh 
       <div className="flex flex-wrap items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-800">
         {chip("updates", "New versions", updates.length)}
         {chip("tracked", "Tracked", tracked.length)}
+        {chip("trusted", "Trusted", trusted.length)}
         {chip("errors", "Failed", errors.length)}
         {chip("untracked", "Not tracked", untracked.length)}
         <div className="ml-auto flex flex-wrap items-center gap-3">
@@ -252,10 +301,32 @@ export default function VersionsView({ programs, onOpen, onRowChange, onRefresh 
                     </td>
                     <td className="px-3 py-2.5 hidden md:table-cell text-xs text-gray-500 dark:text-gray-400">
                       {p.versionCheck?.source ? (
-                        <>
-                          <span className="text-gray-700 dark:text-gray-300">{SOURCE_LABELS[p.versionCheck.source] ?? p.versionCheck.source}</span>
-                          {sourceDetail(p) && <span className="ml-1">· {sourceDetail(p)}</span>}
-                        </>
+                        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span>
+                            <span className="text-gray-700 dark:text-gray-300">
+                              {SOURCE_LABELS[p.versionCheck.source] ?? p.versionCheck.source}
+                            </span>
+                            {sourceDetail(p) && <span className="ml-1">· {sourceDetail(p)}</span>}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => toggleTrust(p)}
+                            disabled={!!rowBusy}
+                            aria-pressed={!!p.versionCheck.autoApply}
+                            title={
+                              p.versionCheck.autoApply
+                                ? "Trusted: new versions are applied automatically. Click to review them instead."
+                                : "Trust this source: apply new versions automatically when the daily check finds them."
+                            }
+                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium cursor-pointer disabled:opacity-50 ${
+                              p.versionCheck.autoApply
+                                ? "border-green-200 bg-green-50 text-green-700 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300"
+                                : "border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-gray-100"
+                            }`}>
+                            <FaShieldAlt size={9} />
+                            {rowBusy === "trust" ? "Saving…" : p.versionCheck.autoApply ? "Trusted" : "Trust source"}
+                          </button>
+                        </span>
                       ) : (
                         "—"
                       )}
