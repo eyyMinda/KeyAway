@@ -1,19 +1,17 @@
 "use client";
 
 /**
- * @fileoverview Dashboard "needs attention": a banner for cron jobs that failed or missed their schedule, and a card
- * with program versions waiting for review or applied automatically from trusted sources this week.
+ * @fileoverview Dashboard version updates card: program versions waiting for review, and versions applied
+ * automatically from trusted sources this week. (Failed jobs show in the dashboard alerts.)
  */
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FaExclamationTriangle, FaShieldAlt } from "react-icons/fa";
+import { FaShieldAlt } from "react-icons/fa";
 import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
 import type { AdminAttention } from "@/src/lib/admin/attention.server";
 
-const PROBLEM_TEXT = { failed: "failed", overdue: "has not run on schedule", never: "has never run automatically" };
 const VERSIONS_HREF = "/admin/programs?view=versions";
 
-/** One request per page load, shared by the banner and the card. */
 let pending: Promise<AdminAttention | null> | null = null;
 
 function useAttention() {
@@ -31,35 +29,6 @@ function useAttention() {
     };
   }, []);
   return data;
-}
-
-function JobAlerts({ jobs }: { jobs: AdminAttention["jobs"] }) {
-  if (!jobs.length) return null;
-  return (
-    <div
-      role="alert"
-      className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 dark:border-red-500/30 dark:bg-red-500/10">
-      <p className="flex items-center gap-2 text-sm font-semibold text-red-800 dark:text-red-200">
-        <FaExclamationTriangle className="h-3.5 w-3.5" aria-hidden />
-        {jobs.length === 1 ? "A scheduled job needs attention" : `${jobs.length} scheduled jobs need attention`}
-      </p>
-      <ul className="mt-1.5 space-y-1 text-sm text-red-800 dark:text-red-200">
-        {jobs.map(job => (
-          <li key={job.job}>
-            <span className="font-medium">{job.label}</span> {PROBLEM_TEXT[job.problem]}
-            {job.at && (
-              <span className="text-red-700/80 dark:text-red-300/80"> · last {formatRelativeTimeCompact(job.at)}</span>
-            )}
-            {job.details && (
-              <span className="block truncate text-xs text-red-700/80 dark:text-red-300/80" title={job.details}>
-                {job.details}
-              </span>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
 }
 
 function VersionUpdatesCard({ data }: { data: AdminAttention }) {
@@ -111,12 +80,6 @@ function VersionUpdatesCard({ data }: { data: AdminAttention }) {
       )}
     </div>
   );
-}
-
-/** Shown at the top of the dashboard only when a job failed or missed its schedule. */
-export function AttentionBanner() {
-  const data = useAttention();
-  return data ? <JobAlerts jobs={data.jobs} /> : null;
 }
 
 export function VersionUpdates() {

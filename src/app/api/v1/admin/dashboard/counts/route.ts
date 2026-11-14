@@ -1,33 +1,8 @@
-import { unstable_cache } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminSession } from "@/src/lib/admin/adminAuth";
-import { client } from "@/src/sanity/lib/client";
+import { getInboxCounts } from "@/src/lib/admin/inboxCounts.server";
 import { Errors } from "@/src/lib/api/errors";
 import { rateLimitMiddleware } from "@/src/lib/api/rateLimit";
-import { SIXTY_DAYS_MS, isoSince } from "@/src/lib/time";
-
-const inboxBadgeQuery = `{
-  "newMessages": count(*[_type == "contactMessage" && status == "new" && createdAt >= $since]),
-  "newSuggestions": count(*[_type == "keySuggestion" && status == "new" && createdAt >= $since]),
-  "newGiveawayFinds": count(*[_type == "giveawayFind" && status == "new"])
-}`;
-
-const getInboxBadges = unstable_cache(
-  async () => {
-    const since = isoSince(SIXTY_DAYS_MS);
-    const row = await client.fetch<{ newMessages?: number; newSuggestions?: number; newGiveawayFinds?: number }>(
-      inboxBadgeQuery,
-      { since }
-    );
-    return {
-      newMessages: row?.newMessages ?? 0,
-      newSuggestions: row?.newSuggestions ?? 0,
-      newGiveawayFinds: row?.newGiveawayFinds ?? 0
-    };
-  },
-  ["admin-inbox-badges"],
-  { revalidate: 60 }
-);
 
 /** GET /api/v1/admin/dashboard/counts - Unread message, suggestion and giveaway find badges for the admin header */
 export async function GET(req: NextRequest) {
@@ -38,7 +13,7 @@ export async function GET(req: NextRequest) {
   if (admin instanceof Response) return admin;
 
   try {
-    const data = await getInboxBadges();
+    const data = await getInboxCounts();
     return NextResponse.json({ data, meta: {} });
   } catch (err) {
     console.error("[GET /api/v1/admin/dashboard/counts]", err);

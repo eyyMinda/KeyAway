@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { FaExternalLinkAlt, FaRobot } from "react-icons/fa";
 import { formatRelativeTimeCompact } from "@/src/lib/dateUtils";
+import { describeUserAgent } from "@/src/lib/analytics/describeUserAgent";
 import type { UsageInsights as Payload, UserAgentTraffic } from "@/src/lib/admin/usageInsights.server";
 
 const card = "rounded-xl border border-gray-200 bg-white p-6 shadow-soft dark:border-gray-800 dark:bg-gray-900";
@@ -20,36 +21,6 @@ function formatBytes(bytes: number): string {
 
 const compact = (n: number) => new Intl.NumberFormat(undefined, { notation: "compact" }).format(n);
 const percent = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : "—");
-
-/** "Chrome 137 · Windows" from a full user agent string. */
-function describeUserAgent(ua: string): string {
-  const browser =
-    ua.match(/Edg\/(\d+)/)?.[1] != null
-      ? `Edge ${ua.match(/Edg\/(\d+)/)![1]}`
-      : ua.match(/OPR\/(\d+)/)
-        ? `Opera ${ua.match(/OPR\/(\d+)/)![1]}`
-        : ua.match(/Firefox\/(\d+)/)
-          ? `Firefox ${ua.match(/Firefox\/(\d+)/)![1]}`
-          : ua.match(/Chrome\/(\d+)/)
-            ? `Chrome ${ua.match(/Chrome\/(\d+)/)![1]}`
-            : ua.match(/Version\/(\d+).*Safari/)
-              ? `Safari ${ua.match(/Version\/(\d+)/)![1]}`
-              : "Other";
-  const os = /Android/.test(ua)
-    ? "Android"
-    : /iPhone|iPad/.test(ua)
-      ? "iOS"
-      : /Windows NT 6\./.test(ua)
-        ? "Windows 7/8"
-        : /Windows/.test(ua)
-          ? "Windows"
-          : /Mac OS X/.test(ua)
-            ? "macOS"
-            : /Linux/.test(ua)
-              ? "Linux"
-              : "";
-  return os ? `${browser} · ${os}` : browser;
-}
 
 function DbTrafficCard({ data }: { data: Payload }) {
   const { traffic, supabaseProjectUrl } = data;
@@ -260,7 +231,7 @@ export default function UsageInsights() {
     <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
       <DbTrafficCard data={data} />
       <RollupStatusCard data={data} />
-      <div className="lg:col-span-2">
+      <div id="traffic-quality" className="scroll-mt-24 lg:col-span-2">
         <TrafficQualityCard data={data} onFlag={flag} saving={saving} />
       </div>
     </div>
