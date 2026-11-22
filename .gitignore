@@ -56,3 +56,8 @@ next-env.d.ts
 /backups/
 *.tar.gz
 migration-report*.json
+
+# graphify local cache and machine paths
+graphify-out/cache/
+graphify-out/.graphify_python
+graphify-out/.graphify_root
